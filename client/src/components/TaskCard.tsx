@@ -124,7 +124,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           {/* Metadata Badges - Mobile/Tree View */}
           <div className="flex flex-wrap md:hidden gap-1.5 mt-1">
             <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Pri:</span>
+              <span className="text-[8px] text-muted-foreground uppercase font-bold">Priority:</span>
               <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getPriorityColor(task.priority))}>
                 <AlertCircle className="w-2.5 h-2.5" /> {task.priority}
               </Badge>
@@ -136,7 +136,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
               </Badge>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Enj:</span>
+              <span className="text-[8px] text-muted-foreground uppercase font-bold">Enjoyment:</span>
               <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getEnjoymentColor(task.enjoyment))}>
                 <Smile className="w-2.5 h-2.5" /> {task.enjoyment}
               </Badge>
