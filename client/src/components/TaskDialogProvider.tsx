@@ -82,6 +82,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             initialData={activeTask}
             parentId={parentId}
             onCancel={closeDialog}
+            onAddChild={(pid) => openCreateDialog(pid)}
           />
         </DialogContent>
       </Dialog>

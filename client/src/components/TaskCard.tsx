@@ -2,11 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, ChevronDown, Plus 
+  ChevronRight, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import {
@@ -65,48 +64,36 @@ const getTimeColor = (level: string) => {
 export function TaskCard({ task, level = 0 }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
+  const [isHolding, setIsHolding] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const deleteTask = useDeleteTask();
-  const { openEditDialog, openCreateDialog } = useTaskDialog();
+  const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   
-  const handleAddSubtask = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    openCreateDialog(task.id);
-  };
-
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     // Prevent starting hold if clicking buttons
     if ((e.target as HTMLElement).closest('button')) return;
     
-    setHoldProgress(0);
-    const startTime = Date.now();
-    const duration = 800; // ms
+    setIsHolding(true);
+    const duration = 1500; // ms
 
     holdTimerRef.current = setTimeout(() => {
       setShowDeleteConfirm(true);
-      setHoldProgress(0);
-      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      setIsHolding(false);
     }, duration);
-
-    progressTimerRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      setHoldProgress(Math.min((elapsed / duration) * 100, 100));
-    }, 16);
   };
 
   const cancelHold = () => {
     if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
-    setHoldProgress(0);
+    setIsHolding(false);
   };
 
   useEffect(() => {
-    return () => cancelHold();
+    return () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    };
   }, []);
 
   const handleDelete = () => {
@@ -123,7 +110,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         className={cn(
           "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200 select-none cursor-pointer",
           "hover:bg-white/[0.02] hover:border-white/[0.05]",
-          holdProgress > 0 && "bg-white/[0.05]"
+          isHolding && "bg-white/[0.05] scale-[0.99] transition-transform"
         )}
         style={{ marginLeft: `${level * 16}px` }}
         onClick={() => openEditDialog(task)}
@@ -133,14 +120,6 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        {/* Hold Progress Bar */}
-        {holdProgress > 0 && (
-          <div 
-            className="absolute left-0 bottom-0 h-0.5 bg-primary/50 transition-all duration-75"
-            style={{ width: `${holdProgress}%` }}
-          />
-        )}
-
         {/* Expand/Collapse Toggle */}
         <div className="w-5 flex justify-center shrink-0">
           {hasSubtasks ? (
@@ -221,19 +200,6 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
               </Badge>
             </div>
           </div>
-        </div>
-
-        {/* Hover Actions */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-full hover:bg-white/10"
-            onClick={handleAddSubtask}
-            title="Add subtask"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
         </div>
       </motion.div>
 
