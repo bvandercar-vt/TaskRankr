@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDeleteTask } from "@/hooks/use-tasks";
-import { useTaskDialog } from "./TaskDialogProvider";
+import { useTaskDialog } from "@/components/TaskDialogProvider";
 import {
   AlertDialog,
   AlertDialogAction,

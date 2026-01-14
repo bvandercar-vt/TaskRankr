@@ -25,6 +25,13 @@ const LEVEL_WEIGHTS: Record<string, number> = {
   'easy': 1
 };
 
+const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
+  'priority': 'desc',   // high first
+  'ease': 'asc',       // low (easy) first
+  'enjoyment': 'desc', // high first
+  'time': 'asc'        // low first
+};
+
 export default function Home() {
   const { data: tasks, isLoading, error } = useTasks();
   const { openCreateDialog } = useTaskDialog();
@@ -44,10 +51,11 @@ export default function Home() {
     }, []);
 
     if (sort !== 'none') {
+      const direction = SORT_DIRECTIONS[sort] || 'desc';
       result.sort((a, b) => {
         const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
         const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
-        return valB - valA; // Descending order (High/Hard first)
+        return direction === 'desc' ? valB - valA : valA - valB;
       });
     }
 
