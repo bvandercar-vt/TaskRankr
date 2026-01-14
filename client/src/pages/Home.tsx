@@ -1,19 +1,14 @@
 import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
-import { TaskResponse, Task } from "@shared/schema";
+import { TaskResponse } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { 
-  Plus, Search, SlidersHorizontal, ArrowUpDown, 
-  LayoutList, Network, SortAsc
+  Plus, Search, ArrowUpDown, 
+  LayoutList
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuLabel, 
-  DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 
 type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
 
@@ -109,45 +104,15 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-white/5">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
-              <LayoutList className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-2xl font-bold font-display tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-              TaskFlow
-            </h1>
-          </div>
-          
-          <Button 
-            onClick={() => openCreateDialog()} 
-            className="hidden sm:flex bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25 transition-all hover:scale-105 active:scale-95"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            New Task
-          </Button>
-          <Button 
-            onClick={() => openCreateDialog()} 
-            size="icon"
-            className="sm:hidden bg-primary hover:bg-primary/90 rounded-full h-10 w-10 shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4">
-        
+    <div className="min-h-screen bg-background text-foreground pb-32">
+      <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         {/* Controls */}
-        <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-col gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Search tasks..." 
-              className="pl-10 bg-secondary/30 border-white/5 focus:border-primary/50 transition-all"
+              className="pl-10 bg-secondary/30 border-white/5 focus:border-primary/50 transition-all h-12"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -161,7 +126,7 @@ export default function Home() {
               variant={sortBy === 'priority' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy(sortBy === 'priority' ? 'none' : 'priority')}
-              className="text-[10px] h-7 px-3 uppercase font-bold"
+              className="text-[10px] h-9 px-4 uppercase font-bold tracking-wider"
             >
               Priority
             </Button>
@@ -169,7 +134,7 @@ export default function Home() {
               variant={sortBy === 'ease' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy(sortBy === 'ease' ? 'none' : 'ease')}
-              className="text-[10px] h-7 px-3 uppercase font-bold"
+              className="text-[10px] h-9 px-4 uppercase font-bold tracking-wider"
             >
               Ease
             </Button>
@@ -177,7 +142,7 @@ export default function Home() {
               variant={sortBy === 'enjoyment' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy(sortBy === 'enjoyment' ? 'none' : 'enjoyment')}
-              className="text-[10px] h-7 px-3 uppercase font-bold"
+              className="text-[10px] h-9 px-4 uppercase font-bold tracking-wider"
             >
               Enjoyment
             </Button>
@@ -185,7 +150,7 @@ export default function Home() {
               variant={sortBy === 'time' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy(sortBy === 'time' ? 'none' : 'time')}
-              className="text-[10px] h-7 px-3 uppercase font-bold"
+              className="text-[10px] h-9 px-4 uppercase font-bold tracking-wider"
             >
               Time
             </Button>
@@ -194,7 +159,7 @@ export default function Home() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSortBy('none')}
-                className="text-[10px] h-7 px-2 text-muted-foreground hover:text-foreground"
+                className="text-[10px] h-9 px-3 text-muted-foreground hover:text-foreground"
               >
                 Clear
               </Button>
@@ -213,6 +178,16 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Floating Action Button */}
+      <Button
+        onClick={() => openCreateDialog()}
+        size="icon"
+        className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground z-50 transition-transform active:scale-95 border-0"
+        data-testid="button-create-task"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
     </div>
   );
 }

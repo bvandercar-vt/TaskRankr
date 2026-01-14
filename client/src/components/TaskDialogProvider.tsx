@@ -67,8 +67,8 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
     <TaskDialogContext.Provider value={{ openCreateDialog, openEditDialog, closeDialog }}>
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-card border-white/10 p-6 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="w-[95vw] sm:max-w-[600px] h-[90vh] sm:h-auto overflow-y-auto bg-card border-white/10 p-4 sm:p-6 shadow-2xl rounded-t-xl sm:rounded-xl bottom-0 sm:bottom-auto translate-y-0 sm:-translate-y-1/2">
+          <DialogHeader className="sticky top-0 bg-card pb-4 z-10">
             <DialogTitle className="text-2xl font-display tracking-tight">
               {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
             </DialogTitle>

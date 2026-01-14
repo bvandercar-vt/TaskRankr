@@ -77,7 +77,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     if ((e.target as HTMLElement).closest('button')) return;
     
     setIsHolding(true);
-    const duration = 1500; // ms
+    const duration = 800; // ms
 
     holdTimerRef.current = setTimeout(() => {
       setShowDeleteConfirm(true);
