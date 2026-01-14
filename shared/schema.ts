@@ -12,7 +12,6 @@ export const tasks = pgTable("tasks", {
   enjoyment: text("enjoyment").notNull(), // low, medium, high
   time: text("time").notNull(), // low, medium, high
   parentId: integer("parent_id"), // For nested tasks
-  isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -30,7 +29,6 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 export const insertTaskSchema = createInsertSchema(tasks).omit({ 
   id: true, 
   createdAt: true,
-  isCompleted: true // defaulted
 });
 
 export type Task = typeof tasks.$inferSelect;
@@ -49,5 +47,5 @@ export type Time = typeof TIME_LEVELS[number];
 
 // Request/Response types
 export type CreateTaskRequest = InsertTask;
-export type UpdateTaskRequest = Partial<InsertTask> & { isCompleted?: boolean };
+export type UpdateTaskRequest = Partial<InsertTask>;
 export type TaskResponse = Task & { subtasks?: TaskResponse[] }; // Recursive for frontend convenience if needed

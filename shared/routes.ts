@@ -43,7 +43,7 @@ export const api = {
     update: {
       method: 'PUT' as const,
       path: '/api/tasks/:id',
-      input: insertTaskSchema.partial().extend({ isCompleted: z.boolean().optional() }),
+      input: insertTaskSchema.partial(),
       responses: {
         200: z.custom<typeof tasks.$inferSelect>(),
         400: errorSchemas.validation,
