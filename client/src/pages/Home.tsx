@@ -15,44 +15,56 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 
-type GroupOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
+type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
+
+const LEVEL_WEIGHTS: Record<string, number> = {
+  'high': 3,
+  'hard': 3,
+  'medium': 2,
+  'low': 1,
+  'easy': 1
+};
 
 export default function Home() {
   const { data: tasks, isLoading, error } = useTasks();
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
-  const [groupBy, setGroupBy] = useState<GroupOption>('none');
+  const [sortBy, setSortBy] = useState<SortOption>('none');
 
   // Recursive function to filter task tree
-  const filterTree = (nodes: TaskResponse[], term: string): TaskResponse[] => {
-    return nodes.reduce((acc: TaskResponse[], node) => {
+  const filterAndSortTree = (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
+    let result = nodes.reduce((acc: TaskResponse[], node) => {
       const matches = node.name.toLowerCase().includes(term.toLowerCase());
-      const filteredSubtasks = node.subtasks ? filterTree(node.subtasks, term) : [];
+      const filteredSubtasks = node.subtasks ? filterAndSortTree(node.subtasks, term, sort) : [];
       
       if (matches || filteredSubtasks.length > 0) {
         acc.push({ ...node, subtasks: filteredSubtasks });
       }
       return acc;
     }, []);
+
+    if (sort !== 'none') {
+      result.sort((a, b) => {
+        const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
+        const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
+        return valB - valA; // Descending order (High/Hard first)
+      });
+    }
+
+    return result;
   };
 
   // Build tree from flat list if backend sends flat list
-  // Note: Backend might send flat list or tree. 
-  // Schema implies recursive type available but `api.tasks.list` returns Task[] (flat).
-  // We need to reconstruct tree here if it is flat.
   const taskTree = useMemo(() => {
     if (!tasks) return [];
     
-    // Deep clone to avoid mutating cache
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
     
-    // First pass: create nodes
     tasks.forEach(task => {
       nodes[task.id] = { ...task, subtasks: [] };
     });
 
-    // Second pass: link children
     tasks.forEach(task => {
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
@@ -66,25 +78,8 @@ export default function Home() {
 
   const displayedTasks = useMemo(() => {
     if (!taskTree) return [];
-    if (!search) return taskTree;
-    return filterTree(taskTree, search);
-  }, [taskTree, search]);
-
-  // Grouping Logic (Flattens the tree for simpler grouping view)
-  const groupedTasks = useMemo(() => {
-    if (groupBy === 'none' || !tasks) return null;
-    
-    const groups: Record<string, TaskResponse[]> = {};
-    const filteredFlat = tasks.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
-
-    filteredFlat.forEach(task => {
-      const key = String(task[groupBy as keyof Task] || 'Uncategorized');
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(task);
-    });
-
-    return groups;
-  }, [tasks, groupBy, search]);
+    return filterAndSortTree(taskTree, search, sortBy);
+  }, [taskTree, search, sortBy]);
 
   if (isLoading) {
     return (
@@ -139,7 +134,7 @@ export default function Home() {
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4">
         
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="flex flex-col gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
@@ -150,67 +145,63 @@ export default function Home() {
             />
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-secondary/30 border-white/5 hover:bg-white/5 gap-2 min-w-[140px]">
-                <SlidersHorizontal className="w-4 h-4" />
-                {groupBy === 'none' ? 'Group By' : `By ${groupBy}`}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-muted-foreground uppercase mr-2 flex items-center gap-1">
+              <ArrowUpDown className="w-3 h-3" /> Sort By:
+            </span>
+            <Button
+              variant={sortBy === 'priority' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'priority' ? 'none' : 'priority')}
+              className="text-[10px] h-7 px-3 uppercase font-bold"
+            >
+              Priority
+            </Button>
+            <Button
+              variant={sortBy === 'ease' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'ease' ? 'none' : 'ease')}
+              className="text-[10px] h-7 px-3 uppercase font-bold"
+            >
+              Ease
+            </Button>
+            <Button
+              variant={sortBy === 'enjoyment' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'enjoyment' ? 'none' : 'enjoyment')}
+              className="text-[10px] h-7 px-3 uppercase font-bold"
+            >
+              Enjoyment
+            </Button>
+            <Button
+              variant={sortBy === 'time' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'time' ? 'none' : 'time')}
+              className="text-[10px] h-7 px-3 uppercase font-bold"
+            >
+              Time
+            </Button>
+            {sortBy !== 'none' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSortBy('none')}
+                className="text-[10px] h-7 px-2 text-muted-foreground hover:text-foreground"
+              >
+                Clear
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card border-white/10">
-              <DropdownMenuLabel>Group View</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuRadioGroup value={groupBy} onValueChange={(v) => setGroupBy(v as GroupOption)}>
-                <DropdownMenuRadioItem value="none">
-                  <Network className="w-4 h-4 mr-2" /> Tree View (Default)
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="priority">Priority</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ease">Ease</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="enjoyment">Enjoyment</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="time">Time Estimate</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            )}
+          </div>
         </div>
 
         {/* Task List Area */}
-        <div className="space-y-6">
-          {/* Default Tree View */}
-          {groupBy === 'none' && (
-            <div className="space-y-1">
-              {displayedTasks.length === 0 ? (
-                <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
-              ) : (
-                displayedTasks.map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))
-              )}
-            </div>
-          )}
-
-          {/* Grouped View */}
-          {groupBy !== 'none' && groupedTasks && (
-            <div className="space-y-8">
-              {Object.entries(groupedTasks).map(([group, tasks]) => (
-                <div key={group} className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-bold capitalize font-display text-primary/90">{group}</h3>
-                    <div className="h-px flex-1 bg-white/10"></div>
-                    <span className="text-xs text-muted-foreground font-mono bg-secondary/50 px-2 py-1 rounded">
-                      {tasks.length}
-                    </span>
-                  </div>
-                  <div className="space-y-1 pl-2 border-l border-white/5">
-                    {tasks.map(task => (
-                      <TaskCard key={task.id} task={{...task, subtasks: []}} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {Object.keys(groupedTasks).length === 0 && (
-                <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
-              )}
-            </div>
+        <div className="space-y-1">
+          {displayedTasks.length === 0 ? (
+            <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
+          ) : (
+            displayedTasks.map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))
           )}
         </div>
       </main>
