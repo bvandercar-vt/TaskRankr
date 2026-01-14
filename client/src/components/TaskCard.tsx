@@ -111,14 +111,30 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         </button>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div className="md:col-span-5">
+        <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-4 items-start md:items-center">
+          <div className="md:col-span-5 w-full">
             <h3 className={cn(
               "font-medium truncate text-base",
               task.isCompleted ? "line-through text-muted-foreground" : "text-foreground"
             )}>
               {task.name}
             </h3>
+          </div>
+
+          {/* Metadata Badges - Mobile/Tree View */}
+          <div className="flex flex-wrap md:hidden gap-1.5 mt-1">
+            <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getPriorityColor(task.priority))}>
+              <AlertCircle className="w-2.5 h-2.5" /> {task.priority}
+            </Badge>
+            <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getEaseColor(task.ease))}>
+              <Gauge className="w-2.5 h-2.5" /> {task.ease}
+            </Badge>
+            <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getEnjoymentColor(task.enjoyment))}>
+              <Smile className="w-2.5 h-2.5" /> {task.enjoyment}
+            </Badge>
+            <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getTimeColor(task.time))}>
+              <Clock className="w-2.5 h-2.5" /> {task.time}
+            </Badge>
           </div>
 
           {/* Metadata Badges - Desktop */}
