@@ -28,18 +28,27 @@ const getPriorityColor = (level: string) => {
 
 const getEaseColor = (level: string) => {
   switch (level) {
-    case 'hard': return 'text-red-400';
-    case 'medium': return 'text-yellow-400';
-    case 'easy': return 'text-emerald-400';
+    case 'hard': return 'text-red-400 bg-red-400/10 border-red-400/20';
+    case 'medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    case 'easy': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
     default: return 'text-slate-400';
   }
 };
 
 const getEnjoymentColor = (level: string) => {
   switch (level) {
-    case 'low': return 'text-red-400';
-    case 'medium': return 'text-yellow-400';
-    case 'high': return 'text-emerald-400';
+    case 'low': return 'text-red-400 bg-red-400/10 border-red-400/20';
+    case 'medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    case 'high': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    default: return 'text-slate-400';
+  }
+};
+
+const getTimeColor = (level: string) => {
+  switch (level) {
+    case 'high': return 'text-red-400 bg-red-400/10 border-red-400/20';
+    case 'medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    case 'low': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
     default: return 'text-slate-400';
   }
 };
@@ -68,24 +77,24 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-3 p-4 rounded-xl border border-transparent transition-all duration-200",
+          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200",
           "hover:bg-white/[0.02] hover:border-white/[0.05]",
           task.isCompleted && "opacity-60 grayscale-[0.5]"
         )}
-        style={{ marginLeft: `${level * 24}px` }}
+        style={{ marginLeft: `${level * 16}px` }}
         onClick={() => openEditDialog(task)}
       >
         {/* Expand/Collapse Toggle */}
-        <div className="w-6 flex justify-center shrink-0">
+        <div className="w-5 flex justify-center shrink-0">
           {hasSubtasks ? (
             <button
               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
             >
-              {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
             </button>
           ) : (
-            <div className="w-4" />
+            <div className="w-3.5" />
           )}
         </div>
 
@@ -95,42 +104,79 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
         >
           {task.isCompleted ? (
-            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <CheckCircle2 className="w-4 h-4 text-primary" />
           ) : (
-            <Circle className="w-5 h-5" />
+            <Circle className="w-4 h-4" />
           )}
         </button>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div className="md:col-span-5">
+        <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-4 items-start md:items-center">
+          <div className="md:col-span-5 w-full">
             <h3 className={cn(
-              "font-medium truncate text-base",
+              "font-medium truncate text-sm",
               task.isCompleted ? "line-through text-muted-foreground" : "text-foreground"
             )}>
               {task.name}
             </h3>
           </div>
 
+          {/* Metadata Badges - Mobile/Tree View */}
+          <div className="flex flex-wrap md:hidden gap-1 mt-0.5">
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Priority:</span>
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getPriorityColor(task.priority))}>
+                {task.priority}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Ease:</span>
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getEaseColor(task.ease))}>
+                {task.ease}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Enjoyment:</span>
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getEnjoymentColor(task.enjoyment))}>
+                {task.enjoyment}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Time:</span>
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getTimeColor(task.time))}>
+                {task.time}
+              </Badge>
+            </div>
+          </div>
+
           {/* Metadata Badges - Desktop */}
-          <div className="hidden md:flex md:col-span-7 gap-2 items-center justify-end">
-            <Badge variant="outline" className={cn("gap-1.5 px-2.5 py-0.5 border text-xs font-medium uppercase tracking-wider", getPriorityColor(task.priority))}>
-              <AlertCircle className="w-3 h-3" /> {task.priority}
-            </Badge>
-            
-            <div className="flex items-center gap-3 text-xs text-muted-foreground/60 px-2">
-               <div className="flex items-center gap-1.5" title="Difficulty">
-                 <Gauge className={cn("w-3.5 h-3.5", getEaseColor(task.ease))} />
-                 <span className="capitalize hidden lg:inline">{task.ease}</span>
-               </div>
-               <div className="flex items-center gap-1.5" title="Enjoyment">
-                 <Smile className={cn("w-3.5 h-3.5", getEnjoymentColor(task.enjoyment))} />
-                 <span className="capitalize hidden lg:inline">{task.enjoyment}</span>
-               </div>
-               <div className="flex items-center gap-1.5" title="Time">
-                 <Clock className={cn("w-3.5 h-3.5", getPriorityColor(task.time))} />
-                 <span className="capitalize hidden lg:inline">{task.time}</span>
-               </div>
+          <div className="hidden md:flex md:col-span-7 gap-3 items-center justify-end">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Priority:</span>
+              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getPriorityColor(task.priority))}>
+                {task.priority}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Ease:</span>
+              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getEaseColor(task.ease))}>
+                {task.ease}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Enjoyment:</span>
+              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getEnjoymentColor(task.enjoyment))}>
+                {task.enjoyment}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Time:</span>
+              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getTimeColor(task.time))}>
+                {task.time}
+              </Badge>
             </div>
           </div>
         </div>
@@ -159,10 +205,9 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
             className="overflow-hidden"
           >
             <div className="relative">
-              {/* Connector Line */}
               <div 
-                className="absolute left-[34px] top-0 bottom-4 w-px bg-white/[0.05]" 
-                style={{ marginLeft: `${level * 24}px` }}
+                className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]" 
+                style={{ marginLeft: `${level * 16}px` }}
               />
               {task.subtasks?.map(subtask => (
                 <TaskCard key={subtask.id} task={subtask} level={level + 1} />
