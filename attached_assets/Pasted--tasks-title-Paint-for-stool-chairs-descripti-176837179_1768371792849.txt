@@ -1,0 +1,357 @@
+{
+    "tasks": [
+        {
+            "title": "Paint for stool chairs",
+            "description": "Order paint and refinish the chairs",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Alexa mixer",
+            "description": "Build and design alexa controllable audio mixer",
+            "priority": "LOW",
+            "ease": "LOW",
+            "time": "LONG",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Better WiFi / Router",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "Joyous",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "LOW",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Update iOS",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "Publish packages",
+            "description": "Get packages published to npm/PyPI, put on github page",
+            "priority": "HIGH",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "HIGH",
+            "children": [
+                {
+                    "title": "type-fest PickBy submission",
+                    "priority": "LOW",
+                    "ease": "MEDIUM",
+                    "time": "MEDIUM",
+                    "enjoyment": "MEDIUM"
+                },
+                {
+                    "title": "Python Spotify tools",
+                    "priority": "MEDIUM",
+                    "ease": "HARD",
+                    "time": "LONG",
+                    "enjoyment": "HIGH"
+                },
+                {
+                    "title": "NPM test helper thing",
+                    "priority": "HIGH",
+                    "ease": "MEDIUM",
+                    "time": "MEDIUM",
+                    "enjoyment": "HIGH"
+                }
+            ]
+        },
+        {
+            "title": "Better task app that has ease and priority",
+            "priority": "HIGH",
+            "ease": "HARD",
+            "time": "MEDIUM",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Resume",
+            "priority": "HIGH",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Insurance - Waiting",
+            "priority": "HIGH",
+            "ease": "MEDIUM",
+            "time": "SHORT",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Order things on Amazon",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "DFT Mix",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Alex wedding mix thing",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Spotify Playlists",
+            "description": "Clean up DJ playlists",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "HIGH",
+            "children": [
+                {
+                    "title": "Search thru CTF to add to deep vibey OG wavey"
+                },
+                {
+                    "title": "Consolidate Monxxy and Monkeystep to Wonky Riddim and DirtySnatcha/DirtMonkey-Ey"
+                },
+                {
+                    "title": "Chill Hip-Hop"
+                },
+                {
+                    "title": "Cull CTF"
+                },
+                {
+                    "title": "Cull Hype Space Hop"
+                },
+                {
+                    "title": "Psy-Hop Deep Dark OG culll... probably shouldn't be in OG"
+                },
+                {
+                    "title": "Cull deeper space bass"
+                },
+                {
+                    "title": "Cull noisy space bass"
+                },
+                {
+                    "title": "3 DNB playlists",
+                    "ease": "MEDIUM"
+                },
+                {
+                    "title": "Wavey and CTF into Deep dark and deep vibey"
+                },
+                {
+                    "title": "Split up chill electronic"
+                },
+                {
+                    "title": "Split up groovy funky breaks between aggressive and chill"
+                },
+                {
+                    "title": "Chill hip hop"
+                },
+                {
+                    "title": "Groovy Monkeystep and Monxxy make better, deeper boogie T, wonky monxy, dirtysnatcha. Don't need to check deep dubstep, already pulled."
+                }
+            ]
+        },
+        {
+            "title": "DFT pics",
+            "priority": "HIGH",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "License plate light",
+            "priority": "MEDIUM",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Fix dashcam",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "SHORT",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Pics",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "Sell white fairy lights",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Annie jewelry shine",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Look up cheaper Car Insurance",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Car registration",
+            "description": "P0420 #0711 Catalytic Ststem efficiency below threshold Bank 1\n\nP0430 \"\"\"\" Bank 2\n\nB1S1 10.4 MAX 40\nB1S2 0.048 MAX 0.435\n\nB2S1 10.6 MAX 40\nB2S2 0.041 MAX 0.429",
+            "priority": "HIGH",
+            "ease": "LOW",
+            "time": "LONG",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Ski pole solution",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "SHORT",
+            "enjoyment": "HIGH"
+        },
+        {
+            "title": "Change iPhone background",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "New Longboard",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "Bikes",
+            "priority": "LOW",
+            "ease": "HARD",
+            "time": "LONG",
+            "enjoyment": "MEDIUM",
+            "children": [
+                {
+                    "title": "Fix red one (go to bikestogether)",
+                    "priority": "MEDIUM",
+                    "ease": "MEDIUM",
+                    "time": "MEDIUM",
+                    "enjoyment": "MEDIUM"
+                },
+                {
+                    "title": "Fix brakes on old one",
+                    "priority": "MEDIUM",
+                    "ease": "MEDIUM",
+                    "time": "SHORT",
+                    "enjoyment": "MEDIUM"
+                },
+                {
+                    "title": "Sell old one"
+                },
+                {
+                    "title": "Sell others, whichever they are"
+                }
+            ]
+        },
+        {
+            "title": "Sell Skis",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "MEDIUM",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "DJ Stuff",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "HIGH",
+            "children": [
+                {
+                    "title": "Live Streams? "
+                },
+                {
+                    "title": "TikToks?"
+                },
+                {
+                    "title": "Next mix"
+                }
+            ]
+        },
+        {
+            "title": "New job",
+            "priority": "HIGH",
+            "ease": "LOW",
+            "time": "LONG",
+            "enjoyment": "LOW"
+        },
+        {
+            "title": "Go Through Pics",
+            "description": "Organize photos",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "MEDIUM",
+            "children": [
+                {
+                    "title": "Duplicates app"
+                }
+            ]
+        },
+        {
+            "title": "Car Audio",
+            "priority": "LOW",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "MEDIUM",
+            "children": [
+                {
+                    "title": "Removable port?"
+                },
+                {
+                    "title": "Different subs"
+                },
+                {
+                    "title": "Try noise remove"
+                },
+                {
+                    "title": "3D Printed tweeter mounts"
+                },
+                {
+                    "title": "Always try DSP re-tuning!"
+                }
+            ]
+        },
+        {
+            "title": "Buy jeans",
+            "priority": "LOW",
+            "ease": "HIGH",
+            "time": "SHORT",
+            "enjoyment": "MEDIUM"
+        },
+        {
+            "title": "Demo skis",
+            "priority": "MEDIUM",
+            "ease": "MEDIUM",
+            "time": "LONG",
+            "enjoyment": "MEDIUM"
+        }
+    ]
+}
