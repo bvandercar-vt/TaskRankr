@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
-// Frontend validation schema can be slightly looser or stricter, but here we match backend
+// Frontend validation schema
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
 
@@ -20,9 +21,46 @@ interface TaskFormProps {
   initialData?: Task;
   parentId?: number | null;
   onCancel: () => void;
+  onAddChild?: (parentId: number) => void;
 }
 
-export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel }: TaskFormProps) {
+const getPriorityStyle = (val: string) => {
+  switch (val) {
+    case 'high': return 'text-red-400 border-red-400/20 bg-red-400/5';
+    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
+    case 'low': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
+    default: return '';
+  }
+};
+
+const getEaseStyle = (val: string) => {
+  switch (val) {
+    case 'hard': return 'text-red-400 border-red-400/20 bg-red-400/5';
+    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
+    case 'easy': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
+    default: return '';
+  }
+};
+
+const getEnjoymentStyle = (val: string) => {
+  switch (val) {
+    case 'low': return 'text-red-400 border-red-400/20 bg-red-400/5';
+    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
+    case 'high': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
+    default: return '';
+  }
+};
+
+const getTimeStyle = (val: string) => {
+  switch (val) {
+    case 'high': return 'text-red-400 border-red-400/20 bg-red-400/5';
+    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
+    case 'low': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
+    default: return '';
+  }
+};
+
+export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
@@ -75,13 +113,13 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel 
                 <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Priority</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-secondary/30 border-white/5">
+                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getPriorityStyle(field.value))}>
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-white/10">
                     {PRIORITY_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className="capitalize">
+                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getPriorityStyle(level))}>
                         {level}
                       </SelectItem>
                     ))}
@@ -100,13 +138,13 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel 
                 <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Ease</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-secondary/30 border-white/5">
+                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getEaseStyle(field.value))}>
                       <SelectValue placeholder="Select ease" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-white/10">
                     {EASE_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className="capitalize">
+                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getEaseStyle(level))}>
                         {level}
                       </SelectItem>
                     ))}
@@ -125,13 +163,13 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel 
                 <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Enjoyment</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-secondary/30 border-white/5">
+                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getEnjoymentStyle(field.value))}>
                       <SelectValue placeholder="Select enjoyment" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-white/10">
                     {ENJOYMENT_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className="capitalize">
+                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getEnjoymentStyle(level))}>
                         {level}
                       </SelectItem>
                     ))}
@@ -150,13 +188,13 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel 
                 <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Time Estimate</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-secondary/30 border-white/5">
+                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getTimeStyle(field.value))}>
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="bg-card border-white/10">
                     {TIME_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className="capitalize">
+                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getTimeStyle(level))}>
                         {level}
                       </SelectItem>
                     ))}
@@ -186,6 +224,21 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel 
             </FormItem>
           )}
         />
+
+        {initialData && onAddChild && (
+          <div className="flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="bg-secondary/20 border-white/5 hover:bg-white/5 text-muted-foreground hover:text-foreground"
+              onClick={() => onAddChild(initialData.id)}
+            >
+              <Plus className="w-3 h-3 mr-2" />
+              Add Child Task
+            </Button>
+          </div>
+        )}
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={onCancel} className="hover:bg-white/5">
