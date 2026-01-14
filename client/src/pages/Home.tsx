@@ -158,7 +158,7 @@ export default function Home() {
         </div>
 
         {/* Column Headers */}
-        <div className="hidden md:flex items-center justify-end px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-10">
+        <div className="hidden md:flex items-center justify-end px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-[8px]">
           <div className="w-16 text-center">Priority</div>
           <div className="w-16 text-center">Ease</div>
           <div className="w-16 text-center">Enjoy</div>
