@@ -135,15 +135,15 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+        <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="font-medium truncate text-sm text-foreground">
               {task.name}
             </h3>
           </div>
 
-          {/* Metadata Badges - Single Row Aligned */}
-          <div className="flex items-center gap-1 shrink-0 w-[268px] justify-end">
+          {/* Metadata Badges */}
+          <div className="flex items-center gap-1 shrink-0 md:w-[268px] md:justify-end">
             <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
               {task.priority}
             </Badge>
