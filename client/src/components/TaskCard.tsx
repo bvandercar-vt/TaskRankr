@@ -77,24 +77,24 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-3 p-4 rounded-xl border border-transparent transition-all duration-200",
+          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200",
           "hover:bg-white/[0.02] hover:border-white/[0.05]",
           task.isCompleted && "opacity-60 grayscale-[0.5]"
         )}
-        style={{ marginLeft: `${level * 24}px` }}
+        style={{ marginLeft: `${level * 16}px` }}
         onClick={() => openEditDialog(task)}
       >
         {/* Expand/Collapse Toggle */}
-        <div className="w-6 flex justify-center shrink-0">
+        <div className="w-5 flex justify-center shrink-0">
           {hasSubtasks ? (
             <button
               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
             >
-              {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
             </button>
           ) : (
-            <div className="w-4" />
+            <div className="w-3.5" />
           )}
         </div>
 
@@ -104,17 +104,17 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
         >
           {task.isCompleted ? (
-            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <CheckCircle2 className="w-4 h-4 text-primary" />
           ) : (
-            <Circle className="w-5 h-5" />
+            <Circle className="w-4 h-4" />
           )}
         </button>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-4 items-start md:items-center">
+        <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-4 items-start md:items-center">
           <div className="md:col-span-5 w-full">
             <h3 className={cn(
-              "font-medium truncate text-base",
+              "font-medium truncate text-sm",
               task.isCompleted ? "line-through text-muted-foreground" : "text-foreground"
             )}>
               {task.name}
@@ -122,29 +122,29 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           </div>
 
           {/* Metadata Badges - Mobile/Tree View */}
-          <div className="flex flex-wrap md:hidden gap-1.5 mt-1">
-            <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Priority:</span>
-              <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getPriorityColor(task.priority))}>
-                <AlertCircle className="w-2.5 h-2.5" /> {task.priority}
+          <div className="flex flex-wrap md:hidden gap-1 mt-0.5">
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold">Priority:</span>
+              <Badge variant="outline" className={cn("gap-0.5 px-1 py-0 border text-[8px] font-bold uppercase", getPriorityColor(task.priority))}>
+                <AlertCircle className="w-2 h-2" /> {task.priority}
               </Badge>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Ease:</span>
-              <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getEaseColor(task.ease))}>
-                <Gauge className="w-2.5 h-2.5" /> {task.ease}
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold">Ease:</span>
+              <Badge variant="outline" className={cn("gap-0.5 px-1 py-0 border text-[8px] font-bold uppercase", getEaseColor(task.ease))}>
+                <Gauge className="w-2 h-2" /> {task.ease}
               </Badge>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Enjoyment:</span>
-              <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getEnjoymentColor(task.enjoyment))}>
-                <Smile className="w-2.5 h-2.5" /> {task.enjoyment}
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold">Enjoyment:</span>
+              <Badge variant="outline" className={cn("gap-0.5 px-1 py-0 border text-[8px] font-bold uppercase", getEnjoymentColor(task.enjoyment))}>
+                <Smile className="w-2 h-2" /> {task.enjoyment}
               </Badge>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase font-bold">Time:</span>
-              <Badge variant="outline" className={cn("gap-1 px-1.5 py-0 border text-[9px] font-bold uppercase", getTimeColor(task.time))}>
-                <Clock className="w-2.5 h-2.5" /> {task.time}
+            <div className="flex items-center gap-0.5">
+              <span className="text-[7px] text-muted-foreground uppercase font-bold">Time:</span>
+              <Badge variant="outline" className={cn("gap-0.5 px-1 py-0 border text-[8px] font-bold uppercase", getTimeColor(task.time))}>
+                <Clock className="w-2 h-2" /> {task.time}
               </Badge>
             </div>
           </div>
@@ -205,10 +205,9 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
             className="overflow-hidden"
           >
             <div className="relative">
-              {/* Connector Line */}
               <div 
-                className="absolute left-[34px] top-0 bottom-4 w-px bg-white/[0.05]" 
-                style={{ marginLeft: `${level * 24}px` }}
+                className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]" 
+                style={{ marginLeft: `${level * 16}px` }}
               />
               {task.subtasks?.map(subtask => (
                 <TaskCard key={subtask.id} task={subtask} level={level + 1} />
