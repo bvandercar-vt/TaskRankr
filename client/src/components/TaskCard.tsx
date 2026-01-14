@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { Task, TaskResponse } from "@shared/schema";
+import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  CheckCircle2, Circle, ChevronRight, ChevronDown, 
-  MoreVertical, Clock, Smile, Gauge, AlertCircle, Plus, Trash2 
+  ChevronRight, ChevronDown, Plus 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
+import { useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "./TaskDialogProvider";
 import {
   AlertDialog,
@@ -70,17 +69,11 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-  const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const { openEditDialog, openCreateDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   
-  const handleToggleComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    updateTask.mutate({ id: task.id, isCompleted: !task.isCompleted });
-  };
-
   const handleAddSubtask = (e: React.MouseEvent) => {
     e.stopPropagation();
     openCreateDialog(task.id);
@@ -130,7 +123,6 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         className={cn(
           "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200 select-none cursor-pointer",
           "hover:bg-white/[0.02] hover:border-white/[0.05]",
-          task.isCompleted && "opacity-60 grayscale-[0.5]",
           holdProgress > 0 && "bg-white/[0.05]"
         )}
         style={{ marginLeft: `${level * 16}px` }}
@@ -163,25 +155,10 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           )}
         </div>
 
-        {/* Checkbox */}
-        <button 
-          onClick={handleToggleComplete}
-          className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
-        >
-          {task.isCompleted ? (
-            <CheckCircle2 className="w-4 h-4 text-primary" />
-          ) : (
-            <Circle className="w-4 h-4" />
-          )}
-        </button>
-
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-4 items-start md:items-center">
           <div className="md:col-span-5 w-full">
-            <h3 className={cn(
-              "font-medium truncate text-sm",
-              task.isCompleted ? "line-through text-muted-foreground" : "text-foreground"
-            )}>
+            <h3 className="font-medium truncate text-sm text-foreground">
               {task.name}
             </h3>
           </div>

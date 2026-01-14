@@ -68,7 +68,7 @@ export function useUpdateTask() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: number } & Partial<TaskInput> & { isCompleted?: boolean }) => {
+    mutationFn: async ({ id, ...updates }: { id: number } & Partial<TaskInput>) => {
       const url = buildUrl(api.tasks.update.path, { id });
       // Validate with schema first to ensure partial is handled if needed, or trust TS
       const res = await fetch(url, {
