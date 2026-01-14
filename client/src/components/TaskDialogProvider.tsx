@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { TaskForm } from "./TaskForm";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { Task } from "@shared/schema";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void;
@@ -67,14 +69,24 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
     <TaskDialogContext.Provider value={{ openCreateDialog, openEditDialog, closeDialog }}>
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-[600px] h-[90vh] sm:h-auto overflow-y-auto bg-card border-white/10 p-4 sm:p-6 shadow-2xl rounded-t-xl sm:rounded-xl bottom-0 sm:bottom-auto translate-y-0 sm:-translate-y-1/2">
-          <DialogHeader className="sticky top-0 bg-card pb-4 z-10">
-            <DialogTitle className="text-2xl font-display tracking-tight">
-              {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
-            </DialogTitle>
-            <DialogDescription>
-              {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
-            </DialogDescription>
+        <DialogContent 
+          className="w-full sm:max-w-[600px] h-full sm:h-auto overflow-y-auto bg-card border-white/10 p-4 sm:p-6 shadow-2xl sm:rounded-xl inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="sticky top-0 bg-card pb-4 z-10 flex flex-row items-center justify-between space-y-0">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl font-display tracking-tight">
+                {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
+              </DialogDescription>
+            </div>
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full sm:hidden">
+                <X className="h-6 w-6" />
+              </Button>
+            </DialogClose>
           </DialogHeader>
           <TaskForm 
             onSubmit={handleSubmit} 

@@ -96,6 +96,7 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                 <Input 
                   placeholder="What needs to be done?" 
                   className="bg-secondary/30 border-white/5 focus:border-primary/50 h-12 text-lg" 
+                  autoFocus={false}
                   {...field} 
                 />
               </FormControl>
