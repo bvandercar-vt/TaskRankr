@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Task, TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   CheckCircle2, Circle, ChevronRight, ChevronDown, 
-  MoreVertical, Clock, Smile, Gauge, AlertCircle, Plus 
+  MoreVertical, Clock, Smile, Gauge, AlertCircle, Plus, Trash2 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useUpdateTask } from "@/hooks/use-tasks";
+import { useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "./TaskDialogProvider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TaskCardProps {
   task: TaskResponse;
@@ -55,7 +65,13 @@ const getTimeColor = (level: string) => {
 
 export function TaskCard({ task, level = 0 }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
   const { openEditDialog, openCreateDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -70,6 +86,41 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     openCreateDialog(task.id);
   };
 
+  const startHold = (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent starting hold if clicking buttons
+    if ((e.target as HTMLElement).closest('button')) return;
+    
+    setHoldProgress(0);
+    const startTime = Date.now();
+    const duration = 800; // ms
+
+    holdTimerRef.current = setTimeout(() => {
+      setShowDeleteConfirm(true);
+      setHoldProgress(0);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    }, duration);
+
+    progressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setHoldProgress(Math.min((elapsed / duration) * 100, 100));
+    }, 16);
+  };
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    setHoldProgress(0);
+  };
+
+  useEffect(() => {
+    return () => cancelHold();
+  }, []);
+
+  const handleDelete = () => {
+    deleteTask.mutate(task.id);
+    setShowDeleteConfirm(false);
+  };
+
   return (
     <div className="group relative">
       <motion.div 
@@ -77,13 +128,27 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200",
+          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200 select-none cursor-pointer",
           "hover:bg-white/[0.02] hover:border-white/[0.05]",
-          task.isCompleted && "opacity-60 grayscale-[0.5]"
+          task.isCompleted && "opacity-60 grayscale-[0.5]",
+          holdProgress > 0 && "bg-white/[0.05]"
         )}
         style={{ marginLeft: `${level * 16}px` }}
         onClick={() => openEditDialog(task)}
+        onMouseDown={startHold}
+        onMouseUp={cancelHold}
+        onMouseLeave={cancelHold}
+        onTouchStart={startHold}
+        onTouchEnd={cancelHold}
       >
+        {/* Hold Progress Bar */}
+        {holdProgress > 0 && (
+          <div 
+            className="absolute left-0 bottom-0 h-0.5 bg-primary/50 transition-all duration-75"
+            style={{ width: `${holdProgress}%` }}
+          />
+        )}
+
         {/* Expand/Collapse Toggle */}
         <div className="w-5 flex justify-center shrink-0">
           {hasSubtasks ? (
@@ -216,6 +281,26 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="bg-card border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{task.name}" and all of its subtasks.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
