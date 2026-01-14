@@ -106,7 +106,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
-        {/* Controls */}
+        {/* Search and Sort Section */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -120,7 +120,7 @@ export default function Home() {
           
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-muted-foreground uppercase mr-2 flex items-center gap-1">
-              <ArrowUpDown className="w-3 h-3" /> Sort By:
+              <ArrowUpDown className="w-3 h-3" /> Sort:
             </span>
             <Button
               variant={sortBy === 'priority' ? 'default' : 'outline'}
@@ -154,17 +154,15 @@ export default function Home() {
             >
               Time
             </Button>
-            {sortBy !== 'none' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSortBy('none')}
-                className="text-[10px] h-9 px-3 text-muted-foreground hover:text-foreground"
-              >
-                Clear
-              </Button>
-            )}
           </div>
+        </div>
+
+        {/* Column Headers */}
+        <div className="hidden md:flex items-center justify-end px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-10">
+          <div className="w-16 text-center">Priority</div>
+          <div className="w-16 text-center">Ease</div>
+          <div className="w-16 text-center">Enjoy</div>
+          <div className="w-16 text-center">Time</div>
         </div>
 
         {/* Task List Area */}

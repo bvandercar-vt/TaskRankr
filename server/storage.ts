@@ -17,8 +17,21 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getTasks(): Promise<Task[]> {
-    // Return all tasks - frontend will handle the tree structure
-    return await db.select().from(tasks).orderBy(tasks.id);
+    const allTasks = await db.select().from(tasks).orderBy(tasks.id);
+    if (allTasks.length === 0) {
+      const testTasks: InsertTask[] = [
+        { name: "Plan vacation", priority: "medium", ease: "medium", enjoyment: "high", time: "medium" },
+        { name: "Research flights", priority: "high", ease: "easy", enjoyment: "medium", time: "low" },
+        { name: "Book hotel", priority: "medium", ease: "hard", enjoyment: "low", time: "medium" },
+        { name: "Clean the house", priority: "low", ease: "medium", enjoyment: "low", time: "high" },
+        { name: "Mop floors", priority: "low", ease: "easy", enjoyment: "low", time: "medium" },
+        { name: "Learn a new recipe", priority: "medium", ease: "hard", enjoyment: "high", time: "medium" },
+        { name: "Buy ingredients", priority: "medium", ease: "easy", enjoyment: "medium", time: "low" },
+      ];
+      await db.insert(tasks).values(testTasks);
+      return await db.select().from(tasks).orderBy(tasks.id);
+    }
+    return allTasks;
   }
 
   async getTask(id: number): Promise<Task | undefined> {

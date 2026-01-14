@@ -135,70 +135,27 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-4 items-start md:items-center">
-          <div className="md:col-span-5 w-full">
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
             <h3 className="font-medium truncate text-sm text-foreground">
               {task.name}
             </h3>
           </div>
 
-          {/* Metadata Badges - Mobile/Tree View */}
-          <div className="flex flex-wrap md:hidden gap-1 mt-0.5">
-            <div className="flex items-center gap-0.5">
-              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Priority:</span>
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getPriorityColor(task.priority))}>
-                {task.priority}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Ease:</span>
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getEaseColor(task.ease))}>
-                {task.ease}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Enjoyment:</span>
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getEnjoymentColor(task.enjoyment))}>
-                {task.enjoyment}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <span className="text-[7px] text-muted-foreground uppercase font-bold w-12 text-right">Time:</span>
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center", getTimeColor(task.time))}>
-                {task.time}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Metadata Badges - Desktop */}
-          <div className="hidden md:flex md:col-span-7 gap-3 items-center justify-end">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Priority:</span>
-              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getPriorityColor(task.priority))}>
-                {task.priority}
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Ease:</span>
-              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getEaseColor(task.ease))}>
-                {task.ease}
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Enjoyment:</span>
-              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getEnjoymentColor(task.enjoyment))}>
-                {task.enjoyment}
-              </Badge>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] text-muted-foreground uppercase font-bold w-16 text-right">Time:</span>
-              <Badge variant="outline" className={cn("px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider w-20 justify-center", getTimeColor(task.time))}>
-                {task.time}
-              </Badge>
-            </div>
+          {/* Metadata Badges - Single Row Aligned */}
+          <div className="flex items-center gap-1 shrink-0 w-[268px] justify-end">
+            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
+              {task.priority}
+            </Badge>
+            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEaseColor(task.ease))}>
+              {task.ease}
+            </Badge>
+            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEnjoymentColor(task.enjoyment))}>
+              {task.enjoyment}
+            </Badge>
+            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getTimeColor(task.time))}>
+              {task.time}
+            </Badge>
           </div>
         </div>
       </motion.div>

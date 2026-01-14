@@ -70,32 +70,36 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent 
-          className="w-full sm:max-w-[600px] h-full sm:h-auto overflow-y-auto bg-card border-white/10 p-4 sm:p-6 shadow-2xl sm:rounded-xl inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
+          className="w-full h-full max-w-none sm:max-w-[600px] sm:h-auto overflow-y-auto bg-card border-white/10 p-0 sm:p-6 shadow-2xl sm:rounded-xl inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <DialogHeader className="sticky top-0 bg-card pb-4 z-10 flex flex-row items-center justify-between space-y-0">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl font-display tracking-tight">
-                {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
-              </DialogTitle>
-              <DialogDescription>
-                {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
-              </DialogDescription>
+          <div className="flex flex-col h-full sm:h-auto">
+            <DialogHeader className="sticky top-0 bg-card p-4 sm:p-0 border-b border-white/5 sm:border-0 z-10 flex flex-row items-center justify-between space-y-0">
+              <div className="flex-1">
+                <DialogTitle className="text-xl sm:text-2xl font-display tracking-tight">
+                  {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
+                </DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
+                  {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
+                </DialogDescription>
+              </div>
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full sm:hidden">
+                  <X className="h-6 w-6" />
+                </Button>
+              </DialogClose>
+            </DialogHeader>
+            <div className="flex-1 p-4 sm:p-0">
+              <TaskForm 
+                onSubmit={handleSubmit} 
+                isPending={isPending} 
+                initialData={activeTask}
+                parentId={parentId}
+                onCancel={closeDialog}
+                onAddChild={(pid) => openCreateDialog(pid)}
+              />
             </div>
-            <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full sm:hidden">
-                <X className="h-6 w-6" />
-              </Button>
-            </DialogClose>
-          </DialogHeader>
-          <TaskForm 
-            onSubmit={handleSubmit} 
-            isPending={isPending} 
-            initialData={activeTask}
-            parentId={parentId}
-            onCancel={closeDialog}
-            onAddChild={(pid) => openCreateDialog(pid)}
-          />
+          </div>
         </DialogContent>
       </Dialog>
     </TaskDialogContext.Provider>
