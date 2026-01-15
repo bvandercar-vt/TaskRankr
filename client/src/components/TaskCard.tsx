@@ -143,7 +143,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
           </div>
 
           {/* Metadata Badges - Right Aligned Container */}
-          <div className="flex items-center gap-1 shrink-0 md:w-[268px] md:justify-end pr-1.5 md:pr-0">
+          <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
             <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
               {task.priority}
             </Badge>

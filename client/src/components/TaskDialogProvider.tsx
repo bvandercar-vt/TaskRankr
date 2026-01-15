@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { TaskForm } from "./TaskForm";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { Task } from "@shared/schema";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void;
@@ -65,31 +67,69 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
 
   const isPending = createTask.isPending || updateTask.isPending;
 
+  // Prevent scrolling when mobile view is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <TaskDialogContext.Provider value={{ openCreateDialog, openEditDialog, closeDialog }}>
       {children}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent 
-          className="w-full h-full max-w-none sm:max-w-[600px] sm:h-auto overflow-y-auto bg-card border-white/10 p-0 sm:p-6 shadow-2xl sm:rounded-xl inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-        >
-          <div className="flex flex-col h-full sm:h-auto">
-            <DialogHeader className="sticky top-0 bg-card p-4 sm:p-0 border-b border-white/5 sm:border-0 z-10 flex flex-row items-center justify-between space-y-0">
-              <div className="flex-1">
-                <DialogTitle className="text-xl sm:text-2xl font-display tracking-tight">
-                  {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
-                </DialogTitle>
-                <DialogDescription className="text-xs sm:text-sm">
-                  {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
-                </DialogDescription>
+      
+      {/* Desktop Dialog (Hidden on Mobile) */}
+      <div className="hidden sm:block">
+        <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
+          <DialogContent 
+            className="w-full max-w-[600px] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <div className="flex flex-col">
+              <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+                <div className="flex-1">
+                  <DialogTitle className="text-2xl font-display tracking-tight">
+                    {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
+                  </DialogDescription>
+                </div>
+              </DialogHeader>
+              <div className="mt-4">
+                <TaskForm 
+                  onSubmit={handleSubmit} 
+                  isPending={isPending} 
+                  initialData={activeTask}
+                  parentId={parentId}
+                  onCancel={closeDialog}
+                  onAddChild={(pid) => openCreateDialog(pid)}
+                />
               </div>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full sm:hidden">
-                  <X className="h-6 w-6" />
-                </Button>
-              </DialogClose>
-            </DialogHeader>
-            <div className="flex-1 p-4 sm:p-0">
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Mobile Full-Screen View */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
+          >
+            {/* Content */}
+            <div 
+              className="flex-1 overflow-y-auto px-4 pt-10"
+            >
               <TaskForm 
                 onSubmit={handleSubmit} 
                 isPending={isPending} 
@@ -99,9 +139,9 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                 onAddChild={(pid) => openCreateDialog(pid)}
               />
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </TaskDialogContext.Provider>
   );
 }
