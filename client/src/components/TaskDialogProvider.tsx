@@ -131,21 +131,14 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                 <h2 className="text-lg font-display font-bold tracking-tight truncate leading-tight">
                   {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
                 </h2>
-                <p className="text-[10px] text-muted-foreground truncate opacity-80">
-                  {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
-                </p>
               </div>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  closeDialog();
-                }}
+                onClick={closeDialog}
                 className="h-10 w-10 rounded-full hover:bg-white/10 shrink-0 relative z-[60] text-foreground"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 pointer-events-none" />
               </Button>
             </div>
             
