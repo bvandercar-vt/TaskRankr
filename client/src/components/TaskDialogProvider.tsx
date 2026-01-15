@@ -126,20 +126,24 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col"
           >
-            <div className="sticky top-0 bg-background/80 backdrop-blur-md z-10 px-4 py-4 border-b border-white/5 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-display font-semibold tracking-tight">
+            <div className="sticky top-0 bg-background z-50 px-4 py-4 border-b border-white/5 flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-display font-semibold tracking-tight truncate">
                   {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
                 </h2>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground truncate">
                   {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
                 </p>
               </div>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={closeDialog}
-                className="h-10 w-10 rounded-full hover:bg-white/10 shrink-0 ml-4"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  closeDialog();
+                }}
+                className="h-10 w-10 rounded-full hover:bg-white/10 shrink-0 ml-4 relative z-[60]"
               >
                 <X className="h-6 w-6" />
               </Button>
