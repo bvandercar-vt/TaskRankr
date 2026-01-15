@@ -127,7 +127,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="h-16 shrink-0 bg-background/95 backdrop-blur-sm px-4 flex items-center justify-between border-b border-white/10 z-[110]">
+            <div className="h-16 shrink-0 bg-background/95 backdrop-blur-sm px-4 flex items-center justify-between border-b border-white/10 z-[110] pointer-events-auto">
               <h2 className="text-xl font-bold tracking-tight truncate">
                 {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
               </h2>
@@ -139,7 +139,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                   e.stopPropagation();
                   closeDialog();
                 }}
-                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground"
+                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground touch-none"
                 data-testid="button-close-mobile-view"
               >
                 <X className="h-6 w-6 pointer-events-none" />
@@ -147,7 +147,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             </div>
             
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 pt-6">
+            <div className="flex-1 overflow-y-auto px-4 pt-6 pb-20 pointer-events-auto touch-auto">
               <TaskForm 
                 onSubmit={handleSubmit} 
                 isPending={isPending} 
