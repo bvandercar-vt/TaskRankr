@@ -9,6 +9,7 @@ import {
   LayoutList
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
 
