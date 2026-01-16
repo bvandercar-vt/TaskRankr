@@ -153,18 +153,26 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
 
           {/* Metadata Badges - Right Aligned Container */}
           <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
-              {task.priority}
-            </Badge>
-            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEaseColor(task.ease))}>
-              {task.ease}
-            </Badge>
-            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEnjoymentColor(task.enjoyment))}>
-              {task.enjoyment}
-            </Badge>
-            <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getTimeColor(task.time))}>
-              {task.time}
-            </Badge>
+            {task.priority && (
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
+                {task.priority}
+              </Badge>
+            )}
+            {task.ease && (
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEaseColor(task.ease))}>
+                {task.ease}
+              </Badge>
+            )}
+            {task.enjoyment && (
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEnjoymentColor(task.enjoyment))}>
+                {task.enjoyment}
+              </Badge>
+            )}
+            {task.time && (
+              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getTimeColor(task.time))}>
+                {task.time}
+              </Badge>
+            )}
           </div>
         </div>
       </motion.div>
