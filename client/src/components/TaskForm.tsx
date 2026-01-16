@@ -6,10 +6,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Calendar } from "lucide-react";
+import { Loader2, Plus, Calendar as CalendarIcon } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
@@ -153,14 +155,34 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                   <div>
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Date Created</FormLabel>
                   </div>
-                  <FormControl>
-                    <Input 
-                      type="datetime-local"
-                      className="w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1"
-                      value={field.value ? format(field.value, "yyyy-MM-dd'T'HH:mm") : ""}
-                      onChange={(e) => field.onChange(new Date(e.target.value))}
-                    />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card border-white/10" align="end">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </FormItem>
               )}
             />
