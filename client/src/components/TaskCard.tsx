@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, ChevronDown
+  ChevronRight, ChevronDown, Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useCompleteTask, useUncompleteTask } from "@/hooks/use-tasks";
+import { useCompleteTask, useUncompleteTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,11 +66,13 @@ const getTimeColor = (level: string) => {
 export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const completeTask = useCompleteTask();
   const uncompleteTask = useUncompleteTask();
+  const deleteTask = useDeleteTask();
   const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -200,15 +203,53 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  setShowConfirm(false);
+                  setTimeout(() => setShowDeleteConfirm(true), 100);
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10 m-0">Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleAction}
+                  className={showRestore 
+                    ? "bg-primary hover:bg-primary/90 text-white"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  }
+                >
+                  {showRestore ? "Restore" : "Complete"}
+                </AlertDialogAction>
+              </div>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="bg-card border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task Permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{task.name}" and all its subtasks. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
             <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleAction}
-              className={showRestore 
-                ? "bg-primary hover:bg-primary/90 text-white"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-              }
+              onClick={() => {
+                deleteTask.mutate(task.id);
+                setShowDeleteConfirm(false);
+              }}
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
-              {showRestore ? "Restore" : "Complete"}
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
