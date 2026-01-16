@@ -96,7 +96,7 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-card border-white/10">
+                      <SelectContent className="bg-card border-white/10 z-[200]">
                         {attr.levels.map((level) => (
                           <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
                             {level}
