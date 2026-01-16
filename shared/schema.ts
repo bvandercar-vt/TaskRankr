@@ -12,6 +12,7 @@ export const tasks = pgTable("tasks", {
   enjoyment: text("enjoyment").notNull(), // low, medium, high
   time: text("time").notNull(), // low, medium, high
   parentId: integer("parent_id"), // For nested tasks
+  isCompleted: boolean("is_completed").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
