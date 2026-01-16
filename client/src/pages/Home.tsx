@@ -59,7 +59,41 @@ export default function Home() {
       result.sort((a, b) => {
         const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
         const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
-        return direction === 'desc' ? valB - valA : valA - valB;
+        
+        if (valA !== valB) {
+          return direction === 'desc' ? valB - valA : valA - valB;
+        }
+
+        // Secondary sorts
+        const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
+        const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
+        const eA = LEVEL_WEIGHTS[a.ease as string] || 0;
+        const eB = LEVEL_WEIGHTS[b.ease as string] || 0;
+        const jA = LEVEL_WEIGHTS[a.enjoyment as string] || 0;
+        const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0;
+
+        if (sort === 'priority') {
+          if (eA !== eB) return eA - eB; // ease (asc: easy to hard)
+          return jB - jA; // enjoyment (desc: high to low)
+        }
+        
+        if (sort === 'ease') {
+          if (pA !== pB) return pB - pA; // priority (desc)
+          return jB - jA; // enjoyment (desc)
+        }
+
+        if (sort === 'enjoyment') {
+          if (pA !== pB) return pB - pA; // priority (desc)
+          return eA - eB; // ease (asc)
+        }
+
+        if (sort === 'time') {
+          if (pA !== pB) return pB - pA; // priority (desc)
+          if (eA !== eB) return eA - eB; // ease (asc)
+          return pB - pA; // priority (desc) - redundant but per request
+        }
+
+        return 0;
       });
     }
 
