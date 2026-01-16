@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, ChevronDown, Trash2
+  ChevronRight, ChevronDown, Trash2, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -192,7 +192,15 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
       </AnimatePresence>
 
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-card border-white/10">
+        <AlertDialogContent className="bg-card border-white/10 pt-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowConfirm(false)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>{showRestore ? "Restore Task?" : "Complete Task?"}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -203,29 +211,32 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <div className="flex items-center justify-between w-full">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={() => {
-                  setShowConfirm(false);
-                  setTimeout(() => setShowDeleteConfirm(true), 100);
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10 m-0">Cancel</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={handleAction}
-                  className={showRestore 
+            <div className="flex flex-col gap-3 w-full">
+              <AlertDialogAction 
+                onClick={handleAction}
+                className={cn(
+                  "w-full h-11 text-base font-semibold",
+                  showRestore 
                     ? "bg-primary hover:bg-primary/90 text-white"
                     : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  }
+                )}
+              >
+                {showRestore ? "Restore Task" : "Complete Task"}
+              </AlertDialogAction>
+              
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 h-8"
+                  onClick={() => {
+                    setShowConfirm(false);
+                    setTimeout(() => setShowDeleteConfirm(true), 100);
+                  }}
                 >
-                  {showRestore ? "Restore" : "Complete"}
-                </AlertDialogAction>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">Delete Permanently</span>
+                </Button>
               </div>
             </div>
           </AlertDialogFooter>
