@@ -387,12 +387,25 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(tasks.id, id))
       .returning();
+
+    // If we're marking a task as completed/restoring it, do the same for all children
+    if (updates.isCompleted !== undefined) {
+      const childTasks = await db.select().from(tasks).where(eq(tasks.parentId, id));
+      for (const child of childTasks) {
+        await this.updateTask(child.id, updates);
+      }
+    }
+
     return task;
   }
 
   async deleteTask(id: number): Promise<void> {
-    // Note: If we strictly enforced foreign keys, we'd need to handle subtasks.
-    // For now, we assume simple deletion or the DB handles cascade if configured (it's not explicit in schema but standard behavior).
+    // Delete all subtasks first (recursive)
+    const childTasks = await db.select().from(tasks).where(eq(tasks.parentId, id));
+    for (const child of childTasks) {
+      await this.deleteTask(child.id);
+    }
+    
     await db.delete(tasks).where(eq(tasks.id, id));
   }
 }
