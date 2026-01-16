@@ -41,7 +41,7 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
+    values: initialData ? {
       name: initialData.name,
       description: initialData.description || "",
       priority: (initialData.priority as any) || "none",
