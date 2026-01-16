@@ -109,18 +109,18 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         {/* Controls Section */}
-        <div className="flex flex-col gap-6 mb-8">
+        <div className="flex items-center justify-between mb-4 px-2">
           {/* Magnifying Glass Search */}
-          <div className="flex items-center justify-start h-12">
+          <div className="flex items-center h-8">
             <div 
               className={cn(
                 "flex items-center transition-all duration-300 ease-in-out overflow-hidden bg-secondary/30 rounded-full border border-white/5",
-                isSearchExpanded ? "w-full sm:w-80 px-4" : "w-12 px-0 justify-center cursor-pointer hover:bg-white/10"
+                isSearchExpanded ? "w-full sm:w-80 px-4" : "w-10 h-10 px-0 justify-center cursor-pointer hover:bg-white/10"
               )}
               onClick={() => !isSearchExpanded && setIsSearchExpanded(true)}
             >
               <Search 
-                className={cn("h-5 w-5 shrink-0 transition-colors", isSearchExpanded ? "text-primary" : "text-muted-foreground")} 
+                className={cn("h-4 w-4 shrink-0 transition-colors", isSearchExpanded ? "text-primary" : "text-muted-foreground")} 
                 onClick={(e) => {
                   if (isSearchExpanded) {
                     e.stopPropagation();
@@ -131,7 +131,7 @@ export default function Home() {
               <Input 
                 placeholder="Search..." 
                 className={cn(
-                  "border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-base placeholder:text-muted-foreground/50 transition-opacity duration-200",
+                  "border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50 transition-opacity duration-200",
                   isSearchExpanded ? "opacity-100" : "opacity-0 w-0"
                 )}
                 autoFocus={isSearchExpanded}
@@ -143,7 +143,7 @@ export default function Home() {
           </div>
           
           {/* Column Sort Headers Aligned with Tags */}
-          <div className="flex items-center justify-end px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-[6px]">
+          <div className="flex items-center gap-1">
             <Button
               variant={sortBy === 'priority' ? 'default' : 'ghost'}
               size="sm"
