@@ -13,7 +13,8 @@ export const tasks = pgTable("tasks", {
   time: text("time").notNull(), // low, medium, high
   parentId: integer("parent_id"), // For nested tasks
   isCompleted: boolean("is_completed").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
 });
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -27,9 +28,11 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
 }));
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({ 
+export const insertTaskSchema = createInsertSchema(tasks, {
+  createdAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+}).omit({ 
   id: true, 
-  createdAt: true,
 });
 
 export type Task = typeof tasks.$inferSelect;

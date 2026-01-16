@@ -107,7 +107,7 @@ export function useCompleteTask() {
       const res = await fetch(url, {
         method: api.tasks.update.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted: true }),
+        body: JSON.stringify({ isCompleted: true, completedAt: new Date() }),
         credentials: "include",
       });
 
@@ -135,7 +135,7 @@ export function useUncompleteTask() {
       const res = await fetch(url, {
         method: api.tasks.update.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted: false }),
+        body: JSON.stringify({ isCompleted: false, completedAt: null }),
         credentials: "include",
       });
 
