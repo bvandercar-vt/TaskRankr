@@ -146,7 +146,7 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium truncate text-sm text-foreground">
+            <h3 className="font-semibold truncate text-base text-foreground">
               {task.name}
             </h3>
           </div>
