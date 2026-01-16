@@ -32,6 +32,7 @@ const LEVEL_STYLES: Record<string, string> = {
   medium: 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5',
   low: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
   easy: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+  none: 'text-muted-foreground italic',
 };
 
 const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
@@ -39,25 +40,34 @@ const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
 export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
   const parentChain = useTaskParentChain(parentId || undefined);
 
+  const extendedSchema = insertTaskSchema.extend({
+    priority: z.string().min(1, "Priority is required"),
+    ease: z.string().min(1, "Ease is required"),
+    enjoyment: z.string().min(1, "Enjoyment is required"),
+    time: z.string().min(1, "Time is required"),
+  });
+
+  const formSchemaToUse = parentId ? insertTaskSchema : extendedSchema;
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchemaToUse),
     values: initialData ? {
       name: initialData.name,
       description: initialData.description || "",
-      priority: (initialData.priority as any) || "none",
-      ease: (initialData.ease as any) || "none",
-      enjoyment: (initialData.enjoyment as any) || "none",
-      time: (initialData.time as any) || "none",
+      priority: (initialData.priority as any) || (parentId ? "none" : ""),
+      ease: (initialData.ease as any) || (parentId ? "none" : ""),
+      enjoyment: (initialData.enjoyment as any) || (parentId ? "none" : ""),
+      time: (initialData.time as any) || (parentId ? "none" : ""),
       parentId: initialData.parentId,
       createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
       completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
     } : {
       name: "",
       description: "",
-      priority: "none",
-      ease: "none",
-      enjoyment: "none",
-      time: "none",
+      priority: parentId ? "none" : "",
+      ease: parentId ? "none" : "",
+      enjoyment: parentId ? "none" : "",
+      time: parentId ? "none" : "",
       parentId: parentId || null,
       createdAt: new Date(),
     },
@@ -66,10 +76,10 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
   const onSubmitWithNulls = (data: FormValues) => {
     const formattedData = {
       ...data,
-      priority: data.priority === "none" ? null : data.priority,
-      ease: data.ease === "none" ? null : data.ease,
-      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
-      time: data.time === "none" ? null : data.time,
+      priority: data.priority === "none" || data.priority === "" ? null : data.priority,
+      ease: data.ease === "none" || data.ease === "" ? null : data.ease,
+      enjoyment: data.enjoyment === "none" || data.enjoyment === "" ? null : data.enjoyment,
+      time: data.time === "none" || data.time === "" ? null : data.time,
     };
     onSubmit(formattedData as any);
   };
@@ -124,14 +134,14 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{attr.label}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
+                      <Select onValueChange={field.onChange} value={field.value || (parentId ? "none" : "")}>
                         <FormControl>
-                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", field.value ? getLevelStyle(field.value) : "text-muted-foreground")}>
-                            <SelectValue placeholder="Not set" />
+                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", (field.value && field.value !== "none") ? getLevelStyle(field.value) : "text-muted-foreground")}>
+                            <SelectValue placeholder={parentId ? "None" : "Select..."} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-card border-white/10 z-[200]">
-                          <SelectItem value="none" className="text-muted-foreground italic">Not set</SelectItem>
+                          {parentId && <SelectItem value="none" className="text-muted-foreground italic">None</SelectItem>}
                           {attr.levels.map((level) => (
                             <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
                               {level}

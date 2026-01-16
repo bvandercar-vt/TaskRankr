@@ -29,6 +29,13 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 }));
 
 export const insertTaskSchema = createInsertSchema(tasks, {
+  name: z.string().min(1, "Name is required"),
+  priority: z.string().nullable().superRefine((val, ctx) => {
+    if (val === null && !ctx.path.includes('parentId')) {
+      // Note: We can't easily check parentId here without a custom schema
+      // We will handle the root-level check in the form validation instead
+    }
+  }),
   createdAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
 }).omit({ 
