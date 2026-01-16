@@ -64,7 +64,7 @@ const getTimeColor = (level: string) => {
 };
 
 export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
