@@ -89,9 +89,9 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
     <TaskDialogContext.Provider value={{ openCreateDialog, openEditDialog, closeDialog }}>
       {children}
       
-      {/* Desktop Dialog */}
+      {/* Desktop Dialog (Hidden on Mobile) */}
       <div className="hidden sm:block">
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
           <DialogContent 
             className="w-full max-w-[600px] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
             onOpenAutoFocus={(e) => e.preventDefault()}
@@ -102,7 +102,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                   <DialogTitle className="text-2xl font-display tracking-tight">
                     {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
                   </DialogTitle>
-                  <DialogDescription className="text-sm">
+                  <DialogDescription className="sr-only">
                     {mode === 'create' ? 'Add a new item to your list.' : 'Update task details and properties.'}
                   </DialogDescription>
                 </div>
