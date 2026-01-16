@@ -2,13 +2,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task, PRIORITY_LEVELS, EASE_LEVELS, ENJOYMENT_LEVELS, TIME_LEVELS } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Calendar } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
@@ -43,6 +44,8 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
       enjoyment: initialData.enjoyment as any,
       time: initialData.time as any,
       parentId: initialData.parentId,
+      createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
+      completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
     } : {
       name: "",
       description: "",
@@ -51,6 +54,7 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
       enjoyment: "medium",
       time: "medium",
       parentId: parentId || null,
+      createdAt: new Date(),
     },
   });
 
@@ -127,6 +131,38 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
               </FormItem>
             )}
           />
+
+          <div className="flex flex-col gap-4 py-2 border-t border-white/5 mt-4">
+            <FormField
+              control={form.control}
+              name="createdAt"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between gap-4">
+                  <div>
+                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Date Created</FormLabel>
+                    <FormDescription className="text-[10px] text-muted-foreground/50">Manually adjust creation date</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Input 
+                      type="datetime-local"
+                      className="w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1"
+                      value={field.value ? format(field.value, "yyyy-MM-dd'T'HH:mm") : ""}
+                      onChange={(e) => field.onChange(new Date(e.target.value))}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {initialData?.isCompleted && initialData?.completedAt && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Date Completed</div>
+                <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                  {format(new Date(initialData.completedAt), "PPP p")}
+                </div>
+              </div>
+            )}
+          </div>
 
           {initialData && onAddChild && (
             <Button

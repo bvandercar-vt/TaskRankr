@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, ChevronDown
+  ChevronRight, ChevronDown, Trash2, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useDeleteTask } from "@/hooks/use-tasks";
+import { useCompleteTask, useUncompleteTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,7 @@ import {
 interface TaskCardProps {
   task: TaskResponse;
   level?: number;
+  showRestore?: boolean;
 }
 
 // Color mapping helpers
@@ -61,12 +63,15 @@ const getTimeColor = (level: string) => {
   }
 };
 
-export function TaskCard({ task, level = 0 }: TaskCardProps) {
+export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   
+  const completeTask = useCompleteTask();
+  const uncompleteTask = useUncompleteTask();
   const deleteTask = useDeleteTask();
   const { openEditDialog } = useTaskDialog();
 
@@ -80,7 +85,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     const duration = 800; // ms
 
     holdTimerRef.current = setTimeout(() => {
-      setShowDeleteConfirm(true);
+      setShowConfirm(true);
       setIsHolding(false);
     }, duration);
   };
@@ -96,9 +101,13 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     };
   }, []);
 
-  const handleDelete = () => {
-    deleteTask.mutate(task.id);
-    setShowDeleteConfirm(false);
+  const handleAction = () => {
+    if (showRestore) {
+      uncompleteTask.mutate(task.id);
+    } else {
+      completeTask.mutate(task.id);
+    }
+    setShowConfirm(false);
   };
 
   return (
@@ -175,28 +184,83 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
                 style={{ marginLeft: `${level * 16}px` }}
               />
               {task.subtasks?.map(subtask => (
-                <TaskCard key={subtask.id} task={subtask} level={level + 1} />
+                <TaskCard key={subtask.id} task={subtask} level={level + 1} showRestore={showRestore} />
               ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent className="bg-card border-white/10 pt-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowConfirm(false)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{showRestore ? "Restore Task?" : "Complete Task?"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {showRestore 
+                ? `Move "${task.name}" back to your active task list.`
+                : `Mark "${task.name}" as complete and move it to the completed list.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <div className="flex flex-col gap-3 w-full">
+              <AlertDialogAction 
+                onClick={handleAction}
+                className={cn(
+                  "w-full h-11 text-base font-semibold",
+                  showRestore 
+                    ? "bg-primary hover:bg-primary/90 text-white"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                )}
+              >
+                {showRestore ? "Restore Task" : "Complete Task"}
+              </AlertDialogAction>
+              
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 h-8"
+                  onClick={() => {
+                    setShowConfirm(false);
+                    setTimeout(() => setShowDeleteConfirm(true), 100);
+                  }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">Delete Permanently</span>
+                </Button>
+              </div>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent className="bg-card border-white/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Task Permanently?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{task.name}" and all of its subtasks.
+              This will permanently delete "{task.name}" and all its subtasks. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDelete}
+              onClick={() => {
+                deleteTask.mutate(task.id);
+                setShowDeleteConfirm(false);
+              }}
               className="bg-destructive hover:bg-destructive/90 text-white"
             >
-              Delete
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

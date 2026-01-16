@@ -86,6 +86,7 @@ async function seedDatabase() {
       ease: "medium",
       enjoyment: "high",
       time: "high",
+      createdAt: new Date(),
     });
 
     // Subtask 1.1
@@ -97,6 +98,7 @@ async function seedDatabase() {
       enjoyment: "medium",
       time: "medium",
       parentId: task1.id,
+      createdAt: new Date(),
     });
 
      // Subtask 1.2
@@ -108,6 +110,7 @@ async function seedDatabase() {
       enjoyment: "medium",
       time: "high",
       parentId: task1.id,
+      createdAt: new Date(),
     });
 
     // Root task 2
@@ -118,6 +121,7 @@ async function seedDatabase() {
       ease: "hard",
       enjoyment: "low",
       time: "high",
+      createdAt: new Date(),
     });
 
     // Root task 3
@@ -128,6 +132,7 @@ async function seedDatabase() {
       ease: "hard",
       enjoyment: "high",
       time: "high",
+      createdAt: new Date(),
     });
     
     await storage.createTask({
@@ -138,6 +143,7 @@ async function seedDatabase() {
       enjoyment: "medium",
       time: "low",
       parentId: task3.id,
+      createdAt: new Date(),
     });
   }
 }

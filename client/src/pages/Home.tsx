@@ -5,11 +5,18 @@ import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { 
-  Plus, Search, ArrowUpDown, 
+  Plus, Search, Menu, CheckCircle2,
   LayoutList
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
 
@@ -59,18 +66,21 @@ export default function Home() {
     return result;
   };
 
-  // Build tree from flat list if backend sends flat list
+  // Build tree from flat list if backend sends flat list (exclude completed tasks)
   const taskTree = useMemo(() => {
     if (!tasks) return [];
+    
+    // Filter out completed tasks first
+    const activeTasks = tasks.filter(task => !task.isCompleted);
     
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
     
-    tasks.forEach(task => {
+    activeTasks.forEach(task => {
       nodes[task.id] = { ...task, subtasks: [] };
     });
 
-    tasks.forEach(task => {
+    activeTasks.forEach(task => {
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
       } else {
@@ -110,36 +120,45 @@ export default function Home() {
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         {/* Controls Section */}
         <div className="flex items-center justify-between mb-4 px-2">
-          {/* Magnifying Glass Search */}
-          <div className="flex items-center h-8">
-            <div 
-              className={cn(
-                "flex items-center transition-all duration-300 ease-in-out overflow-hidden bg-secondary/30 rounded-full border border-white/5",
-                isSearchExpanded ? "w-full sm:w-80 px-4" : "w-10 h-10 px-0 justify-center cursor-pointer hover:bg-white/10"
-              )}
-              onClick={() => !isSearchExpanded && setIsSearchExpanded(true)}
-            >
-              <Search 
-                className={cn("h-4 w-4 shrink-0 transition-colors", isSearchExpanded ? "text-primary" : "text-muted-foreground")} 
-                onClick={(e) => {
-                  if (isSearchExpanded) {
-                    e.stopPropagation();
-                    if (!search) setIsSearchExpanded(false);
-                  }
-                }}
-              />
-              <Input 
-                placeholder="Search..." 
-                className={cn(
-                  "border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50 transition-opacity duration-200",
-                  isSearchExpanded ? "opacity-100" : "opacity-0 w-0"
-                )}
-                autoFocus={isSearchExpanded}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onBlur={() => !search && setIsSearchExpanded(false)}
-              />
-            </div>
+          {/* Hamburger Menu */}
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10" data-testid="button-menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-card border-white/10 w-48">
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </DropdownMenuItem>
+                <Link href="/completed">
+                  <DropdownMenuItem className="cursor-pointer" data-testid="menu-item-completed">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Completed Tasks
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            {/* Expandable Search */}
+            {isSearchExpanded && (
+              <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
+                <Search className="h-4 w-4 shrink-0 text-primary" />
+                <Input 
+                  placeholder="Search..." 
+                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onBlur={() => !search && setIsSearchExpanded(false)}
+                />
+              </div>
+            )}
           </div>
           
           {/* Column Sort Headers Aligned with Tags */}
