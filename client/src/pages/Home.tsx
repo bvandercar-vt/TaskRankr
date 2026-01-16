@@ -40,7 +40,7 @@ export default function Home() {
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('none');
+  const [sortBy, setSortBy] = useState<SortOption>('priority');
 
   // Recursive function to filter task tree
   const filterAndSortTree = (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
@@ -166,7 +166,7 @@ export default function Home() {
             <Button
               variant={sortBy === 'priority' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setSortBy(sortBy === 'priority' ? 'none' : 'priority')}
+              onClick={() => setSortBy('priority')}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
                 sortBy === 'priority' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
@@ -177,7 +177,7 @@ export default function Home() {
             <Button
               variant={sortBy === 'ease' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setSortBy(sortBy === 'ease' ? 'none' : 'ease')}
+              onClick={() => setSortBy('ease')}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
                 sortBy === 'ease' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
@@ -188,7 +188,7 @@ export default function Home() {
             <Button
               variant={sortBy === 'enjoyment' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setSortBy(sortBy === 'enjoyment' ? 'none' : 'enjoyment')}
+              onClick={() => setSortBy('enjoyment')}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
                 sortBy === 'enjoyment' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
@@ -199,7 +199,7 @@ export default function Home() {
             <Button
               variant={sortBy === 'time' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setSortBy(sortBy === 'time' ? 'none' : 'time')}
+              onClick={() => setSortBy('time')}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
                 sortBy === 'time' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
