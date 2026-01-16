@@ -39,28 +39,39 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
     defaultValues: initialData ? {
       name: initialData.name,
       description: initialData.description || "",
-      priority: initialData.priority as any,
-      ease: initialData.ease as any,
-      enjoyment: initialData.enjoyment as any,
-      time: initialData.time as any,
+      priority: (initialData.priority as any) || "none",
+      ease: (initialData.ease as any) || "none",
+      enjoyment: (initialData.enjoyment as any) || "none",
+      time: (initialData.time as any) || "none",
       parentId: initialData.parentId,
       createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
       completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
     } : {
       name: "",
       description: "",
-      priority: "medium",
-      ease: "medium",
-      enjoyment: "medium",
-      time: "medium",
+      priority: parentId ? "none" : "medium",
+      ease: parentId ? "none" : "medium",
+      enjoyment: parentId ? "none" : "medium",
+      time: parentId ? "none" : "medium",
       parentId: parentId || null,
       createdAt: new Date(),
     },
   });
 
+  const onSubmitWithNulls = (data: FormValues) => {
+    const formattedData = {
+      ...data,
+      priority: data.priority === "none" ? null : data.priority,
+      ease: data.ease === "none" ? null : data.ease,
+      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
+      time: data.time === "none" ? null : data.time,
+    };
+    onSubmit(formattedData as any);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmitWithNulls)} className="flex flex-col h-full space-y-6">
         <div className="flex-1 space-y-6">
           <FormField
             control={form.control}
@@ -94,20 +105,21 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{attr.label}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", getLevelStyle(field.value))}>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-card border-white/10 z-[200]">
-                        {attr.levels.map((level) => (
-                          <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
+                        <FormControl>
+                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", field.value ? getLevelStyle(field.value) : "text-muted-foreground")}>
+                            <SelectValue placeholder="Not set" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-card border-white/10 z-[200]">
+                          <SelectItem value="none" className="text-muted-foreground italic">Not set</SelectItem>
+                          {attr.levels.map((level) => (
+                            <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
+                              {level}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                   </FormItem>
                 )}
               />
@@ -140,7 +152,6 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                 <FormItem className="flex items-center justify-between gap-4">
                   <div>
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Date Created</FormLabel>
-                    <FormDescription className="text-[10px] text-muted-foreground/50">Manually adjust creation date</FormDescription>
                   </div>
                   <FormControl>
                     <Input 

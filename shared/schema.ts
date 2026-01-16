@@ -7,10 +7,10 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"), // For the "text box" details
-  priority: text("priority").notNull(), // low, medium, high
-  ease: text("ease").notNull(), // easy, medium, hard
-  enjoyment: text("enjoyment").notNull(), // low, medium, high
-  time: text("time").notNull(), // low, medium, high
+  priority: text("priority"), // low, medium, high
+  ease: text("ease"), // easy, medium, hard
+  enjoyment: text("enjoyment"), // low, medium, high
+  time: text("time"), // low, medium, high
   parentId: integer("parent_id"), // For nested tasks
   isCompleted: boolean("is_completed").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
