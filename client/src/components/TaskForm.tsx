@@ -1,17 +1,19 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { insertTaskSchema, type Task, PRIORITY_LEVELS, EASE_LEVELS, ENJOYMENT_LEVELS, TIME_LEVELS } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Plus, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTaskParentChain } from "@/hooks/use-tasks";
 
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
@@ -31,50 +33,104 @@ const LEVEL_STYLES: Record<string, string> = {
   medium: 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5',
   low: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
   easy: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+  none: 'text-muted-foreground italic',
 };
 
 const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
 
 export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
+  const parentChain = useTaskParentChain(parentId || undefined);
+
+  const extendedSchema = insertTaskSchema.extend({
+    priority: z.string().min(1, "Priority is required"),
+    ease: z.string().min(1, "Ease is required"),
+    enjoyment: z.string().min(1, "Enjoyment is required"),
+    time: z.string().min(1, "Time is required"),
+  });
+
+  const formSchemaToUse = parentId ? insertTaskSchema : extendedSchema;
+
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchemaToUse),
+    mode: "onChange",
     defaultValues: initialData ? {
       name: initialData.name,
       description: initialData.description || "",
-      priority: (initialData.priority as any) || "none",
-      ease: (initialData.ease as any) || "none",
-      enjoyment: (initialData.enjoyment as any) || "none",
-      time: (initialData.time as any) || "none",
+      priority: (initialData.priority as any) || (parentId ? "none" : ""),
+      ease: (initialData.ease as any) || (parentId ? "none" : ""),
+      enjoyment: (initialData.enjoyment as any) || (parentId ? "none" : ""),
+      time: (initialData.time as any) || (parentId ? "none" : ""),
       parentId: initialData.parentId,
       createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
       completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
     } : {
       name: "",
       description: "",
-      priority: parentId ? "none" : "medium",
-      ease: parentId ? "none" : "medium",
-      enjoyment: parentId ? "none" : "medium",
-      time: parentId ? "none" : "medium",
+      priority: parentId ? "none" : "",
+      ease: parentId ? "none" : "",
+      enjoyment: parentId ? "none" : "",
+      time: parentId ? "none" : "",
       parentId: parentId || null,
       createdAt: new Date(),
     },
   });
 
+  // Use useEffect to reset form when initialData or parentId changes
+  // to ensure "Add Subtask" dialog is clean.
+  useEffect(() => {
+    form.reset(initialData ? {
+      name: initialData.name,
+      description: initialData.description || "",
+      priority: (initialData.priority as any) || (parentId ? "none" : ""),
+      ease: (initialData.ease as any) || (parentId ? "none" : ""),
+      enjoyment: (initialData.enjoyment as any) || (parentId ? "none" : ""),
+      time: (initialData.time as any) || (parentId ? "none" : ""),
+      parentId: initialData.parentId,
+      createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
+      completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
+    } : {
+      name: "",
+      description: "",
+      priority: parentId ? "none" : "",
+      ease: parentId ? "none" : "",
+      enjoyment: parentId ? "none" : "",
+      time: parentId ? "none" : "",
+      parentId: parentId || null,
+      createdAt: new Date(),
+    });
+  }, [initialData, parentId, form]);
+
   const onSubmitWithNulls = (data: FormValues) => {
     const formattedData = {
       ...data,
-      priority: data.priority === "none" ? null : data.priority,
-      ease: data.ease === "none" ? null : data.ease,
-      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
-      time: data.time === "none" ? null : data.time,
+      priority: data.priority === "none" || data.priority === "" ? null : data.priority,
+      ease: data.ease === "none" || data.ease === "" ? null : data.ease,
+      enjoyment: data.enjoyment === "none" || data.enjoyment === "" ? null : data.enjoyment,
+      time: data.time === "none" || data.time === "" ? null : data.time,
     };
     onSubmit(formattedData as any);
   };
+
+  const isValid = form.formState.isValid;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitWithNulls)} className="flex flex-col h-full space-y-6">
         <div className="flex-1 space-y-6">
+          {parentChain.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap px-1 mb-2">
+              {parentChain.map((p, idx) => (
+                <div key={p.id} className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-secondary/10 px-2 py-0.5 rounded border border-white/5">
+                    {p.name}
+                  </span>
+                  {idx < parentChain.length - 1 && (
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/30" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <FormField
             control={form.control}
             name="name"
@@ -107,14 +163,14 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{attr.label}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
+                      <Select onValueChange={field.onChange} value={field.value || (parentId ? "none" : "")}>
                         <FormControl>
-                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", field.value ? getLevelStyle(field.value) : "text-muted-foreground")}>
-                            <SelectValue placeholder="Not set" />
+                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", (field.value && field.value !== "none") ? getLevelStyle(field.value) : "text-muted-foreground")}>
+                            <SelectValue placeholder={parentId ? "None" : "Select..."} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-card border-white/10 z-[200]">
-                          <SelectItem value="none" className="text-muted-foreground italic">Not set</SelectItem>
+                          {parentId && <SelectItem value="none" className="text-muted-foreground italic">None</SelectItem>}
                           {attr.levels.map((level) => (
                             <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
                               {level}
@@ -225,8 +281,8 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
           </Button>
           <Button 
             type="submit" 
-            disabled={isPending}
-            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold"
+            disabled={isPending || !isValid}
+            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initialData ? "Save" : "Create"}

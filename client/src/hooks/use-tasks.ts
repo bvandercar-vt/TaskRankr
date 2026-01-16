@@ -14,6 +14,28 @@ export function useTasks() {
   });
 }
 
+// Custom hook to get parent chain for a task
+export function useTaskParentChain(parentId?: number) {
+  const { data: tasks } = useTasks();
+  
+  if (!parentId || !tasks) return [];
+  
+  const chain: { id: number; name: string }[] = [];
+  let currentId: number | null | undefined = parentId;
+  
+  while (currentId) {
+    const parent = tasks.find(t => t.id === currentId);
+    if (parent) {
+      chain.unshift({ id: parent.id, name: parent.name });
+      currentId = parent.parentId;
+    } else {
+      break;
+    }
+  }
+  
+  return chain;
+}
+
 // Fetch single task
 export function useTask(id: number) {
   return useQuery({
