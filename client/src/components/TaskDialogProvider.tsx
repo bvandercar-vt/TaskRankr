@@ -126,7 +126,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col"
           >
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-50 px-4 py-3 border-b border-white/10 flex items-center justify-between">
+            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-[110] px-4 py-3 border-b border-white/10 flex items-center justify-between">
               <div className="flex-1 min-w-0 pr-2">
                 <h2 className="text-lg font-display font-bold tracking-tight truncate leading-tight">
                   {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
@@ -135,10 +135,15 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={closeDialog}
-                className="h-10 w-10 rounded-full hover:bg-white/10 shrink-0 relative z-[60] text-foreground"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  closeDialog();
+                }}
+                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 shrink-0 relative z-[120] text-foreground flex items-center justify-center"
+                data-testid="button-close-mobile-view"
               >
-                <X className="h-5 w-5 pointer-events-none" />
+                <X className="h-6 w-6 pointer-events-none" />
               </Button>
             </div>
             
