@@ -6,12 +6,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Loader2, Plus } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 
-// Frontend validation schema
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
 
@@ -24,41 +22,15 @@ interface TaskFormProps {
   onAddChild?: (parentId: number) => void;
 }
 
-const getPriorityStyle = (val: string) => {
-  switch (val) {
-    case 'high': return 'text-red-400 border-red-400/20 bg-red-400/5';
-    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
-    case 'low': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
-    default: return '';
-  }
+const LEVEL_STYLES: Record<string, string> = {
+  high: 'text-red-400 border-red-400/20 bg-red-400/5',
+  hard: 'text-red-400 border-red-400/20 bg-red-400/5',
+  medium: 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5',
+  low: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+  easy: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
 };
 
-const getEaseStyle = (val: string) => {
-  switch (val) {
-    case 'hard': return 'text-red-400 border-red-400/20 bg-red-400/5';
-    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
-    case 'easy': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
-    default: return '';
-  }
-};
-
-const getEnjoymentStyle = (val: string) => {
-  switch (val) {
-    case 'low': return 'text-red-400 border-red-400/20 bg-red-400/5';
-    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
-    case 'high': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
-    default: return '';
-  }
-};
-
-const getTimeStyle = (val: string) => {
-  switch (val) {
-    case 'high': return 'text-red-400 border-red-400/20 bg-red-400/5';
-    case 'medium': return 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5';
-    case 'low': return 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5';
-    default: return '';
-  }
-};
+const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
 
 export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
   const form = useForm<FormValues>({
@@ -84,176 +56,105 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
-        
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground/80 font-medium">Task Name</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="What needs to be done?" 
-                  className="bg-secondary/30 border-white/5 focus:border-primary/50 h-12 text-lg" 
-                  autoFocus={false}
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full space-y-6">
+        <div className="flex-1 space-y-6">
           <FormField
             control={form.control}
-            name="priority"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Priority</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getPriorityStyle(field.value))}>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-card border-white/10">
-                    {PRIORITY_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getPriorityStyle(level))}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel className="text-sm font-medium">Task Name</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Task name" 
+                    className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50" 
+                    {...field} 
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { name: 'priority', label: 'Priority', levels: PRIORITY_LEVELS },
+              { name: 'ease', label: 'Ease', levels: EASE_LEVELS },
+              { name: 'enjoyment', label: 'Enjoyment', levels: ENJOYMENT_LEVELS },
+              { name: 'time', label: 'Time', levels: TIME_LEVELS },
+            ].map((attr) => (
+              <FormField
+                key={attr.name}
+                control={form.control}
+                name={attr.name as any}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{attr.label}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", getLevelStyle(field.value))}>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-card border-white/10">
+                        {attr.levels.map((level) => (
+                          <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
+
           <FormField
             control={form.control}
-            name="ease"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Ease</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getEaseStyle(field.value))}>
-                      <SelectValue placeholder="Select ease" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-card border-white/10">
-                    {EASE_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getEaseStyle(level))}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
+                <FormLabel className="text-sm font-medium">Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Additional details..." 
+                    className="bg-secondary/20 border-white/5 min-h-[120px] resize-none focus-visible:ring-primary/50" 
+                    {...field} 
+                    value={field.value || ""}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="enjoyment"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Enjoyment</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getEnjoymentStyle(field.value))}>
-                      <SelectValue placeholder="Select enjoyment" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-card border-white/10">
-                    {ENJOYMENT_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getEnjoymentStyle(level))}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Time Estimate</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className={cn("bg-secondary/30 border-white/5 transition-colors capitalize font-bold", getTimeStyle(field.value))}>
-                      <SelectValue placeholder="Select time" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-card border-white/10">
-                    {TIME_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level} className={cn("capitalize font-bold", getTimeStyle(level))}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground/80 font-medium">Details</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Add extra context, sub-steps, or notes..." 
-                  className="bg-secondary/30 border-white/5 min-h-[120px] resize-none" 
-                  {...field} 
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {initialData && onAddChild && (
-          <div className="flex justify-start">
+          {initialData && onAddChild && (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="bg-secondary/20 border-white/5 hover:bg-white/5 text-muted-foreground hover:text-foreground"
+              className="w-full bg-secondary/10 border-white/5 hover:bg-secondary/20 h-10"
               onClick={() => onAddChild(initialData.id)}
             >
-              <Plus className="w-3 h-3 mr-2" />
-              Add Child Task
+              <Plus className="w-4 h-4 mr-2" />
+              Add Subtask
             </Button>
-          </div>
-        )}
+          )}
+        </div>
 
-        <DialogFooter>
-          <Button type="button" variant="ghost" onClick={onCancel} className="hover:bg-white/5">
+        <div className="sticky bottom-0 pt-4 pb-6 bg-background/80 backdrop-blur-sm mt-auto flex gap-3 border-t border-white/5">
+          <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 h-12">
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={isPending}
-            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-lg shadow-primary/20"
+            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? "Save Changes" : "Create Task"}
+            {initialData ? "Save" : "Create"}
           </Button>
-        </DialogFooter>
+        </div>
       </form>
     </Form>
   );

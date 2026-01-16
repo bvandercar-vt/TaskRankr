@@ -120,18 +120,17 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
+            initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col"
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
           >
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-[110] px-4 py-3 border-b border-white/10 flex items-center justify-between">
-              <div className="flex-1 min-w-0 pr-2">
-                <h2 className="text-lg font-display font-bold tracking-tight truncate leading-tight">
-                  {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
-                </h2>
-              </div>
+            {/* Header */}
+            <div className="h-16 shrink-0 bg-background/95 backdrop-blur-sm px-4 flex items-center justify-between border-b border-white/10 z-[110]">
+              <h2 className="text-xl font-bold tracking-tight truncate">
+                {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
+              </h2>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -140,14 +139,15 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                   e.stopPropagation();
                   closeDialog();
                 }}
-                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 shrink-0 relative z-[120] text-foreground flex items-center justify-center"
+                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground"
                 data-testid="button-close-mobile-view"
               >
                 <X className="h-6 w-6 pointer-events-none" />
               </Button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-4 pb-20">
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-4 pt-6">
               <TaskForm 
                 onSubmit={handleSubmit} 
                 isPending={isPending} 
