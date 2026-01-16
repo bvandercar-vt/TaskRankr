@@ -53,6 +53,12 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
     }, 300); // Wait for animation
   };
 
+  const handleMobileClick = (e: React.MouseEvent) => {
+    // This prevents the click from reaching any underlying elements
+    // but we don't call closeDialog here.
+    e.stopPropagation();
+  };
+
   const handleSubmit = (data: any) => {
     if (mode === 'create') {
       createTask.mutate({ ...data, parentId }, {
@@ -139,7 +145,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
                   e.stopPropagation();
                   closeDialog();
                 }}
-                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground touch-none"
+                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground"
                 data-testid="button-close-mobile-view"
               >
                 <X className="h-6 w-6 pointer-events-none" />
@@ -147,7 +153,10 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             </div>
             
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 pt-6 pb-20 pointer-events-auto touch-auto">
+            <div 
+              className="flex-1 overflow-y-auto px-4 pt-6 pb-20 pointer-events-auto"
+              onClick={handleMobileClick}
+            >
               <TaskForm 
                 onSubmit={handleSubmit} 
                 isPending={isPending} 
