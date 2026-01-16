@@ -1,17 +1,16 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type Task, PRIORITY_LEVELS, EASE_LEVELS, ENJOYMENT_LEVELS, TIME_LEVELS } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Plus, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTaskParentChain } from "@/hooks/use-tasks";
 
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
@@ -36,6 +35,8 @@ const LEVEL_STYLES: Record<string, string> = {
 const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
 
 export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
+  const parentChain = useTaskParentChain(parentId || undefined);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
@@ -51,10 +52,10 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
     } : {
       name: "",
       description: "",
-      priority: parentId ? "none" : "medium",
-      ease: parentId ? "none" : "medium",
-      enjoyment: parentId ? "none" : "medium",
-      time: parentId ? "none" : "medium",
+      priority: "none",
+      ease: "none",
+      enjoyment: "none",
+      time: "none",
       parentId: parentId || null,
       createdAt: new Date(),
     },
@@ -75,6 +76,20 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitWithNulls)} className="flex flex-col h-full space-y-6">
         <div className="flex-1 space-y-6">
+          {parentChain.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap px-1 mb-2">
+              {parentChain.map((p, idx) => (
+                <div key={p.id} className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-secondary/10 px-2 py-0.5 rounded border border-white/5">
+                    {p.name}
+                  </span>
+                  {idx < parentChain.length - 1 && (
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/30" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <FormField
             control={form.control}
             name="name"
