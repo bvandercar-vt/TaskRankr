@@ -143,14 +143,14 @@ export default function Home() {
           </div>
           
           {/* Column Sort Headers Aligned with Tags */}
-          <div className="flex items-center justify-end px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-[8px]">
+          <div className="flex items-center justify-end px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground gap-1 pr-[6px]">
             <Button
               variant={sortBy === 'priority' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setSortBy(sortBy === 'priority' ? 'none' : 'priority')}
               className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all",
-                sortBy === 'priority' ? "text-primary-foreground" : "hover:text-foreground"
+                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+                sortBy === 'priority' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               Priority
@@ -160,8 +160,8 @@ export default function Home() {
               size="sm"
               onClick={() => setSortBy(sortBy === 'ease' ? 'none' : 'ease')}
               className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all",
-                sortBy === 'ease' ? "text-primary-foreground" : "hover:text-foreground"
+                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+                sortBy === 'ease' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               Ease
@@ -171,8 +171,8 @@ export default function Home() {
               size="sm"
               onClick={() => setSortBy(sortBy === 'enjoyment' ? 'none' : 'enjoyment')}
               className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all",
-                sortBy === 'enjoyment' ? "text-primary-foreground" : "hover:text-foreground"
+                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+                sortBy === 'enjoyment' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               Enjoy
@@ -182,8 +182,8 @@ export default function Home() {
               size="sm"
               onClick={() => setSortBy(sortBy === 'time' ? 'none' : 'time')}
               className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all",
-                sortBy === 'time' ? "text-primary-foreground" : "hover:text-foreground"
+                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+                sortBy === 'time' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               Time
