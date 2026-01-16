@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useDeleteTask } from "@/hooks/use-tasks";
+import { useCompleteTask, useUncompleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import {
   AlertDialog,
@@ -22,6 +22,7 @@ import {
 interface TaskCardProps {
   task: TaskResponse;
   level?: number;
+  showRestore?: boolean;
 }
 
 // Color mapping helpers
@@ -61,13 +62,14 @@ const getTimeColor = (level: string) => {
   }
 };
 
-export function TaskCard({ task, level = 0 }: TaskCardProps) {
+export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-  const deleteTask = useDeleteTask();
+  const completeTask = useCompleteTask();
+  const uncompleteTask = useUncompleteTask();
   const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -80,7 +82,7 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     const duration = 800; // ms
 
     holdTimerRef.current = setTimeout(() => {
-      setShowDeleteConfirm(true);
+      setShowConfirm(true);
       setIsHolding(false);
     }, duration);
   };
@@ -96,9 +98,13 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
     };
   }, []);
 
-  const handleDelete = () => {
-    deleteTask.mutate(task.id);
-    setShowDeleteConfirm(false);
+  const handleAction = () => {
+    if (showRestore) {
+      uncompleteTask.mutate(task.id);
+    } else {
+      completeTask.mutate(task.id);
+    }
+    setShowConfirm(false);
   };
 
   return (
@@ -175,28 +181,34 @@ export function TaskCard({ task, level = 0 }: TaskCardProps) {
                 style={{ marginLeft: `${level * 16}px` }}
               />
               {task.subtasks?.map(subtask => (
-                <TaskCard key={subtask.id} task={subtask} level={level + 1} />
+                <TaskCard key={subtask.id} task={subtask} level={level + 1} showRestore={showRestore} />
               ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent className="bg-card border-white/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task?</AlertDialogTitle>
+            <AlertDialogTitle>{showRestore ? "Restore Task?" : "Complete Task?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{task.name}" and all of its subtasks.
+              {showRestore 
+                ? `Move "${task.name}" back to your active task list.`
+                : `Mark "${task.name}" as complete and move it to the completed list.`
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90 text-white"
+              onClick={handleAction}
+              className={showRestore 
+                ? "bg-primary hover:bg-primary/90 text-white"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white"
+              }
             >
-              Delete
+              {showRestore ? "Restore" : "Complete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

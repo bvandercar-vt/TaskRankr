@@ -96,7 +96,63 @@ export function useUpdateTask() {
   });
 }
 
-// Delete a task
+// Complete a task (mark as completed)
+export function useCompleteTask() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.tasks.update.path, { id });
+      const res = await fetch(url, {
+        method: api.tasks.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isCompleted: true }),
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to complete task");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      toast({ title: "Completed", description: "Task marked as complete." });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+}
+
+// Uncomplete a task (restore to active)
+export function useUncompleteTask() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.tasks.update.path, { id });
+      const res = await fetch(url, {
+        method: api.tasks.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isCompleted: false }),
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to restore task");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      toast({ title: "Restored", description: "Task moved back to active." });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+}
+
+// Delete a task (for actual deletion if ever needed)
 export function useDeleteTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
