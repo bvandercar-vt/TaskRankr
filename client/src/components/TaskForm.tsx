@@ -174,12 +174,20 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-card border-white/10" align="end">
+                    <PopoverContent className="w-auto p-0 bg-card border-white/10 z-[300]" align="end">
+                      <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
+                        Select Creation Date
+                      </div>
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          // We don't close automatically to allow checking the date, 
+                          // but the user can tap outside to close.
+                        }}
                         initialFocus
+                        className="rounded-md border-0"
                       />
                     </PopoverContent>
                   </Popover>
