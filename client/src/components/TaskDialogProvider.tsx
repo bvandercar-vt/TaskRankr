@@ -126,29 +126,9 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
           >
-            {/* Header */}
-            <div className="h-16 shrink-0 bg-background/95 backdrop-blur-sm px-4 flex items-center justify-between border-b border-white/10 z-[110] pointer-events-auto">
-              <h2 className="text-xl font-bold tracking-tight truncate">
-                {mode === 'create' ? (parentId ? 'New Subtask' : 'New Task') : 'Edit Task'}
-              </h2>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  closeDialog();
-                }}
-                className="h-12 w-12 -mr-2 rounded-full hover:bg-white/10 relative z-[120] flex items-center justify-center text-foreground"
-                data-testid="button-close-mobile-view"
-              >
-                <X className="h-6 w-6 pointer-events-none" />
-              </Button>
-            </div>
-            
             {/* Content */}
             <div 
-              className="flex-1 overflow-y-auto px-4 pt-6 pb-20 pointer-events-auto"
+              className="flex-1 overflow-y-auto px-4 pt-10"
             >
               <TaskForm 
                 onSubmit={handleSubmit} 
