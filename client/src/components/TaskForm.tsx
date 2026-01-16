@@ -84,6 +84,8 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
     onSubmit(formattedData as any);
   };
 
+  const isValid = form.formState.isValid;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmitWithNulls)} className="flex flex-col h-full space-y-6">
@@ -252,8 +254,8 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
           </Button>
           <Button 
             type="submit" 
-            disabled={isPending}
-            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold"
+            disabled={isPending || !isValid}
+            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initialData ? "Save" : "Create"}
