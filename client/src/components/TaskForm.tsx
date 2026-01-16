@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { insertTaskSchema, type Task, PRIORITY_LEVELS, EASE_LEVELS, ENJOYMENT_LEVELS, TIME_LEVELS } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
@@ -73,6 +74,31 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
       createdAt: new Date(),
     },
   });
+
+  // Use useEffect to reset form when initialData or parentId changes
+  // to ensure "Add Subtask" dialog is clean.
+  useEffect(() => {
+    form.reset(initialData ? {
+      name: initialData.name,
+      description: initialData.description || "",
+      priority: (initialData.priority as any) || (parentId ? "none" : ""),
+      ease: (initialData.ease as any) || (parentId ? "none" : ""),
+      enjoyment: (initialData.enjoyment as any) || (parentId ? "none" : ""),
+      time: (initialData.time as any) || (parentId ? "none" : ""),
+      parentId: initialData.parentId,
+      createdAt: initialData.createdAt ? new Date(initialData.createdAt) : new Date(),
+      completedAt: initialData.completedAt ? new Date(initialData.completedAt) : null,
+    } : {
+      name: "",
+      description: "",
+      priority: parentId ? "none" : "",
+      ease: parentId ? "none" : "",
+      enjoyment: parentId ? "none" : "",
+      time: parentId ? "none" : "",
+      parentId: parentId || null,
+      createdAt: new Date(),
+    });
+  }, [initialData, parentId, form]);
 
   const onSubmitWithNulls = (data: FormValues) => {
     const formattedData = {
