@@ -24,6 +24,7 @@ interface TaskCardProps {
   task: TaskResponse;
   level?: number;
   showRestore?: boolean;
+  showCompletedDate?: boolean;
 }
 
 // Color mapping helpers
@@ -63,7 +64,18 @@ const getTimeColor = (level: string) => {
   }
 };
 
-export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps) {
+// Format date helper
+const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
+  if (!dateValue) return null;
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+  });
+};
+
+export function TaskCard({ task, level = 0, showRestore = false, showCompletedDate = false }: TaskCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -161,26 +173,33 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
           </div>
 
           {/* Metadata Badges - Right Aligned Container */}
-          <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-            {task.priority && (
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
-                {task.priority}
-              </Badge>
-            )}
-            {task.ease && (
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEaseColor(task.ease))}>
-                {task.ease}
-              </Badge>
-            )}
-            {task.enjoyment && (
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEnjoymentColor(task.enjoyment))}>
-                {task.enjoyment}
-              </Badge>
-            )}
-            {task.time && (
-              <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getTimeColor(task.time))}>
-                {task.time}
-              </Badge>
+          <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
+            <div className="flex items-center gap-1 justify-end">
+              {task.priority && (
+                <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getPriorityColor(task.priority))}>
+                  {task.priority}
+                </Badge>
+              )}
+              {task.ease && (
+                <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEaseColor(task.ease))}>
+                  {task.ease}
+                </Badge>
+              )}
+              {task.enjoyment && (
+                <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getEnjoymentColor(task.enjoyment))}>
+                  {task.enjoyment}
+                </Badge>
+              )}
+              {task.time && (
+                <Badge variant="outline" className={cn("px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0", getTimeColor(task.time))}>
+                  {task.time}
+                </Badge>
+              )}
+            </div>
+            {showCompletedDate && task.completedAt && (
+              <span className="text-[10px] text-muted-foreground mt-0.5">
+                Completed {formatCompletedDate(task.completedAt)}
+              </span>
             )}
           </div>
         </div>
@@ -201,7 +220,7 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
                 style={{ marginLeft: `${level * 16}px` }}
               />
               {task.subtasks?.map(subtask => (
-                <TaskCard key={subtask.id} task={subtask} level={level + 1} showRestore={showRestore} />
+                <TaskCard key={subtask.id} task={subtask} level={level + 1} showRestore={showRestore} showCompletedDate={showCompletedDate} />
               ))}
             </div>
           </motion.div>

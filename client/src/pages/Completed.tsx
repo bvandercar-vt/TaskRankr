@@ -73,13 +73,29 @@ export default function Completed() {
           <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>
         </div>
 
+        {/* Column Headers */}
+        {completedTasks.length > 0 && (
+          <div className="hidden md:flex items-center gap-2 px-2 mb-2">
+            <div className="w-5 shrink-0" />
+            <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+              <div className="flex-1" />
+              <div className="flex items-center gap-1 shrink-0 w-[268px] pr-0">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Priority</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Ease</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Enjoy</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Time</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Task List Area */}
         <div className="space-y-1">
           {completedTasks.length === 0 ? (
             <EmptyState />
           ) : (
             completedTasks.map(task => (
-              <TaskCard key={task.id} task={task as TaskResponse} showRestore />
+              <TaskCard key={task.id} task={task as TaskResponse} showRestore showCompletedDate />
             ))
           )}
         </div>
