@@ -4,10 +4,7 @@ import { TaskResponse } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { 
-  Plus, Search, Menu, CheckCircle2,
-  LayoutList
-} from "lucide-react";
+import { Plus, Search, Menu, CheckCircle2, LayoutList } from "lucide-react";
 import { Input } from "@/components/ui/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
@@ -18,23 +15,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/menus/dropdown-menu";
 
-type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
+type SortOption = "none" | "priority" | "ease" | "enjoyment" | "time";
 
 const LEVEL_WEIGHTS: Record<string, number> = {
-  'highest': 5,
-  'high': 4,
-  'hard': 4,
-  'medium': 3,
-  'low': 2,
-  'easy': 2,
-  'lowest': 1
+  highest: 5,
+  high: 4,
+  hard: 4,
+  medium: 3,
+  low: 2,
+  easy: 2,
+  lowest: 1,
 };
 
-const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
-  'priority': 'desc',   // high first
-  'ease': 'asc',       // low (easy) first
-  'enjoyment': 'desc', // high first
-  'time': 'asc'        // low first
+const SORT_DIRECTIONS: Record<string, "asc" | "desc"> = {
+  priority: "desc", // high first
+  ease: "asc", // low (easy) first
+  enjoyment: "desc", // high first
+  time: "asc", // low first
 };
 
 export default function Home() {
@@ -42,14 +39,20 @@ export default function Home() {
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('priority');
+  const [sortBy, setSortBy] = useState<SortOption>("priority");
 
   // Recursive function to filter task tree
-  const filterAndSortTree = (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
+  const filterAndSortTree = (
+    nodes: TaskResponse[],
+    term: string,
+    sort: SortOption,
+  ): TaskResponse[] => {
     let result = nodes.reduce((acc: TaskResponse[], node) => {
       const matches = node.name.toLowerCase().includes(term.toLowerCase());
-      const filteredSubtasks = node.subtasks ? filterAndSortTree(node.subtasks, term, sort) : [];
-      
+      const filteredSubtasks = node.subtasks
+        ? filterAndSortTree(node.subtasks, term, sort)
+        : [];
+
       if (matches || filteredSubtasks.length > 0) {
         acc.push({ ...node, subtasks: filteredSubtasks });
       }
@@ -57,14 +60,16 @@ export default function Home() {
     }, []);
 
     // Apply normal sorting (in-progress tasks are hoisted separately)
-    if (sort !== 'none') {
+    if (sort !== "none") {
       result.sort((a, b) => {
-        const direction = SORT_DIRECTIONS[sort] || 'desc';
-        const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
-        const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
-        
+        const direction = SORT_DIRECTIONS[sort] || "desc";
+        const valA =
+          LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
+        const valB =
+          LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
+
         if (valA !== valB) {
-          return direction === 'desc' ? valB - valA : valA - valB;
+          return direction === "desc" ? valB - valA : valA - valB;
         }
 
         // Secondary sorts
@@ -75,22 +80,22 @@ export default function Home() {
         const jA = LEVEL_WEIGHTS[a.enjoyment as string] || 0;
         const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0;
 
-        if (sort === 'priority') {
+        if (sort === "priority") {
           if (eA !== eB) return eA - eB; // ease (asc: easy to hard)
           return jB - jA; // enjoyment (desc: high to low)
         }
-        
-        if (sort === 'ease') {
+
+        if (sort === "ease") {
           if (pA !== pB) return pB - pA; // priority (desc)
           return jB - jA; // enjoyment (desc)
         }
 
-        if (sort === 'enjoyment') {
+        if (sort === "enjoyment") {
           if (pA !== pB) return pB - pA; // priority (desc)
           return eA - eB; // ease (asc)
         }
 
-        if (sort === 'time') {
+        if (sort === "time") {
           if (pA !== pB) return pB - pA; // priority (desc)
           if (eA !== eB) return eA - eB; // ease (asc)
           return pB - pA; // priority (desc) - redundant but per request
@@ -107,33 +112,33 @@ export default function Home() {
   // Also extract in-progress child tasks to be displayed at top level
   const { taskTree, inProgressTasks } = useMemo(() => {
     if (!tasks) return { taskTree: [], inProgressTasks: [] };
-    
+
     // Filter out completed tasks first
-    const activeTasks = tasks.filter(task => !task.isCompleted);
-    
+    const activeTasks = tasks.filter((task) => !task.isCompleted);
+
     // Collect all in-progress tasks (including children) to display at top
     const inProgressTaskIds = new Set<number>();
     const inProgressList: TaskResponse[] = [];
-    
-    activeTasks.forEach(task => {
+
+    activeTasks.forEach((task) => {
       if (task.isInProgress) {
         inProgressTaskIds.add(task.id);
         inProgressList.push({ ...task, subtasks: [] });
       }
     });
-    
+
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
-    
-    activeTasks.forEach(task => {
+
+    activeTasks.forEach((task) => {
       // Skip in-progress tasks from the tree (they're hoisted to top)
       if (inProgressTaskIds.has(task.id)) return;
       nodes[task.id] = { ...task, subtasks: [] };
     });
 
-    activeTasks.forEach(task => {
+    activeTasks.forEach((task) => {
       if (inProgressTaskIds.has(task.id)) return;
-      
+
       // If parent is in progress, treat as root level
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
@@ -151,12 +156,12 @@ export default function Home() {
   const displayedTasks = useMemo(() => {
     if (!taskTree) return [];
     const sortedTree = filterAndSortTree(taskTree, search, sortBy);
-    
+
     // Filter in-progress tasks by search term too
-    const filteredInProgress = inProgressTasks.filter(task => 
-      task.name.toLowerCase().includes(search.toLowerCase())
+    const filteredInProgress = inProgressTasks.filter((task) =>
+      task.name.toLowerCase().includes(search.toLowerCase()),
     );
-    
+
     // Combine: in-progress tasks at top, then sorted tree
     return [...filteredInProgress, ...sortedTree];
   }, [taskTree, inProgressTasks, search, sortBy]);
@@ -189,12 +194,20 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10" data-testid="button-menu">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10"
+                  data-testid="button-menu"
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-card border-white/10 w-48">
-                <DropdownMenuItem 
+              <DropdownMenuContent
+                align="start"
+                className="bg-card border-white/10 w-48"
+              >
+                <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                 >
@@ -202,20 +215,23 @@ export default function Home() {
                   Search
                 </DropdownMenuItem>
                 <Link href="/completed">
-                  <DropdownMenuItem className="cursor-pointer" data-testid="menu-item-completed">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    data-testid="menu-item-completed"
+                  >
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             {/* Expandable Search */}
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
                 <Search className="h-4 w-4 shrink-0 text-primary" />
-                <Input 
-                  placeholder="Search..." 
+                <Input
+                  placeholder="Search..."
                   className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
                   autoFocus
                   value={search}
@@ -225,49 +241,57 @@ export default function Home() {
               </div>
             )}
           </div>
-          
+
           {/* Column Sort Headers Aligned with Tags */}
           <div className="flex items-center gap-1">
             <Button
-              variant={sortBy === 'priority' ? 'default' : 'ghost'}
+              variant={sortBy === "priority" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setSortBy('priority')}
+              onClick={() => setSortBy("priority")}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === 'priority' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                sortBy === "priority"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
               )}
             >
               Priority
             </Button>
             <Button
-              variant={sortBy === 'ease' ? 'default' : 'ghost'}
+              variant={sortBy === "ease" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setSortBy('ease')}
+              onClick={() => setSortBy("ease")}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === 'ease' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                sortBy === "ease"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
               )}
             >
               Ease
             </Button>
             <Button
-              variant={sortBy === 'enjoyment' ? 'default' : 'ghost'}
+              variant={sortBy === "enjoyment" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setSortBy('enjoyment')}
+              onClick={() => setSortBy("enjoyment")}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === 'enjoyment' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                sortBy === "enjoyment"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
               )}
             >
               Enjoy
             </Button>
             <Button
-              variant={sortBy === 'time' ? 'default' : 'ghost'}
+              variant={sortBy === "time" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setSortBy('time')}
+              onClick={() => setSortBy("time")}
               className={cn(
                 "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === 'time' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                sortBy === "time"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
               )}
             >
               Time
@@ -280,9 +304,7 @@ export default function Home() {
           {displayedTasks.length === 0 ? (
             <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
           ) : (
-            displayedTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
-            ))
+            displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}
         </div>
       </main>
@@ -300,17 +322,29 @@ export default function Home() {
   );
 }
 
-function EmptyState({ onAdd, isSearch }: { onAdd: () => void, isSearch: boolean }) {
+function EmptyState({
+  onAdd,
+  isSearch,
+}: {
+  onAdd: () => void;
+  isSearch: boolean;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
       <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-        {isSearch ? <Search className="w-8 h-8 text-muted-foreground" /> : <LayoutList className="w-8 h-8 text-muted-foreground" />}
+        {isSearch ? (
+          <Search className="w-8 h-8 text-muted-foreground" />
+        ) : (
+          <LayoutList className="w-8 h-8 text-muted-foreground" />
+        )}
       </div>
       <h3 className="text-xl font-medium text-foreground">
         {isSearch ? "No matching tasks found" : "Your list is empty"}
       </h3>
       <p className="text-muted-foreground max-w-sm">
-        {isSearch ? "Try adjusting your search terms." : "Start by adding your first task to get organized."}
+        {isSearch
+          ? "Try adjusting your search terms."
+          : "Start by adding your first task to get organized."}
       </p>
       {!isSearch && (
         <Button onClick={onAdd} variant="secondary" className="mt-4">
