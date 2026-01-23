@@ -9,7 +9,7 @@ import {
   ENJOYMENT_LEVELS,
   TIME_LEVELS,
 } from "@shared/schema";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/primitives/button";
 import {
   Form,
   FormControl,
@@ -18,16 +18,16 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/forms/form";
-import { Input } from "@/components/ui/forms/input";
-import { Textarea } from "@/components/ui/forms/textarea";
+} from "@/components/primitives/forms/form";
+import { Input } from "@/components/primitives/forms/input";
+import { Textarea } from "@/components/primitives/forms/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/forms/select";
+} from "@/components/primitives/forms/select";
 import {
   Loader2,
   Plus,
@@ -37,12 +37,12 @@ import {
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/forms/calendar";
+import { Calendar } from "@/components/primitives/forms/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/overlays/popover";
+} from "@/components/primitives/overlays/popover";
 import { useTaskParentChain } from "@/hooks/use-tasks";
 
 const formSchema = insertTaskSchema;

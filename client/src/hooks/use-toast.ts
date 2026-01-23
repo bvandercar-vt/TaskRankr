@@ -3,7 +3,7 @@ import * as React from "react"
 import type {
   ToastActionElement,
   ToastProps,
-} from "@/components/ui/overlays/toast"
+} from "@/components/primitives/overlays/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1500

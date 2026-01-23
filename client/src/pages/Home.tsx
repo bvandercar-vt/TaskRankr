@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
 import { TaskResponse } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { Plus, Search, Menu, CheckCircle2, LayoutList } from "lucide-react";
-import { Input } from "@/components/ui/forms/input";
+import { Input } from "@/components/primitives/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import {
@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/menus/dropdown-menu";
+} from "@/components/primitives/menus/dropdown-menu";
 
 type SortOption = "none" | "priority" | "ease" | "enjoyment" | "time";
 

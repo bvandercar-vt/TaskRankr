@@ -5,10 +5,10 @@ import {
   ChevronRight, ChevronDown, Trash2, X, Clock, StopCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/primitives/badge";
 import { useCompleteTask, useUncompleteTask, useDeleteTask, useToggleInProgress } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/primitives/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/overlays/alert-dialog";
+} from "@/components/primitives/overlays/alert-dialog";
 
 interface TaskCardProps {
   task: TaskResponse;
