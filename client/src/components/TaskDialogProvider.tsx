@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialogs/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/overlays/dialog";
 import { TaskForm } from "./TaskForm";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { Task } from "@shared/schema";

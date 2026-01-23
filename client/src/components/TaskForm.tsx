@@ -42,7 +42,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/dialogs/popover";
+} from "@/components/ui/overlays/popover";
 import { useTaskParentChain } from "@/hooks/use-tasks";
 
 const formSchema = insertTaskSchema;

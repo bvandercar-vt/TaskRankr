@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/dialogs/alert-dialog";
+} from "@/components/ui/overlays/alert-dialog";
 
 interface TaskCardProps {
   task: TaskResponse;
