@@ -1,4 +1,11 @@
-export const PRIORITY_STYLES: Record<string, string> = {
+import type { Priority, Ease, Enjoyment, Time } from "@shared/schema";
+
+type PriorityOrNone = Priority | "none";
+type EaseOrNone = Ease | "none";
+type EnjoymentOrNone = Enjoyment | "none";
+type TimeOrNone = Time | "none";
+
+export const PRIORITY_STYLES: Record<PriorityOrNone, string> = {
   highest: "text-red-700 bg-red-400/10 border-red-500/20",
   high: "text-red-400 bg-red-400/10 border-red-500/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
@@ -7,38 +14,40 @@ export const PRIORITY_STYLES: Record<string, string> = {
   none: "text-muted-foreground italic",
 };
 
-export const EASE_STYLES: Record<string, string> = {
+export const EASE_STYLES: Record<EaseOrNone, string> = {
   hard: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   easy: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   none: "text-muted-foreground italic",
 };
 
-export const ENJOYMENT_STYLES: Record<string, string> = {
+export const ENJOYMENT_STYLES: Record<EnjoymentOrNone, string> = {
   low: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   high: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   none: "text-muted-foreground italic",
 };
 
-export const TIME_STYLES: Record<string, string> = {
+export const TIME_STYLES: Record<TimeOrNone, string> = {
   high: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   none: "text-muted-foreground italic",
 };
 
-export const getPriorityStyle = (level: string | null | undefined): string =>
-  PRIORITY_STYLES[level || ""] || "text-slate-400";
+const DEFAULT_STYLE = "text-slate-400";
 
-export const getEaseStyle = (level: string | null | undefined): string =>
-  EASE_STYLES[level || ""] || "text-slate-400";
+export const getPriorityStyle = (level: Priority | null | undefined): string =>
+  level ? PRIORITY_STYLES[level] : DEFAULT_STYLE;
 
-export const getEnjoymentStyle = (level: string | null | undefined): string =>
-  ENJOYMENT_STYLES[level || ""] || "text-slate-400";
+export const getEaseStyle = (level: Ease | null | undefined): string =>
+  level ? EASE_STYLES[level] : DEFAULT_STYLE;
 
-export const getTimeStyle = (level: string | null | undefined): string =>
-  TIME_STYLES[level || ""] || "text-slate-400";
+export const getEnjoymentStyle = (level: Enjoyment | null | undefined): string =>
+  level ? ENJOYMENT_STYLES[level] : DEFAULT_STYLE;
+
+export const getTimeStyle = (level: Time | null | undefined): string =>
+  level ? TIME_STYLES[level] : DEFAULT_STYLE;
 
 export const getAttributeStyle = (
   field: "priority" | "ease" | "enjoyment" | "time",
@@ -46,14 +55,14 @@ export const getAttributeStyle = (
 ): string => {
   switch (field) {
     case "priority":
-      return getPriorityStyle(value);
+      return getPriorityStyle(value as Priority);
     case "ease":
-      return getEaseStyle(value);
+      return getEaseStyle(value as Ease);
     case "enjoyment":
-      return getEnjoymentStyle(value);
+      return getEnjoymentStyle(value as Enjoyment);
     case "time":
-      return getTimeStyle(value);
+      return getTimeStyle(value as Time);
     default:
-      return "text-slate-400";
+      return DEFAULT_STYLE;
   }
 };
