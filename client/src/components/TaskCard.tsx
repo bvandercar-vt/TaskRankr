@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import type { TaskResponse, Priority, Ease, Enjoyment, Time } from "@shared/schema";
+import type { TaskResponse, Priority, Ease, Enjoyment, Time, TaskSortField } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -29,12 +29,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/primitives/overlays/alert-dialog";
-import {
-  getPriorityStyle,
-  getEaseStyle,
-  getEnjoymentStyle,
-  getTimeStyle,
-} from "@/lib/taskStyles";
+import { getAttributeStyle } from "@/lib/taskStyles";
+
+interface TaskBadgeProps {
+  field: TaskSortField;
+  value: string | null | undefined;
+}
+
+function TaskBadge({ field, value }: TaskBadgeProps) {
+  if (!value) return null;
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
+        getAttributeStyle(field, value as Priority | Ease | Enjoyment | Time),
+      )}
+      data-testid={`badge-${field}-${value}`}
+    >
+      {value}
+    </Badge>
+  );
+}
 
 interface TaskCardProps {
   task: TaskResponse;
@@ -171,50 +187,10 @@ export function TaskCard({
           {/* Metadata Badges - Right Aligned Container */}
           <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {task.priority && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getPriorityStyle(task.priority as Priority),
-                  )}
-                >
-                  {task.priority}
-                </Badge>
-              )}
-              {task.ease && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEaseStyle(task.ease as Ease),
-                  )}
-                >
-                  {task.ease}
-                </Badge>
-              )}
-              {task.enjoyment && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEnjoymentStyle(task.enjoyment as Enjoyment),
-                  )}
-                >
-                  {task.enjoyment}
-                </Badge>
-              )}
-              {task.time && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getTimeStyle(task.time as Time),
-                  )}
-                >
-                  {task.time}
-                </Badge>
-              )}
+              <TaskBadge field="priority" value={task.priority} />
+              <TaskBadge field="ease" value={task.ease} />
+              <TaskBadge field="enjoyment" value={task.enjoyment} />
+              <TaskBadge field="time" value={task.time} />
             </div>
             {showCompletedDate && task.completedAt && (
               <span className="text-[10px] text-muted-foreground mt-0.5">
