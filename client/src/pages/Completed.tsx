@@ -75,11 +75,11 @@ export default function Completed() {
 
         {/* Column Headers */}
         {completedTasks.length > 0 && (
-          <div className="hidden md:flex items-center gap-2 px-2 mb-2">
+          <div className="flex items-center gap-2 px-2 mb-2">
             <div className="w-5 shrink-0" />
-            <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
-              <div className="flex-1" />
-              <div className="flex items-center gap-1 shrink-0 w-[268px] pr-0">
+            <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
+              <div className="flex-1 hidden md:block" />
+              <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
                 <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Priority</span>
                 <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Ease</span>
                 <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Enjoy</span>
