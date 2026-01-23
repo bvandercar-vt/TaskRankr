@@ -109,6 +109,8 @@ export const TaskForm = ({
         },
   });
 
+  // Use useEffect to reset form when initialData or parentId changes
+  // to ensure "Add Subtask" dialog is clean.
   useEffect(() => {
     form.reset(
       initialData
