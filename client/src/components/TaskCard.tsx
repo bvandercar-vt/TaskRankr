@@ -154,7 +154,9 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
               {task.name}
             </h3>
             {task.isInProgress && (
-              <Clock className="w-4 h-4 text-blue-400 shrink-0" />
+              <Badge variant="outline" className="px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0 text-blue-400 bg-blue-400/10 border-blue-400/20">
+                In Progress
+              </Badge>
             )}
           </div>
 
