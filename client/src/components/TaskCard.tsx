@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { TaskResponse } from "@shared/schema";
+import type { TaskResponse, Priority, Ease, Enjoyment, Time } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -176,7 +176,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getPriorityStyle(task.priority),
+                    getPriorityStyle(task.priority as Priority),
                   )}
                 >
                   {task.priority}
@@ -187,7 +187,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEaseStyle(task.ease),
+                    getEaseStyle(task.ease as Ease),
                   )}
                 >
                   {task.ease}
@@ -198,7 +198,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEnjoymentStyle(task.enjoyment),
+                    getEnjoymentStyle(task.enjoyment as Enjoyment),
                   )}
                 >
                   {task.enjoyment}
@@ -209,7 +209,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getTimeStyle(task.time),
+                    getTimeStyle(task.time as Time),
                   )}
                 >
                   {task.time}
