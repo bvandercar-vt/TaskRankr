@@ -150,12 +150,12 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center gap-2">
-            {task.isInProgress && (
-              <Clock className="w-4 h-4 text-blue-400 shrink-0" />
-            )}
             <h3 className="font-semibold truncate text-base text-foreground">
               {task.name}
             </h3>
+            {task.isInProgress && (
+              <Clock className="w-4 h-4 text-blue-400 shrink-0" />
+            )}
           </div>
 
           {/* Metadata Badges - Right Aligned Container */}
