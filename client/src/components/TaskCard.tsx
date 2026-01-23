@@ -1,15 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import type { TaskResponse } from "@shared/schema";
+import type { TaskResponse, TaskStatus } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
-import {
-  useCompleteTask,
-  useUncompleteTask,
-  useDeleteTask,
-  useToggleInProgress,
-} from "@/hooks/use-tasks";
+import { useSetTaskStatus, useDeleteTask } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { getAttributeStyle } from "@/lib/taskStyles";
 import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
@@ -65,16 +60,15 @@ export function TaskCard({
   const [isHolding, setIsHolding] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const completeTask = useCompleteTask();
-  const uncompleteTask = useUncompleteTask();
+  const setTaskStatus = useSetTaskStatus();
   const deleteTask = useDeleteTask();
-  const toggleInProgress = useToggleInProgress();
   const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+  const isInProgress = task.status === "in_progress";
+  const isPending = task.status === "pending";
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
-    // Prevent starting hold if clicking buttons
     if ((e.target as HTMLElement).closest("button")) return;
 
     setIsHolding(true);
@@ -97,12 +91,8 @@ export function TaskCard({
     };
   }, []);
 
-  const handleAction = () => {
-    if (showRestore) {
-      uncompleteTask.mutate(task.id);
-    } else {
-      completeTask.mutate(task.id);
-    }
+  const handleSetStatus = (status: TaskStatus) => {
+    setTaskStatus.mutate({ id: task.id, status });
     setShowConfirm(false);
   };
 
@@ -114,15 +104,15 @@ export function TaskCard({
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
-          task.isInProgress
+          isInProgress
             ? "border-blue-500/30 bg-blue-500/5"
-            : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
+            : isPending
+              ? "border-amber-500/30 bg-amber-500/5"
+              : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
         )}
         style={{ marginLeft: `${level * 16}px` }}
-        data-testid={
-          task.isInProgress ? `task-in-progress-${task.id}` : `task-${task.id}`
-        }
+        data-testid={`task-${task.status}-${task.id}`}
         onClick={() => openEditDialog(task)}
         onMouseDown={startHold}
         onMouseUp={cancelHold}
@@ -157,10 +147,16 @@ export function TaskCard({
             <h3 className="font-semibold truncate text-base text-foreground">
               {task.name}
             </h3>
-            {task.isInProgress && (
+            {isInProgress && (
               <TaskBadge
                 value="In Progress"
                 styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
+              />
+            )}
+            {isPending && (
+              <TaskBadge
+                value="Pending"
+                styleClass="text-amber-400 bg-amber-400/10 border-amber-400/20"
               />
             )}
           </div>
@@ -216,16 +212,8 @@ export function TaskCard({
         open={showConfirm}
         onOpenChange={setShowConfirm}
         taskName={task.name}
-        isInProgress={task.isInProgress}
-        showRestore={showRestore}
-        onToggleInProgress={() => {
-          toggleInProgress.mutate({
-            id: task.id,
-            isInProgress: !task.isInProgress,
-          });
-          setShowConfirm(false);
-        }}
-        onComplete={handleAction}
+        status={task.status}
+        onSetStatus={handleSetStatus}
         onDeleteClick={() => {
           setShowConfirm(false);
           setTimeout(() => setShowDeleteConfirm(true), 100);

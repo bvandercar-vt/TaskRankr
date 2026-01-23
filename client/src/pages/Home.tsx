@@ -115,63 +115,70 @@ export default function Home() {
     return result;
   };
 
-  // Build tree from flat list if backend sends flat list (exclude completed tasks)
-  // Also extract in-progress child tasks to be displayed at top level
-  const { taskTree, inProgressTasks } = useMemo(() => {
-    if (!tasks) return { taskTree: [], inProgressTasks: [] };
+  // Build tree from flat list, excluding completed tasks
+  // Also extract in-progress and pending tasks to be hoisted to top
+  const { taskTree, pinnedTasks } = useMemo(() => {
+    if (!tasks) return { taskTree: [], pinnedTasks: [] };
 
-    // Filter out completed tasks first
-    const activeTasks = tasks.filter((task) => !task.isCompleted);
+    // Filter out completed tasks
+    const activeTasks = tasks.filter((task) => task.status !== "completed");
 
-    // Collect all in-progress tasks (including children) to display at top
-    const inProgressTaskIds = new Set<number>();
+    // Collect pinned tasks (in_progress first, then pending) to display at top
+    const pinnedTaskIds = new Set<number>();
     const inProgressList: TaskResponse[] = [];
+    const pendingList: TaskResponse[] = [];
 
     activeTasks.forEach((task) => {
-      if (task.isInProgress) {
-        inProgressTaskIds.add(task.id);
+      if (task.status === "in_progress") {
+        pinnedTaskIds.add(task.id);
         inProgressList.push({ ...task, subtasks: [] } as TaskResponse);
+      } else if (task.status === "pending") {
+        pinnedTaskIds.add(task.id);
+        pendingList.push({ ...task, subtasks: [] } as TaskResponse);
       }
     });
+
+    // Pinned order: in_progress first, then pending
+    const pinnedList = [...inProgressList, ...pendingList];
 
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
 
     activeTasks.forEach((task) => {
-      // Skip in-progress tasks from the tree (they're hoisted to top)
-      if (inProgressTaskIds.has(task.id)) return;
+      // Skip pinned tasks from the tree (they're hoisted to top)
+      if (pinnedTaskIds.has(task.id)) return;
       nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
     });
 
     activeTasks.forEach((task) => {
-      if (inProgressTaskIds.has(task.id)) return;
+      if (pinnedTaskIds.has(task.id)) return;
 
-      // If parent is in progress, treat as root level
+      // If parent is pinned, treat as root level
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
-      } else if (!task.parentId || !inProgressTaskIds.has(task.parentId)) {
+      } else if (!task.parentId || !pinnedTaskIds.has(task.parentId)) {
         roots.push(nodes[task.id]);
       } else {
-        // Parent is in-progress, so this becomes a root
+        // Parent is pinned, so this becomes a root
         roots.push(nodes[task.id]);
       }
     });
 
-    return { taskTree: roots, inProgressTasks: inProgressList };
+    return { taskTree: roots, pinnedTasks: pinnedList };
   }, [tasks]);
 
   const displayedTasks = useMemo(() => {
     if (!taskTree) return [];
     const sortedTree = filterAndSortTree(taskTree, search, sortBy);
 
-    // Filter in-progress tasks by search term too
-    const filteredInProgress = inProgressTasks.filter((task) =>
+    // Filter pinned tasks by search term too
+    const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
     );
 
-    // Combine: in-progress tasks at top, then sorted tree
-    return [...filteredInProgress, ...sortedTree];
-  }, [taskTree, inProgressTasks, search, sortBy]);
+    // Combine: pinned tasks (in_progress + pending) at top, then sorted tree
+    return [...filteredPinned, ...sortedTree];
+  }, [taskTree, pinnedTasks, search, sortBy]);
 
   if (isLoading) {
     return (

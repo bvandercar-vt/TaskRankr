@@ -14,13 +14,13 @@ export default function Completed() {
     if (!tasks) return [];
     
     // Filter to completed tasks first
-    const completedOnly = tasks.filter(task => task.isCompleted);
+    const completedOnly = tasks.filter(task => task.status === "completed");
     
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
     
     completedOnly.forEach(task => {
-      nodes[task.id] = { ...task, subtasks: [] };
+      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
     });
 
     completedOnly.forEach(task => {
