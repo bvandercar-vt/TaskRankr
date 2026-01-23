@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { getAttributeStyle } from "@/lib/taskStyles";
 import { format } from "date-fns";
 import { Calendar } from "@/components/primitives/forms/calendar";
 import {
@@ -56,30 +57,6 @@ interface TaskFormProps {
   onCancel: () => void;
   onAddChild?: (parentId: number) => void;
 }
-
-const LEVEL_STYLES: Record<string, string> = {
-  highest: "text-red-600 border-red-600/20 bg-red-600/5",
-  high: "text-red-400 border-red-400/20 bg-red-400/5",
-  hard: "text-red-400 border-red-400/20 bg-red-400/5",
-  medium: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5",
-  low: "text-emerald-400 border-emerald-400/20 bg-emerald-400/5",
-  lowest: "text-emerald-600/60 border-emerald-600/10 bg-emerald-600/5",
-  easy: "text-emerald-400 border-emerald-400/20 bg-emerald-400/5",
-  none: "text-muted-foreground italic",
-};
-
-// Enjoyment is reversed: high = good (green), low = bad (red)
-const ENJOYMENT_STYLES: Record<string, string> = {
-  high: "text-emerald-400 border-emerald-400/20 bg-emerald-400/5",
-  medium: "text-yellow-400 border-yellow-400/20 bg-yellow-400/5",
-  low: "text-red-400 border-red-400/20 bg-red-400/5",
-  none: "text-muted-foreground italic",
-};
-
-const getLevelStyle = (val: string, field?: string) => {
-  if (field === "enjoyment") return ENJOYMENT_STYLES[val] || "";
-  return LEVEL_STYLES[val] || "";
-};
 
 export function TaskForm({
   onSubmit,
@@ -250,7 +227,7 @@ export function TaskForm({
                           className={cn(
                             "bg-secondary/20 border-white/5 capitalize font-semibold h-10",
                             field.value && field.value !== "none"
-                              ? getLevelStyle(field.value, attr.name)
+                              ? getAttributeStyle(attr.name as any, field.value)
                               : "text-muted-foreground",
                           )}
                         >
@@ -274,7 +251,7 @@ export function TaskForm({
                             value={level}
                             className={cn(
                               "capitalize font-semibold",
-                              getLevelStyle(level, attr.name),
+                              getAttributeStyle(attr.name as any, level),
                             )}
                           >
                             {level}
