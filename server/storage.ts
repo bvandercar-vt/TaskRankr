@@ -382,9 +382,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, updates: UpdateTaskRequest): Promise<Task> {
+    // First get the current task to check for in-progress state changes
+    const currentTask = await this.getTask(id);
+    if (!currentTask) {
+      throw new Error('Task not found');
+    }
+
+    // Handle in-progress time accumulation
+    let finalUpdates = { ...updates };
+    
+    if (updates.isInProgress !== undefined && updates.isInProgress !== currentTask.isInProgress) {
+      if (updates.isInProgress === true) {
+        // Starting in-progress: set the start time
+        finalUpdates.inProgressStartedAt = new Date();
+      } else if (updates.isInProgress === false && currentTask.inProgressStartedAt) {
+        // Stopping in-progress: calculate elapsed time and add to cumulative total
+        const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime();
+        finalUpdates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
+        finalUpdates.inProgressStartedAt = null;
+      }
+    }
+
+    // If completing a task that is in progress, stop the timer first
+    if (updates.isCompleted === true && currentTask.isInProgress && currentTask.inProgressStartedAt) {
+      const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime();
+      finalUpdates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
+      finalUpdates.isInProgress = false;
+      finalUpdates.inProgressStartedAt = null;
+    }
+
     const [task] = await db
       .update(tasks)
-      .set(updates)
+      .set(finalUpdates)
       .where(eq(tasks.id, id))
       .returning();
 
