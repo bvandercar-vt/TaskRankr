@@ -94,6 +94,7 @@ export function TaskForm({
           completedAt: initialData.completedAt
             ? new Date(initialData.completedAt)
             : null,
+          inProgressTime: initialData.inProgressTime || 0,
         }
       : {
           name: "",
@@ -104,6 +105,7 @@ export function TaskForm({
           time: parentId ? "none" : "",
           parentId: parentId || null,
           createdAt: new Date(),
+          inProgressTime: 0,
         },
   });
 
@@ -127,6 +129,7 @@ export function TaskForm({
             completedAt: initialData.completedAt
               ? new Date(initialData.completedAt)
               : null,
+            inProgressTime: initialData.inProgressTime || 0,
           }
         : {
             name: "",
@@ -137,6 +140,7 @@ export function TaskForm({
             time: parentId ? "none" : "",
             parentId: parentId || null,
             createdAt: new Date(),
+            inProgressTime: 0,
           },
     );
   }, [initialData, parentId, form]);
@@ -344,13 +348,54 @@ export function TaskForm({
               )}
             />
 
-            {initialData?.isCompleted && initialData?.completedAt && (
+            {initialData?.status === "completed" && initialData?.completedAt && (
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Date Completed
                 </div>
                 <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
                   {format(new Date(initialData.completedAt), "PPP p")}
+                </div>
+              </div>
+            )}
+
+            {initialData?.status === "completed" && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Time Spent
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    value={Math.floor((form.watch("inProgressTime") || 0) / 3600000)}
+                    onChange={(e) => {
+                      const hours = parseInt(e.target.value) || 0;
+                      const currentMs = form.getValues("inProgressTime") || 0;
+                      const currentMinutes = Math.floor((currentMs % 3600000) / 60000);
+                      form.setValue("inProgressTime", hours * 3600000 + currentMinutes * 60000);
+                    }}
+                    data-testid="input-time-hours"
+                  />
+                  <span className="text-xs text-muted-foreground">h</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="59"
+                    placeholder="0"
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    value={Math.floor(((form.watch("inProgressTime") || 0) % 3600000) / 60000)}
+                    onChange={(e) => {
+                      const minutes = Math.min(59, parseInt(e.target.value) || 0);
+                      const currentMs = form.getValues("inProgressTime") || 0;
+                      const currentHours = Math.floor(currentMs / 3600000);
+                      form.setValue("inProgressTime", currentHours * 3600000 + minutes * 60000);
+                    }}
+                    data-testid="input-time-minutes"
+                  />
+                  <span className="text-xs text-muted-foreground">m</span>
                 </div>
               </div>
             )}
