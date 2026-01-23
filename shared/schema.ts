@@ -76,10 +76,18 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   id: true,
 });
 
-export type Task = typeof tasks.$inferSelect;
+// Base type from Drizzle, then override attribute fields with enum types
+type TaskBase = typeof tasks.$inferSelect;
+export type Task = Omit<TaskBase, "priority" | "ease" | "enjoyment" | "time"> & {
+  priority: Priority | null;
+  ease: Ease | null;
+  enjoyment: Enjoyment | null;
+  time: Time | null;
+};
+
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Request/Response types
 export type CreateTaskRequest = InsertTask;
 export type UpdateTaskRequest = Partial<InsertTask>;
-export type TaskResponse = Task & { subtasks?: TaskResponse[] }; // Recursive for frontend convenience if needed
+export type TaskResponse = Task & { subtasks?: TaskResponse[] };
