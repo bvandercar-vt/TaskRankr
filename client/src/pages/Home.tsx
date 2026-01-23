@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/primitives/menus/dropdown-menu";
+} from "@/components/primitives/dropdown-menu";
 
 type SortOption = "none" | "priority" | "ease" | "enjoyment" | "time";
 
