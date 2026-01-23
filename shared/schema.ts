@@ -13,6 +13,9 @@ export const tasks = pgTable("tasks", {
   time: text("time"), // low, medium, high
   parentId: integer("parent_id"), // For nested tasks
   isCompleted: boolean("is_completed").default(false).notNull(),
+  isInProgress: boolean("is_in_progress").default(false).notNull(),
+  inProgressTime: integer("in_progress_time").default(0).notNull(), // Cumulative time in milliseconds
+  inProgressStartedAt: timestamp("in_progress_started_at"), // When current in-progress session started
   createdAt: timestamp("created_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
 });
@@ -38,6 +41,7 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   }),
   createdAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
+  inProgressStartedAt: z.coerce.date().optional().nullable(),
 }).omit({ 
   id: true, 
 });

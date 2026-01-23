@@ -69,7 +69,18 @@ Tasks have:
 - `priority`, `ease`, `enjoyment`, `time` (enum-like text: low/medium/high)
 - `parentId` (nullable, for nested task hierarchy)
 - `isCompleted` (boolean)
+- `isInProgress` (boolean) - tracks if task is currently being worked on
+- `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
+- `inProgressStartedAt` (timestamp) - when the current in-progress session started
 - `createdAt` (timestamp)
+- `completedAt` (timestamp)
+
+### In-Progress Feature
+- Tasks can be marked as "in progress" via the Task Status dialog (long-press on a task)
+- In-progress tasks are hoisted to the top of the task list, regardless of sorting
+- Time spent in-progress accumulates across sessions (4hrs + 2hrs = 6hrs total)
+- Completing an in-progress task automatically stops the timer and saves accumulated time
+- Visual indicators: blue border, clock icon, and the task appears at top of list
 
 ## External Dependencies
 

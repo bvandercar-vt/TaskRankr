@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, ChevronDown, Trash2, X
+  ChevronRight, ChevronDown, Trash2, X, Clock, StopCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useCompleteTask, useUncompleteTask, useDeleteTask } from "@/hooks/use-tasks";
+import { useCompleteTask, useUncompleteTask, useDeleteTask, useToggleInProgress } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,6 +73,7 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
   const completeTask = useCompleteTask();
   const uncompleteTask = useUncompleteTask();
   const deleteTask = useDeleteTask();
+  const toggleInProgress = useToggleInProgress();
   const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -117,11 +118,14 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200 select-none cursor-pointer",
-          "hover:bg-white/[0.02] hover:border-white/[0.05]",
+          "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
+          task.isInProgress 
+            ? "border-blue-500/30 bg-blue-500/5" 
+            : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform"
         )}
         style={{ marginLeft: `${level * 16}px` }}
+        data-testid={task.isInProgress ? `task-in-progress-${task.id}` : `task-${task.id}`}
         onClick={() => openEditDialog(task)}
         onMouseDown={startHold}
         onMouseUp={cancelHold}
@@ -145,10 +149,15 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
             <h3 className="font-semibold truncate text-base text-foreground">
               {task.name}
             </h3>
+            {task.isInProgress && (
+              <Badge variant="outline" className="px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0 text-blue-400 bg-blue-400/10 border-blue-400/20">
+                In Progress
+              </Badge>
+            )}
           </div>
 
           {/* Metadata Badges - Right Aligned Container */}
@@ -206,20 +215,50 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
             size="icon"
             className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={() => setShowConfirm(false)}
+            data-testid="button-close-status-dialog"
           >
             <X className="w-4 h-4" />
           </Button>
           <AlertDialogHeader>
-            <AlertDialogTitle>{showRestore ? "Restore Task?" : "Complete Task?"}</AlertDialogTitle>
+            <AlertDialogTitle>{showRestore ? "Restore Task?" : "Task Status"}</AlertDialogTitle>
             <AlertDialogDescription>
               {showRestore 
                 ? `Move "${task.name}" back to your active task list.`
-                : `Mark "${task.name}" as complete and move it to the completed list.`
+                : `Choose an action for "${task.name}"`
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <div className="flex flex-col gap-3 w-full">
+              {!showRestore && (
+                <Button
+                  onClick={() => {
+                    toggleInProgress.mutate({ id: task.id, isInProgress: !task.isInProgress });
+                    setShowConfirm(false);
+                  }}
+                  variant="outline"
+                  className={cn(
+                    "w-full h-11 text-base font-semibold gap-2",
+                    task.isInProgress 
+                      ? "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                      : "border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                  )}
+                  data-testid="button-toggle-in-progress"
+                >
+                  {task.isInProgress ? (
+                    <>
+                      <StopCircle className="w-4 h-4" />
+                      Remove from Progress
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-4 h-4" />
+                      Mark as In Progress
+                    </>
+                  )}
+                </Button>
+              )}
+              
               <AlertDialogAction 
                 onClick={handleAction}
                 className={cn(
@@ -228,6 +267,7 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
                     ? "bg-primary hover:bg-primary/90 text-white"
                     : "bg-emerald-600 hover:bg-emerald-700 text-white"
                 )}
+                data-testid="button-complete-task"
               >
                 {showRestore ? "Restore Task" : "Complete Task"}
               </AlertDialogAction>
@@ -241,6 +281,7 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
                     setShowConfirm(false);
                     setTimeout(() => setShowDeleteConfirm(true), 100);
                   }}
+                  data-testid="button-delete-task"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span className="text-xs font-medium">Delete Permanently</span>

@@ -198,3 +198,36 @@ export function useDeleteTask() {
     }
   });
 }
+
+// Toggle in-progress state
+export function useToggleInProgress() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, isInProgress }: { id: number; isInProgress: boolean }) => {
+      const url = buildUrl(api.tasks.update.path, { id });
+      const res = await fetch(url, {
+        method: api.tasks.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isInProgress }),
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to update task");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      toast({ 
+        title: variables.isInProgress ? "In Progress" : "Removed from Progress", 
+        description: variables.isInProgress 
+          ? "Task is now being tracked." 
+          : "Task is no longer being tracked."
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+}

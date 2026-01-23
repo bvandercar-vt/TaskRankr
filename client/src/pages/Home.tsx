@@ -54,9 +54,10 @@ export default function Home() {
       return acc;
     }, []);
 
+    // Apply normal sorting (in-progress tasks are hoisted separately)
     if (sort !== 'none') {
-      const direction = SORT_DIRECTIONS[sort] || 'desc';
       result.sort((a, b) => {
+        const direction = SORT_DIRECTIONS[sort] || 'desc';
         const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
         const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
         
@@ -101,34 +102,62 @@ export default function Home() {
   };
 
   // Build tree from flat list if backend sends flat list (exclude completed tasks)
-  const taskTree = useMemo(() => {
-    if (!tasks) return [];
+  // Also extract in-progress child tasks to be displayed at top level
+  const { taskTree, inProgressTasks } = useMemo(() => {
+    if (!tasks) return { taskTree: [], inProgressTasks: [] };
     
     // Filter out completed tasks first
     const activeTasks = tasks.filter(task => !task.isCompleted);
+    
+    // Collect all in-progress tasks (including children) to display at top
+    const inProgressTaskIds = new Set<number>();
+    const inProgressList: TaskResponse[] = [];
+    
+    activeTasks.forEach(task => {
+      if (task.isInProgress) {
+        inProgressTaskIds.add(task.id);
+        inProgressList.push({ ...task, subtasks: [] });
+      }
+    });
     
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
     
     activeTasks.forEach(task => {
+      // Skip in-progress tasks from the tree (they're hoisted to top)
+      if (inProgressTaskIds.has(task.id)) return;
       nodes[task.id] = { ...task, subtasks: [] };
     });
 
     activeTasks.forEach(task => {
+      if (inProgressTaskIds.has(task.id)) return;
+      
+      // If parent is in progress, treat as root level
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
+      } else if (!task.parentId || !inProgressTaskIds.has(task.parentId)) {
+        roots.push(nodes[task.id]);
       } else {
+        // Parent is in-progress, so this becomes a root
         roots.push(nodes[task.id]);
       }
     });
 
-    return roots;
+    return { taskTree: roots, inProgressTasks: inProgressList };
   }, [tasks]);
 
   const displayedTasks = useMemo(() => {
     if (!taskTree) return [];
-    return filterAndSortTree(taskTree, search, sortBy);
-  }, [taskTree, search, sortBy]);
+    const sortedTree = filterAndSortTree(taskTree, search, sortBy);
+    
+    // Filter in-progress tasks by search term too
+    const filteredInProgress = inProgressTasks.filter(task => 
+      task.name.toLowerCase().includes(search.toLowerCase())
+    );
+    
+    // Combine: in-progress tasks at top, then sorted tree
+    return [...filteredInProgress, ...sortedTree];
+  }, [taskTree, inProgressTasks, search, sortBy]);
 
   if (isLoading) {
     return (
