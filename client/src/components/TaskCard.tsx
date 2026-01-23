@@ -5,7 +5,7 @@ import {
   ChevronRight, ChevronDown, Trash2, X, Clock, StopCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/data-display/badge";
 import { useCompleteTask, useUncompleteTask, useDeleteTask, useToggleInProgress } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/dialogs/alert-dialog";
 
 interface TaskCardProps {
   task: TaskResponse;
