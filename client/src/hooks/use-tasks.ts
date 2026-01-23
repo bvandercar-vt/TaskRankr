@@ -217,14 +217,8 @@ export function useToggleInProgress() {
       if (!res.ok) throw new Error("Failed to update task");
       return res.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      toast({ 
-        title: variables.isInProgress ? "In Progress" : "Removed from Progress", 
-        description: variables.isInProgress 
-          ? "Task is now being tracked." 
-          : "Task is no longer being tracked."
-      });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
