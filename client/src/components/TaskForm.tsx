@@ -199,16 +199,22 @@ export function TaskForm({
           />
 
           <div className="grid grid-cols-2 gap-4">
-            {[
-              { name: "priority", label: "Priority", levels: PRIORITY_LEVELS },
-              { name: "ease", label: "Ease", levels: EASE_LEVELS },
-              {
-                name: "enjoyment",
-                label: "Enjoyment",
-                levels: ENJOYMENT_LEVELS,
-              },
-              { name: "time", label: "Time", levels: TIME_LEVELS },
-            ].map((attr) => (
+            {(
+              [
+                {
+                  name: "priority",
+                  label: "Priority",
+                  levels: PRIORITY_LEVELS,
+                },
+                { name: "ease", label: "Ease", levels: EASE_LEVELS },
+                {
+                  name: "enjoyment",
+                  label: "Enjoyment",
+                  levels: ENJOYMENT_LEVELS,
+                },
+                { name: "time", label: "Time", levels: TIME_LEVELS },
+              ] as const
+            ).map((attr) => (
               <FormField
                 key={attr.name}
                 control={form.control}
@@ -227,7 +233,7 @@ export function TaskForm({
                           className={cn(
                             "bg-secondary/20 border-white/5 capitalize font-semibold h-10",
                             field.value && field.value !== "none"
-                              ? getAttributeStyle(attr.name as any, field.value)
+                              ? getAttributeStyle(attr.name, field.value)
                               : "text-muted-foreground",
                           )}
                         >
@@ -251,7 +257,7 @@ export function TaskForm({
                             value={level}
                             className={cn(
                               "capitalize font-semibold",
-                              getAttributeStyle(attr.name as any, level),
+                              getAttributeStyle(attr.name, level),
                             )}
                           >
                             {level}
