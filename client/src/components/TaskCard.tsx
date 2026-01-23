@@ -1,14 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { TaskResponse, Priority, Ease, Enjoyment, Time, TaskSortField } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronRight,
-  ChevronDown,
-  Trash2,
-  X,
-  Clock,
-  StopCircle,
-} from "lucide-react";
+import { ChevronRight, ChevronDown, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
 import {
@@ -19,17 +12,9 @@ import {
 } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { Button } from "@/components/primitives/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/primitives/overlays/alert-dialog";
 import { getAttributeStyle } from "@/lib/taskStyles";
+import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 interface TaskBadgeProps {
   field: TaskSortField;
@@ -229,121 +214,35 @@ export function TaskCard({
         )}
       </AnimatePresence>
 
-      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-card border-white/10 pt-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
-            onClick={() => setShowConfirm(false)}
-            data-testid="button-close-status-dialog"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {showRestore ? "Restore Task?" : "Task Status"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {showRestore
-                ? `Move "${task.name}" back to your active task list.`
-                : `Choose an action for "${task.name}"`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <div className="flex flex-col gap-3 w-full">
-              {!showRestore && (
-                <Button
-                  onClick={() => {
-                    toggleInProgress.mutate({
-                      id: task.id,
-                      isInProgress: !task.isInProgress,
-                    });
-                    setShowConfirm(false);
-                  }}
-                  variant="outline"
-                  className={cn(
-                    "w-full h-11 text-base font-semibold gap-2",
-                    task.isInProgress
-                      ? "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                      : "border-blue-500/50 text-blue-400 hover:bg-blue-500/10",
-                  )}
-                  data-testid="button-toggle-in-progress"
-                >
-                  {task.isInProgress ? (
-                    <>
-                      <StopCircle className="w-4 h-4" />
-                      Remove from Progress
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-4 h-4" />
-                      Mark as In Progress
-                    </>
-                  )}
-                </Button>
-              )}
+      <ChangeStatusDialog
+        open={showConfirm}
+        onOpenChange={setShowConfirm}
+        taskName={task.name}
+        isInProgress={task.isInProgress}
+        showRestore={showRestore}
+        onToggleInProgress={() => {
+          toggleInProgress.mutate({
+            id: task.id,
+            isInProgress: !task.isInProgress,
+          });
+          setShowConfirm(false);
+        }}
+        onComplete={handleAction}
+        onDeleteClick={() => {
+          setShowConfirm(false);
+          setTimeout(() => setShowDeleteConfirm(true), 100);
+        }}
+      />
 
-              <AlertDialogAction
-                onClick={handleAction}
-                className={cn(
-                  "w-full h-11 text-base font-semibold",
-                  showRestore
-                    ? "bg-primary hover:bg-primary/90 text-white"
-                    : "bg-emerald-600 hover:bg-emerald-700 text-white",
-                )}
-                data-testid="button-complete-task"
-              >
-                {showRestore ? "Restore Task" : "Complete Task"}
-              </AlertDialogAction>
-
-              <div className="flex justify-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 h-8"
-                  onClick={() => {
-                    setShowConfirm(false);
-                    setTimeout(() => setShowDeleteConfirm(true), 100);
-                  }}
-                  data-testid="button-delete-task"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium">
-                    Delete Permanently
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="bg-card border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task Permanently?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete "{task.name}" and all its subtasks.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                deleteTask.mutate(task.id);
-                setShowDeleteConfirm(false);
-              }}
-              className="bg-destructive hover:bg-destructive/90 text-white"
-            >
-              Delete Permanently
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        taskName={task.name}
+        onConfirm={() => {
+          deleteTask.mutate(task.id);
+          setShowDeleteConfirm(false);
+        }}
+      />
     </div>
   );
 }
