@@ -118,11 +118,14 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-2 p-2 rounded-lg border border-transparent transition-all duration-200 select-none cursor-pointer",
-          "hover:bg-white/[0.02] hover:border-white/[0.05]",
+          "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
+          task.isInProgress 
+            ? "border-blue-500/30 bg-blue-500/5" 
+            : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform"
         )}
         style={{ marginLeft: `${level * 16}px` }}
+        data-testid={task.isInProgress ? `task-in-progress-${task.id}` : `task-${task.id}`}
         onClick={() => openEditDialog(task)}
         onMouseDown={startHold}
         onMouseUp={cancelHold}
@@ -146,7 +149,10 @@ export function TaskCard({ task, level = 0, showRestore = false }: TaskCardProps
 
         {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            {task.isInProgress && (
+              <Clock className="w-4 h-4 text-blue-400 shrink-0" />
+            )}
             <h3 className="font-semibold truncate text-base text-foreground">
               {task.name}
             </h3>
