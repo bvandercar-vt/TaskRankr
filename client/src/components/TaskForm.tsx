@@ -28,10 +28,12 @@ interface TaskFormProps {
 }
 
 const LEVEL_STYLES: Record<string, string> = {
+  highest: 'text-rose-500 border-rose-500/20 bg-rose-500/5',
   high: 'text-red-400 border-red-400/20 bg-red-400/5',
   hard: 'text-red-400 border-red-400/20 bg-red-400/5',
   medium: 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5',
   low: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+  lowest: 'text-slate-400 border-slate-400/20 bg-slate-400/5',
   easy: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
   none: 'text-muted-foreground italic',
 };

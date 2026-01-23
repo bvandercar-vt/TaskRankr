@@ -50,7 +50,7 @@ export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Enums for validation and UI
-export const PRIORITY_LEVELS = ["low", "medium", "high"] as const;
+export const PRIORITY_LEVELS = ["lowest", "low", "medium", "high", "highest"] as const;
 export const EASE_LEVELS = ["easy", "medium", "hard"] as const;
 export const ENJOYMENT_LEVELS = ["low", "medium", "high"] as const;
 export const TIME_LEVELS = ["low", "medium", "high"] as const;
