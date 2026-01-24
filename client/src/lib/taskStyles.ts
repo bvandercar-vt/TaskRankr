@@ -1,6 +1,6 @@
 export const PRIORITY_STYLES: Record<string, string> = {
-  highest: "text-red-700 bg-red-400/10 border-red-400/20",
-  high: "text-red-400 bg-red-400/10 border-red-400/20",
+  highest: "text-red-700 bg-red-400/10 border-red-500/20",
+  high: "text-red-400 bg-red-400/10 border-red-500/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   lowest: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
