@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
-import { TaskResponse } from "@shared/schema";
+import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/primitives/dropdown-menu";
 
-type SortOption = "none" | "priority" | "ease" | "enjoyment" | "time";
+type SortOption = "date" | TaskSortField;
 
 const LEVEL_WEIGHTS: Record<string, number> = {
   highest: 5,
@@ -28,6 +28,7 @@ const LEVEL_WEIGHTS: Record<string, number> = {
 };
 
 const SORT_DIRECTIONS: Record<string, "asc" | "desc"> = {
+  date: "desc", // newest first
   priority: "desc", // high first
   ease: "asc", // low (easy) first
   enjoyment: "desc", // high first
@@ -39,7 +40,7 @@ export default function Home() {
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("priority");
+  const [sortBy, setSortBy] = useState<SortOption>("date");
 
   // Recursive function to filter task tree
   const filterAndSortTree = (
@@ -60,7 +61,13 @@ export default function Home() {
     }, []);
 
     // Apply normal sorting (in-progress tasks are hoisted separately)
-    if (sort !== "none") {
+    if (sort === "date") {
+      result.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // newest first
+      });
+    } else {
       result.sort((a, b) => {
         const direction = SORT_DIRECTIONS[sort] || "desc";
         const valA =
@@ -244,6 +251,20 @@ export default function Home() {
 
           {/* Column Sort Headers Aligned with Tags */}
           <div className="flex items-center gap-1">
+            <Button
+              variant={sortBy === "date" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setSortBy("date")}
+              className={cn(
+                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+                sortBy === "date"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+              )}
+              data-testid="button-sort-date"
+            >
+              Date
+            </Button>
             <Button
               variant={sortBy === "priority" ? "default" : "ghost"}
               size="sm"

@@ -1,4 +1,10 @@
-import type { Priority, Ease, Enjoyment, Time } from "@shared/schema";
+import type {
+  Priority,
+  Ease,
+  Enjoyment,
+  Time,
+  TaskSortField,
+} from "@shared/schema";
 
 type OrNone<T extends string> = T | "none";
 type PriorityOrNone = OrNone<Priority>;
@@ -53,7 +59,7 @@ export const getTimeStyle = (level: Time | null | undefined): string =>
   level ? (TIME_STYLES[level] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
 export const getAttributeStyle = (
-  field: "priority" | "ease" | "enjoyment" | "time",
+  field: TaskSortField,
   value: string | null | undefined,
 ): string => {
   switch (field) {

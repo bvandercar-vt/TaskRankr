@@ -1,4 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -24,41 +31,52 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   parent: one(tasks, {
     fields: [tasks.parentId],
     references: [tasks.id],
-    relationName: "subtasks"
+    relationName: "subtasks",
   }),
   subtasks: many(tasks, {
-    relationName: "subtasks"
+    relationName: "subtasks",
   }),
 }));
 
 export const insertTaskSchema = createInsertSchema(tasks, {
   name: z.string().min(1, "Name is required"),
-  priority: z.string().nullable().superRefine((val, ctx) => {
-    if (val === null && !ctx.path.includes('parentId')) {
-      // Note: We can't easily check parentId here without a custom schema
-      // We will handle the root-level check in the form validation instead
-    }
-  }),
+  priority: z
+    .string()
+    .nullable()
+    .superRefine((val, ctx) => {
+      if (val === null && !ctx.path.includes("parentId")) {
+        // Note: We can't easily check parentId here without a custom schema
+        // We will handle the root-level check in the form validation instead
+      }
+    }),
   createdAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   inProgressStartedAt: z.coerce.date().optional().nullable(),
-}).omit({ 
-  id: true, 
+}).omit({
+  id: true,
 });
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Enums for validation and UI
-export const PRIORITY_LEVELS = ["lowest", "low", "medium", "high", "highest"] as const;
+export const PRIORITY_LEVELS = [
+  "lowest",
+  "low",
+  "medium",
+  "high",
+  "highest",
+] as const;
 export const EASE_LEVELS = ["easy", "medium", "hard"] as const;
 export const ENJOYMENT_LEVELS = ["low", "medium", "high"] as const;
 export const TIME_LEVELS = ["low", "medium", "high"] as const;
 
-export type Priority = typeof PRIORITY_LEVELS[number];
-export type Ease = typeof EASE_LEVELS[number];
-export type Enjoyment = typeof ENJOYMENT_LEVELS[number];
-export type Time = typeof TIME_LEVELS[number];
+export type Priority = (typeof PRIORITY_LEVELS)[number];
+export type Ease = (typeof EASE_LEVELS)[number];
+export type Enjoyment = (typeof ENJOYMENT_LEVELS)[number];
+export type Time = (typeof TIME_LEVELS)[number];
+
+export type TaskSortField = "priority" | "ease" | "enjoyment" | "time";
 
 // Request/Response types
 export type CreateTaskRequest = InsertTask;
