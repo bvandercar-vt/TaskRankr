@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
 import { TaskResponse } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/primitives/button";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 
