@@ -30,9 +30,11 @@ interface TaskCardProps {
 // Color mapping helpers
 const getPriorityColor = (level: string) => {
   switch (level) {
+    case 'highest': return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
     case 'high': return 'text-red-400 bg-red-400/10 border-red-400/20';
     case 'medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
     case 'low': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    case 'lowest': return 'text-slate-400 bg-slate-400/10 border-slate-400/20';
     default: return 'text-slate-400';
   }
 };
