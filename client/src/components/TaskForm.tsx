@@ -57,14 +57,14 @@ interface TaskFormProps {
   onAddChild?: (parentId: number) => void;
 }
 
-export function TaskForm({
+export const TaskForm = ({
   onSubmit,
   isPending,
   initialData,
   parentId,
   onCancel,
   onAddChild,
-}: TaskFormProps) {
+}: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId || undefined);
 
   const extendedSchema = insertTaskSchema.extend({
@@ -109,8 +109,6 @@ export function TaskForm({
         },
   });
 
-  // Use useEffect to reset form when initialData or parentId changes
-  // to ensure "Add Subtask" dialog is clean.
   useEffect(() => {
     form.reset(
       initialData
@@ -336,8 +334,6 @@ export function TaskForm({
                         selected={field.value}
                         onSelect={(date) => {
                           field.onChange(date);
-                          // We don't close automatically to allow checking the date,
-                          // but the user can tap outside to close.
                         }}
                         initialFocus
                         className="rounded-md border-0"
@@ -436,4 +432,4 @@ export function TaskForm({
       </form>
     </Form>
   );
-}
+};
