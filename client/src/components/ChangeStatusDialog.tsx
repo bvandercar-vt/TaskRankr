@@ -21,14 +21,14 @@ interface ChangeStatusDialogProps {
   onDeleteClick: () => void;
 }
 
-export function ChangeStatusDialog({
+export const ChangeStatusDialog = ({
   open,
   onOpenChange,
   taskName,
   status,
   onSetStatus,
   onDeleteClick,
-}: ChangeStatusDialogProps) {
+}: ChangeStatusDialogProps) => {
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
   const isPending = status === "pending";
@@ -124,4 +124,4 @@ export function ChangeStatusDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};

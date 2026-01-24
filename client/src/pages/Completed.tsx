@@ -6,14 +6,12 @@ import { Button } from "@/components/primitives/button";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 
-export default function Completed() {
+const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks();
 
-  // Build tree from flat list for completed tasks only, sorted by completion date
   const completedTasks = useMemo(() => {
     if (!tasks) return [];
     
-    // Filter to completed tasks first
     const completedOnly = tasks.filter(task => task.status === "completed");
     
     const nodes: Record<number, TaskResponse> = {};
@@ -31,7 +29,6 @@ export default function Completed() {
       }
     });
 
-    // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {
       const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
       const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;
@@ -63,7 +60,6 @@ export default function Completed() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-8 px-2">
           <Link href="/">
             <Button variant="ghost" size="icon" className="h-10 w-10" data-testid="button-back-home">
@@ -73,7 +69,6 @@ export default function Completed() {
           <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>
         </div>
 
-        {/* Column Headers */}
         {completedTasks.length > 0 && (
           <div className="flex items-center gap-2 px-2 mb-2">
             <div className="w-5 shrink-0" />
@@ -89,7 +84,6 @@ export default function Completed() {
           </div>
         )}
 
-        {/* Task List Area */}
         <div className="space-y-1">
           {completedTasks.length === 0 ? (
             <EmptyState />
@@ -102,20 +96,20 @@ export default function Completed() {
       </main>
     </div>
   );
-}
+};
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-      <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-        <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-      </div>
-      <h3 className="text-xl font-medium text-foreground">
-        No completed tasks yet
-      </h3>
-      <p className="text-muted-foreground max-w-sm">
-        Long-press on any task to mark it as complete.
-      </p>
+const EmptyState = () => (
+  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
+    <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
+      <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
     </div>
-  );
-}
+    <h3 className="text-xl font-medium text-foreground">
+      No completed tasks yet
+    </h3>
+    <p className="text-muted-foreground max-w-sm">
+      Long-press on any task to mark it as complete.
+    </p>
+  </div>
+);
+
+export default Completed;

@@ -8,27 +8,23 @@ import Home from "@/pages/Home";
 import Completed from "@/pages/Completed";
 import NotFound from "@/pages/not-found";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/completed" component={Completed} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+const Router = () => (
+  <Switch>
+    <Route path="/" component={Home} />
+    <Route path="/completed" component={Completed} />
+    <Route component={NotFound} />
+  </Switch>
+);
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <TaskDialogProvider>
-          <Toaster />
-          <Router />
-        </TaskDialogProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <TaskDialogProvider>
+        <Toaster />
+        <Router />
+      </TaskDialogProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

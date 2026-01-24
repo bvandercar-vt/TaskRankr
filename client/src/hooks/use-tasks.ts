@@ -3,8 +3,7 @@ import { api, buildUrl, type TaskInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 import type { TaskStatus } from "@shared/schema";
 
-// Fetch all tasks
-export function useTasks() {
+export const useTasks = () => {
   return useQuery({
     queryKey: [api.tasks.list.path],
     queryFn: async () => {
@@ -13,10 +12,9 @@ export function useTasks() {
       return api.tasks.list.responses[200].parse(await res.json());
     },
   });
-}
+};
 
-// Custom hook to get parent chain for a task
-export function useTaskParentChain(parentId?: number) {
+export const useTaskParentChain = (parentId?: number) => {
   const { data: tasks } = useTasks();
   
   if (!parentId || !tasks) return [];
@@ -35,10 +33,9 @@ export function useTaskParentChain(parentId?: number) {
   }
   
   return chain;
-}
+};
 
-// Fetch single task
-export function useTask(id: number) {
+export const useTask = (id: number) => {
   return useQuery({
     queryKey: [api.tasks.get.path, id],
     queryFn: async () => {
@@ -50,10 +47,9 @@ export function useTask(id: number) {
     },
     enabled: !!id,
   });
-}
+};
 
-// Create a new task
-export function useCreateTask() {
+export const useCreateTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -83,17 +79,15 @@ export function useCreateTask() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
-}
+};
 
-// Update a task
-export function useUpdateTask() {
+export const useUpdateTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: number } & Partial<TaskInput>) => {
       const url = buildUrl(api.tasks.update.path, { id });
-      // Validate with schema first to ensure partial is handled if needed, or trust TS
       const res = await fetch(url, {
         method: api.tasks.update.method,
         headers: { "Content-Type": "application/json" },
@@ -117,10 +111,9 @@ export function useUpdateTask() {
       toast({ title: "Update Failed", description: error.message, variant: "destructive" });
     }
   });
-}
+};
 
-// Set task status
-export function useSetTaskStatus() {
+export const useSetTaskStatus = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -151,10 +144,9 @@ export function useSetTaskStatus() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
-}
+};
 
-// Delete a task (for actual deletion if ever needed)
-export function useDeleteTask() {
+export const useDeleteTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -176,5 +168,4 @@ export function useDeleteTask() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
-}
-
+};

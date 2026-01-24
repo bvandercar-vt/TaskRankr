@@ -15,20 +15,18 @@ interface TaskBadgeProps {
   styleClass: string;
 }
 
-function TaskBadge({ value, styleClass }: TaskBadgeProps) {
-  return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-        styleClass,
-      )}
-      data-testid={`badge-${value}`}
-    >
-      {value}
-    </Badge>
-  );
-}
+const TaskBadge = ({ value, styleClass }: TaskBadgeProps) => (
+  <Badge
+    variant="outline"
+    className={cn(
+      "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
+      styleClass,
+    )}
+    data-testid={`badge-${value}`}
+  >
+    {value}
+  </Badge>
+);
 
 interface TaskCardProps {
   task: TaskResponse;
@@ -37,7 +35,6 @@ interface TaskCardProps {
   showCompletedDate?: boolean;
 }
 
-// Format date helper
 const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   if (!dateValue) return null;
   const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
@@ -48,7 +45,6 @@ const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   });
 };
 
-// Format duration helper (milliseconds to human-readable)
 const formatDuration = (ms: number) => {
   if (ms <= 0) return null;
   const totalSeconds = Math.floor(ms / 1000);
@@ -66,12 +62,12 @@ const formatDuration = (ms: number) => {
   }
 };
 
-export function TaskCard({
+export const TaskCard = ({
   task,
   level = 0,
   showRestore = false,
   showCompletedDate = false,
-}: TaskCardProps) {
+}: TaskCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -90,7 +86,7 @@ export function TaskCard({
     if ((e.target as HTMLElement).closest("button")) return;
 
     setIsHolding(true);
-    const duration = 800; // ms
+    const duration = 800;
 
     holdTimerRef.current = setTimeout(() => {
       setShowConfirm(true);
@@ -138,7 +134,6 @@ export function TaskCard({
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        {/* Expand/Collapse Toggle */}
         <div className="w-5 flex justify-center shrink-0">
           {hasSubtasks ? (
             <button
@@ -159,7 +154,6 @@ export function TaskCard({
           )}
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
             <h3 className="font-semibold truncate text-base text-foreground">
@@ -179,7 +173,6 @@ export function TaskCard({
             )}
           </div>
 
-          {/* Metadata Badges - Right Aligned Container */}
           <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
             <div className="flex items-center gap-1 justify-end">
               {(["priority", "ease", "enjoyment", "time"] as const).map((field) => {
@@ -207,7 +200,6 @@ export function TaskCard({
         </div>
       </motion.div>
 
-      {/* Subtasks */}
       <AnimatePresence>
         {isExpanded && hasSubtasks && (
           <motion.div
@@ -258,4 +250,4 @@ export function TaskCard({
       />
     </div>
   );
-}
+};

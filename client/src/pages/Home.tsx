@@ -28,21 +28,20 @@ const LEVEL_WEIGHTS: Record<string, number> = {
 };
 
 const SORT_DIRECTIONS: Record<string, "asc" | "desc"> = {
-  date: "desc", // newest first
-  priority: "desc", // high first
-  ease: "asc", // low (easy) first
-  enjoyment: "desc", // high first
-  time: "asc", // low first
+  date: "desc",
+  priority: "desc",
+  ease: "asc",
+  enjoyment: "desc",
+  time: "asc",
 };
 
-export default function Home() {
+const Home = () => {
   const { data: tasks, isLoading, error } = useTasks();
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("date");
 
-  // Recursive function to filter task tree
   const filterAndSortTree = (
     nodes: TaskResponse[],
     term: string,
@@ -60,12 +59,11 @@ export default function Home() {
       return acc;
     }, []);
 
-    // Apply normal sorting (in-progress tasks are hoisted separately)
     if (sort === "date") {
       result.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
-        return dateB - dateA; // newest first
+        return dateB - dateA;
       });
     } else {
       result.sort((a, b) => {
@@ -79,7 +77,6 @@ export default function Home() {
           return direction === "desc" ? valB - valA : valA - valB;
         }
 
-        // Secondary sorts
         const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
         const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
         const eA = LEVEL_WEIGHTS[a.ease as string] || 0;
@@ -88,24 +85,24 @@ export default function Home() {
         const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0;
 
         if (sort === "priority") {
-          if (eA !== eB) return eA - eB; // ease (asc: easy to hard)
-          return jB - jA; // enjoyment (desc: high to low)
+          if (eA !== eB) return eA - eB;
+          return jB - jA;
         }
 
         if (sort === "ease") {
-          if (pA !== pB) return pB - pA; // priority (desc)
-          return jB - jA; // enjoyment (desc)
+          if (pA !== pB) return pB - pA;
+          return jB - jA;
         }
 
         if (sort === "enjoyment") {
-          if (pA !== pB) return pB - pA; // priority (desc)
-          return eA - eB; // ease (asc)
+          if (pA !== pB) return pB - pA;
+          return eA - eB;
         }
 
         if (sort === "time") {
-          if (pA !== pB) return pB - pA; // priority (desc)
-          if (eA !== eB) return eA - eB; // ease (asc)
-          return pB - pA; // priority (desc) - redundant but per request
+          if (pA !== pB) return pB - pA;
+          if (eA !== eB) return eA - eB;
+          return pB - pA;
         }
 
         return 0;
@@ -115,15 +112,11 @@ export default function Home() {
     return result;
   };
 
-  // Build tree from flat list, excluding completed tasks
-  // Also extract in-progress and pending tasks to be hoisted to top
   const { taskTree, pinnedTasks } = useMemo(() => {
     if (!tasks) return { taskTree: [], pinnedTasks: [] };
 
-    // Filter out completed tasks
     const activeTasks = tasks.filter((task) => task.status !== "completed");
 
-    // Collect pinned tasks (in_progress first, then pending) to display at top
     const pinnedTaskIds = new Set<number>();
     const inProgressList: TaskResponse[] = [];
     const pendingList: TaskResponse[] = [];
@@ -138,14 +131,12 @@ export default function Home() {
       }
     });
 
-    // Pinned order: in_progress first, then pending
     const pinnedList = [...inProgressList, ...pendingList];
 
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
 
     activeTasks.forEach((task) => {
-      // Skip pinned tasks from the tree (they're hoisted to top)
       if (pinnedTaskIds.has(task.id)) return;
       nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
     });
@@ -153,13 +144,11 @@ export default function Home() {
     activeTasks.forEach((task) => {
       if (pinnedTaskIds.has(task.id)) return;
 
-      // If parent is pinned, treat as root level
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
       } else if (!task.parentId || !pinnedTaskIds.has(task.parentId)) {
         roots.push(nodes[task.id]);
       } else {
-        // Parent is pinned, so this becomes a root
         roots.push(nodes[task.id]);
       }
     });
@@ -171,12 +160,10 @@ export default function Home() {
     if (!taskTree) return [];
     const sortedTree = filterAndSortTree(taskTree, search, sortBy);
 
-    // Filter pinned tasks by search term too
     const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
     );
 
-    // Combine: pinned tasks (in_progress + pending) at top, then sorted tree
     return [...filteredPinned, ...sortedTree];
   }, [taskTree, pinnedTasks, search, sortBy]);
 
@@ -202,9 +189,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
-        {/* Controls Section */}
         <div className="flex items-center justify-between mb-4 px-2">
-          {/* Hamburger Menu */}
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -240,7 +225,6 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Expandable Search */}
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
                 <Search className="h-4 w-4 shrink-0 text-primary" />
@@ -256,7 +240,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Column Sort Headers Aligned with Tags */}
           <div className="flex items-center gap-1">
             <Button
               variant={sortBy === "date" ? "default" : "ghost"}
@@ -327,7 +310,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Task List Area */}
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (
             <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
@@ -337,7 +319,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Floating Action Button */}
       <Button
         onClick={() => openCreateDialog()}
         size="icon"
@@ -348,37 +329,37 @@ export default function Home() {
       </Button>
     </div>
   );
-}
+};
 
-function EmptyState({
+const EmptyState = ({
   onAdd,
   isSearch,
 }: {
   onAdd: () => void;
   isSearch: boolean;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-      <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-        {isSearch ? (
-          <Search className="w-8 h-8 text-muted-foreground" />
-        ) : (
-          <LayoutList className="w-8 h-8 text-muted-foreground" />
-        )}
-      </div>
-      <h3 className="text-xl font-medium text-foreground">
-        {isSearch ? "No matching tasks found" : "Your list is empty"}
-      </h3>
-      <p className="text-muted-foreground max-w-sm">
-        {isSearch
-          ? "Try adjusting your search terms."
-          : "Start by adding your first task to get organized."}
-      </p>
-      {!isSearch && (
-        <Button onClick={onAdd} variant="secondary" className="mt-4">
-          Create First Task
-        </Button>
+}) => (
+  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
+    <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
+      {isSearch ? (
+        <Search className="w-8 h-8 text-muted-foreground" />
+      ) : (
+        <LayoutList className="w-8 h-8 text-muted-foreground" />
       )}
     </div>
-  );
-}
+    <h3 className="text-xl font-medium text-foreground">
+      {isSearch ? "No matching tasks found" : "Your list is empty"}
+    </h3>
+    <p className="text-muted-foreground max-w-sm">
+      {isSearch
+        ? "Try adjusting your search terms."
+        : "Start by adding your first task to get organized."}
+    </p>
+    {!isSearch && (
+      <Button onClick={onAdd} variant="secondary" className="mt-4">
+        Create First Task
+      </Button>
+    )}
+  </div>
+);
+
+export default Home;
