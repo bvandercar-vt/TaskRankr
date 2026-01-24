@@ -79,13 +79,20 @@ export const useCreateTask = () => {
       // Auto-pin new task if setting is enabled
       const settings = getSettings();
       if (settings.autoPinNewTasks) {
-        const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id });
-        await fetch(pinUrl, {
-          method: api.tasks.setStatus.method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "pinned" }),
-          credentials: "include",
-        });
+        try {
+          const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id });
+          const pinRes = await fetch(pinUrl, {
+            method: api.tasks.setStatus.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "pinned" }),
+            credentials: "include",
+          });
+          if (!pinRes.ok) {
+            console.error("Failed to auto-pin task");
+          }
+        } catch (e) {
+          console.error("Failed to auto-pin task:", e);
+        }
       }
       
       return task;
