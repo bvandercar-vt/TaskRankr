@@ -1,4 +1,4 @@
-import { Clock, StopCircle, X } from "lucide-react";
+import { Clock, StopCircle, X, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/primitives/button";
 import {
@@ -10,15 +10,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/primitives/overlays/alert-dialog";
+import type { TaskStatus } from "@shared/schema";
 
 interface ChangeStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   taskName: string;
-  isInProgress: boolean;
-  showRestore: boolean;
-  onToggleInProgress: () => void;
-  onComplete: () => void;
+  status: TaskStatus;
+  onSetStatus: (status: TaskStatus) => void;
   onDeleteClick: () => void;
 }
 
@@ -26,12 +25,14 @@ export function ChangeStatusDialog({
   open,
   onOpenChange,
   taskName,
-  isInProgress,
-  showRestore,
-  onToggleInProgress,
-  onComplete,
+  status,
+  onSetStatus,
   onDeleteClick,
 }: ChangeStatusDialogProps) {
+  const isCompleted = status === "completed";
+  const isInProgress = status === "in_progress";
+  const isPending = status === "pending";
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-card border-white/10 pt-10">
@@ -46,53 +47,65 @@ export function ChangeStatusDialog({
         </Button>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {showRestore ? "Restore Task?" : "Task Status"}
+            {isCompleted ? "Restore Task?" : "Task Status"}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {showRestore
+            {isCompleted
               ? `Move "${taskName}" back to your active task list.`
               : `Choose an action for "${taskName}"`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <div className="flex flex-col gap-3 w-full">
-            {!showRestore && (
-              <Button
-                onClick={onToggleInProgress}
-                variant="outline"
-                className={cn(
-                  "w-full h-11 text-base font-semibold gap-2",
-                  isInProgress
-                    ? "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                    : "border-blue-500/50 text-blue-400 hover:bg-blue-500/10",
-                )}
-                data-testid="button-toggle-in-progress"
-              >
+            {!isCompleted && (
+              <>
                 {isInProgress ? (
-                  <>
+                  <Button
+                    onClick={() => onSetStatus("open")}
+                    variant="outline"
+                    className="w-full h-11 text-base font-semibold gap-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                    data-testid="button-stop-progress"
+                  >
                     <StopCircle className="w-4 h-4" />
-                    Remove from Progress
-                  </>
+                    Stop Working
+                  </Button>
                 ) : (
-                  <>
+                  <Button
+                    onClick={() => onSetStatus("in_progress")}
+                    variant="outline"
+                    className="w-full h-11 text-base font-semibold gap-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                    data-testid="button-start-progress"
+                  >
                     <Clock className="w-4 h-4" />
-                    Mark as In Progress
-                  </>
+                    Start Working
+                  </Button>
                 )}
-              </Button>
+
+                {isPending && (
+                  <Button
+                    onClick={() => onSetStatus("open")}
+                    variant="outline"
+                    className="w-full h-11 text-base font-semibold gap-2 border-muted-foreground/50 text-muted-foreground hover:bg-muted/10"
+                    data-testid="button-remove-pending"
+                  >
+                    <Pause className="w-4 h-4" />
+                    Remove from Pending
+                  </Button>
+                )}
+              </>
             )}
 
             <AlertDialogAction
-              onClick={onComplete}
+              onClick={() => onSetStatus(isCompleted ? "open" : "completed")}
               className={cn(
                 "w-full h-11 text-base font-semibold",
-                showRestore
+                isCompleted
                   ? "bg-primary hover:bg-primary/90 text-white"
                   : "bg-emerald-600 hover:bg-emerald-700 text-white",
               )}
               data-testid="button-complete-task"
             >
-              {showRestore ? "Restore Task" : "Complete Task"}
+              {isCompleted ? "Restore Task" : "Complete Task"}
             </AlertDialogAction>
 
             <div className="flex justify-center">
