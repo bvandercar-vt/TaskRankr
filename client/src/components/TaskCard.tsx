@@ -168,18 +168,12 @@ export function TaskCard({
           {/* Metadata Badges - Right Aligned Container */}
           <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {task.priority && (
-                <TaskBadge value={task.priority} styleClass={getAttributeStyle("priority", task.priority)} />
-              )}
-              {task.ease && (
-                <TaskBadge value={task.ease} styleClass={getAttributeStyle("ease", task.ease)} />
-              )}
-              {task.enjoyment && (
-                <TaskBadge value={task.enjoyment} styleClass={getAttributeStyle("enjoyment", task.enjoyment)} />
-              )}
-              {task.time && (
-                <TaskBadge value={task.time} styleClass={getAttributeStyle("time", task.time)} />
-              )}
+              {(["priority", "ease", "enjoyment", "time"] as const).map((field) => {
+                const value = task[field];
+                return value ? (
+                  <TaskBadge key={field} value={value} styleClass={getAttributeStyle(field, value)} />
+                ) : null;
+              })}
             </div>
             {showCompletedDate && task.completedAt && (
               <span className="text-[10px] text-muted-foreground mt-0.5">
