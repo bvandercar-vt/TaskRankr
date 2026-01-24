@@ -21,11 +21,13 @@ import {
 type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
 
 const LEVEL_WEIGHTS: Record<string, number> = {
-  'high': 3,
-  'hard': 3,
-  'medium': 2,
-  'low': 1,
-  'easy': 1
+  'highest': 5,
+  'high': 4,
+  'hard': 4,
+  'medium': 3,
+  'low': 2,
+  'easy': 2,
+  'lowest': 1
 };
 
 const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
