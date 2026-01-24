@@ -1,12 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import type {
-  TaskResponse,
-  Priority,
-  Ease,
-  Enjoyment,
-  Time,
-  TaskSortField,
-} from "@shared/schema";
+import type { TaskResponse } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,26 +16,21 @@ import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 interface TaskBadgeProps {
-  field?: TaskSortField;
-  value?: string | null;
-  label?: string;
-  styleClass?: string;
+  value: string;
+  styleClass: string;
 }
 
-function TaskBadge({ field, value, label, styleClass }: TaskBadgeProps) {
-  if (!value && !label) return null;
-  const displayText = label || value;
-  const style = styleClass || (field && value ? getAttributeStyle(field, value as Priority | Ease | Enjoyment | Time) : "");
+function TaskBadge({ value, styleClass }: TaskBadgeProps) {
   return (
     <Badge
       variant="outline"
       className={cn(
         "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-        style,
+        styleClass,
       )}
-      data-testid={`badge-${field || "custom"}-${value || label}`}
+      data-testid={`badge-${value}`}
     >
-      {displayText}
+      {value}
     </Badge>
   );
 }
@@ -171,7 +159,7 @@ export function TaskCard({
             </h3>
             {task.isInProgress && (
               <TaskBadge
-                label="In Progress"
+                value="In Progress"
                 styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
               />
             )}
@@ -180,10 +168,18 @@ export function TaskCard({
           {/* Metadata Badges - Right Aligned Container */}
           <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              <TaskBadge field="priority" value={task.priority} />
-              <TaskBadge field="ease" value={task.ease} />
-              <TaskBadge field="enjoyment" value={task.enjoyment} />
-              <TaskBadge field="time" value={task.time} />
+              {task.priority && (
+                <TaskBadge value={task.priority} styleClass={getAttributeStyle("priority", task.priority)} />
+              )}
+              {task.ease && (
+                <TaskBadge value={task.ease} styleClass={getAttributeStyle("ease", task.ease)} />
+              )}
+              {task.enjoyment && (
+                <TaskBadge value={task.enjoyment} styleClass={getAttributeStyle("enjoyment", task.enjoyment)} />
+              )}
+              {task.time && (
+                <TaskBadge value={task.time} styleClass={getAttributeStyle("time", task.time)} />
+              )}
             </div>
             {showCompletedDate && task.completedAt && (
               <span className="text-[10px] text-muted-foreground mt-0.5">
