@@ -37,17 +37,17 @@ export const TIME_STYLES: Record<TimeOrNone, string> = {
 
 const DEFAULT_STYLE = "text-slate-400";
 
-export const getPriorityStyle = (level: Priority | null | undefined): string =>
-  level ? PRIORITY_STYLES[level] : DEFAULT_STYLE;
+export const getPriorityStyle = (level: Priority | string | null | undefined): string =>
+  level ? (PRIORITY_STYLES[level as Priority] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
-export const getEaseStyle = (level: Ease | null | undefined): string =>
-  level ? EASE_STYLES[level] : DEFAULT_STYLE;
+export const getEaseStyle = (level: Ease | string | null | undefined): string =>
+  level ? (EASE_STYLES[level as Ease] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
-export const getEnjoymentStyle = (level: Enjoyment | null | undefined): string =>
-  level ? ENJOYMENT_STYLES[level] : DEFAULT_STYLE;
+export const getEnjoymentStyle = (level: Enjoyment | string | null | undefined): string =>
+  level ? (ENJOYMENT_STYLES[level as Enjoyment] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
-export const getTimeStyle = (level: Time | null | undefined): string =>
-  level ? TIME_STYLES[level] : DEFAULT_STYLE;
+export const getTimeStyle = (level: Time | string | null | undefined): string =>
+  level ? (TIME_STYLES[level as Time] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
 export const getAttributeStyle = (
   field: "priority" | "ease" | "enjoyment" | "time",
