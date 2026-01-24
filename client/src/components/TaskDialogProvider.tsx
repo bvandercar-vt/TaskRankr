@@ -27,12 +27,12 @@ const TaskDialogContext = createContext<TaskDialogContextType | undefined>(
   undefined,
 );
 
-export function useTaskDialog() {
+export const useTaskDialog = () => {
   const context = useContext(TaskDialogContext);
   if (!context)
     throw new Error("useTaskDialog must be used within a TaskDialogProvider");
   return context;
-}
+};
 
 interface DialogProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ interface DialogProps {
   onAddChild: (pid: number) => void;
 }
 
-function DesktopDialog({
+const DesktopDialog = ({
   isOpen,
   setIsOpen,
   mode,
@@ -56,71 +56,34 @@ function DesktopDialog({
   onSubmit,
   onClose,
   onAddChild,
-}: DialogProps) {
-  return (
-    <div className="hidden sm:block">
-      <Dialog
-        open={isOpen && window.innerWidth >= 640}
-        onOpenChange={setIsOpen}
+}: DialogProps) => (
+  <div className="hidden sm:block">
+    <Dialog
+      open={isOpen && window.innerWidth >= 640}
+      onOpenChange={setIsOpen}
+    >
+      <DialogContent
+        className="w-full max-w-[600px] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogContent
-          className="w-full max-w-[600px] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-        >
-          <div className="flex flex-col">
-            <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-              <div className="flex-1">
-                <DialogTitle className="text-2xl font-display tracking-tight">
-                  {mode === "create"
-                    ? parentId
-                      ? "New Subtask"
-                      : "New Task"
-                    : "Edit Task"}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  {mode === "create"
-                    ? "Add a new item to your list."
-                    : "Update task details and properties."}
-                </DialogDescription>
-              </div>
-            </DialogHeader>
-            <div className="mt-4">
-              <TaskForm
-                onSubmit={onSubmit}
-                isPending={isPending}
-                initialData={activeTask}
-                parentId={parentId}
-                onCancel={onClose}
-                onAddChild={onAddChild}
-              />
+        <div className="flex flex-col">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl font-display tracking-tight">
+                {mode === "create"
+                  ? parentId
+                    ? "New Subtask"
+                    : "New Task"
+                  : "Edit Task"}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                {mode === "create"
+                  ? "Add a new item to your list."
+                  : "Update task details and properties."}
+              </DialogDescription>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function MobileDialog({
-  isOpen,
-  activeTask,
-  parentId,
-  isPending,
-  onSubmit,
-  onClose,
-  onAddChild,
-}: Omit<DialogProps, "setIsOpen" | "mode">) {
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: "100%" }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: "100%" }}
-          transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
-        >
-          <div className="flex-1 overflow-y-auto px-4 pt-10">
+          </DialogHeader>
+          <div className="mt-4">
             <TaskForm
               onSubmit={onSubmit}
               isPending={isPending}
@@ -130,13 +93,46 @@ function MobileDialog({
               onAddChild={onAddChild}
             />
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
+);
 
-export function TaskDialogProvider({ children }: { children: ReactNode }) {
+const MobileDialog = ({
+  isOpen,
+  activeTask,
+  parentId,
+  isPending,
+  onSubmit,
+  onClose,
+  onAddChild,
+}: Omit<DialogProps, "setIsOpen" | "mode">) => (
+  <AnimatePresence>
+    {isOpen && (
+      <motion.div
+        initial={{ opacity: 0, y: "100%" }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: "100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
+      >
+        <div className="flex-1 overflow-y-auto px-4 pt-10">
+          <TaskForm
+            onSubmit={onSubmit}
+            isPending={isPending}
+            initialData={activeTask}
+            parentId={parentId}
+            onCancel={onClose}
+            onAddChild={onAddChild}
+          />
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+export const TaskDialogProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [activeTask, setActiveTask] = useState<Task | undefined>(undefined);
@@ -169,10 +165,7 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
 
   const handleSubmit = (data: any) => {
     if (mode === "create") {
-      createTask.mutate(
-        { ...data, parentId },
-        { onSuccess: closeDialog },
-      );
+      createTask.mutate({ ...data, parentId }, { onSuccess: closeDialog });
     } else if (mode === "edit" && activeTask) {
       updateTask.mutate(
         { id: activeTask.id, ...data },
@@ -223,4 +216,4 @@ export function TaskDialogProvider({ children }: { children: ReactNode }) {
       />
     </TaskDialogContext.Provider>
   );
-}
+};
