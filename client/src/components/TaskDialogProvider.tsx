@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/primitives/overlays/dialog";
-import { TaskForm } from "./TaskForm";
+import { TaskForm, TaskFormProps } from "./TaskForm";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { Task } from "@shared/schema";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,16 +34,14 @@ export const useTaskDialog = () => {
   return context;
 };
 
-interface DialogProps {
+interface DialogProps
+  extends Pick<TaskFormProps, "isPending" | "onSubmit" | "onAddChild"> {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   mode: "create" | "edit";
   parentId?: number;
   activeTask?: Task;
-  isPending: boolean;
-  onSubmit: (data: any) => void;
   onClose: () => void;
-  onAddChild: (pid: number) => void;
 }
 
 const DesktopDialog = ({
