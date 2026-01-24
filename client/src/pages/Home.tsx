@@ -42,6 +42,7 @@ const Home = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("date");
 
+  // Recursive function to filter task tree
   const filterAndSortTree = (
     nodes: TaskResponse[],
     term: string,
@@ -59,6 +60,7 @@ const Home = () => {
       return acc;
     }, []);
 
+    // Apply normal sorting (in-progress tasks are hoisted separately)
     if (sort === "date") {
       result.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
@@ -77,6 +79,7 @@ const Home = () => {
           return direction === "desc" ? valB - valA : valA - valB;
         }
 
+        // Secondary sorts
         const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
         const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
         const eA = LEVEL_WEIGHTS[a.ease as string] || 0;
@@ -112,11 +115,15 @@ const Home = () => {
     return result;
   };
 
+  // Build tree from flat list, excluding completed tasks
+  // Also extract in-progress and pending tasks to be hoisted to top
   const { taskTree, pinnedTasks } = useMemo(() => {
     if (!tasks) return { taskTree: [], pinnedTasks: [] };
 
+    // Filter out completed tasks
     const activeTasks = tasks.filter((task) => task.status !== "completed");
 
+    // Collect pinned tasks (in_progress first, then pending) to display at top
     const pinnedTaskIds = new Set<number>();
     const inProgressList: TaskResponse[] = [];
     const pendingList: TaskResponse[] = [];
@@ -131,6 +138,7 @@ const Home = () => {
       }
     });
 
+    // Pinned order: in_progress first, then pending
     const pinnedList = [...inProgressList, ...pendingList];
 
     const nodes: Record<number, TaskResponse> = {};
@@ -144,11 +152,13 @@ const Home = () => {
     activeTasks.forEach((task) => {
       if (pinnedTaskIds.has(task.id)) return;
 
+      // If parent is pinned, treat as root level
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks?.push(nodes[task.id]);
       } else if (!task.parentId || !pinnedTaskIds.has(task.parentId)) {
         roots.push(nodes[task.id]);
       } else {
+        // Parent is pinned, so this becomes a root
         roots.push(nodes[task.id]);
       }
     });
@@ -160,10 +170,12 @@ const Home = () => {
     if (!taskTree) return [];
     const sortedTree = filterAndSortTree(taskTree, search, sortBy);
 
+    // Filter pinned tasks by search term too
     const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
     );
 
+    // Combine: pinned tasks (in_progress + pending) at top, then sorted tree
     return [...filteredPinned, ...sortedTree];
   }, [taskTree, pinnedTasks, search, sortBy]);
 

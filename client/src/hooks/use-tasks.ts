@@ -3,6 +3,7 @@ import { api, buildUrl, type TaskInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 import type { TaskStatus } from "@shared/schema";
 
+// Fetch all tasks
 export const useTasks = () => {
   return useQuery({
     queryKey: [api.tasks.list.path],
@@ -14,6 +15,7 @@ export const useTasks = () => {
   });
 };
 
+// Custom hook to get parent chain for a task
 export const useTaskParentChain = (parentId?: number) => {
   const { data: tasks } = useTasks();
   
@@ -35,6 +37,7 @@ export const useTaskParentChain = (parentId?: number) => {
   return chain;
 };
 
+// Fetch single task
 export const useTask = (id: number) => {
   return useQuery({
     queryKey: [api.tasks.get.path, id],
@@ -49,6 +52,7 @@ export const useTask = (id: number) => {
   });
 };
 
+// Create a new task
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -81,6 +85,7 @@ export const useCreateTask = () => {
   });
 };
 
+// Update a task
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -113,6 +118,7 @@ export const useUpdateTask = () => {
   });
 };
 
+// Set task status
 export const useSetTaskStatus = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -146,6 +152,7 @@ export const useSetTaskStatus = () => {
   });
 };
 
+// Delete a task (for actual deletion if ever needed)
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
