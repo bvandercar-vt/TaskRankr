@@ -48,7 +48,7 @@ import { useTaskParentChain } from "@/hooks/use-tasks";
 const formSchema = insertTaskSchema;
 type FormValues = z.infer<typeof formSchema>;
 
-interface TaskFormProps {
+export interface TaskFormProps {
   onSubmit: (data: FormValues) => void;
   isPending: boolean;
   initialData?: Task;
