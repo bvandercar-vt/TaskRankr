@@ -48,6 +48,24 @@ const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   });
 };
 
+// Format duration helper (milliseconds to human-readable)
+const formatDuration = (ms: number) => {
+  if (ms <= 0) return null;
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h`;
+  } else if (minutes > 0) {
+    return `${minutes}m`;
+  } else {
+    return `${totalSeconds}s`;
+  }
+};
+
 export function TaskCard({
   task,
   level = 0,
@@ -171,10 +189,19 @@ export function TaskCard({
                 ) : null;
               })}
             </div>
-            {showCompletedDate && task.completedAt && (
-              <span className="text-[10px] text-muted-foreground mt-0.5">
-                Completed: {formatCompletedDate(task.completedAt)}
-              </span>
+            {showCompletedDate && (
+              <div className="flex flex-col items-end mt-0.5">
+                {task.completedAt && (
+                  <span className="text-[10px] text-muted-foreground">
+                    Completed: {formatCompletedDate(task.completedAt)}
+                  </span>
+                )}
+                {task.inProgressTime > 0 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    Time spent: {formatDuration(task.inProgressTime)}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>
