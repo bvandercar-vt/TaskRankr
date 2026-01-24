@@ -71,7 +71,7 @@ const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   return date.toLocaleDateString('en-US', { 
     month: 'short', 
     day: 'numeric',
-    year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+    year: 'numeric'
   });
 };
 
@@ -198,7 +198,7 @@ export function TaskCard({ task, level = 0, showRestore = false, showCompletedDa
             </div>
             {showCompletedDate && task.completedAt && (
               <span className="text-[10px] text-muted-foreground mt-0.5">
-                Completed {formatCompletedDate(task.completedAt)}
+                Completed: {formatCompletedDate(task.completedAt)}
               </span>
             )}
           </div>
