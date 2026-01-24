@@ -130,7 +130,7 @@ export default function Home() {
     activeTasks.forEach((task) => {
       if (task.isInProgress) {
         inProgressTaskIds.add(task.id);
-        inProgressList.push({ ...task, subtasks: [] });
+        inProgressList.push({ ...task, subtasks: [] } as TaskResponse);
       }
     });
 
@@ -140,7 +140,7 @@ export default function Home() {
     activeTasks.forEach((task) => {
       // Skip in-progress tasks from the tree (they're hoisted to top)
       if (inProgressTaskIds.has(task.id)) return;
-      nodes[task.id] = { ...task, subtasks: [] };
+      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
     });
 
     activeTasks.forEach((task) => {

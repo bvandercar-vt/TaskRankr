@@ -17,17 +17,18 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getTasks(): Promise<Task[]> {
-    return await db.select().from(tasks).orderBy(tasks.id);
+    const result = await db.select().from(tasks).orderBy(tasks.id);
+    return result as Task[];
   }
 
   async getTask(id: number): Promise<Task | undefined> {
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
-    return task;
+    return task as Task | undefined;
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
     const [task] = await db.insert(tasks).values(insertTask).returning();
-    return task;
+    return task as Task;
   }
 
   async updateTask(id: number, updates: UpdateTaskRequest): Promise<Task> {
@@ -74,7 +75,7 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    return task;
+    return task as Task;
   }
 
   async deleteTask(id: number): Promise<void> {

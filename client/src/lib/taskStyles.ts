@@ -58,9 +58,16 @@ export const getEnjoymentStyle = (
 export const getTimeStyle = (level: Time | null | undefined): string =>
   level ? (TIME_STYLES[level] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
 
-export const getAttributeStyle = (
-  field: TaskSortField,
-  value: string | null | undefined,
+type TaksSortFieldMap = {
+  priority: Priority;
+  ease: Ease;
+  enjoyment: Enjoyment;
+  time: Time;
+};
+
+export const getAttributeStyle = <Field extends TaskSortField>(
+  field: Field,
+  value: TaksSortFieldMap[Field] | null | undefined,
 ): string => {
   switch (field) {
     case "priority":

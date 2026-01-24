@@ -38,28 +38,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
 }));
 
-export const insertTaskSchema = createInsertSchema(tasks, {
-  name: z.string().min(1, "Name is required"),
-  priority: z
-    .string()
-    .nullable()
-    .superRefine((val, ctx) => {
-      if (val === null && !ctx.path.includes("parentId")) {
-        // Note: We can't easily check parentId here without a custom schema
-        // We will handle the root-level check in the form validation instead
-      }
-    }),
-  createdAt: z.coerce.date().optional(),
-  completedAt: z.coerce.date().optional().nullable(),
-  inProgressStartedAt: z.coerce.date().optional().nullable(),
-}).omit({
-  id: true,
-});
-
-export type Task = typeof tasks.$inferSelect;
-export type InsertTask = z.infer<typeof insertTaskSchema>;
-
-// Enums for validation and UI
+// Attribute level constants and types
 export const PRIORITY_LEVELS = [
   "lowest",
   "low",
@@ -78,7 +57,37 @@ export type Time = (typeof TIME_LEVELS)[number];
 
 export type TaskSortField = "priority" | "ease" | "enjoyment" | "time";
 
+// Zod enums for validation
+export const priorityEnum = z.enum(PRIORITY_LEVELS);
+export const easeEnum = z.enum(EASE_LEVELS);
+export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS);
+export const timeEnum = z.enum(TIME_LEVELS);
+
+export const insertTaskSchema = createInsertSchema(tasks, {
+  name: z.string().min(1, "Name is required"),
+  priority: priorityEnum.nullable().optional(),
+  ease: easeEnum.nullable().optional(),
+  enjoyment: enjoymentEnum.nullable().optional(),
+  time: timeEnum.nullable().optional(),
+  createdAt: z.coerce.date().optional(),
+  completedAt: z.coerce.date().optional().nullable(),
+  inProgressStartedAt: z.coerce.date().optional().nullable(),
+}).omit({
+  id: true,
+});
+
+// Base type from Drizzle, then override attribute fields with enum types
+type TaskBase = typeof tasks.$inferSelect;
+export type Task = Omit<TaskBase, "priority" | "ease" | "enjoyment" | "time"> & {
+  priority: Priority | null;
+  ease: Ease | null;
+  enjoyment: Enjoyment | null;
+  time: Time | null;
+};
+
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+
 // Request/Response types
 export type CreateTaskRequest = InsertTask;
 export type UpdateTaskRequest = Partial<InsertTask>;
-export type TaskResponse = Task & { subtasks?: TaskResponse[] }; // Recursive for frontend convenience if needed
+export type TaskResponse = Task & { subtasks?: TaskResponse[] };
