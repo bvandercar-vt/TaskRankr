@@ -36,7 +36,18 @@ const LEVEL_STYLES: Record<string, string> = {
   none: 'text-muted-foreground italic',
 };
 
-const getLevelStyle = (val: string) => LEVEL_STYLES[val] || '';
+// Enjoyment is reversed: high = good (green), low = bad (red)
+const ENJOYMENT_STYLES: Record<string, string> = {
+  high: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5',
+  medium: 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5',
+  low: 'text-red-400 border-red-400/20 bg-red-400/5',
+  none: 'text-muted-foreground italic',
+};
+
+const getLevelStyle = (val: string, field?: string) => {
+  if (field === 'enjoyment') return ENJOYMENT_STYLES[val] || '';
+  return LEVEL_STYLES[val] || '';
+};
 
 export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel, onAddChild }: TaskFormProps) {
   const parentChain = useTaskParentChain(parentId || undefined);
@@ -165,14 +176,14 @@ export function TaskForm({ onSubmit, isPending, initialData, parentId, onCancel,
                     <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">{attr.label}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || (parentId ? "none" : "")}>
                         <FormControl>
-                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", (field.value && field.value !== "none") ? getLevelStyle(field.value) : "text-muted-foreground")}>
+                          <SelectTrigger className={cn("bg-secondary/20 border-white/5 capitalize font-semibold h-10", (field.value && field.value !== "none") ? getLevelStyle(field.value, attr.name) : "text-muted-foreground")}>
                             <SelectValue placeholder={parentId ? "None" : "Select..."} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-card border-white/10 z-[200]">
                           {parentId && <SelectItem value="none" className="text-muted-foreground italic">None</SelectItem>}
                           {attr.levels.map((level) => (
-                            <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level))}>
+                            <SelectItem key={level} value={level} className={cn("capitalize font-semibold", getLevelStyle(level, attr.name))}>
                               {level}
                             </SelectItem>
                           ))}
