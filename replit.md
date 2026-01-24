@@ -61,26 +61,33 @@ Key endpoints:
 - `GET /api/tasks/:id` - Get single task
 - `POST /api/tasks` - Create task
 - `PUT /api/tasks/:id` - Update task
+- `PUT /api/tasks/:id/status` - Set task status (handles time tracking and auto-demotion)
 - `DELETE /api/tasks/:id` - Delete task
 
 ### Task Data Model
 Tasks have:
 - `name`, `description` (text fields)
-- `priority`, `ease`, `enjoyment`, `time` (enum-like text: low/medium/high)
+- `priority` (enum: lowest/low/medium/high/highest)
+- `ease`, `enjoyment`, `time` (enums: low/medium/high or easy/medium/hard)
 - `parentId` (nullable, for nested task hierarchy)
-- `isCompleted` (boolean)
-- `isInProgress` (boolean) - tracks if task is currently being worked on
+- `status` (enum: open/in_progress/pending/completed) - single status field
 - `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
 - `inProgressStartedAt` (timestamp) - when the current in-progress session started
 - `createdAt` (timestamp)
 - `completedAt` (timestamp)
 
-### In-Progress Feature
-- Tasks can be marked as "in progress" via the Task Status dialog (long-press on a task)
-- In-progress tasks are hoisted to the top of the task list, regardless of sorting
-- Time spent in-progress accumulates across sessions (4hrs + 2hrs = 6hrs total)
-- Completing an in-progress task automatically stops the timer and saves accumulated time
-- Visual indicators: blue border, clock icon, and the task appears at top of list
+### Task Status System
+- **open**: Default state for new tasks
+- **in_progress**: Task being actively worked on (only ONE task can be in_progress at a time)
+- **pending**: Was in_progress, now queued (multiple allowed, hoisted below in_progress)
+- **completed**: Task finished
+
+Status behaviors:
+- Setting a task to in_progress auto-demotes the current in_progress task to pending
+- Pending tasks are pinned at the top of the list, below the in_progress task
+- Time accumulates when in in_progress status, not when pending
+- Long-press (800ms) opens the Task Status dialog for status changes
+- Visual indicators: blue border for in_progress, amber border for pending
 
 ## External Dependencies
 

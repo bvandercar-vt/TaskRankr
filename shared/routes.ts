@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertTaskSchema, tasks } from './schema';
+import { insertTaskSchema, tasks, taskStatusEnum } from './schema';
 
 export const errorSchemas = {
   validation: z.object({
@@ -55,6 +55,16 @@ export const api = {
       path: '/api/tasks/:id',
       responses: {
         204: z.void(),
+        404: errorSchemas.notFound,
+      },
+    },
+    setStatus: {
+      method: 'PUT' as const,
+      path: '/api/tasks/:id/status',
+      input: z.object({ status: taskStatusEnum }),
+      responses: {
+        200: z.custom<typeof tasks.$inferSelect>(),
+        400: errorSchemas.validation,
         404: errorSchemas.notFound,
       },
     },

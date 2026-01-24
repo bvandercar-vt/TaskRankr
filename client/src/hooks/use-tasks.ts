@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, type TaskInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
+import type { TaskStatus } from "@shared/schema";
 
 // Fetch all tasks
 export function useTasks() {
@@ -118,55 +119,33 @@ export function useUpdateTask() {
   });
 }
 
-// Complete a task (mark as completed)
-export function useCompleteTask() {
+// Set task status
+export function useSetTaskStatus() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const url = buildUrl(api.tasks.update.path, { id });
+    mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
+      const url = buildUrl(api.tasks.setStatus.path, { id });
       const res = await fetch(url, {
-        method: api.tasks.update.method,
+        method: api.tasks.setStatus.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted: true, completedAt: new Date() }),
+        body: JSON.stringify({ status }),
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Failed to complete task");
+      if (!res.ok) throw new Error("Failed to update task status");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      toast({ title: "Completed", description: "Task marked as complete." });
-    },
-    onError: (error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    }
-  });
-}
-
-// Uncomplete a task (restore to active)
-export function useUncompleteTask() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (id: number) => {
-      const url = buildUrl(api.tasks.update.path, { id });
-      const res = await fetch(url, {
-        method: api.tasks.update.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted: false, completedAt: null }),
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Failed to restore task");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      toast({ title: "Restored", description: "Task moved back to active." });
+      const messages: Record<TaskStatus, { title: string; description: string }> = {
+        completed: { title: "Completed", description: "Task marked as complete." },
+        in_progress: { title: "In Progress", description: "Task is now in progress." },
+        pending: { title: "Pending", description: "Task moved to pending." },
+        open: { title: "Restored", description: "Task moved back to active." },
+      };
+      toast(messages[status]);
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -199,29 +178,3 @@ export function useDeleteTask() {
   });
 }
 
-// Toggle in-progress state
-export function useToggleInProgress() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async ({ id, isInProgress }: { id: number; isInProgress: boolean }) => {
-      const url = buildUrl(api.tasks.update.path, { id });
-      const res = await fetch(url, {
-        method: api.tasks.update.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isInProgress }),
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Failed to update task");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-    },
-    onError: (error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    }
-  });
-}
