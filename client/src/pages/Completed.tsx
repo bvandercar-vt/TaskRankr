@@ -9,7 +9,7 @@ import { Link } from "wouter";
 export default function Completed() {
   const { data: tasks, isLoading, error } = useTasks();
 
-  // Build tree from flat list for completed tasks only
+  // Build tree from flat list for completed tasks only, sorted by completion date
   const completedTasks = useMemo(() => {
     if (!tasks) return [];
     
@@ -29,6 +29,13 @@ export default function Completed() {
       } else {
         roots.push(nodes[task.id]);
       }
+    });
+
+    // Sort by completedAt date (most recent first)
+    roots.sort((a, b) => {
+      const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+      const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+      return dateB - dateA;
     });
 
     return roots;
@@ -66,13 +73,29 @@ export default function Completed() {
           <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>
         </div>
 
+        {/* Column Headers */}
+        {completedTasks.length > 0 && (
+          <div className="flex items-center gap-2 px-2 mb-2">
+            <div className="w-5 shrink-0" />
+            <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
+              <div className="flex-1 hidden md:block" />
+              <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Priority</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Ease</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Enjoy</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Time</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Task List Area */}
         <div className="space-y-1">
           {completedTasks.length === 0 ? (
             <EmptyState />
           ) : (
             completedTasks.map(task => (
-              <TaskCard key={task.id} task={task as TaskResponse} showRestore />
+              <TaskCard key={task.id} task={task as TaskResponse} showRestore showCompletedDate />
             ))
           )}
         </div>
