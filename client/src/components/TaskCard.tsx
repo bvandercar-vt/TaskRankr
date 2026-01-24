@@ -29,6 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/primitives/overlays/alert-dialog";
+import {
+  getPriorityStyle,
+  getEaseStyle,
+  getEnjoymentStyle,
+  getTimeStyle,
+} from "@/lib/taskStyles";
 
 interface TaskCardProps {
   task: TaskResponse;
@@ -36,63 +42,6 @@ interface TaskCardProps {
   showRestore?: boolean;
   showCompletedDate?: boolean;
 }
-
-// Color mapping helpers
-const getPriorityColor = (level: string) => {
-  switch (level) {
-    case "highest":
-      return "text-red-500 bg-red-500/10 border-red-400/20";
-    case "high":
-      return "text-red-400 bg-red-400/10 border-red-400/20";
-    case "medium":
-      return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-    case "low":
-      return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-    case "lowest":
-      return "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10";
-    default:
-      return "text-slate-400";
-  }
-};
-
-const getEaseColor = (level: string) => {
-  switch (level) {
-    case "hard":
-      return "text-red-400 bg-red-400/10 border-red-400/20";
-    case "medium":
-      return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-    case "easy":
-      return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-    default:
-      return "text-slate-400";
-  }
-};
-
-const getEnjoymentColor = (level: string) => {
-  switch (level) {
-    case "low":
-      return "text-red-400 bg-red-400/10 border-red-400/20";
-    case "medium":
-      return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-    case "high":
-      return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-    default:
-      return "text-slate-400";
-  }
-};
-
-const getTimeColor = (level: string) => {
-  switch (level) {
-    case "high":
-      return "text-red-400 bg-red-400/10 border-red-400/20";
-    case "medium":
-      return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-    case "low":
-      return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-    default:
-      return "text-slate-400";
-  }
-};
 
 // Format date helper
 const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
@@ -227,7 +176,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getPriorityColor(task.priority),
+                    getPriorityStyle(task.priority),
                   )}
                 >
                   {task.priority}
@@ -238,7 +187,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEaseColor(task.ease),
+                    getEaseStyle(task.ease),
                   )}
                 >
                   {task.ease}
@@ -249,7 +198,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getEnjoymentColor(task.enjoyment),
+                    getEnjoymentStyle(task.enjoyment),
                   )}
                 >
                   {task.enjoyment}
@@ -260,7 +209,7 @@ export function TaskCard({
                   variant="outline"
                   className={cn(
                     "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-                    getTimeColor(task.time),
+                    getTimeStyle(task.time),
                   )}
                 >
                   {task.time}
