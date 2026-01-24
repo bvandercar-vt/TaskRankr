@@ -158,18 +158,19 @@ export const TaskCard = ({
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              {isPinned && (
-                <Pin className="w-3.5 h-3.5 text-slate-400 shrink-0" data-testid="icon-pinned" />
-              )}
-              <h3 className="font-semibold truncate text-base text-foreground">
-                {task.name}
-              </h3>
-            </div>
+            <h3 className="font-semibold truncate text-base text-foreground">
+              {task.name}
+            </h3>
             {isInProgress && (
               <TaskBadge
                 value="In Progress"
                 styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
+              />
+            )}
+            {isPinned && (
+              <Pin 
+                className="w-4 h-4 text-slate-400 fill-slate-400 shrink-0 rotate-45" 
+                data-testid="icon-pinned" 
               />
             )}
           </div>
