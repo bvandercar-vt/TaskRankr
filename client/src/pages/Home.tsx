@@ -8,7 +8,7 @@ import {
   Plus, Search, Menu, CheckCircle2,
   LayoutList
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import {
@@ -16,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/menus/dropdown-menu";
 
 type SortOption = 'none' | 'priority' | 'ease' | 'enjoyment' | 'time';
 
