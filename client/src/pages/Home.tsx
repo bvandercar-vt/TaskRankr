@@ -4,7 +4,7 @@ import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { Plus, Search, Menu, CheckCircle2, LayoutList } from "lucide-react";
+import { Plus, Search, Menu, CheckCircle2, LayoutList, Settings } from "lucide-react";
 import { Input } from "@/components/primitives/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
@@ -232,6 +232,15 @@ const Home = () => {
                   >
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Completed Tasks
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/settings">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    data-testid="menu-item-settings"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
