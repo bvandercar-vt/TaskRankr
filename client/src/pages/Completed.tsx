@@ -9,9 +9,11 @@ import { Link } from "wouter";
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks();
 
+  // Build tree from flat list for completed tasks only, sorted by completion date
   const completedTasks = useMemo(() => {
     if (!tasks) return [];
     
+    // Filter to completed tasks first
     const completedOnly = tasks.filter(task => task.status === "completed");
     
     const nodes: Record<number, TaskResponse> = {};
@@ -29,6 +31,7 @@ const Completed = () => {
       }
     });
 
+    // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {
       const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
       const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;

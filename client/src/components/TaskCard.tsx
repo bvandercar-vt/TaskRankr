@@ -35,6 +35,7 @@ interface TaskCardProps {
   showCompletedDate?: boolean;
 }
 
+// Format date helper
 const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   if (!dateValue) return null;
   const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
@@ -45,6 +46,7 @@ const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
   });
 };
 
+// Format duration helper (milliseconds to human-readable)
 const formatDuration = (ms: number) => {
   if (ms <= 0) return null;
   const totalSeconds = Math.floor(ms / 1000);
