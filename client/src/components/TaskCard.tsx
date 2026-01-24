@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import type { TaskResponse, Priority, Ease, Enjoyment, Time, TaskSortField } from "@shared/schema";
+import type {
+  TaskResponse,
+  Priority,
+  Ease,
+  Enjoyment,
+  Time,
+  TaskSortField,
+} from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronDown, Clock } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
 import {
@@ -11,28 +18,31 @@ import {
   useToggleInProgress,
 } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { Button } from "@/components/primitives/button";
 import { getAttributeStyle } from "@/lib/taskStyles";
 import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 
 interface TaskBadgeProps {
-  field: TaskSortField;
-  value: string | null | undefined;
+  field?: TaskSortField;
+  value?: string | null;
+  label?: string;
+  styleClass?: string;
 }
 
-function TaskBadge({ field, value }: TaskBadgeProps) {
-  if (!value) return null;
+function TaskBadge({ field, value, label, styleClass }: TaskBadgeProps) {
+  if (!value && !label) return null;
+  const displayText = label || value;
+  const style = styleClass || (field && value ? getAttributeStyle(field, value as Priority | Ease | Enjoyment | Time) : "");
   return (
     <Badge
       variant="outline"
       className={cn(
         "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-        getAttributeStyle(field, value as Priority | Ease | Enjoyment | Time),
+        style,
       )}
-      data-testid={`badge-${field}-${value}`}
+      data-testid={`badge-${field || "custom"}-${value || label}`}
     >
-      {value}
+      {displayText}
     </Badge>
   );
 }
@@ -160,12 +170,10 @@ export function TaskCard({
               {task.name}
             </h3>
             {task.isInProgress && (
-              <Badge
-                variant="outline"
-                className="px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0 text-blue-400 bg-blue-400/10 border-blue-400/20"
-              >
-                In Progress
-              </Badge>
+              <TaskBadge
+                label="In Progress"
+                styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
+              />
             )}
           </div>
 
