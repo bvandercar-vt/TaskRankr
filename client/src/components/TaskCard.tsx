@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { TaskResponse, TaskStatus } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
 import { useSetTaskStatus, useDeleteTask } from "@/hooks/use-tasks";
@@ -82,7 +82,7 @@ export const TaskCard = ({
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   const isInProgress = task.status === "in_progress";
-  const isPending = task.status === "pending";
+  const isPinned = task.status === "pinned";
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
@@ -122,8 +122,8 @@ export const TaskCard = ({
           "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
           isInProgress
             ? "border-blue-500/30 bg-blue-500/5"
-            : isPending
-              ? "border-amber-500/30 bg-amber-500/5"
+            : isPinned
+              ? "border-slate-400/30 bg-slate-500/5"
               : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
         )}
@@ -158,19 +158,18 @@ export const TaskCard = ({
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-            <h3 className="font-semibold truncate text-base text-foreground">
-              {task.name}
-            </h3>
+            <div className="flex items-center gap-2 min-w-0">
+              {isPinned && (
+                <Pin className="w-3.5 h-3.5 text-slate-400 shrink-0" data-testid="icon-pinned" />
+              )}
+              <h3 className="font-semibold truncate text-base text-foreground">
+                {task.name}
+              </h3>
+            </div>
             {isInProgress && (
               <TaskBadge
                 value="In Progress"
                 styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
-              />
-            )}
-            {isPending && (
-              <TaskBadge
-                value="Pending"
-                styleClass="text-amber-400 bg-amber-400/10 border-amber-400/20"
               />
             )}
           </div>
