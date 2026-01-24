@@ -5,7 +5,7 @@ import {
   ChevronRight, ChevronDown, Trash2, X, Clock, StopCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/data-display/badge";
+import { Badge } from "@/components/ui/badge";
 import { useCompleteTask, useUncompleteTask, useDeleteTask, useToggleInProgress } from "@/hooks/use-tasks";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { Button } from "@/components/ui/button";
