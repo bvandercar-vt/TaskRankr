@@ -13,14 +13,13 @@ import { z } from "zod";
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"), // For the "text box" details
-  priority: text("priority"), // low, medium, high
-  ease: text("ease"), // easy, medium, hard
-  enjoyment: text("enjoyment"), // low, medium, high
-  time: text("time"), // low, medium, high
-  parentId: integer("parent_id"), // For nested tasks
-  isCompleted: boolean("is_completed").default(false).notNull(),
-  isInProgress: boolean("is_in_progress").default(false).notNull(),
+  description: text("description"),
+  priority: text("priority"),
+  ease: text("ease"),
+  enjoyment: text("enjoyment"),
+  time: text("time"),
+  parentId: integer("parent_id"),
+  status: text("status").default("open").notNull(), // open, in_progress, pending, completed
   inProgressTime: integer("in_progress_time").default(0).notNull(), // Cumulative time in milliseconds
   inProgressStartedAt: timestamp("in_progress_started_at"), // When current in-progress session started
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -37,6 +36,11 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     relationName: "subtasks",
   }),
 }));
+
+// Status constants and types
+export const TASK_STATUSES = ["open", "in_progress", "pending", "completed"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+export const taskStatusEnum = z.enum(TASK_STATUSES);
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
@@ -65,6 +69,7 @@ export const timeEnum = z.enum(TIME_LEVELS);
 
 export const insertTaskSchema = createInsertSchema(tasks, {
   name: z.string().min(1, "Name is required"),
+  status: taskStatusEnum.optional(),
   priority: priorityEnum.nullable().optional(),
   ease: easeEnum.nullable().optional(),
   enjoyment: enjoymentEnum.nullable().optional(),
@@ -78,7 +83,8 @@ export const insertTaskSchema = createInsertSchema(tasks, {
 
 // Base type from Drizzle, then override attribute fields with enum types
 type TaskBase = typeof tasks.$inferSelect;
-export type Task = Omit<TaskBase, "priority" | "ease" | "enjoyment" | "time"> & {
+export type Task = Omit<TaskBase, "status" | "priority" | "ease" | "enjoyment" | "time"> & {
+  status: TaskStatus;
   priority: Priority | null;
   ease: Ease | null;
   enjoyment: Enjoyment | null;

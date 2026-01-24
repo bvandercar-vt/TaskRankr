@@ -3,7 +3,8 @@ import {
   tasks,
   type Task,
   type InsertTask,
-  type UpdateTaskRequest
+  type UpdateTaskRequest,
+  type TaskStatus
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
@@ -13,6 +14,7 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, updates: UpdateTaskRequest): Promise<Task>;
   deleteTask(id: number): Promise<void>;
+  setTaskStatus(id: number, newStatus: TaskStatus): Promise<Task>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -31,49 +33,75 @@ export class DatabaseStorage implements IStorage {
     return task as Task;
   }
 
-  async updateTask(id: number, updates: UpdateTaskRequest): Promise<Task> {
-    // First get the current task to check for in-progress state changes
+  async setTaskStatus(id: number, newStatus: TaskStatus): Promise<Task> {
     const currentTask = await this.getTask(id);
     if (!currentTask) {
       throw new Error('Task not found');
     }
 
-    // Handle in-progress time accumulation
-    let finalUpdates = { ...updates };
-    
-    if (updates.isInProgress !== undefined && updates.isInProgress !== currentTask.isInProgress) {
-      if (updates.isInProgress === true) {
-        // Starting in-progress: set the start time
-        finalUpdates.inProgressStartedAt = new Date();
-      } else if (updates.isInProgress === false && currentTask.inProgressStartedAt) {
-        // Stopping in-progress: calculate elapsed time and add to cumulative total
-        const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime();
-        finalUpdates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
-        finalUpdates.inProgressStartedAt = null;
+    const oldStatus = currentTask.status;
+    const updates: Partial<InsertTask> & { completedAt?: Date | null } = { status: newStatus };
+
+    // Handle status transitions
+    if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
+      // Starting in-progress: demote current in_progress task to pending
+      const allTasks = await this.getTasks();
+      const currentInProgressTask = allTasks.find(t => t.status === 'in_progress' && t.id !== id);
+      if (currentInProgressTask) {
+        // Stop timer on old in-progress task and set to pending
+        const elapsed = currentInProgressTask.inProgressStartedAt 
+          ? Date.now() - currentInProgressTask.inProgressStartedAt.getTime() 
+          : 0;
+        await db.update(tasks)
+          .set({
+            status: 'pending',
+            inProgressTime: (currentInProgressTask.inProgressTime || 0) + elapsed,
+            inProgressStartedAt: null
+          })
+          .where(eq(tasks.id, currentInProgressTask.id));
       }
+      // Start timer on new in-progress task
+      updates.inProgressStartedAt = new Date();
     }
 
-    // If completing a task that is in progress, stop the timer first
-    if (updates.isCompleted === true && currentTask.isInProgress && currentTask.inProgressStartedAt) {
+    if (oldStatus === 'in_progress' && newStatus !== 'in_progress' && currentTask.inProgressStartedAt) {
+      // Leaving in-progress: accumulate time
       const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime();
-      finalUpdates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
-      finalUpdates.isInProgress = false;
-      finalUpdates.inProgressStartedAt = null;
+      updates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
+      updates.inProgressStartedAt = null;
+    }
+
+    if (newStatus === 'completed') {
+      updates.completedAt = new Date();
+    }
+
+    if (oldStatus === 'completed' && newStatus !== 'completed') {
+      updates.completedAt = null;
     }
 
     const [task] = await db
       .update(tasks)
-      .set(finalUpdates)
+      .set(updates)
       .where(eq(tasks.id, id))
       .returning();
 
-    // If we're marking a task as completed/restoring it, do the same for all children
-    if (updates.isCompleted !== undefined) {
+    // Cascade status to children for completed/restored
+    if (newStatus === 'completed' || (oldStatus === 'completed' && newStatus === 'open')) {
       const childTasks = await db.select().from(tasks).where(eq(tasks.parentId, id));
       for (const child of childTasks) {
-        await this.updateTask(child.id, updates);
+        await this.setTaskStatus(child.id, newStatus);
       }
     }
+
+    return task as Task;
+  }
+
+  async updateTask(id: number, updates: UpdateTaskRequest): Promise<Task> {
+    const [task] = await db
+      .update(tasks)
+      .set(updates)
+      .where(eq(tasks.id, id))
+      .returning();
 
     return task as Task;
   }
