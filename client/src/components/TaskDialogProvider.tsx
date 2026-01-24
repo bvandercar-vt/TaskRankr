@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/overlays/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/primitives/overlays/dialog";
 import { TaskForm } from "./TaskForm";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { Task } from "@shared/schema";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/primitives/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
