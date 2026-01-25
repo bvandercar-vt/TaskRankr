@@ -44,17 +44,17 @@ export class DatabaseStorage implements IStorage {
 
     // Handle status transitions
     if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
-      // Starting in-progress: demote current in_progress task to pending
+      // Starting in-progress: demote current in_progress task to pinned
       const allTasks = await this.getTasks();
       const currentInProgressTask = allTasks.find(t => t.status === 'in_progress' && t.id !== id);
       if (currentInProgressTask) {
-        // Stop timer on old in-progress task and set to pending
+        // Stop timer on old in-progress task and set to pinned
         const elapsed = currentInProgressTask.inProgressStartedAt 
           ? Date.now() - currentInProgressTask.inProgressStartedAt.getTime() 
           : 0;
         await db.update(tasks)
           .set({
-            status: 'pending',
+            status: 'pinned',
             inProgressTime: (currentInProgressTask.inProgressTime || 0) + elapsed,
             inProgressStartedAt: null
           })
