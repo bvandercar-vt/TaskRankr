@@ -4,7 +4,14 @@ import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { Plus, Search, Menu, CheckCircle2, LayoutList, Settings } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Menu,
+  CheckCircle2,
+  LayoutList,
+  Settings,
+} from "lucide-react";
 import { Input } from "@/components/primitives/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
@@ -16,6 +23,36 @@ import {
 } from "@/components/primitives/dropdown-menu";
 
 type SortOption = "date" | TaskSortField;
+
+const SortButton = ({
+  label,
+  value,
+  className,
+  current,
+  onSelect,
+}: {
+  label: string;
+  value: SortOption;
+  className?: string;
+  current: SortOption;
+  onSelect: (v: SortOption) => void;
+}) => (
+  <Button
+    variant={current === value ? "default" : "ghost"}
+    size="sm"
+    onClick={() => onSelect(value)}
+    className={cn(
+      "h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+      current === value
+        ? "bg-primary text-primary-foreground"
+        : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+      className,
+    )}
+    data-testid={`button-sort-${value}`}
+  >
+    {label}
+  </Button>
+);
 
 const LEVEL_WEIGHTS: Record<string, number> = {
   highest: 5,
@@ -201,7 +238,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
-        <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center justify-between mb-4 pr-2">
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -262,72 +299,41 @@ const Home = () => {
           </div>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant={sortBy === "date" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("date")}
-              className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === "date"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-              data-testid="button-sort-date"
-            >
-              Date
-            </Button>
-            <Button
-              variant={sortBy === "priority" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("priority")}
-              className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === "priority"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-            >
-              Priority
-            </Button>
-            <Button
-              variant={sortBy === "ease" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("ease")}
-              className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === "ease"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-            >
-              Ease
-            </Button>
-            <Button
-              variant={sortBy === "enjoyment" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("enjoyment")}
-              className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === "enjoyment"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-            >
-              Enjoy
-            </Button>
-            <Button
-              variant={sortBy === "time" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("time")}
-              className={cn(
-                "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
-                sortBy === "time"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
-            >
-              Time
-            </Button>
+            <SortButton
+              label="Date"
+              value="date"
+              className="min-w-12 max-w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Priority"
+              value="priority"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Ease"
+              value="ease"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Enjoy"
+              value="enjoyment"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Time"
+              value="time"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
           </div>
         </div>
 
