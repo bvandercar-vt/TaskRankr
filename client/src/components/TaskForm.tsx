@@ -416,16 +416,16 @@ export const TaskForm = ({
         <div className="sticky bottom-0 pt-4 pb-6 bg-background/80 backdrop-blur-sm mt-auto flex gap-3 border-t border-white/5">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12"
+            className="flex-1 h-12 border-white/10"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={isPending || !isValid}
-            className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initialData ? "Save" : "Create"}
