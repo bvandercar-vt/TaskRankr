@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/primitives/overlays/tooltip";
 import { TaskDialogProvider } from "@/components/TaskDialogProvider";
 import Home from "@/pages/Home";
 import Completed from "@/pages/Completed";
+import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 
 const Router = () => (
   <Switch>
     <Route path="/" component={Home} />
     <Route path="/completed" component={Completed} />
+    <Route path="/settings" component={Settings} />
     <Route component={NotFound} />
   </Switch>
 );

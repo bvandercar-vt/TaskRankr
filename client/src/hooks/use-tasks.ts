@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, type TaskInput } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
+import { getSettings } from "@/hooks/use-settings";
 import type { TaskStatus } from "@shared/schema";
 
 // Fetch all tasks
@@ -73,7 +74,21 @@ export const useCreateTask = () => {
         }
         throw new Error("Failed to create task");
       }
-      return api.tasks.create.responses[201].parse(await res.json());
+      const task = api.tasks.create.responses[201].parse(await res.json());
+      
+      // Auto-pin new task if setting is enabled
+      const settings = getSettings();
+      if (settings.autoPinNewTasks) {
+        const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id });
+        await fetch(pinUrl, {
+          method: api.tasks.setStatus.method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "pinned" }),
+          credentials: "include",
+        });
+      }
+      
+      return task;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });

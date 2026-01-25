@@ -169,13 +169,13 @@ export const TaskCard = ({
             )}
             {isPinned && (
               <Pin 
-                className="w-4 h-4 text-slate-400 fill-slate-400 shrink-0 rotate-45" 
+                className="w-4 h-4 text-slate-400  shrink-0 rotate-45" 
                 data-testid="icon-pinned" 
               />
             )}
           </div>
 
-          <div className="flex flex-col items-end shrink-0 md:w-[268px] pr-1.5 md:pr-0">
+          <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
               {(["priority", "ease", "enjoyment", "time"] as const).map((field) => {
                 const value = task[field];
