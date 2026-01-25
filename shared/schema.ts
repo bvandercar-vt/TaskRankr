@@ -19,7 +19,7 @@ export const tasks = pgTable("tasks", {
   enjoyment: text("enjoyment"),
   time: text("time"),
   parentId: integer("parent_id"),
-  status: text("status").default("open").notNull(), // open, in_progress, pending, completed
+  status: text("status").default("open").notNull(), // open, in_progress, pinned, completed
   inProgressTime: integer("in_progress_time").default(0).notNull(), // Cumulative time in milliseconds
   inProgressStartedAt: timestamp("in_progress_started_at"), // When current in-progress session started
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -38,7 +38,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 }));
 
 // Status constants and types
-export const TASK_STATUSES = ["open", "in_progress", "pending", "completed"] as const;
+export const TASK_STATUSES = ["open", "in_progress", "pinned", "completed"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 export const taskStatusEnum = z.enum(TASK_STATUSES);
 
