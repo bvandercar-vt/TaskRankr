@@ -15,13 +15,12 @@ const Settings = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10"
               data-testid="button-back"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-bold" data-testid="heading-settings">Settings</h1>
         </div>
 
         <div className="space-y-6">
