@@ -141,8 +141,8 @@ export const useSetTaskStatus = () => {
       const messages: Record<TaskStatus, { title: string; description: string }> = {
         completed: { title: "Completed", description: "Task marked as complete." },
         in_progress: { title: "In Progress", description: "Task is now in progress." },
-        pending: { title: "Pending", description: "Task moved to pending." },
-        open: { title: "Restored", description: "Task moved back to active." },
+        pinned: { title: "Pinned", description: "Task pinned to top." },
+        open: { title: "Updated", description: "Task moved back to active." },
       };
       toast(messages[status]);
     },

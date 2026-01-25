@@ -1,4 +1,4 @@
-import { Clock, StopCircle, X, Pause } from "lucide-react";
+import { Clock, StopCircle, X, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/primitives/button";
 import {
@@ -31,7 +31,7 @@ export const ChangeStatusDialog = ({
 }: ChangeStatusDialogProps) => {
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
-  const isPending = status === "pending";
+  const isPinned = status === "pinned";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -59,11 +59,12 @@ export const ChangeStatusDialog = ({
           <div className="flex flex-col gap-3 w-full">
             {!isCompleted && (
               <>
+                {/* Start/Stop Working button */}
                 {isInProgress ? (
                   <Button
                     onClick={() => onSetStatus("open")}
                     variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
                     data-testid="button-stop-progress"
                   >
                     <StopCircle className="w-4 h-4" />
@@ -81,15 +82,26 @@ export const ChangeStatusDialog = ({
                   </Button>
                 )}
 
-                {isPending && (
+                {/* Pin/Unpin button */}
+                {isInProgress || isPinned ? (
                   <Button
                     onClick={() => onSetStatus("open")}
                     variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-muted-foreground/50 text-muted-foreground hover:bg-muted/10"
-                    data-testid="button-remove-pending"
+                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
+                    data-testid="button-unpin"
                   >
-                    <Pause className="w-4 h-4" />
-                    Remove from Pending
+                    <PinOff className="w-4 h-4" />
+                    Unpin
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => onSetStatus("pinned")}
+                    variant="outline"
+                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
+                    data-testid="button-pin"
+                  >
+                    <Pin className="w-4 h-4" />
+                    Pin to Top
                   </Button>
                 )}
               </>

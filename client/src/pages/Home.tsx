@@ -123,23 +123,23 @@ const Home = () => {
     // Filter out completed tasks
     const activeTasks = tasks.filter((task) => task.status !== "completed");
 
-    // Collect pinned tasks (in_progress first, then pending) to display at top
+    // Collect pinned tasks (in_progress first, then pinned) to display at top
     const pinnedTaskIds = new Set<number>();
     const inProgressList: TaskResponse[] = [];
-    const pendingList: TaskResponse[] = [];
+    const pinnedList: TaskResponse[] = [];
 
     activeTasks.forEach((task) => {
       if (task.status === "in_progress") {
         pinnedTaskIds.add(task.id);
         inProgressList.push({ ...task, subtasks: [] } as TaskResponse);
-      } else if (task.status === "pending") {
+      } else if (task.status === "pinned") {
         pinnedTaskIds.add(task.id);
-        pendingList.push({ ...task, subtasks: [] } as TaskResponse);
+        pinnedList.push({ ...task, subtasks: [] } as TaskResponse);
       }
     });
 
-    // Pinned order: in_progress first, then pending
-    const pinnedList = [...inProgressList, ...pendingList];
+    // Hoisted order: in_progress first, then pinned
+    const hoistedList = [...inProgressList, ...pinnedList];
 
     const nodes: Record<number, TaskResponse> = {};
     const roots: TaskResponse[] = [];
@@ -163,7 +163,7 @@ const Home = () => {
       }
     });
 
-    return { taskTree: roots, pinnedTasks: pinnedList };
+    return { taskTree: roots, pinnedTasks: hoistedList };
   }, [tasks]);
 
   const displayedTasks = useMemo(() => {
@@ -175,7 +175,7 @@ const Home = () => {
       task.name.toLowerCase().includes(search.toLowerCase()),
     );
 
-    // Combine: pinned tasks (in_progress + pending) at top, then sorted tree
+    // Combine: hoisted tasks (in_progress + pinned) at top, then sorted tree
     return [...filteredPinned, ...sortedTree];
   }, [taskTree, pinnedTasks, search, sortBy]);
 

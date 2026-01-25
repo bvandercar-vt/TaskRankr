@@ -70,7 +70,7 @@ Tasks have:
 - `priority` (enum: lowest/low/medium/high/highest)
 - `ease`, `enjoyment`, `time` (enums: low/medium/high or easy/medium/hard)
 - `parentId` (nullable, for nested task hierarchy)
-- `status` (enum: open/in_progress/pending/completed) - single status field
+- `status` (enum: open/in_progress/pinned/completed) - single status field
 - `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
 - `inProgressStartedAt` (timestamp) - when the current in-progress session started
 - `createdAt` (timestamp)
@@ -79,15 +79,15 @@ Tasks have:
 ### Task Status System
 - **open**: Default state for new tasks
 - **in_progress**: Task being actively worked on (only ONE task can be in_progress at a time)
-- **pending**: Was in_progress, now queued (multiple allowed, hoisted below in_progress)
+- **pinned**: Hoisted to top of list (multiple allowed, displayed below in_progress)
 - **completed**: Task finished
 
 Status behaviors:
-- Setting a task to in_progress auto-demotes the current in_progress task to pending
-- Pending tasks are pinned at the top of the list, below the in_progress task
-- Time accumulates when in in_progress status, not when pending
+- Setting a task to in_progress auto-demotes the current in_progress task to pinned
+- Pinned tasks are hoisted at the top of the list, below the in_progress task
+- Time accumulates when in in_progress status, not when pinned
 - Long-press (800ms) opens the Task Status dialog for status changes
-- Visual indicators: blue border for in_progress, amber border for pending
+- Visual indicators: blue border for in_progress, slate blue-gray border + pin icon for pinned
 
 ## External Dependencies
 
