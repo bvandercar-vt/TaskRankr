@@ -4,7 +4,14 @@ import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { Plus, Search, Menu, CheckCircle2, LayoutList, Settings } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Menu,
+  CheckCircle2,
+  LayoutList,
+  Settings,
+} from "lucide-react";
 import { Input } from "@/components/primitives/forms/input";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
@@ -20,11 +27,13 @@ type SortOption = "date" | TaskSortField;
 const SortButton = ({
   label,
   value,
+  className,
   current,
   onSelect,
 }: {
   label: string;
   value: SortOption;
+  className?: string;
   current: SortOption;
   onSelect: (v: SortOption) => void;
 }) => (
@@ -33,10 +42,11 @@ const SortButton = ({
     size="sm"
     onClick={() => onSelect(value)}
     className={cn(
-      "w-16 h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+      "h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
       current === value
         ? "bg-primary text-primary-foreground"
         : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+      className,
     )}
     data-testid={`button-sort-${value}`}
   >
@@ -228,7 +238,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
-        <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center justify-between mb-4 pr-2">
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -289,11 +299,41 @@ const Home = () => {
           </div>
 
           <div className="flex items-center gap-1">
-            <SortButton label="Date" value="date" current={sortBy} onSelect={setSortBy} />
-            <SortButton label="Priority" value="priority" current={sortBy} onSelect={setSortBy} />
-            <SortButton label="Ease" value="ease" current={sortBy} onSelect={setSortBy} />
-            <SortButton label="Enjoy" value="enjoyment" current={sortBy} onSelect={setSortBy} />
-            <SortButton label="Time" value="time" current={sortBy} onSelect={setSortBy} />
+            <SortButton
+              label="Date"
+              value="date"
+              className="min-w-12 max-w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Priority"
+              value="priority"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Ease"
+              value="ease"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Enjoy"
+              value="enjoyment"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
+            <SortButton
+              label="Time"
+              value="time"
+              className="w-16"
+              current={sortBy}
+              onSelect={setSortBy}
+            />
           </div>
         </div>
 

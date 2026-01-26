@@ -99,7 +99,6 @@ export const useCreateTask = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      toast({ title: "Task Created", description: "New task added to your list." });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -191,7 +190,6 @@ export const useDeleteTask = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      toast({ title: "Deleted", description: "Task removed successfully." });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
