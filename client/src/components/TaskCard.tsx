@@ -65,6 +65,19 @@ const formatDuration = (ms: number) => {
   }
 };
 
+// Calculate current accumulated time for in-progress tasks
+const getCurrentAccumulatedTime = (task: TaskResponse): number => {
+  let total = task.inProgressTime;
+  if (task.status === "in_progress" && task.inProgressStartedAt) {
+    const startedAt = typeof task.inProgressStartedAt === "string" 
+      ? new Date(task.inProgressStartedAt) 
+      : task.inProgressStartedAt;
+    const elapsed = Date.now() - startedAt.getTime();
+    total += elapsed;
+  }
+  return total;
+};
+
 export const TaskCard = ({
   task,
   level = 0,
@@ -237,7 +250,7 @@ export const TaskCard = ({
         onOpenChange={setShowConfirm}
         taskName={task.name}
         status={task.status}
-        inProgressTime={task.inProgressTime}
+        inProgressTime={getCurrentAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
           updateTask.mutate({ id: task.id, inProgressTime: timeMs });
