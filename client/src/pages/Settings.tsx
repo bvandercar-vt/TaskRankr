@@ -23,7 +23,7 @@ const Settings = () => {
           <h1 className="text-2xl font-bold" data-testid="heading-settings">Settings</h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
             <div className="flex-1">
               <h3 className="font-semibold text-foreground">Automatically Pin new tasks</h3>
@@ -35,6 +35,20 @@ const Settings = () => {
               checked={settings.autoPinNewTasks}
               onCheckedChange={(checked: boolean) => updateSetting("autoPinNewTasks", checked)}
               data-testid="switch-auto-pin"
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Enable In Progress Time</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Track and display time spent working on tasks.
+              </p>
+            </div>
+            <Switch
+              checked={settings.enableInProgressTime}
+              onCheckedChange={(checked: boolean) => updateSetting("enableInProgressTime", checked)}
+              data-testid="switch-enable-time"
             />
           </div>
         </div>
