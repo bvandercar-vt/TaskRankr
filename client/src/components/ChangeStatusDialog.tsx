@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Clock, StopCircle, X, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/primitives/button";
+import { Input } from "@/components/primitives/forms/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,27 +13,66 @@ import {
   AlertDialogTitle,
 } from "@/components/primitives/overlays/alert-dialog";
 import type { TaskStatus } from "@shared/schema";
+import { getSettings } from "@/hooks/use-settings";
 
 interface ChangeStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   taskName: string;
   status: TaskStatus;
+  inProgressTime: number;
   onSetStatus: (status: TaskStatus) => void;
+  onUpdateTime: (timeMs: number) => void;
   onDeleteClick: () => void;
 }
+
+const parseTimeToMs = (hours: number, minutes: number): number => {
+  return (hours * 3600 + minutes * 60) * 1000;
+};
+
+const msToHoursMinutes = (ms: number): { hours: number; minutes: number } => {
+  const totalMinutes = Math.floor(ms / 60000);
+  return {
+    hours: Math.floor(totalMinutes / 60),
+    minutes: totalMinutes % 60,
+  };
+};
 
 export const ChangeStatusDialog = ({
   open,
   onOpenChange,
   taskName,
   status,
+  inProgressTime,
   onSetStatus,
+  onUpdateTime,
   onDeleteClick,
 }: ChangeStatusDialogProps) => {
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
   const isPinned = status === "pinned";
+  
+  const settings = getSettings();
+  const showTimeInputs = settings.enableInProgressTime;
+  
+  const { hours: initialHours, minutes: initialMinutes } = msToHoursMinutes(inProgressTime);
+  const [hours, setHours] = useState(initialHours);
+  const [minutes, setMinutes] = useState(initialMinutes);
+  
+  useEffect(() => {
+    if (open) {
+      const { hours: h, minutes: m } = msToHoursMinutes(inProgressTime);
+      setHours(h);
+      setMinutes(m);
+    }
+  }, [open, inProgressTime]);
+  
+  const handleTimeChange = () => {
+    const newTimeMs = parseTimeToMs(hours, minutes);
+    if (newTimeMs !== inProgressTime) {
+      onUpdateTime(newTimeMs);
+    }
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -119,6 +160,39 @@ export const ChangeStatusDialog = ({
             >
               {isCompleted ? "Restore Task" : "Complete Task"}
             </AlertDialogAction>
+
+            {showTimeInputs && (
+              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
+                <span className="text-xs text-muted-foreground text-center">Time Spent</span>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={hours}
+                      onChange={(e) => setHours(Math.max(0, parseInt(e.target.value) || 0))}
+                      onBlur={handleTimeChange}
+                      className="w-16 h-8 text-center text-sm"
+                      data-testid="input-hours"
+                    />
+                    <span className="text-xs text-muted-foreground">h</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={59}
+                      value={minutes}
+                      onChange={(e) => setMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                      onBlur={handleTimeChange}
+                      className="w-16 h-8 text-center text-sm"
+                      data-testid="input-minutes"
+                    />
+                    <span className="text-xs text-muted-foreground">m</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-center">
               <Button

@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
-import { useSetTaskStatus, useDeleteTask } from "@/hooks/use-tasks";
+import { useSetTaskStatus, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
+import { getSettings } from "@/hooks/use-settings";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { getAttributeStyle } from "@/lib/taskStyles";
 import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
@@ -78,6 +79,8 @@ export const TaskCard = ({
 
   const setTaskStatus = useSetTaskStatus();
   const deleteTask = useDeleteTask();
+  const updateTask = useUpdateTask();
+  const settings = getSettings();
   const { openEditDialog } = useTaskDialog();
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -191,7 +194,7 @@ export const TaskCard = ({
                     Completed: {formatCompletedDate(task.completedAt)}
                   </span>
                 )}
-                {task.inProgressTime > 0 && (
+                {settings.enableInProgressTime && task.inProgressTime > 0 && (
                   <span className="text-[10px] text-muted-foreground">
                     Time spent: {formatDuration(task.inProgressTime)}
                   </span>
@@ -234,7 +237,11 @@ export const TaskCard = ({
         onOpenChange={setShowConfirm}
         taskName={task.name}
         status={task.status}
+        inProgressTime={task.inProgressTime}
         onSetStatus={handleSetStatus}
+        onUpdateTime={(timeMs) => {
+          updateTask.mutate({ id: task.id, inProgressTime: timeMs });
+        }}
         onDeleteClick={() => {
           setShowConfirm(false);
           setTimeout(() => setShowDeleteConfirm(true), 100);

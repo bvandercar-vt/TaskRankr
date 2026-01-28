@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 
 export interface AppSettings {
   autoPinNewTasks: boolean;
+  enableInProgressTime: boolean;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-  autoPinNewTasks: false,
+  autoPinNewTasks: true,
+  enableInProgressTime: true,
 };
 
 const STORAGE_KEY = "task-app-settings";
