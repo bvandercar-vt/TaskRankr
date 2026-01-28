@@ -51,6 +51,20 @@ const Settings = () => {
               data-testid="switch-enable-time"
             />
           </div>
+
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Always sort pinned by Priority</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Pinned tasks are always sorted by priority first, then by your selected sort.
+              </p>
+            </div>
+            <Switch
+              checked={settings.alwaysSortPinnedByPriority}
+              onCheckedChange={(checked: boolean) => updateSetting("alwaysSortPinnedByPriority", checked)}
+              data-testid="switch-sort-pinned-priority"
+            />
+          </div>
         </div>
       </main>
     </div>
