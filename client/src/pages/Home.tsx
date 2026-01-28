@@ -78,7 +78,7 @@ const Home = () => {
   const { openCreateDialog } = useTaskDialog();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("date");
+  const [sortBy, setSortBy] = useState<SortOption>("priority");
 
   // Sort function for tasks
   const sortTasks = (tasks: TaskResponse[], sort: SortOption): TaskResponse[] => {
