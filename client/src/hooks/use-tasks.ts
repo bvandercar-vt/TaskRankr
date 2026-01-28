@@ -157,15 +157,8 @@ export const useSetTaskStatus = () => {
       if (!res.ok) throw new Error("Failed to update task status");
       return res.json();
     },
-    onSuccess: (_, { status }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-      const messages: Record<TaskStatus, { title: string; description: string }> = {
-        completed: { title: "Completed", description: "Task marked as complete." },
-        in_progress: { title: "In Progress", description: "Task is now in progress." },
-        pinned: { title: "Pinned", description: "Task pinned to top." },
-        open: { title: "Updated", description: "Task moved back to active." },
-      };
-      toast(messages[status]);
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

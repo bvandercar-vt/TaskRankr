@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
+import { getSettings } from "@/hooks/use-settings";
 import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
@@ -79,33 +80,17 @@ const Home = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("date");
 
-  // Recursive function to filter task tree
-  const filterAndSortTree = (
-    nodes: TaskResponse[],
-    term: string,
-    sort: SortOption,
-  ): TaskResponse[] => {
-    let result = nodes.reduce((acc: TaskResponse[], node) => {
-      const matches = node.name.toLowerCase().includes(term.toLowerCase());
-      const filteredSubtasks = node.subtasks
-        ? filterAndSortTree(node.subtasks, term, sort)
-        : [];
-
-      if (matches || filteredSubtasks.length > 0) {
-        acc.push({ ...node, subtasks: filteredSubtasks });
-      }
-      return acc;
-    }, []);
-
-    // Apply normal sorting (in-progress tasks are hoisted separately)
+  // Sort function for tasks
+  const sortTasks = (tasks: TaskResponse[], sort: SortOption): TaskResponse[] => {
+    const sorted = [...tasks];
     if (sort === "date") {
-      result.sort((a, b) => {
+      sorted.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA;
       });
     } else {
-      result.sort((a, b) => {
+      sorted.sort((a, b) => {
         const direction = SORT_DIRECTIONS[sort] || "desc";
         const valA =
           LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
@@ -116,7 +101,6 @@ const Home = () => {
           return direction === "desc" ? valB - valA : valA - valB;
         }
 
-        // Secondary sorts
         const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
         const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
         const eA = LEVEL_WEIGHTS[a.ease as string] || 0;
@@ -128,28 +112,44 @@ const Home = () => {
           if (eA !== eB) return eA - eB;
           return jB - jA;
         }
-
         if (sort === "ease") {
           if (pA !== pB) return pB - pA;
           return jB - jA;
         }
-
         if (sort === "enjoyment") {
           if (pA !== pB) return pB - pA;
           return eA - eB;
         }
-
         if (sort === "time") {
           if (pA !== pB) return pB - pA;
           if (eA !== eB) return eA - eB;
           return pB - pA;
         }
-
         return 0;
       });
     }
+    return sorted;
+  };
 
-    return result;
+  // Recursive function to filter task tree
+  const filterAndSortTree = (
+    nodes: TaskResponse[],
+    term: string,
+    sort: SortOption,
+  ): TaskResponse[] => {
+    const result = nodes.reduce((acc: TaskResponse[], node) => {
+      const matches = node.name.toLowerCase().includes(term.toLowerCase());
+      const filteredSubtasks = node.subtasks
+        ? filterAndSortTree(node.subtasks, term, sort)
+        : [];
+
+      if (matches || filteredSubtasks.length > 0) {
+        acc.push({ ...node, subtasks: filteredSubtasks });
+      }
+      return acc;
+    }, []);
+
+    return sortTasks(result, sort);
   };
 
   // Build tree from flat list, excluding completed tasks
@@ -207,13 +207,40 @@ const Home = () => {
     if (!taskTree) return [];
     const sortedTree = filterAndSortTree(taskTree, search, sortBy);
 
-    // Filter pinned tasks by search term too
+    // Filter pinned tasks by search term
     const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
     );
 
-    // Combine: hoisted tasks (in_progress + pinned) at top, then sorted tree
-    return [...filteredPinned, ...sortedTree];
+    // Separate in_progress (always first) from pinned, then sort pinned
+    const inProgressTask = filteredPinned.filter((t) => t.status === "in_progress");
+    const pinnedOnly = filteredPinned.filter((t) => t.status === "pinned");
+    
+    // Sort pinned: by priority first if setting enabled, then by current sort as secondary
+    const settings = getSettings();
+    let sortedPinned: TaskResponse[];
+    if (settings.alwaysSortPinnedByPriority && sortBy !== "priority") {
+      // Sort by priority first, with current sortBy as secondary
+      sortedPinned = [...pinnedOnly].sort((a, b) => {
+        const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
+        const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
+        if (pA !== pB) return pB - pA; // Priority descending
+        
+        // Secondary sort by current sortBy
+        if (sortBy === "date") {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        const direction = SORT_DIRECTIONS[sortBy] || "desc";
+        const valA = LEVEL_WEIGHTS[a[sortBy as keyof TaskResponse] as string] || 0;
+        const valB = LEVEL_WEIGHTS[b[sortBy as keyof TaskResponse] as string] || 0;
+        return direction === "desc" ? valB - valA : valA - valB;
+      });
+    } else {
+      sortedPinned = sortTasks(pinnedOnly, sortBy);
+    }
+
+    // Combine: in_progress first, then sorted pinned, then sorted tree
+    return [...inProgressTask, ...sortedPinned, ...sortedTree];
   }, [taskTree, pinnedTasks, search, sortBy]);
 
   if (isLoading) {
