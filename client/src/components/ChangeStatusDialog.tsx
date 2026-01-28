@@ -162,9 +162,9 @@ export const ChangeStatusDialog = ({
             </AlertDialogAction>
 
             {showTimeInputs && (
-              <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-                <span className="text-xs text-muted-foreground text-center">Time Spent</span>
-                <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/10">
+                <span className="text-xs text-muted-foreground">Time Spent</span>
+                <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Input
                       type="number"
