@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
+import { getSettings } from "@/hooks/use-settings";
 import type { TaskResponse, TaskSortField } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
@@ -214,7 +215,29 @@ const Home = () => {
     // Separate in_progress (always first) from pinned, then sort pinned
     const inProgressTask = filteredPinned.filter((t) => t.status === "in_progress");
     const pinnedOnly = filteredPinned.filter((t) => t.status === "pinned");
-    const sortedPinned = sortTasks(pinnedOnly, sortBy);
+    
+    // Sort pinned: by priority first if setting enabled, then by current sort as secondary
+    const settings = getSettings();
+    let sortedPinned: TaskResponse[];
+    if (settings.alwaysSortPinnedByPriority && sortBy !== "priority") {
+      // Sort by priority first, with current sortBy as secondary
+      sortedPinned = [...pinnedOnly].sort((a, b) => {
+        const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
+        const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
+        if (pA !== pB) return pB - pA; // Priority descending
+        
+        // Secondary sort by current sortBy
+        if (sortBy === "date") {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        const direction = SORT_DIRECTIONS[sortBy] || "desc";
+        const valA = LEVEL_WEIGHTS[a[sortBy as keyof TaskResponse] as string] || 0;
+        const valB = LEVEL_WEIGHTS[b[sortBy as keyof TaskResponse] as string] || 0;
+        return direction === "desc" ? valB - valA : valA - valB;
+      });
+    } else {
+      sortedPinned = sortTasks(pinnedOnly, sortBy);
+    }
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree];

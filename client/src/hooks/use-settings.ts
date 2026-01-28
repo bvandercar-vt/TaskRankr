@@ -3,11 +3,13 @@ import { useState, useEffect, useCallback } from "react";
 export interface AppSettings {
   autoPinNewTasks: boolean;
   enableInProgressTime: boolean;
+  alwaysSortPinnedByPriority: boolean;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   autoPinNewTasks: true,
   enableInProgressTime: true,
+  alwaysSortPinnedByPriority: true,
 };
 
 const STORAGE_KEY = "task-app-settings";
