@@ -103,5 +103,52 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Export all tasks as JSON
+  app.get('/api/tasks/export', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const tasks = await storage.getTasks(userId);
+    
+    // Remove userId and id from exported tasks for privacy/portability
+    const exportData = tasks.map(({ id, userId: _, ...task }) => task);
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="taskvana-export.json"');
+    res.json({ version: 1, exportedAt: new Date().toISOString(), tasks: exportData });
+  });
+
+  // Import tasks from JSON
+  app.post('/api/tasks/import', isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const { tasks } = req.body;
+      
+      if (!Array.isArray(tasks)) {
+        return res.status(400).json({ message: 'Invalid import format: tasks must be an array' });
+      }
+      
+      let imported = 0;
+      for (const taskData of tasks) {
+        // Create each task with the current user's ID
+        await storage.createTask({
+          ...taskData,
+          userId,
+          // Reset status-related fields for imported tasks
+          status: taskData.status || 'open',
+          inProgressTime: taskData.inProgressTime || 0,
+          inProgressStartedAt: null,
+          completedAt: null,
+        });
+        imported++;
+      }
+      
+      res.json({ message: `Successfully imported ${imported} tasks`, imported });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid task data in import' });
+      }
+      throw err;
+    }
+  });
+
   return httpServer;
 }
