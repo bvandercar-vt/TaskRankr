@@ -46,20 +46,45 @@ export async function registerRoutes(
         return res.status(400).json({ message: 'Invalid import format: tasks must be an array' });
       }
       
-      let imported = 0;
+      // Map old IDs to new IDs for preserving hierarchy
+      const idMap = new Map<number, number>();
+      
+      // First pass: create all tasks without parentId
       for (const taskData of tasks) {
-        await storage.createTask({
-          ...taskData,
+        const oldId = taskData.id;
+        const { id, ...rest } = taskData;
+        
+        const newTask = await storage.createTask({
+          name: rest.name,
+          description: rest.description || null,
+          priority: rest.priority || null,
+          ease: rest.ease || null,
+          enjoyment: rest.enjoyment || null,
+          time: rest.time || null,
           userId,
-          status: taskData.status || 'open',
-          inProgressTime: taskData.inProgressTime || 0,
+          parentId: null, // Set in second pass
+          status: rest.status || 'open',
+          inProgressTime: rest.inProgressTime || 0,
           inProgressStartedAt: null,
-          completedAt: null,
+          createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
+          completedAt: rest.completedAt ? new Date(rest.completedAt) : null,
         });
-        imported++;
+        
+        if (oldId && newTask) {
+          idMap.set(oldId, newTask.id);
+        }
       }
       
-      res.json({ message: `Successfully imported ${imported} tasks`, imported });
+      // Second pass: update parentIds using the ID map
+      for (const taskData of tasks) {
+        if (taskData.parentId && idMap.has(taskData.id) && idMap.has(taskData.parentId)) {
+          const newId = idMap.get(taskData.id)!;
+          const newParentId = idMap.get(taskData.parentId)!;
+          await storage.updateTask(newId, userId, { parentId: newParentId });
+        }
+      }
+      
+      res.json({ message: `Successfully imported ${idMap.size} tasks`, imported: idMap.size });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid task data in import' });
