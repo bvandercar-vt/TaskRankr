@@ -109,7 +109,7 @@ export const ChangeStatusDialog = ({
                     data-testid="button-stop-progress"
                   >
                     <StopCircle className="w-4 h-4" />
-                    Stop Working
+                    Stop Progress
                   </Button>
                 ) : (
                   <Button
@@ -119,7 +119,7 @@ export const ChangeStatusDialog = ({
                     data-testid="button-start-progress"
                   >
                     <Clock className="w-4 h-4" />
-                    Start Working
+                    In Progress
                   </Button>
                 )}
 
