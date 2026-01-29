@@ -103,3 +103,23 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type CreateTaskRequest = InsertTask;
 export type UpdateTaskRequest = Partial<InsertTask>;
 export type TaskResponse = Task & { subtasks?: TaskResponse[] };
+
+// User Settings
+export const SORT_OPTIONS = ["date", "priority", "ease", "enjoyment", "time"] as const;
+export type SortOption = (typeof SORT_OPTIONS)[number];
+
+export const userSettings = pgTable("user_settings", {
+  userId: varchar("user_id").primaryKey(),
+  autoPinNewTasks: boolean("auto_pin_new_tasks").default(true).notNull(),
+  enableInProgressTime: boolean("enable_in_progress_time").default(true).notNull(),
+  alwaysSortPinnedByPriority: boolean("always_sort_pinned_by_priority").default(true).notNull(),
+  sortBy: text("sort_by").default("priority").notNull(),
+});
+
+export const insertUserSettingsSchema = createInsertSchema(userSettings, {
+  userId: z.string().min(1),
+  sortBy: z.enum(SORT_OPTIONS).optional(),
+}).omit({});
+
+export type UserSettings = typeof userSettings.$inferSelect;
+export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
