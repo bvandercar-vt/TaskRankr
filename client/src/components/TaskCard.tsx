@@ -197,9 +197,14 @@ export const TaskCard = ({
                 const visibleKey = `${field}Visible` as keyof typeof settings;
                 if (!settings[visibleKey]) return null;
                 const value = task[field];
-                return value ? (
-                  <TaskBadge key={field} value={value} styleClass={getAttributeStyle(field, value)} />
-                ) : null;
+                const hasValue = value && value !== "none";
+                return (
+                  <TaskBadge 
+                    key={field} 
+                    value={hasValue ? value : "---"} 
+                    styleClass={hasValue ? getAttributeStyle(field, value) : "opacity-0"} 
+                  />
+                );
               })}
             </div>
             {showCompletedDate && (
