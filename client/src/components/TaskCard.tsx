@@ -194,6 +194,8 @@ export const TaskCard = ({
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
               {(["priority", "ease", "enjoyment", "time"] as const).map((field) => {
+                const visibleKey = `${field}Visible` as keyof typeof settings;
+                if (!settings[visibleKey]) return null;
                 const value = task[field];
                 return value ? (
                   <TaskBadge key={field} value={value} styleClass={getAttributeStyle(field, value)} />
