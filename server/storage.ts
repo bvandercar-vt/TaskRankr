@@ -6,25 +6,25 @@ import {
   type UpdateTaskRequest,
   type TaskStatus
 } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getTasks(userId: string): Promise<Task[]>;
-  getTask(id: number, userId: string): Promise<Task | undefined>;
+  getTasks(): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
   createTask(task: InsertTask): Promise<Task>;
-  updateTask(id: number, userId: string, updates: UpdateTaskRequest): Promise<Task>;
-  deleteTask(id: number, userId: string): Promise<void>;
-  setTaskStatus(id: number, userId: string, newStatus: TaskStatus): Promise<Task>;
+  updateTask(id: number, updates: UpdateTaskRequest): Promise<Task>;
+  deleteTask(id: number): Promise<void>;
+  setTaskStatus(id: number, newStatus: TaskStatus): Promise<Task>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getTasks(userId: string): Promise<Task[]> {
-    const result = await db.select().from(tasks).where(eq(tasks.userId, userId)).orderBy(tasks.id);
+  async getTasks(): Promise<Task[]> {
+    const result = await db.select().from(tasks).orderBy(tasks.id);
     return result as Task[];
   }
 
-  async getTask(id: number, userId: string): Promise<Task | undefined> {
-    const [task] = await db.select().from(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
     return task as Task | undefined;
   }
 
@@ -33,8 +33,8 @@ export class DatabaseStorage implements IStorage {
     return task as Task;
   }
 
-  async setTaskStatus(id: number, userId: string, newStatus: TaskStatus): Promise<Task> {
-    const currentTask = await this.getTask(id, userId);
+  async setTaskStatus(id: number, newStatus: TaskStatus): Promise<Task> {
+    const currentTask = await this.getTask(id);
     if (!currentTask) {
       throw new Error('Task not found');
     }
@@ -45,7 +45,7 @@ export class DatabaseStorage implements IStorage {
     // Handle status transitions
     if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
       // Starting in-progress: demote current in_progress task to pinned
-      const allTasks = await this.getTasks(userId);
+      const allTasks = await this.getTasks();
       const currentInProgressTask = allTasks.find(t => t.status === 'in_progress' && t.id !== id);
       if (currentInProgressTask) {
         // Stop timer on old in-progress task and set to pinned
@@ -87,33 +87,33 @@ export class DatabaseStorage implements IStorage {
 
     // Cascade status to children for completed/restored
     if (newStatus === 'completed' || (oldStatus === 'completed' && newStatus === 'open')) {
-      const childTasks = await db.select().from(tasks).where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)));
+      const childTasks = await db.select().from(tasks).where(eq(tasks.parentId, id));
       for (const child of childTasks) {
-        await this.setTaskStatus(child.id, userId, newStatus);
+        await this.setTaskStatus(child.id, newStatus);
       }
     }
 
     return task as Task;
   }
 
-  async updateTask(id: number, userId: string, updates: UpdateTaskRequest): Promise<Task> {
+  async updateTask(id: number, updates: UpdateTaskRequest): Promise<Task> {
     const [task] = await db
       .update(tasks)
       .set(updates)
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+      .where(eq(tasks.id, id))
       .returning();
 
     return task as Task;
   }
 
-  async deleteTask(id: number, userId: string): Promise<void> {
+  async deleteTask(id: number): Promise<void> {
     // Delete all subtasks first (recursive)
-    const childTasks = await db.select().from(tasks).where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)));
+    const childTasks = await db.select().from(tasks).where(eq(tasks.parentId, id));
     for (const child of childTasks) {
-      await this.deleteTask(child.id, userId);
+      await this.deleteTask(child.id);
     }
     
-    await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+    await db.delete(tasks).where(eq(tasks.id, id));
   }
 }
 
