@@ -115,6 +115,15 @@ export const userSettings = pgTable("user_settings", {
   enableInProgressTime: boolean("enable_in_progress_time").default(true).notNull(),
   alwaysSortPinnedByPriority: boolean("always_sort_pinned_by_priority").default(true).notNull(),
   sortBy: text("sort_by").default("priority").notNull(),
+  // Attribute visibility settings
+  priorityVisible: boolean("priority_visible").default(true).notNull(),
+  priorityRequired: boolean("priority_required").default(true).notNull(),
+  easeVisible: boolean("ease_visible").default(true).notNull(),
+  easeRequired: boolean("ease_required").default(true).notNull(),
+  enjoymentVisible: boolean("enjoyment_visible").default(true).notNull(),
+  enjoymentRequired: boolean("enjoyment_required").default(true).notNull(),
+  timeVisible: boolean("time_visible").default(true).notNull(),
+  timeRequired: boolean("time_required").default(true).notNull(),
 });
 
 export const insertUserSettingsSchema = createInsertSchema(userSettings, {
