@@ -18,7 +18,7 @@ const Landing = () => (
         <p className="text-lg text-muted-foreground" data-testid="text-description">
           Rate priority, ease, enjoyment, and time for each task. Sort by any attribute at a glance.
         </p>
-        <a href="/api/login">
+        <a href="/api/login" className="mt-4 inline-block">
           <Button size="lg" className="text-lg px-8" data-testid="button-get-started">
             Get Started
           </Button>
