@@ -49,15 +49,16 @@ export const taskStatusEnum = z.enum(TASK_STATUSES);
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
+  "none",
   "lowest",
   "low",
   "medium",
   "high",
   "highest",
 ] as const;
-export const EASE_LEVELS = ["easy", "medium", "hard"] as const;
-export const ENJOYMENT_LEVELS = ["low", "medium", "high"] as const;
-export const TIME_LEVELS = ["low", "medium", "high"] as const;
+export const EASE_LEVELS = ["none", "easy", "medium", "hard"] as const;
+export const ENJOYMENT_LEVELS = ["none", "low", "medium", "high"] as const;
+export const TIME_LEVELS = ["none", "low", "medium", "high"] as const;
 
 export type Priority = (typeof PRIORITY_LEVELS)[number];
 export type Ease = (typeof EASE_LEVELS)[number];
@@ -114,6 +115,15 @@ export const userSettings = pgTable("user_settings", {
   enableInProgressTime: boolean("enable_in_progress_time").default(true).notNull(),
   alwaysSortPinnedByPriority: boolean("always_sort_pinned_by_priority").default(true).notNull(),
   sortBy: text("sort_by").default("priority").notNull(),
+  // Attribute visibility settings
+  priorityVisible: boolean("priority_visible").default(true).notNull(),
+  priorityRequired: boolean("priority_required").default(true).notNull(),
+  easeVisible: boolean("ease_visible").default(true).notNull(),
+  easeRequired: boolean("ease_required").default(true).notNull(),
+  enjoymentVisible: boolean("enjoyment_visible").default(true).notNull(),
+  enjoymentRequired: boolean("enjoyment_required").default(true).notNull(),
+  timeVisible: boolean("time_visible").default(true).notNull(),
+  timeRequired: boolean("time_required").default(true).notNull(),
 });
 
 export const insertUserSettingsSchema = createInsertSchema(userSettings, {

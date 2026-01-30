@@ -334,34 +334,42 @@ const Home = () => {
               current={sortBy}
               onSelect={setSortBy}
             />
-            <SortButton
-              label="Priority"
-              value="priority"
-              className="w-16"
-              current={sortBy}
-              onSelect={setSortBy}
-            />
-            <SortButton
-              label="Ease"
-              value="ease"
-              className="w-16"
-              current={sortBy}
-              onSelect={setSortBy}
-            />
-            <SortButton
-              label="Enjoy"
-              value="enjoyment"
-              className="w-16"
-              current={sortBy}
-              onSelect={setSortBy}
-            />
-            <SortButton
-              label="Time"
-              value="time"
-              className="w-16"
-              current={sortBy}
-              onSelect={setSortBy}
-            />
+            {settings.priorityVisible && (
+              <SortButton
+                label="Priority"
+                value="priority"
+                className="w-16"
+                current={sortBy}
+                onSelect={setSortBy}
+              />
+            )}
+            {settings.easeVisible && (
+              <SortButton
+                label="Ease"
+                value="ease"
+                className="w-16"
+                current={sortBy}
+                onSelect={setSortBy}
+              />
+            )}
+            {settings.enjoymentVisible && (
+              <SortButton
+                label="Enjoy"
+                value="enjoyment"
+                className="w-16"
+                current={sortBy}
+                onSelect={setSortBy}
+              />
+            )}
+            {settings.timeVisible && (
+              <SortButton
+                label="Time"
+                value="time"
+                className="w-16"
+                current={sortBy}
+                onSelect={setSortBy}
+              />
+            )}
           </div>
         </div>
 
