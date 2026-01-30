@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useTasks } from "@/hooks/use-tasks";
-import { getSettings } from "@/hooks/use-settings";
-import type { TaskResponse, TaskSortField } from "@shared/schema";
+import { useSettings, getSettings } from "@/hooks/use-settings";
+import type { TaskResponse, TaskSortField, SortOption } from "@shared/schema";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/primitives/button";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
@@ -22,8 +22,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/primitives/dropdown-menu";
-
-type SortOption = "date" | TaskSortField;
 
 const SortButton = ({
   label,
@@ -76,9 +74,12 @@ const SORT_DIRECTIONS: Record<string, "asc" | "desc"> = {
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks();
   const { openCreateDialog } = useTaskDialog();
+  const { settings, updateSetting } = useSettings();
   const [search, setSearch] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("priority");
+  
+  const sortBy = settings.sortBy;
+  const setSortBy = (value: SortOption) => updateSetting("sortBy", value);
 
   // Sort function for tasks
   const sortTasks = (tasks: TaskResponse[], sort: SortOption): TaskResponse[] => {

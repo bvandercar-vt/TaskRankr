@@ -173,5 +173,18 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Settings routes
+  app.get('/api/settings', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const settings = await storage.getSettings(userId);
+    res.json(settings);
+  });
+
+  app.put('/api/settings', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const settings = await storage.updateSettings(userId, req.body);
+    res.json(settings);
+  });
+
   return httpServer;
 }
