@@ -178,15 +178,21 @@ export const TaskCard = ({
               {task.name}
             </h3>
             {isInProgress && (
-              <TaskBadge
-                value="In Progress"
-                styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
-              />
+              <div 
+                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+                className="cursor-pointer"
+              >
+                <TaskBadge
+                  value="In Progress"
+                  styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
+                />
+              </div>
             )}
             {isPinned && (
               <Pin 
-                className="w-4 h-4 text-slate-400  shrink-0 rotate-45" 
-                data-testid="icon-pinned" 
+                className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer" 
+                data-testid="icon-pinned"
+                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
               />
             )}
           </div>
