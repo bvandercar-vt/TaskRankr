@@ -1,54 +1,52 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import type { SortOption } from "@shared/schema";
 
 export interface AppSettings {
+  userId: string;
   autoPinNewTasks: boolean;
   enableInProgressTime: boolean;
   alwaysSortPinnedByPriority: boolean;
+  sortBy: SortOption;
 }
 
-const DEFAULT_SETTINGS: AppSettings = {
+const DEFAULT_SETTINGS: Omit<AppSettings, "userId"> = {
   autoPinNewTasks: true,
   enableInProgressTime: true,
   alwaysSortPinnedByPriority: true,
-};
-
-const STORAGE_KEY = "task-app-settings";
-
-const loadSettings = (): AppSettings => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-    }
-  } catch (e) {
-    console.error("Failed to load settings:", e);
-  }
-  return DEFAULT_SETTINGS;
-};
-
-const saveSettings = (settings: AppSettings) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch (e) {
-    console.error("Failed to save settings:", e);
-  }
+  sortBy: "priority",
 };
 
 export const useSettings = () => {
-  const [settings, setSettings] = useState<AppSettings>(loadSettings);
+  const { data: settings, isLoading } = useQuery<AppSettings>({
+    queryKey: ["/api/settings"],
+  });
 
-  useEffect(() => {
-    saveSettings(settings);
-  }, [settings]);
+  const updateMutation = useMutation({
+    mutationFn: async (updates: Partial<AppSettings>) => {
+      const res = await apiRequest("PUT", "/api/settings", updates);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+    },
+  });
 
-  const updateSetting = useCallback(<K extends keyof AppSettings>(
+  const updateSetting = <K extends keyof Omit<AppSettings, "userId">>(
     key: K,
     value: AppSettings[K]
   ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  }, []);
+    updateMutation.mutate({ [key]: value });
+  };
 
-  return { settings, updateSetting };
+  return {
+    settings: settings || { ...DEFAULT_SETTINGS, userId: "" },
+    isLoading,
+    updateSetting,
+  };
 };
 
-export const getSettings = (): AppSettings => loadSettings();
+export const getSettings = (): Omit<AppSettings, "userId"> => {
+  const cached = queryClient.getQueryData<AppSettings>(["/api/settings"]);
+  return cached || DEFAULT_SETTINGS;
+};

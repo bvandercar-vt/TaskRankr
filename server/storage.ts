@@ -1,10 +1,12 @@
 import { db } from "./db";
 import {
   tasks,
+  userSettings,
   type Task,
   type InsertTask,
   type UpdateTaskRequest,
-  type TaskStatus
+  type TaskStatus,
+  type UserSettings
 } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -15,6 +17,8 @@ export interface IStorage {
   updateTask(id: number, userId: string, updates: UpdateTaskRequest): Promise<Task>;
   deleteTask(id: number, userId: string): Promise<void>;
   setTaskStatus(id: number, userId: string, newStatus: TaskStatus): Promise<Task>;
+  getSettings(userId: string): Promise<UserSettings>;
+  updateSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -114,6 +118,29 @@ export class DatabaseStorage implements IStorage {
     }
     
     await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+  }
+
+  async getSettings(userId: string): Promise<UserSettings> {
+    const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
+    if (settings) {
+      return settings;
+    }
+    // Create default settings for new user
+    const [newSettings] = await db.insert(userSettings).values({ userId }).returning();
+    return newSettings;
+  }
+
+  async updateSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+    // Ensure settings exist first
+    await this.getSettings(userId);
+    
+    const { userId: _, ...updateData } = updates;
+    const [settings] = await db
+      .update(userSettings)
+      .set(updateData)
+      .where(eq(userSettings.userId, userId))
+      .returning();
+    return settings;
   }
 }
 
