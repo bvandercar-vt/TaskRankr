@@ -66,6 +66,13 @@ const Settings = () => {
             />
           </div>
         </div>
+
+        <div className="mt-16 text-center text-muted-foreground">
+          <p className="text-sm font-medium" data-testid="text-app-name">TaskVana</p>
+          <p className="text-xs mt-1" data-testid="text-app-description">
+            Track tasks with priority, ease, enjoyment, and time ratings.
+          </p>
+        </div>
       </main>
     </div>
   );

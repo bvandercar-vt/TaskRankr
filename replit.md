@@ -1,8 +1,8 @@
-# replit.md
+# TaskVana
 
 ## Overview
 
-This is a task management application with hierarchical/nested task support. Users can create, edit, and organize tasks with multiple attributes (priority, ease, enjoyment, time) and nest subtasks under parent tasks. The app features a modern dark-themed UI with smooth animations and a recursive tree structure for task organization.
+TaskVana is a task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Sort by any attribute at a glance. Features hierarchical/nested task support, a modern dark-themed UI with smooth animations, and a recursive tree structure for task organization.
 
 ## User Preferences
 
