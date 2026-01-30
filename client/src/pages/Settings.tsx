@@ -6,14 +6,17 @@ import { Link } from "wouter";
 import { useSettings } from "@/hooks/use-settings";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useTasks } from "@/hooks/use-tasks";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: tasks } = useTasks();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const hasNoTasks = !tasks || tasks.length === 0;
 
   const handleExport = () => {
     window.location.href = '/api/tasks/export';
@@ -107,12 +110,13 @@ const Settings = () => {
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
-          <h3 className="font-semibold text-foreground mb-3">Data</h3>
-          <div className="flex flex-wrap gap-3">
+          <h3 className="font-semibold text-foreground mb-3 text-center">Data</h3>
+          <div className="flex flex-wrap justify-center gap-3">
             <Button 
               variant="outline" 
               className="gap-2" 
               onClick={handleExport}
+              disabled={hasNoTasks}
               data-testid="button-export"
             >
               <Download className="w-4 h-4" />
@@ -137,7 +141,7 @@ const Settings = () => {
               data-testid="input-import-file"
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.
           </p>
         </div>
