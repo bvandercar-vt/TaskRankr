@@ -5,18 +5,13 @@ import {
   integer,
   boolean,
   timestamp,
-  varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Re-export auth models
-export * from "./models/auth";
-
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(), // Owner of the task
   name: text("name").notNull(),
   description: text("description"),
   priority: text("priority"),
@@ -74,7 +69,6 @@ export const timeEnum = z.enum(TIME_LEVELS);
 
 export const insertTaskSchema = createInsertSchema(tasks, {
   name: z.string().min(1, "Name is required"),
-  userId: z.string().min(1, "User ID is required"),
   status: taskStatusEnum.optional(),
   priority: priorityEnum.nullable().optional(),
   ease: easeEnum.nullable().optional(),
