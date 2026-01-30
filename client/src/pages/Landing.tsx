@@ -4,7 +4,7 @@ import { CheckCircle, ListTodo, Clock, Star } from "lucide-react";
 const Landing = () => (
   <div className="min-h-screen bg-background text-foreground flex flex-col">
     <header className="p-6 flex justify-between items-center">
-      <h1 className="text-xl font-bold" data-testid="text-logo">TaskVana</h1>
+      <h1 className="text-xl font-bold" data-testid="text-logo">TaskRankr</h1>
       <a href="/api/login">
         <Button data-testid="button-login-header">Log In</Button>
       </a>
@@ -46,7 +46,7 @@ const Landing = () => (
     </main>
 
     <footer className="p-6 text-center text-sm text-muted-foreground" data-testid="footer">
-      <p data-testid="text-footer-brand">TaskVana</p>
+      <p data-testid="text-footer-brand">TaskRankr</p>
     </footer>
   </div>
 );

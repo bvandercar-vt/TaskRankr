@@ -1,8 +1,8 @@
-# TaskVana
+# TaskRankr
 
 ## Overview
 
-TaskVana is a task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Sort by any attribute at a glance. Features hierarchical/nested task support, a modern dark-themed UI with smooth animations, and a recursive tree structure for task organization.
+TaskRankr is a task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Sort by any attribute at a glance. Features hierarchical/nested task support, a modern dark-themed UI with smooth animations, and a recursive tree structure for task organization.
 
 ## User Preferences
 
