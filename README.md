@@ -1,4 +1,4 @@
-# TaskVana
+# TaskRankr
 
 Track tasks with priority, ease, enjoyment, and time ratings. Sort by any attribute at a glance.
 
