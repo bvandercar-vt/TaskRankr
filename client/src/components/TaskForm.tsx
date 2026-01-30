@@ -67,14 +67,16 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId || undefined);
 
-  const extendedSchema = insertTaskSchema.extend({
+  const baseFormSchema = insertTaskSchema.omit({ userId: true });
+  
+  const extendedSchema = baseFormSchema.extend({
     priority: z.string().min(1, "Priority is required"),
     ease: z.string().min(1, "Ease is required"),
     enjoyment: z.string().min(1, "Enjoyment is required"),
     time: z.string().min(1, "Time is required"),
   });
 
-  const formSchemaToUse = parentId ? insertTaskSchema : extendedSchema;
+  const formSchemaToUse = parentId ? baseFormSchema : extendedSchema;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchemaToUse),
