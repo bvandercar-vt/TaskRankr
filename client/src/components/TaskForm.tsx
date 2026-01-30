@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   insertTaskSchema,
   type Task,
@@ -9,6 +9,7 @@ import {
   ENJOYMENT_LEVELS,
   TIME_LEVELS,
 } from "@shared/schema";
+import { useSettings, type AppSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/primitives/button";
 import {
   Form,
@@ -57,6 +58,23 @@ export interface TaskFormProps {
   onAddChild?: (parentId: number) => void;
 }
 
+type AttributeName = "priority" | "ease" | "enjoyment" | "time";
+
+const ATTRIBUTE_CONFIG = [
+  {
+    name: "priority" as const,
+    label: "Priority",
+    levels: PRIORITY_LEVELS,
+  },
+  { name: "ease" as const, label: "Ease", levels: EASE_LEVELS },
+  {
+    name: "enjoyment" as const,
+    label: "Enjoyment",
+    levels: ENJOYMENT_LEVELS,
+  },
+  { name: "time" as const, label: "Time", levels: TIME_LEVELS },
+];
+
 export const TaskForm = ({
   onSubmit,
   isPending,
@@ -66,6 +84,23 @@ export const TaskForm = ({
   onAddChild,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId || undefined);
+  const { settings } = useSettings();
+
+  const getVisibility = (attr: AttributeName): boolean => {
+    const key = `${attr}Visible` as keyof AppSettings;
+    return settings[key] as boolean;
+  };
+
+  const getRequired = (attr: AttributeName): boolean => {
+    if (!getVisibility(attr)) return false;
+    const key = `${attr}Required` as keyof AppSettings;
+    return settings[key] as boolean;
+  };
+
+  const visibleAttributes = useMemo(() => 
+    ATTRIBUTE_CONFIG.filter(attr => getVisibility(attr.name)),
+    [settings]
+  );
 
   const baseFormSchema = insertTaskSchema.omit({ userId: true });
   
@@ -150,7 +185,21 @@ export const TaskForm = ({
     onSubmit(formattedData as any);
   };
 
-  const isValid = form.formState.isValid;
+  const watchedValues = form.watch();
+  
+  const requiredAttributesFilled = useMemo(() => {
+    for (const attr of visibleAttributes) {
+      if (getRequired(attr.name)) {
+        const value = watchedValues[attr.name as keyof typeof watchedValues];
+        if (!value || value === "none") {
+          return false;
+        }
+      }
+    }
+    return true;
+  }, [watchedValues, visibleAttributes, settings]);
+
+  const isValid = form.formState.isValid && requiredAttributesFilled;
 
   return (
     <Form {...form}>
@@ -191,78 +240,78 @@ export const TaskForm = ({
             )}
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            {(
-              [
-                {
-                  name: "priority",
-                  label: "Priority",
-                  levels: PRIORITY_LEVELS,
-                },
-                { name: "ease", label: "Ease", levels: EASE_LEVELS },
-                {
-                  name: "enjoyment",
-                  label: "Enjoyment",
-                  levels: ENJOYMENT_LEVELS,
-                },
-                { name: "time", label: "Time", levels: TIME_LEVELS },
-              ] as const
-            ).map((attr) => (
-              <FormField
-                key={attr.name}
-                control={form.control}
-                name={attr.name as any}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {attr.label}
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || (parentId ? "none" : "")}
-                    >
-                      <FormControl>
-                        <SelectTrigger
-                          className={cn(
-                            "bg-secondary/20 border-white/5 capitalize font-semibold h-10",
-                            field.value && field.value !== "none"
-                              ? getAttributeStyle(attr.name, field.value)
-                              : "text-muted-foreground",
+          {visibleAttributes.length > 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              {visibleAttributes.map((attr) => {
+                const isRequired = getRequired(attr.name);
+                const showNoneOption = !isRequired;
+                
+                return (
+                  <FormField
+                    key={attr.name}
+                    control={form.control}
+                    name={attr.name as any}
+                    render={({ field }) => {
+                      const hasError = isRequired && (!field.value || field.value === "none");
+                      return (
+                        <FormItem>
+                          <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            {attr.label}
+                            {isRequired && <span className="text-destructive ml-1">*</span>}
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || "none"}
+                          >
+                            <FormControl>
+                              <SelectTrigger
+                                className={cn(
+                                  "bg-secondary/20 capitalize font-semibold h-10",
+                                  hasError 
+                                    ? "border-destructive/50" 
+                                    : "border-white/5",
+                                  field.value && field.value !== "none"
+                                    ? getAttributeStyle(attr.name, field.value)
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                <SelectValue placeholder="Select..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-card border-white/10 z-[200]">
+                              {showNoneOption && (
+                                <SelectItem
+                                  value="none"
+                                  className="text-muted-foreground italic"
+                                >
+                                  None
+                                </SelectItem>
+                              )}
+                              {attr.levels.filter(level => level !== "none").map((level) => (
+                                <SelectItem
+                                  key={level}
+                                  value={level}
+                                  className={cn(
+                                    "capitalize font-semibold",
+                                    getAttributeStyle(attr.name, level),
+                                  )}
+                                >
+                                  {level}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {hasError && (
+                            <p className="text-[10px] text-destructive mt-1">Required</p>
                           )}
-                        >
-                          <SelectValue
-                            placeholder={parentId ? "None" : "Select..."}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-card border-white/10 z-[200]">
-                        {parentId && (
-                          <SelectItem
-                            value="none"
-                            className="text-muted-foreground italic"
-                          >
-                            None
-                          </SelectItem>
-                        )}
-                        {attr.levels.map((level) => (
-                          <SelectItem
-                            key={level}
-                            value={level}
-                            className={cn(
-                              "capitalize font-semibold",
-                              getAttributeStyle(attr.name, level),
-                            )}
-                          >
-                            {level}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
 
           <FormField
             control={form.control}

@@ -144,7 +144,13 @@ const Settings = () => {
                     <td className="py-3 text-center">
                       <Checkbox
                         checked={isVisible}
-                        onCheckedChange={(checked: boolean | "indeterminate") => updateSetting(visibleKey as any, !!checked)}
+                        onCheckedChange={(checked: boolean | "indeterminate") => {
+                          const newVisible = !!checked;
+                          updateSetting(visibleKey as any, newVisible);
+                          if (!newVisible && isRequired) {
+                            updateSetting(requiredKey as any, false);
+                          }
+                        }}
                         data-testid={`checkbox-${key}-visible`}
                       />
                     </td>
