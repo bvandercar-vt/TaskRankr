@@ -49,15 +49,16 @@ export const taskStatusEnum = z.enum(TASK_STATUSES);
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
+  "none",
   "lowest",
   "low",
   "medium",
   "high",
   "highest",
 ] as const;
-export const EASE_LEVELS = ["easy", "medium", "hard"] as const;
-export const ENJOYMENT_LEVELS = ["low", "medium", "high"] as const;
-export const TIME_LEVELS = ["low", "medium", "high"] as const;
+export const EASE_LEVELS = ["none", "easy", "medium", "hard"] as const;
+export const ENJOYMENT_LEVELS = ["none", "low", "medium", "high"] as const;
+export const TIME_LEVELS = ["none", "low", "medium", "high"] as const;
 
 export type Priority = (typeof PRIORITY_LEVELS)[number];
 export type Ease = (typeof EASE_LEVELS)[number];

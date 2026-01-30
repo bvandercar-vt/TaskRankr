@@ -6,13 +6,7 @@ import type {
   TaskSortField,
 } from "@shared/schema";
 
-type OrNone<T extends string> = T | "none";
-type PriorityOrNone = OrNone<Priority>;
-type EaseOrNone = OrNone<Ease>;
-type EnjoymentOrNone = OrNone<Enjoyment>;
-type TimeOrNone = OrNone<Time>;
-
-const PRIORITY_STYLES: Record<PriorityOrNone, string> = {
+const PRIORITY_STYLES: Record<Priority, string> = {
   highest: "text-red-700 bg-red-400/10 border-red-500/20",
   high: "text-red-400 bg-red-400/10 border-red-500/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
@@ -21,21 +15,21 @@ const PRIORITY_STYLES: Record<PriorityOrNone, string> = {
   none: "text-muted-foreground italic",
 };
 
-const EASE_STYLES: Record<EaseOrNone, string> = {
+const EASE_STYLES: Record<Ease, string> = {
   hard: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   easy: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   none: "text-muted-foreground italic",
 };
 
-const ENJOYMENT_STYLES: Record<EnjoymentOrNone, string> = {
+const ENJOYMENT_STYLES: Record<Enjoyment, string> = {
   low: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   high: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   none: "text-muted-foreground italic",
 };
 
-const TIME_STYLES: Record<TimeOrNone, string> = {
+const TIME_STYLES: Record<Time, string> = {
   high: "text-red-400 bg-red-400/10 border-red-400/20",
   medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",

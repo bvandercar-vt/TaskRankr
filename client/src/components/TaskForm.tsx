@@ -69,14 +69,7 @@ export const TaskForm = ({
 
   const baseFormSchema = insertTaskSchema.omit({ userId: true });
   
-  const extendedSchema = baseFormSchema.extend({
-    priority: z.string().min(1, "Priority is required"),
-    ease: z.string().min(1, "Ease is required"),
-    enjoyment: z.string().min(1, "Enjoyment is required"),
-    time: z.string().min(1, "Time is required"),
-  });
-
-  const formSchemaToUse = parentId ? baseFormSchema : extendedSchema;
+  const formSchemaToUse = baseFormSchema;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchemaToUse),
@@ -85,10 +78,10 @@ export const TaskForm = ({
       ? {
           name: initialData.name,
           description: initialData.description || "",
-          priority: (initialData.priority as any) || (parentId ? "none" : ""),
-          ease: (initialData.ease as any) || (parentId ? "none" : ""),
-          enjoyment: (initialData.enjoyment as any) || (parentId ? "none" : ""),
-          time: (initialData.time as any) || (parentId ? "none" : ""),
+          priority: initialData.priority || "none",
+          ease: initialData.ease || "none",
+          enjoyment: initialData.enjoyment || "none",
+          time: initialData.time || "none",
           parentId: initialData.parentId,
           createdAt: initialData.createdAt
             ? new Date(initialData.createdAt)
@@ -101,10 +94,10 @@ export const TaskForm = ({
       : {
           name: "",
           description: "",
-          priority: parentId ? "none" : "",
-          ease: parentId ? "none" : "",
-          enjoyment: parentId ? "none" : "",
-          time: parentId ? "none" : "",
+          priority: "none",
+          ease: "none",
+          enjoyment: "none",
+          time: "none",
           parentId: parentId || null,
           createdAt: new Date(),
           inProgressTime: 0,
@@ -119,11 +112,10 @@ export const TaskForm = ({
         ? {
             name: initialData.name,
             description: initialData.description || "",
-            priority: (initialData.priority as any) || (parentId ? "none" : ""),
-            ease: (initialData.ease as any) || (parentId ? "none" : ""),
-            enjoyment:
-              (initialData.enjoyment as any) || (parentId ? "none" : ""),
-            time: (initialData.time as any) || (parentId ? "none" : ""),
+            priority: initialData.priority || "none",
+            ease: initialData.ease || "none",
+            enjoyment: initialData.enjoyment || "none",
+            time: initialData.time || "none",
             parentId: initialData.parentId,
             createdAt: initialData.createdAt
               ? new Date(initialData.createdAt)
@@ -136,10 +128,10 @@ export const TaskForm = ({
         : {
             name: "",
             description: "",
-            priority: parentId ? "none" : "",
-            ease: parentId ? "none" : "",
-            enjoyment: parentId ? "none" : "",
-            time: parentId ? "none" : "",
+            priority: "none",
+            ease: "none",
+            enjoyment: "none",
+            time: "none",
             parentId: parentId || null,
             createdAt: new Date(),
             inProgressTime: 0,
@@ -150,14 +142,10 @@ export const TaskForm = ({
   const onSubmitWithNulls = (data: FormValues) => {
     const formattedData = {
       ...data,
-      priority:
-        data.priority === "none" || data.priority === "" ? null : data.priority,
-      ease: data.ease === "none" || data.ease === "" ? null : data.ease,
-      enjoyment:
-        data.enjoyment === "none" || data.enjoyment === ""
-          ? null
-          : data.enjoyment,
-      time: data.time === "none" || data.time === "" ? null : data.time,
+      priority: data.priority === "none" ? null : data.priority,
+      ease: data.ease === "none" ? null : data.ease,
+      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
+      time: data.time === "none" ? null : data.time,
     };
     onSubmit(formattedData as any);
   };
