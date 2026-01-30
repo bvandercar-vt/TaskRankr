@@ -1,11 +1,36 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Switch } from "@/components/primitives/forms/switch";
 import { Link } from "wouter";
 import { useSettings } from "@/hooks/use-settings";
+import { useState } from "react";
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportTasks = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch("/api/tasks");
+      if (!response.ok) throw new Error("Failed to fetch tasks");
+      const tasks = await response.json();
+      
+      const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tasks-export-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -64,6 +89,27 @@ const Settings = () => {
               onCheckedChange={(checked: boolean) => updateSetting("alwaysSortPinnedByPriority", checked)}
               data-testid="switch-sort-pinned-priority"
             />
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <h2 className="text-lg font-semibold" data-testid="heading-data">Data</h2>
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">Export Tasks</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Download all your tasks as a JSON file.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleExportTasks}
+              disabled={isExporting}
+              data-testid="button-export-tasks"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
           </div>
         </div>
 
