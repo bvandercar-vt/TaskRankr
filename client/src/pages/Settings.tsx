@@ -2,12 +2,21 @@ import { useRef, useState } from "react";
 import { ArrowLeft, LogOut, Download, Upload } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Switch } from "@/components/primitives/forms/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
-import { useSettings } from "@/hooks/use-settings";
+import { useSettings, type AppSettings } from "@/hooks/use-settings";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+
+type AttributeKey = "priority" | "ease" | "enjoyment" | "time";
+const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
+  { key: "priority", label: "Priority" },
+  { key: "ease", label: "Ease" },
+  { key: "enjoyment", label: "Enjoyment" },
+  { key: "time", label: "Time" },
+];
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
@@ -107,6 +116,52 @@ const Settings = () => {
               data-testid="switch-sort-pinned-priority"
             />
           </div>
+        </div>
+
+        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+          <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Control which attributes appear in forms and task cards.
+          </p>
+          <table className="w-full" data-testid="table-attribute-settings">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="text-left py-2 font-medium text-sm text-muted-foreground">Attribute</th>
+                <th className="text-center py-2 font-medium text-sm text-muted-foreground">Visible</th>
+                <th className="text-center py-2 font-medium text-sm text-muted-foreground">Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ATTRIBUTES.map(({ key, label }) => {
+                const visibleKey = `${key}Visible` as keyof AppSettings;
+                const requiredKey = `${key}Required` as keyof AppSettings;
+                const isVisible = settings[visibleKey] as boolean;
+                const isRequired = settings[requiredKey] as boolean;
+                
+                return (
+                  <tr key={key} className="border-b border-white/5">
+                    <td className="py-3 text-foreground">{label}</td>
+                    <td className="py-3 text-center">
+                      <Checkbox
+                        checked={isVisible}
+                        onCheckedChange={(checked: boolean | "indeterminate") => updateSetting(visibleKey as any, !!checked)}
+                        data-testid={`checkbox-${key}-visible`}
+                      />
+                    </td>
+                    <td className="py-3 text-center">
+                      <Checkbox
+                        checked={isRequired}
+                        onCheckedChange={(checked: boolean | "indeterminate") => updateSetting(requiredKey as any, !!checked)}
+                        disabled={!isVisible}
+                        className={!isVisible ? "opacity-50" : ""}
+                        data-testid={`checkbox-${key}-required`}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
