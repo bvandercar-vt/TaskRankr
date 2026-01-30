@@ -1,11 +1,13 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Switch } from "@/components/primitives/forms/switch";
 import { Link } from "wouter";
 import { useSettings } from "@/hooks/use-settings";
+import { useAuth } from "@/hooks/use-auth";
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -64,6 +66,25 @@ const Settings = () => {
               onCheckedChange={(checked: boolean) => updateSetting("alwaysSortPinnedByPriority", checked)}
               data-testid="switch-sort-pinned-priority"
             />
+          </div>
+        </div>
+
+        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-foreground" data-testid="text-user-name">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-sm text-muted-foreground" data-testid="text-user-email">
+                {user?.email}
+              </p>
+            </div>
+            <a href="/api/logout">
+              <Button variant="outline" className="gap-2" data-testid="button-logout">
+                <LogOut className="w-4 h-4" />
+                Log Out
+              </Button>
+            </a>
           </div>
         </div>
 
