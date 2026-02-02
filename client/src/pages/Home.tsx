@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   CheckCircle2,
   LayoutList,
@@ -9,14 +9,6 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import type {
-  Ease,
-  Enjoyment,
-  Priority,
-  SortOption,
-  TaskResponse,
-  Time,
-} from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
@@ -30,6 +22,14 @@ import { useTaskDialog } from '@/components/TaskDialogProvider'
 import { getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { cn } from '@/lib/utils'
+import type {
+  Ease,
+  Enjoyment,
+  Priority,
+  SortOption,
+  TaskResponse,
+  Time,
+} from '~/shared/schema'
 
 const SortButton = ({
   label,
@@ -97,77 +97,76 @@ const Home = () => {
   const setSortBy = (value: SortOption) => updateSetting('sortBy', value)
 
   // Sort function for tasks
-  const sortTasks = (
-    tasks: TaskResponse[],
-    sort: SortOption,
-  ): TaskResponse[] => {
-    const sorted = [...tasks]
-    if (sort === 'date') {
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime()
-        const dateB = new Date(b.createdAt).getTime()
-        return dateB - dateA
-      })
-    } else {
-      sorted.sort((a, b) => {
-        const direction = SORT_DIRECTIONS[sort] || 'desc'
-        const valA = getLevelWeight(a[sort])
-        const valB = getLevelWeight(b[sort])
+  const sortTasks = useCallback(
+    (theseTasks: TaskResponse[], sort: SortOption): TaskResponse[] => {
+      const sorted = [...theseTasks]
+      if (sort === 'date') {
+        sorted.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime()
+          const dateB = new Date(b.createdAt).getTime()
+          return dateB - dateA
+        })
+      } else {
+        sorted.sort((a, b) => {
+          const direction = SORT_DIRECTIONS[sort] || 'desc'
+          const valA = getLevelWeight(a[sort])
+          const valB = getLevelWeight(b[sort])
 
-        if (valA !== valB) {
-          return direction === 'desc' ? valB - valA : valA - valB
-        }
+          if (valA !== valB) {
+            return direction === 'desc' ? valB - valA : valA - valB
+          }
 
-        const pA = getLevelWeight(a.priority)
-        const pB = getLevelWeight(b.priority)
-        const eA = getLevelWeight(a.ease)
-        const eB = getLevelWeight(b.ease)
-        const jA = getLevelWeight(a.enjoyment)
-        const jB = getLevelWeight(b.enjoyment)
+          const pA = getLevelWeight(a.priority)
+          const pB = getLevelWeight(b.priority)
+          const eA = getLevelWeight(a.ease)
+          const eB = getLevelWeight(b.ease)
+          const jA = getLevelWeight(a.enjoyment)
+          const jB = getLevelWeight(b.enjoyment)
 
-        if (sort === 'priority') {
-          if (eA !== eB) return eA - eB
-          return jB - jA
-        }
-        if (sort === 'ease') {
-          if (pA !== pB) return pB - pA
-          return jB - jA
-        }
-        if (sort === 'enjoyment') {
-          if (pA !== pB) return pB - pA
-          return eA - eB
-        }
-        if (sort === 'time') {
-          if (pA !== pB) return pB - pA
-          if (eA !== eB) return eA - eB
-          return pB - pA
-        }
-        return 0
-      })
-    }
-    return sorted
-  }
+          if (sort === 'priority') {
+            if (eA !== eB) return eA - eB
+            return jB - jA
+          }
+          if (sort === 'ease') {
+            if (pA !== pB) return pB - pA
+            return jB - jA
+          }
+          if (sort === 'enjoyment') {
+            if (pA !== pB) return pB - pA
+            return eA - eB
+          }
+          if (sort === 'time') {
+            if (pA !== pB) return pB - pA
+            if (eA !== eB) return eA - eB
+            return pB - pA
+          }
+          return 0
+        })
+      }
+      return sorted
+    },
+    [],
+  )
 
   // Recursive function to filter task tree
-  const filterAndSortTree = (
-    nodes: TaskResponse[],
-    term: string,
-    sort: SortOption,
-  ): TaskResponse[] => {
-    const result = nodes.reduce((acc: TaskResponse[], node) => {
-      const matches = node.name.toLowerCase().includes(term.toLowerCase())
-      const filteredSubtasks = node.subtasks
-        ? filterAndSortTree(node.subtasks, term, sort)
-        : []
+  const filterAndSortTree = useCallback(
+    (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
+      const result = nodes.reduce((acc: TaskResponse[], node) => {
+        const matches = node.name.toLowerCase().includes(term.toLowerCase())
+        const filteredSubtasks = node.subtasks
+          ? filterAndSortTree(node.subtasks, term, sort)
+          : []
 
-      if (matches || filteredSubtasks.length > 0) {
-        acc.push({ ...node, subtasks: filteredSubtasks })
-      }
-      return acc
-    }, [])
+        if (matches || filteredSubtasks.length > 0) {
+          acc.push({ ...node, subtasks: filteredSubtasks })
+        }
+        return acc
+      }, [])
 
-    return sortTasks(result, sort)
-  }
+      return sortTasks(result, sort)
+    },
+    [sortTasks],
+  )
 
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pending tasks to be hoisted to top
@@ -236,9 +235,9 @@ const Home = () => {
     const pinnedOnly = filteredPinned.filter((t) => t.status === 'pinned')
 
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    const settings = getSettings()
+    const currentSettings = getSettings()
     let sortedPinned: TaskResponse[]
-    if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
+    if (currentSettings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
         const pA = getLevelWeight(a.priority)
@@ -262,7 +261,7 @@ const Home = () => {
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
-  }, [taskTree, pinnedTasks, search, sortBy])
+  }, [taskTree, pinnedTasks, search, sortBy, sortTasks, filterAndSortTree])
 
   if (isLoading) {
     return (

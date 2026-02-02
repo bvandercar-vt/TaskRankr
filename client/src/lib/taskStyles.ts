@@ -1,4 +1,4 @@
-import type { SortFieldValueMap, TaskSortField } from '@shared/schema'
+import type { SortFieldValueMap, TaskSortField } from '~/shared/schema'
 
 const STYLES_COMMON = {
   red: 'text-red-400 bg-red-400/10 border-red-500/20',

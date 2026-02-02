@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { SORT_FIELD_CONFIG, type TaskSortField } from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import { Checkbox } from '@/components/primitives/forms/checkbox'
 import { Switch } from '@/components/primitives/forms/switch'
@@ -13,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
+import { SORT_FIELD_CONFIG, type TaskSortField } from '~/shared/schema'
 
 type SortCriterion = {
   attr: TaskSortField | 'date'
@@ -106,7 +106,7 @@ const Settings = () => {
 
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] })
       toast({ title: 'Tasks imported successfully' })
-    } catch (err) {
+    } catch (_error) {
       toast({ title: 'Failed to import tasks', variant: 'destructive' })
     } finally {
       setIsImporting(false)
@@ -257,6 +257,7 @@ const Settings = () => {
             onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
             className="w-full flex items-center justify-start gap-2 cursor-pointer"
             data-testid="button-sort-info-toggle"
+            type="button"
           >
             <h3 className="font-semibold text-foreground">Sort Info</h3>
             <ChevronDown
@@ -290,17 +291,22 @@ const Settings = () => {
                         item.criteria.length > 1 && 'space-y-0.5',
                       )}
                     >
-                      {item.criteria.map((c, idx) => {
+                      {item.criteria.map((c) => {
                         const style =
                           c.attr !== 'date'
                             ? getAttributeStyle(
                                 c.attr,
-                                c.value satisfies string as any,
+                                c.value satisfies string as Parameters<
+                                  typeof getAttributeStyle
+                                >[1],
                                 '',
                               )
                             : ''
                         return (
-                          <li key={idx} className="text-muted-foreground">
+                          <li
+                            key={`${c.attr} ${c.value}`}
+                            className="text-muted-foreground"
+                          >
                             {ATTR_LABELS[c.attr]} (
                             {style ? (
                               <span className={cn('font-medium', style)}>

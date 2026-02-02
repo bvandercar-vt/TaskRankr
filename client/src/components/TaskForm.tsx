@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import {
@@ -10,12 +10,6 @@ import {
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
-import {
-  insertTaskSchema,
-  SORT_FIELD_CONFIG,
-  type Task,
-  type TaskSortField,
-} from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import { Calendar } from '@/components/primitives/forms/calendar'
 import {
@@ -44,6 +38,12 @@ import { useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
+import {
+  insertTaskSchema,
+  SORT_FIELD_CONFIG,
+  type Task,
+  type TaskSortField,
+} from '~/shared/schema'
 
 const formSchema = insertTaskSchema
 export type TaskFormValues = z.infer<typeof formSchema>
@@ -68,20 +68,26 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
 
-  const getVisibility = (attr: TaskSortField): boolean => {
-    const key = `${attr}Visible` as const
-    return settings[key]
-  }
+  const getVisibility = useCallback(
+    (attr: TaskSortField): boolean => {
+      const key = `${attr}Visible` as const
+      return settings[key]
+    },
+    [settings],
+  )
 
-  const getRequired = (attr: TaskSortField): boolean => {
-    if (!getVisibility(attr)) return false
-    const key = `${attr}Required` as const
-    return settings[key]
-  }
+  const getRequired = useCallback(
+    (attr: TaskSortField): boolean => {
+      if (!getVisibility(attr)) return false
+      const key = `${attr}Required` as const
+      return settings[key]
+    },
+    [settings, getVisibility],
+  )
 
   const visibleAttributes = useMemo(
     () => SORT_FIELD_CONFIG.filter((attr) => getVisibility(attr.name)),
-    [settings],
+    [getVisibility],
   )
 
   const baseFormSchema = insertTaskSchema.omit({ userId: true })
@@ -179,7 +185,7 @@ export const TaskForm = ({
       }
     }
     return true
-  }, [watchedValues, visibleAttributes, settings])
+  }, [watchedValues, visibleAttributes, getRequired])
 
   const isValid = form.formState.isValid && requiredAttributesFilled
 

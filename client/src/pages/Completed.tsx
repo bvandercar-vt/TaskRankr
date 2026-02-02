@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import type { TaskResponse } from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/use-tasks'
+import type { TaskResponse } from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
