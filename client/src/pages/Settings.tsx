@@ -21,9 +21,8 @@ const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
 ];
 
 type SortCriterion = {
-  label: string;
+  attr: "priority" | "ease" | "enjoyment" | "time" | "date";
   value: string;
-  style: string;
 };
 
 type SortInfoItem = {
@@ -32,50 +31,43 @@ type SortInfoItem = {
   criteria: SortCriterion[];
 };
 
-const getSortInfoConfig = (
-  priorityStyle: (v: string) => string,
-  easeStyle: (v: string) => string,
-  enjoymentStyle: (v: string) => string,
-  timeStyle: (v: string) => string
-): SortInfoItem[] => [
-  {
-    name: "Date",
-    fullWidth: true,
-    criteria: [{ label: "Date created", value: "newest", style: "" }],
-  },
-  {
-    name: "Priority",
-    criteria: [
-      { label: "Priority", value: "highest", style: priorityStyle("highest") },
-      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
-      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
-    ],
-  },
-  {
-    name: "Ease",
-    criteria: [
-      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
-      { label: "Priority", value: "highest", style: priorityStyle("highest") },
-      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
-    ],
-  },
-  {
-    name: "Enjoyment",
-    criteria: [
-      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
-      { label: "Priority", value: "highest", style: priorityStyle("highest") },
-      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
-    ],
-  },
-  {
-    name: "Time",
-    criteria: [
-      { label: "Time", value: "lowest", style: timeStyle("lowest") },
-      { label: "Priority", value: "highest", style: priorityStyle("highest") },
-      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
-    ],
-  },
+const SORT_INFO_CONFIG: SortInfoItem[] = [
+  { name: "Date", fullWidth: true, criteria: [{ attr: "date", value: "newest" }] },
+  { name: "Priority", criteria: [
+    { attr: "priority", value: "highest" },
+    { attr: "ease", value: "easiest" },
+    { attr: "enjoyment", value: "highest" },
+  ]},
+  { name: "Ease", criteria: [
+    { attr: "ease", value: "easiest" },
+    { attr: "priority", value: "highest" },
+    { attr: "enjoyment", value: "highest" },
+  ]},
+  { name: "Enjoyment", criteria: [
+    { attr: "enjoyment", value: "highest" },
+    { attr: "priority", value: "highest" },
+    { attr: "ease", value: "easiest" },
+  ]},
+  { name: "Time", criteria: [
+    { attr: "time", value: "lowest" },
+    { attr: "priority", value: "highest" },
+    { attr: "ease", value: "easiest" },
+  ]},
 ];
+
+const ATTR_LABELS: Record<string, string> = {
+  priority: "Priority", ease: "Ease", enjoyment: "Enjoyment", time: "Time", date: "Date created"
+};
+
+const getAttrStyle = (attr: string, value: string): string => {
+  switch (attr) {
+    case "priority": return getPriorityStyle(value as any);
+    case "ease": return getEaseStyle(value as any);
+    case "enjoyment": return getEnjoymentStyle(value as any);
+    case "time": return getTimeStyle(value as any);
+    default: return "";
+  }
+};
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
@@ -250,20 +242,23 @@ const Settings = () => {
                 When tasks have the same value, they are sorted by secondary attributes.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {getSortInfoConfig(getPriorityStyle, getEaseStyle, getEnjoymentStyle, getTimeStyle).map((item) => (
+                {SORT_INFO_CONFIG.map((item) => (
                   <div 
                     key={item.name} 
                     className={cn("p-3 bg-secondary/20 rounded-md", item.fullWidth && "sm:col-span-2")}
                   >
                     <p className="font-medium text-foreground mb-1">{item.name}</p>
                     <ol className={cn("text-xs list-decimal list-inside", item.criteria.length > 1 && "space-y-0.5")}>
-                      {item.criteria.map((criterion, idx) => (
-                        <li key={idx} className="text-muted-foreground">
-                          {criterion.label} ({criterion.style ? (
-                            <span className={cn("font-medium", criterion.style)}>{criterion.value}</span>
-                          ) : criterion.value} first)
-                        </li>
-                      ))}
+                      {item.criteria.map((c, idx) => {
+                        const style = getAttrStyle(c.attr, c.value);
+                        return (
+                          <li key={idx} className="text-muted-foreground">
+                            {ATTR_LABELS[c.attr]} ({style ? (
+                              <span className={cn("font-medium", style)}>{c.value}</span>
+                            ) : c.value} first)
+                          </li>
+                        );
+                      })}
                     </ol>
                   </div>
                 ))}
