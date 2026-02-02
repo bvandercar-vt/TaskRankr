@@ -56,9 +56,9 @@ export const PRIORITY_LEVELS = [
   "high",
   "highest",
 ] as const;
-export const EASE_LEVELS = ["none", "easy", "medium", "hard"] as const;
-export const ENJOYMENT_LEVELS = ["none", "low", "medium", "high"] as const;
-export const TIME_LEVELS = ["none", "low", "medium", "high"] as const;
+export const EASE_LEVELS = ["none", "easiest", "easy", "medium", "hard", "hardest"] as const;
+export const ENJOYMENT_LEVELS = ["none", "lowest", "low", "medium", "high", "highest"] as const;
+export const TIME_LEVELS = ["none", "lowest", "low", "medium", "high", "highest"] as const;
 
 export type Priority = (typeof PRIORITY_LEVELS)[number];
 export type Ease = (typeof EASE_LEVELS)[number];

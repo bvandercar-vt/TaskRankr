@@ -4,7 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/primitives/badge";
-import { useSetTaskStatus, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
+import {
+  useSetTaskStatus,
+  useDeleteTask,
+  useUpdateTask,
+} from "@/hooks/use-tasks";
 import { getSettings } from "@/hooks/use-settings";
 import { useTaskDialog } from "@/components/TaskDialogProvider";
 import { getAttributeStyle } from "@/lib/taskStyles";
@@ -53,7 +57,7 @@ const formatDuration = (ms: number) => {
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  
+
   if (hours > 0 && minutes > 0) {
     return `${hours}h ${minutes}m`;
   } else if (hours > 0) {
@@ -69,9 +73,10 @@ const formatDuration = (ms: number) => {
 const getCurrentAccumulatedTime = (task: TaskResponse): number => {
   let total = task.inProgressTime;
   if (task.status === "in_progress" && task.inProgressStartedAt) {
-    const startedAt = typeof task.inProgressStartedAt === "string" 
-      ? new Date(task.inProgressStartedAt) 
-      : task.inProgressStartedAt;
+    const startedAt =
+      typeof task.inProgressStartedAt === "string"
+        ? new Date(task.inProgressStartedAt)
+        : task.inProgressStartedAt;
     const elapsed = Date.now() - startedAt.getTime();
     total += elapsed;
   }
@@ -178,8 +183,11 @@ export const TaskCard = ({
               {task.name}
             </h3>
             {isInProgress && (
-              <div 
-                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfirm(true);
+                }}
                 className="cursor-pointer"
               >
                 <TaskBadge
@@ -189,29 +197,37 @@ export const TaskCard = ({
               </div>
             )}
             {isPinned && (
-              <Pin 
-                className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer" 
+              <Pin
+                className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer"
                 data-testid="icon-pinned"
-                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfirm(true);
+                }}
               />
             )}
           </div>
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {(["priority", "ease", "enjoyment", "time"] as const).map((field) => {
-                const visibleKey = `${field}Visible` as keyof typeof settings;
-                if (!settings[visibleKey]) return null;
-                const value = task[field];
-                const hasValue = value && value !== "none";
-                return (
-                  <TaskBadge 
-                    key={field} 
-                    value={hasValue ? value : "---"} 
-                    styleClass={hasValue ? getAttributeStyle(field, value) : "opacity-0"} 
-                  />
-                );
-              })}
+              {(["priority", "ease", "enjoyment", "time"] as const).map(
+                (field) => {
+                  const visibleKey = `${field}Visible` as keyof typeof settings;
+                  if (!settings[visibleKey]) return null;
+                  const value = task[field] ?? "none";
+                  return (
+                    <TaskBadge
+                      key={field}
+                      value={value}
+                      styleClass={
+                        value !== "none"
+                          ? getAttributeStyle(field, value)
+                          : "opacity-0"
+                      }
+                    />
+                  );
+                },
+              )}
             </div>
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">
