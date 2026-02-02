@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
 import Landing from '@/pages/Landing'
-import NotFound from '@/pages/not-found'
+import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
 import { queryClient } from './lib/queryClient'
 

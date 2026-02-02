@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/primitives/overlays/alert-dialog'
 import { getSettings } from '@/hooks/use-settings'
-import { cn } from '@/lib/utils'
+import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
 
 interface ChangeStatusDialogProps {
   open: boolean
@@ -25,18 +25,6 @@ interface ChangeStatusDialogProps {
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
   onDeleteClick: () => void
-}
-
-const parseTimeToMs = (hours: number, minutes: number): number => {
-  return (hours * 3600 + minutes * 60) * 1000
-}
-
-const msToHoursMinutes = (ms: number): { hours: number; minutes: number } => {
-  const totalMinutes = Math.floor(ms / 60_000)
-  return {
-    hours: Math.floor(totalMinutes / 60),
-    minutes: totalMinutes % 60,
-  }
 }
 
 export const ChangeStatusDialog = ({
@@ -70,7 +58,7 @@ export const ChangeStatusDialog = ({
   }, [open, inProgressTime])
 
   const handleTimeChange = () => {
-    const newTimeMs = parseTimeToMs(hours, minutes)
+    const newTimeMs = hoursMinutesToMs(hours, minutes)
     if (newTimeMs !== inProgressTime) {
       onUpdateTime(newTimeMs)
     }
