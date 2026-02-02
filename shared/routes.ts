@@ -1,5 +1,6 @@
-import { z } from 'zod';
-import { insertTaskSchema, tasks, taskStatusEnum } from './schema';
+import { z } from 'zod'
+
+import { insertTaskSchema, taskStatusEnum, type tasks } from './schema'
 
 export const errorSchemas = {
   validation: z.object({
@@ -12,7 +13,7 @@ export const errorSchemas = {
   internal: z.object({
     message: z.string(),
   }),
-};
+}
 
 export const api = {
   tasks: {
@@ -69,19 +70,22 @@ export const api = {
       },
     },
   },
-};
+}
 
-export function buildUrl(path: string, params?: Record<string, string | number>): string {
-  let url = path;
+export function buildUrl(
+  path: string,
+  params?: Record<string, string | number>,
+): string {
+  let url = path
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (url.includes(`:${key}`)) {
-        url = url.replace(`:${key}`, String(value));
+        url = url.replace(`:${key}`, String(value))
       }
-    });
+    })
   }
-  return url;
+  return url
 }
 
-export type TaskInput = z.infer<typeof api.tasks.create.input>;
-export type TaskResponse = z.infer<typeof api.tasks.create.responses[201]>;
+export type TaskInput = z.infer<typeof api.tasks.create.input>
+export type TaskResponse = z.infer<(typeof api.tasks.create.responses)[201]>

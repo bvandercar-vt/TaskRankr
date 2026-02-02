@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Clock, StopCircle, X, Pin, PinOff } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/primitives/button";
-import { Input } from "@/components/primitives/forms/input";
+import { useEffect, useState } from 'react'
+import { Clock, Pin, PinOff, StopCircle, X } from 'lucide-react'
+
+import type { TaskStatus } from '@shared/schema'
+import { Button } from '@/components/primitives/button'
+import { Input } from '@/components/primitives/forms/input'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,32 +12,32 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/primitives/overlays/alert-dialog";
-import type { TaskStatus } from "@shared/schema";
-import { getSettings } from "@/hooks/use-settings";
+} from '@/components/primitives/overlays/alert-dialog'
+import { getSettings } from '@/hooks/use-settings'
+import { cn } from '@/lib/utils'
 
 interface ChangeStatusDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  taskName: string;
-  status: TaskStatus;
-  inProgressTime: number;
-  onSetStatus: (status: TaskStatus) => void;
-  onUpdateTime: (timeMs: number) => void;
-  onDeleteClick: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  taskName: string
+  status: TaskStatus
+  inProgressTime: number
+  onSetStatus: (status: TaskStatus) => void
+  onUpdateTime: (timeMs: number) => void
+  onDeleteClick: () => void
 }
 
 const parseTimeToMs = (hours: number, minutes: number): number => {
-  return (hours * 3600 + minutes * 60) * 1000;
-};
+  return (hours * 3600 + minutes * 60) * 1000
+}
 
 const msToHoursMinutes = (ms: number): { hours: number; minutes: number } => {
-  const totalMinutes = Math.floor(ms / 60000);
+  const totalMinutes = Math.floor(ms / 60_000)
   return {
     hours: Math.floor(totalMinutes / 60),
     minutes: totalMinutes % 60,
-  };
-};
+  }
+}
 
 export const ChangeStatusDialog = ({
   open,
@@ -48,31 +49,32 @@ export const ChangeStatusDialog = ({
   onUpdateTime,
   onDeleteClick,
 }: ChangeStatusDialogProps) => {
-  const isCompleted = status === "completed";
-  const isInProgress = status === "in_progress";
-  const isPinned = status === "pinned";
-  
-  const settings = getSettings();
-  const showTimeInputs = settings.enableInProgressTime;
-  
-  const { hours: initialHours, minutes: initialMinutes } = msToHoursMinutes(inProgressTime);
-  const [hours, setHours] = useState(initialHours);
-  const [minutes, setMinutes] = useState(initialMinutes);
-  
+  const isCompleted = status === 'completed'
+  const isInProgress = status === 'in_progress'
+  const isPinned = status === 'pinned'
+
+  const settings = getSettings()
+  const showTimeInputs = settings.enableInProgressTime
+
+  const { hours: initialHours, minutes: initialMinutes } =
+    msToHoursMinutes(inProgressTime)
+  const [hours, setHours] = useState(initialHours)
+  const [minutes, setMinutes] = useState(initialMinutes)
+
   useEffect(() => {
     if (open) {
-      const { hours: h, minutes: m } = msToHoursMinutes(inProgressTime);
-      setHours(h);
-      setMinutes(m);
+      const { hours: h, minutes: m } = msToHoursMinutes(inProgressTime)
+      setHours(h)
+      setMinutes(m)
     }
-  }, [open, inProgressTime]);
-  
+  }, [open, inProgressTime])
+
   const handleTimeChange = () => {
-    const newTimeMs = parseTimeToMs(hours, minutes);
+    const newTimeMs = parseTimeToMs(hours, minutes)
     if (newTimeMs !== inProgressTime) {
-      onUpdateTime(newTimeMs);
+      onUpdateTime(newTimeMs)
     }
-  };
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -88,7 +90,7 @@ export const ChangeStatusDialog = ({
         </Button>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isCompleted ? "Restore Task?" : "Task Status"}
+            {isCompleted ? 'Restore Task?' : 'Task Status'}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isCompleted
@@ -103,7 +105,7 @@ export const ChangeStatusDialog = ({
                 {/* Start/Stop Working button */}
                 {isInProgress ? (
                   <Button
-                    onClick={() => onSetStatus("open")}
+                    onClick={() => onSetStatus('open')}
                     variant="outline"
                     className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
                     data-testid="button-stop-progress"
@@ -113,7 +115,7 @@ export const ChangeStatusDialog = ({
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => onSetStatus("in_progress")}
+                    onClick={() => onSetStatus('in_progress')}
                     variant="outline"
                     className="w-full h-11 text-base font-semibold gap-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
                     data-testid="button-start-progress"
@@ -126,7 +128,7 @@ export const ChangeStatusDialog = ({
                 {/* Pin/Unpin button */}
                 {isInProgress || isPinned ? (
                   <Button
-                    onClick={() => onSetStatus("open")}
+                    onClick={() => onSetStatus('open')}
                     variant="outline"
                     className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
                     data-testid="button-unpin"
@@ -136,7 +138,7 @@ export const ChangeStatusDialog = ({
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => onSetStatus("pinned")}
+                    onClick={() => onSetStatus('pinned')}
                     variant="outline"
                     className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
                     data-testid="button-pin"
@@ -149,28 +151,34 @@ export const ChangeStatusDialog = ({
             )}
 
             <AlertDialogAction
-              onClick={() => onSetStatus(isCompleted ? "open" : "completed")}
+              onClick={() => onSetStatus(isCompleted ? 'open' : 'completed')}
               className={cn(
-                "w-full h-11 text-base font-semibold",
+                'w-full h-11 text-base font-semibold',
                 isCompleted
-                  ? "bg-primary hover:bg-primary/90 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white",
+                  ? 'bg-primary hover:bg-primary/90 text-white'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white',
               )}
               data-testid="button-complete-task"
             >
-              {isCompleted ? "Restore Task" : "Complete Task"}
+              {isCompleted ? 'Restore Task' : 'Complete Task'}
             </AlertDialogAction>
 
             {showTimeInputs && (
               <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/10">
-                <span className="text-xs text-muted-foreground">Time Spent</span>
+                <span className="text-xs text-muted-foreground">
+                  Time Spent
+                </span>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Input
                       type="number"
                       min={0}
                       value={hours}
-                      onChange={(e) => setHours(Math.max(0, parseInt(e.target.value) || 0))}
+                      onChange={(e) =>
+                        setHours(
+                          Math.max(0, Number.parseInt(e.target.value) || 0),
+                        )
+                      }
                       onBlur={handleTimeChange}
                       className="w-16 h-8 text-center text-sm"
                       data-testid="input-hours"
@@ -183,7 +191,14 @@ export const ChangeStatusDialog = ({
                       min={0}
                       max={59}
                       value={minutes}
-                      onChange={(e) => setMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                      onChange={(e) =>
+                        setMinutes(
+                          Math.min(
+                            59,
+                            Math.max(0, Number.parseInt(e.target.value) || 0),
+                          ),
+                        )
+                      }
                       onBlur={handleTimeChange}
                       className="w-16 h-8 text-center text-sm"
                       data-testid="input-minutes"
@@ -209,5 +224,5 @@ export const ChangeStatusDialog = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
+  )
+}

@@ -1,55 +1,56 @@
-import { useMemo } from "react";
-import { useTasks } from "@/hooks/use-tasks";
-import { TaskResponse } from "@shared/schema";
-import { TaskCard } from "@/components/TaskCard";
-import { Button } from "@/components/primitives/button";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Link } from "wouter";
+import { useMemo } from 'react'
+import { ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Link } from 'wouter'
+
+import type { TaskResponse } from '@shared/schema'
+import { Button } from '@/components/primitives/button'
+import { TaskCard } from '@/components/TaskCard'
+import { useTasks } from '@/hooks/use-tasks'
 
 const Completed = () => {
-  const { data: tasks, isLoading, error } = useTasks();
+  const { data: tasks, isLoading, error } = useTasks()
 
   // Build tree from flat list for completed tasks only, sorted by completion date
   const completedTasks = useMemo(() => {
-    if (!tasks) return [];
-    
-    // Filter to completed tasks first
-    const completedOnly = tasks.filter(task => task.status === "completed");
-    
-    const nodes: Record<number, TaskResponse> = {};
-    const roots: TaskResponse[] = [];
-    
-    completedOnly.forEach(task => {
-      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
-    });
+    if (!tasks) return []
 
-    completedOnly.forEach(task => {
+    // Filter to completed tasks first
+    const completedOnly = tasks.filter((task) => task.status === 'completed')
+
+    const nodes: Record<number, TaskResponse> = {}
+    const roots: TaskResponse[] = []
+
+    completedOnly.forEach((task) => {
+      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse
+    })
+
+    completedOnly.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
-        nodes[task.parentId].subtasks?.push(nodes[task.id]);
+        nodes[task.parentId].subtasks?.push(nodes[task.id])
       } else {
-        roots.push(nodes[task.id]);
+        roots.push(nodes[task.id])
       }
-    });
+    })
 
     // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {
-      const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
-      const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;
-      return dateB - dateA;
-    });
+      const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0
+      const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0
+      return dateB - dateA
+    })
 
-    return roots;
-  }, [tasks]);
+    return roots
+  }, [tasks])
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-secondary/50"></div>
-          <div className="h-4 w-32 bg-secondary/50 rounded"></div>
+          <div className="w-12 h-12 rounded-full bg-secondary/50" />
+          <div className="h-4 w-32 bg-secondary/50 rounded" />
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -57,7 +58,7 @@ const Completed = () => {
       <div className="min-h-screen flex items-center justify-center text-destructive">
         Error loading tasks. Please try again.
       </div>
-    );
+    )
   }
 
   return (
@@ -65,7 +66,12 @@ const Completed = () => {
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <div className="flex items-center gap-4 mb-8 px-2">
           <Link href="/">
-            <Button variant="ghost" size="icon" className="h-10 w-10" data-testid="button-back-home">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              data-testid="button-back-home"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -78,10 +84,18 @@ const Completed = () => {
             <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
               <div className="flex-1 hidden md:block" />
               <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Priority</span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Ease</span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Enjoy</span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">Time</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
+                  Priority
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
+                  Ease
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
+                  Enjoy
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
+                  Time
+                </span>
               </div>
             </div>
           </div>
@@ -91,15 +105,20 @@ const Completed = () => {
           {completedTasks.length === 0 ? (
             <EmptyState />
           ) : (
-            completedTasks.map(task => (
-              <TaskCard key={task.id} task={task as TaskResponse} showRestore showCompletedDate />
+            completedTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task as TaskResponse}
+                showRestore
+                showCompletedDate
+              />
             ))
           )}
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
@@ -113,6 +132,6 @@ const EmptyState = () => (
       Long-press on any task to mark it as complete.
     </p>
   </div>
-);
+)
 
-export default Completed;
+export default Completed
