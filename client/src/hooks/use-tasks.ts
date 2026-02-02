@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
+import { apiRequest } from '@/lib/queryClient'
 import { api, buildUrl, type TaskInput } from '~/shared/routes'
 import type { TaskStatus } from '~/shared/schema'
 
@@ -10,8 +11,7 @@ export const useTasks = () => {
   return useQuery({
     queryKey: [api.tasks.list.path],
     queryFn: async () => {
-      const res = await fetch(api.tasks.list.path, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch tasks')
+      const res = await apiRequest('GET', api.tasks.list.path)
       return api.tasks.list.responses[200].parse(await res.json())
     },
   })
@@ -45,10 +45,13 @@ export const useTask = (id: number) => {
     queryKey: [api.tasks.get.path, id],
     queryFn: async () => {
       const url = buildUrl(api.tasks.get.path, { id })
-      const res = await fetch(url, { credentials: 'include' })
-      if (res.status === 404) return null
-      if (!res.ok) throw new Error('Failed to fetch task')
-      return api.tasks.get.responses[200].parse(await res.json())
+      try {
+        const res = await apiRequest('GET', url)
+        return api.tasks.get.responses[200].parse(await res.json())
+      } catch (e) {
+        if (e instanceof Error && e.message.startsWith('404:')) return null
+        throw e
+      }
     },
     enabled: !!id,
   })
@@ -61,20 +64,7 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async (data: TaskInput) => {
-      const res = await fetch(api.tasks.create.path, {
-        method: api.tasks.create.method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      })
-
-      if (!res.ok) {
-        if (res.status === 400) {
-          const error = api.tasks.create.responses[400].parse(await res.json())
-          throw new Error(error.message)
-        }
-        throw new Error('Failed to create task')
-      }
+      const res = await apiRequest(api.tasks.create.method, api.tasks.create.path, data)
       const task = api.tasks.create.responses[201].parse(await res.json())
 
       // Auto-pin new task if setting is enabled
@@ -82,15 +72,7 @@ export const useCreateTask = () => {
       if (settings.autoPinNewTasks) {
         try {
           const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id })
-          const pinRes = await fetch(pinUrl, {
-            method: api.tasks.setStatus.method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'pinned' }),
-            credentials: 'include',
-          })
-          if (!pinRes.ok) {
-            console.error('Failed to auto-pin task')
-          }
+          await apiRequest(api.tasks.setStatus.method, pinUrl, { status: 'pinned' })
         } catch (e) {
           console.error('Failed to auto-pin task:', e)
         }
@@ -122,20 +104,7 @@ export const useUpdateTask = () => {
       ...updates
     }: { id: number } & Partial<TaskInput>) => {
       const url = buildUrl(api.tasks.update.path, { id })
-      const res = await fetch(url, {
-        method: api.tasks.update.method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-        credentials: 'include',
-      })
-
-      if (!res.ok) {
-        if (res.status === 400) {
-          const error = api.tasks.update.responses[400].parse(await res.json())
-          throw new Error(error.message)
-        }
-        throw new Error('Failed to update task')
-      }
+      const res = await apiRequest(api.tasks.update.method, url, updates)
       return api.tasks.update.responses[200].parse(await res.json())
     },
     onSuccess: () => {
@@ -159,14 +128,7 @@ export const useSetTaskStatus = () => {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
       const url = buildUrl(api.tasks.setStatus.path, { id })
-      const res = await fetch(url, {
-        method: api.tasks.setStatus.method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-        credentials: 'include',
-      })
-
-      if (!res.ok) throw new Error('Failed to update task status')
+      const res = await apiRequest(api.tasks.setStatus.method, url, { status })
       return res.json()
     },
     onSuccess: () => {
@@ -190,12 +152,7 @@ export const useDeleteTask = () => {
   return useMutation({
     mutationFn: async (id: number) => {
       const url = buildUrl(api.tasks.delete.path, { id })
-      const res = await fetch(url, {
-        method: api.tasks.delete.method,
-        credentials: 'include',
-      })
-
-      if (!res.ok) throw new Error('Failed to delete task')
+      await apiRequest(api.tasks.delete.method, url)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
