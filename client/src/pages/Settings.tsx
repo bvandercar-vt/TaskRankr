@@ -171,6 +171,53 @@ const Settings = () => {
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+          <h3 className="font-semibold text-foreground mb-3 text-center">Sort Info</h3>
+          <p className="text-xs text-muted-foreground mb-3 text-center">
+            When tasks have the same value, they are sorted by secondary attributes.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div className="p-3 bg-secondary/20 rounded-md">
+              <p className="font-medium text-foreground mb-1">Priority</p>
+              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
+                <li>Priority (highest first)</li>
+                <li>Ease (easiest first)</li>
+                <li>Enjoyment (highest first)</li>
+              </ol>
+            </div>
+            <div className="p-3 bg-secondary/20 rounded-md">
+              <p className="font-medium text-foreground mb-1">Ease</p>
+              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
+                <li>Ease (easiest first)</li>
+                <li>Priority (highest first)</li>
+                <li>Enjoyment (highest first)</li>
+              </ol>
+            </div>
+            <div className="p-3 bg-secondary/20 rounded-md">
+              <p className="font-medium text-foreground mb-1">Enjoyment</p>
+              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
+                <li>Enjoyment (highest first)</li>
+                <li>Priority (highest first)</li>
+                <li>Ease (easiest first)</li>
+              </ol>
+            </div>
+            <div className="p-3 bg-secondary/20 rounded-md">
+              <p className="font-medium text-foreground mb-1">Time</p>
+              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
+                <li>Time (lowest first)</li>
+                <li>Priority (highest first)</li>
+                <li>Ease (easiest first)</li>
+              </ol>
+            </div>
+            <div className="p-3 bg-secondary/20 rounded-md sm:col-span-2">
+              <p className="font-medium text-foreground mb-1">Date</p>
+              <ol className="text-xs text-muted-foreground list-decimal list-inside">
+                <li>Date created (newest first)</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
           <h3 className="font-semibold text-foreground mb-3 text-center">Data</h3>
           <div className="flex flex-wrap justify-center gap-3">
             <Button 
