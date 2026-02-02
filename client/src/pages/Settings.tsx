@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, LogOut, Download, Upload } from "lucide-react";
+import { ArrowLeft, LogOut, Download, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Switch } from "@/components/primitives/forms/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { getPriorityStyle, getEaseStyle, getEnjoymentStyle, getTimeStyle } from "@/lib/taskStyles";
+import { cn } from "@/lib/utils";
 
 type AttributeKey = "priority" | "ease" | "enjoyment" | "time";
 const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
@@ -25,6 +27,7 @@ const Settings = () => {
   const { data: tasks } = useTasks();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [sortInfoExpanded, setSortInfoExpanded] = useState(false);
   const hasNoTasks = !tasks || tasks.length === 0;
 
   const handleExport = () => {
@@ -171,50 +174,66 @@ const Settings = () => {
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
-          <h3 className="font-semibold text-foreground mb-3 text-center">Sort Info</h3>
-          <p className="text-xs text-muted-foreground mb-3 text-center">
-            When tasks have the same value, they are sorted by secondary attributes.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div className="p-3 bg-secondary/20 rounded-md">
-              <p className="font-medium text-foreground mb-1">Priority</p>
-              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
-                <li>Priority (highest first)</li>
-                <li>Ease (easiest first)</li>
-                <li>Enjoyment (highest first)</li>
-              </ol>
+          <button
+            onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
+            className="w-full flex items-center justify-center gap-2 cursor-pointer"
+            data-testid="button-sort-info-toggle"
+          >
+            <h3 className="font-semibold text-foreground">Sort Info</h3>
+            <ChevronDown 
+              className={cn(
+                "w-4 h-4 text-muted-foreground transition-transform",
+                sortInfoExpanded && "rotate-180"
+              )} 
+            />
+          </button>
+          {sortInfoExpanded && (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-3 text-center">
+                When tasks have the same value, they are sorted by secondary attributes.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="p-3 bg-secondary/20 rounded-md">
+                  <p className="font-medium text-foreground mb-1">Priority</p>
+                  <ol className="text-xs list-decimal list-inside space-y-0.5">
+                    <li className="text-muted-foreground">Priority (<span className={cn("font-medium", getPriorityStyle("highest"))}>highest</span> first)</li>
+                    <li className="text-muted-foreground">Ease (<span className={cn("font-medium", getEaseStyle("easiest"))}>easiest</span> first)</li>
+                    <li className="text-muted-foreground">Enjoyment (<span className={cn("font-medium", getEnjoymentStyle("highest"))}>highest</span> first)</li>
+                  </ol>
+                </div>
+                <div className="p-3 bg-secondary/20 rounded-md">
+                  <p className="font-medium text-foreground mb-1">Ease</p>
+                  <ol className="text-xs list-decimal list-inside space-y-0.5">
+                    <li className="text-muted-foreground">Ease (<span className={cn("font-medium", getEaseStyle("easiest"))}>easiest</span> first)</li>
+                    <li className="text-muted-foreground">Priority (<span className={cn("font-medium", getPriorityStyle("highest"))}>highest</span> first)</li>
+                    <li className="text-muted-foreground">Enjoyment (<span className={cn("font-medium", getEnjoymentStyle("highest"))}>highest</span> first)</li>
+                  </ol>
+                </div>
+                <div className="p-3 bg-secondary/20 rounded-md">
+                  <p className="font-medium text-foreground mb-1">Enjoyment</p>
+                  <ol className="text-xs list-decimal list-inside space-y-0.5">
+                    <li className="text-muted-foreground">Enjoyment (<span className={cn("font-medium", getEnjoymentStyle("highest"))}>highest</span> first)</li>
+                    <li className="text-muted-foreground">Priority (<span className={cn("font-medium", getPriorityStyle("highest"))}>highest</span> first)</li>
+                    <li className="text-muted-foreground">Ease (<span className={cn("font-medium", getEaseStyle("easiest"))}>easiest</span> first)</li>
+                  </ol>
+                </div>
+                <div className="p-3 bg-secondary/20 rounded-md">
+                  <p className="font-medium text-foreground mb-1">Time</p>
+                  <ol className="text-xs list-decimal list-inside space-y-0.5">
+                    <li className="text-muted-foreground">Time (<span className={cn("font-medium", getTimeStyle("lowest"))}>lowest</span> first)</li>
+                    <li className="text-muted-foreground">Priority (<span className={cn("font-medium", getPriorityStyle("highest"))}>highest</span> first)</li>
+                    <li className="text-muted-foreground">Ease (<span className={cn("font-medium", getEaseStyle("easiest"))}>easiest</span> first)</li>
+                  </ol>
+                </div>
+                <div className="p-3 bg-secondary/20 rounded-md sm:col-span-2">
+                  <p className="font-medium text-foreground mb-1">Date</p>
+                  <ol className="text-xs list-decimal list-inside">
+                    <li className="text-muted-foreground">Date created (newest first)</li>
+                  </ol>
+                </div>
+              </div>
             </div>
-            <div className="p-3 bg-secondary/20 rounded-md">
-              <p className="font-medium text-foreground mb-1">Ease</p>
-              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
-                <li>Ease (easiest first)</li>
-                <li>Priority (highest first)</li>
-                <li>Enjoyment (highest first)</li>
-              </ol>
-            </div>
-            <div className="p-3 bg-secondary/20 rounded-md">
-              <p className="font-medium text-foreground mb-1">Enjoyment</p>
-              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
-                <li>Enjoyment (highest first)</li>
-                <li>Priority (highest first)</li>
-                <li>Ease (easiest first)</li>
-              </ol>
-            </div>
-            <div className="p-3 bg-secondary/20 rounded-md">
-              <p className="font-medium text-foreground mb-1">Time</p>
-              <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-0.5">
-                <li>Time (lowest first)</li>
-                <li>Priority (highest first)</li>
-                <li>Ease (easiest first)</li>
-              </ol>
-            </div>
-            <div className="p-3 bg-secondary/20 rounded-md sm:col-span-2">
-              <p className="font-medium text-foreground mb-1">Date</p>
-              <ol className="text-xs text-muted-foreground list-decimal list-inside">
-                <li>Date created (newest first)</li>
-              </ol>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
