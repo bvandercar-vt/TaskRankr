@@ -36,11 +36,11 @@ const EASE_STYLES: Record<Ease, string> = {
 };
 
 const ENJOYMENT_STYLES: Record<Enjoyment, string> = {
-  lowest: STYLES_COMMON.green_bold,
+  lowest: STYLES_COMMON.red_dull,
   low: STYLES_COMMON.red,
   medium: STYLES_COMMON.yellow,
   high: STYLES_COMMON.green,
-  highest: STYLES_COMMON.red_dull,
+  highest: STYLES_COMMON.green_bold,
   none: STYLES_COMMON.none,
 };
 
