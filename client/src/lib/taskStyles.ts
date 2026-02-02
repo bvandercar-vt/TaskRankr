@@ -6,40 +6,51 @@ import type {
   TaskSortField,
 } from "@shared/schema";
 
-const PRIORITY_STYLES: Record<Priority, string> = {
-  highest: "text-red-700 bg-red-400/10 border-red-500/20",
-  high: "text-red-400 bg-red-400/10 border-red-500/20",
-  medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  lowest: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
+const STYLES_COMMON = {
+  red: "text-red-400 bg-red-400/10 border-red-500/20",
+  yellow: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+  green: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  red_bold: "text-red-700 bg-red-400/10 border-red-500/20",
+  green_bold: "text-emerald-700 bg-emerald-400/10 border-emerald-400/20",
+  green_dull: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
+  red_dull: "text-red-400/60 bg-red-400/10 border-red-500/60",
   none: "text-muted-foreground italic",
+};
+
+const PRIORITY_STYLES: Record<Priority, string> = {
+  highest: STYLES_COMMON.red_bold,
+  high: STYLES_COMMON.red,
+  medium: STYLES_COMMON.yellow,
+  low: STYLES_COMMON.green,
+  lowest: STYLES_COMMON.green_dull,
+  none: STYLES_COMMON.none,
 };
 
 const EASE_STYLES: Record<Ease, string> = {
-  hardest: "text-red-700 bg-red-400/10 border-red-500/20",
-  hard: "text-red-400 bg-red-400/10 border-red-400/20",
-  medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  easy: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  easiest: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
-  none: "text-muted-foreground italic",
+  hardest: STYLES_COMMON.red_dull,
+  hard: STYLES_COMMON.red,
+  medium: STYLES_COMMON.yellow,
+  easy: STYLES_COMMON.green,
+  easiest: STYLES_COMMON.green_bold,
+  none: STYLES_COMMON.none,
 };
 
 const ENJOYMENT_STYLES: Record<Enjoyment, string> = {
-  lowest: "text-red-700 bg-red-400/10 border-red-500/20",
-  low: "text-red-400 bg-red-400/10 border-red-400/20",
-  medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  high: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  highest: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
-  none: "text-muted-foreground italic",
+  lowest: STYLES_COMMON.green_bold,
+  low: STYLES_COMMON.red,
+  medium: STYLES_COMMON.yellow,
+  high: STYLES_COMMON.green,
+  highest: STYLES_COMMON.red_dull,
+  none: STYLES_COMMON.none,
 };
 
 const TIME_STYLES: Record<Time, string> = {
-  highest: "text-red-700 bg-red-400/10 border-red-500/20",
-  high: "text-red-400 bg-red-400/10 border-red-400/20",
-  medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-  low: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  lowest: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
-  none: "text-muted-foreground italic",
+  highest: STYLES_COMMON.red_dull,
+  high: STYLES_COMMON.red,
+  medium: STYLES_COMMON.yellow,
+  low: STYLES_COMMON.green,
+  lowest: STYLES_COMMON.green_bold,
+  none: STYLES_COMMON.none,
 };
 
 const DEFAULT_STYLE = "text-slate-400";
