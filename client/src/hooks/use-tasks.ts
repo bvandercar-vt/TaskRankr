@@ -64,7 +64,11 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async (data: TaskInput) => {
-      const res = await apiRequest(api.tasks.create.method, api.tasks.create.path, data)
+      const res = await apiRequest(
+        api.tasks.create.method,
+        api.tasks.create.path,
+        data,
+      )
       const task = api.tasks.create.responses[201].parse(await res.json())
 
       // Auto-pin new task if setting is enabled
@@ -72,7 +76,9 @@ export const useCreateTask = () => {
       if (settings.autoPinNewTasks) {
         try {
           const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id })
-          await apiRequest(api.tasks.setStatus.method, pinUrl, { status: 'pinned' })
+          await apiRequest(api.tasks.setStatus.method, pinUrl, {
+            status: 'pinned',
+          })
         } catch (e) {
           console.error('Failed to auto-pin task:', e)
         }
