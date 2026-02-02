@@ -139,6 +139,24 @@ export const api = {
       },
     },
   },
+  auth: {
+    login: {
+      method: 'GET',
+      path: '/api/login',
+    },
+    logout: {
+      method: 'GET',
+      path: '/api/logout',
+    },
+    callback: {
+      method: 'GET',
+      path: '/api/callback',
+    },
+    user: {
+      method: 'GET',
+      path: '/api/auth/user',
+    },
+  },
 } as const
 
 export function buildUrl(
