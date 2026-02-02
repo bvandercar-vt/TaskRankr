@@ -11,7 +11,7 @@ const STYLES_COMMON = {
   yellow: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
   green: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   red_bold: "text-red-700 bg-red-400/10 border-red-500/20",
-  green_bold: "text-emerald-700 bg-emerald-400/10 border-emerald-400/20",
+  green_bold: "text-emerald-300 bg-emerald-400/10 border-emerald-400/20",
   green_dull: "text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10",
   red_dull: "text-red-400/60 bg-red-400/10 border-red-500/60",
   none: "text-muted-foreground italic",
