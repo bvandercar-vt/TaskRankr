@@ -176,7 +176,7 @@ const Settings = () => {
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
           <button
             onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
-            className="w-full flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full flex items-center justify-start gap-2 cursor-pointer"
             data-testid="button-sort-info-toggle"
           >
             <h3 className="font-semibold text-foreground">Sort Info</h3>
