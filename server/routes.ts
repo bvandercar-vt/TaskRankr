@@ -30,7 +30,7 @@ export async function registerRoutes(
   })
 
   // Export all tasks as JSON (must be before /api/tasks/:id)
-  app.get('/api/tasks/export', isAuthenticated, async (req, res) => {
+  app.get(api.tasks.export.path, isAuthenticated, async (req, res) => {
     const userId = getUserId(req)
     const tasks = await storage.getTasks(userId)
 
@@ -50,16 +50,11 @@ export async function registerRoutes(
   })
 
   // Import tasks from JSON
-  app.post('/api/tasks/import', isAuthenticated, async (req, res) => {
+  app.post(api.tasks.import.path, isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req)
-      const { tasks } = req.body
-
-      if (!Array.isArray(tasks)) {
-        return res
-          .status(400)
-          .json({ message: 'Invalid import format: tasks must be an array' })
-      }
+      const parsed = api.tasks.import.input.parse(req.body)
+      const { tasks } = parsed
 
       // Map old IDs to new IDs for preserving hierarchy
       const idMap = new Map<number, number>()
@@ -92,7 +87,7 @@ export async function registerRoutes(
 
       // Second pass: update parentIds using the ID map
       for (const taskData of tasks) {
-        if (!taskData.parentId) continue
+        if (!taskData.parentId || taskData.id === undefined) continue
         const newId = idMap.get(taskData.id)
         const newParentId = idMap.get(taskData.parentId)
         if (newId !== undefined && newParentId !== undefined) {
@@ -201,15 +196,16 @@ export async function registerRoutes(
   })
 
   // Settings routes
-  app.get('/api/settings', isAuthenticated, async (req, res) => {
+  app.get(api.settings.get.path, isAuthenticated, async (req, res) => {
     const userId = getUserId(req)
     const settings = await storage.getSettings(userId)
     res.json(settings)
   })
 
-  app.put('/api/settings', isAuthenticated, async (req, res) => {
+  app.put(api.settings.update.path, isAuthenticated, async (req, res) => {
     const userId = getUserId(req)
-    const settings = await storage.updateSettings(userId, req.body)
+    const input = api.settings.update.input.parse(req.body)
+    const settings = await storage.updateSettings(userId, input)
     res.json(settings)
   })
 
