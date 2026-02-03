@@ -75,9 +75,9 @@ const tasksContract = c.router({
     pathParams: z.object({
       id: z.coerce.number(),
     }),
-    body: z.undefined(),
+    body: c.noBody(),
     responses: {
-      204: z.undefined(),
+      204: c.noBody(),
       404: errorSchemas.notFound,
     },
     summary: 'Delete a task',
