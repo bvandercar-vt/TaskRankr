@@ -9,7 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { getPriorityStyle, getEaseStyle, getEnjoymentStyle, getTimeStyle } from "@/lib/taskStyles";
+import { getAttributeStyle } from "@/lib/taskStyles";
+import type { TaskSortField } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
 type AttributeKey = "priority" | "ease" | "enjoyment" | "time";
@@ -21,7 +22,7 @@ const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
 ];
 
 type SortCriterion = {
-  attr: "priority" | "ease" | "enjoyment" | "time" | "date";
+  attr: TaskSortField | "date";
   value: string;
 };
 
@@ -57,16 +58,6 @@ const SORT_INFO_CONFIG: SortInfoItem[] = [
 
 const ATTR_LABELS: Record<string, string> = {
   priority: "Priority", ease: "Ease", enjoyment: "Enjoyment", time: "Time", date: "Date created"
-};
-
-const getAttrStyle = (attr: string, value: string): string => {
-  switch (attr) {
-    case "priority": return getPriorityStyle(value as any);
-    case "ease": return getEaseStyle(value as any);
-    case "enjoyment": return getEnjoymentStyle(value as any);
-    case "time": return getTimeStyle(value as any);
-    default: return "";
-  }
 };
 
 const Settings = () => {
@@ -250,7 +241,9 @@ const Settings = () => {
                     <p className="font-medium text-foreground mb-1">{item.name}</p>
                     <ol className={cn("text-xs list-decimal list-inside", item.criteria.length > 1 && "space-y-0.5")}>
                       {item.criteria.map((c, idx) => {
-                        const style = getAttrStyle(c.attr, c.value);
+                        const style = c.attr !== "date" 
+                          ? getAttributeStyle(c.attr, c.value as any, "") 
+                          : "";
                         return (
                           <li key={idx} className="text-muted-foreground">
                             {ATTR_LABELS[c.attr]} ({style ? (
