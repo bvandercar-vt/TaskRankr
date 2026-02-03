@@ -3,12 +3,20 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 
-import type { TaskResponse } from '~/shared/schema'
+import type {
+  CreateTaskRequest,
+  TaskResponse,
+  TaskStatus,
+  UpdateTaskRequest,
+} from '~/shared/schema'
 import type { AppSettings } from '@/hooks/use-settings'
+
+type CreateDemoTaskInput = Omit<CreateTaskRequest, 'userId'>
 
 interface DemoContextValue {
   isDemo: boolean
@@ -17,6 +25,10 @@ interface DemoContextValue {
   demoTasks: TaskResponse[]
   demoSettings: AppSettings
   updateDemoSettings: (updates: Partial<AppSettings>) => void
+  createDemoTask: (data: CreateDemoTaskInput) => TaskResponse
+  updateDemoTask: (id: number, updates: UpdateTaskRequest) => TaskResponse
+  setDemoTaskStatus: (id: number, status: TaskStatus) => TaskResponse
+  deleteDemoTask: (id: number) => void
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null)
@@ -177,18 +189,171 @@ const DEMO_SETTINGS: AppSettings = {
   timeRequired: false,
 }
 
+const updateTaskInTree = (
+  tasks: TaskResponse[],
+  id: number,
+  updater: (task: TaskResponse) => TaskResponse,
+): TaskResponse[] => {
+  return tasks.map((task) => {
+    if (task.id === id) {
+      return updater(task)
+    }
+    const subtasks = task.subtasks ?? []
+    if (subtasks.length > 0) {
+      return {
+        ...task,
+        subtasks: updateTaskInTree(subtasks, id, updater),
+      }
+    }
+    return task
+  })
+}
+
+const deleteTaskFromTree = (
+  tasks: TaskResponse[],
+  id: number,
+): TaskResponse[] => {
+  return tasks
+    .filter((task) => task.id !== id)
+    .map((task) => ({
+      ...task,
+      subtasks: deleteTaskFromTree(task.subtasks ?? [], id),
+    }))
+}
+
+const findTaskInTree = (
+  tasks: TaskResponse[],
+  id: number,
+): TaskResponse | undefined => {
+  for (const task of tasks) {
+    if (task.id === id) return task
+    const found = findTaskInTree(task.subtasks ?? [], id)
+    if (found) return found
+  }
+  return undefined
+}
+
+const addTaskToTree = (
+  tasks: TaskResponse[],
+  newTask: TaskResponse,
+  parentId: number | null,
+): TaskResponse[] => {
+  if (!parentId) {
+    return [...tasks, newTask]
+  }
+  return tasks.map((task) => {
+    if (task.id === parentId) {
+      return { ...task, subtasks: [...(task.subtasks ?? []), newTask] }
+    }
+    const subtasks = task.subtasks ?? []
+    if (subtasks.length > 0) {
+      return { ...task, subtasks: addTaskToTree(subtasks, newTask, parentId) }
+    }
+    return task
+  })
+}
+
 export const DemoProvider = ({ children }: { children: ReactNode }) => {
   const [isDemo, setIsDemo] = useState(false)
   const [demoSettings, setDemoSettings] = useState<AppSettings>(DEMO_SETTINGS)
+  const [demoTasks, setDemoTasks] = useState<TaskResponse[]>(DEMO_TASKS)
+  const nextIdRef = useRef(100)
 
   const enterDemo = useCallback(() => setIsDemo(true), [])
   const exitDemo = useCallback(() => {
     setIsDemo(false)
     setDemoSettings(DEMO_SETTINGS)
+    setDemoTasks(DEMO_TASKS)
   }, [])
 
   const updateDemoSettings = useCallback((updates: Partial<AppSettings>) => {
     setDemoSettings((prev) => ({ ...prev, ...updates }))
+  }, [])
+
+  const createDemoTask = useCallback(
+    (data: CreateDemoTaskInput): TaskResponse => {
+      const newTask: TaskResponse = {
+        id: nextIdRef.current++,
+        userId: 'demo',
+        name: data.name,
+        description: data.description ?? null,
+        priority: data.priority ?? 'none',
+        ease: data.ease ?? 'none',
+        enjoyment: data.enjoyment ?? 'none',
+        time: data.time ?? 'none',
+        parentId: data.parentId ?? null,
+        status: demoSettings.autoPinNewTasks ? 'pinned' : 'open',
+        inProgressTime: 0,
+        inProgressStartedAt: null,
+        createdAt: new Date(),
+        completedAt: null,
+        subtasks: [],
+      }
+      setDemoTasks((prev) => addTaskToTree(prev, newTask, data.parentId ?? null))
+      return newTask
+    },
+    [demoSettings.autoPinNewTasks],
+  )
+
+  const updateDemoTask = useCallback(
+    (id: number, updates: UpdateTaskRequest): TaskResponse => {
+      let updatedTask: TaskResponse | undefined
+      setDemoTasks((prev) =>
+        updateTaskInTree(prev, id, (task) => {
+          updatedTask = { ...task, ...updates }
+          return updatedTask
+        }),
+      )
+      return updatedTask!
+    },
+    [],
+  )
+
+  const setDemoTaskStatus = useCallback(
+    (id: number, status: TaskStatus): TaskResponse => {
+      let updatedTask: TaskResponse | undefined
+      setDemoTasks((prev) => {
+        let tasks = prev
+        if (status === 'in_progress') {
+          tasks = updateTaskInTree(tasks, id, (task) => ({
+            ...task,
+            status: 'in_progress',
+            inProgressStartedAt: new Date(),
+          }))
+          tasks = tasks.map((t) => {
+            if (t.id !== id && t.status === 'in_progress') {
+              return { ...t, status: 'pinned' as const, inProgressStartedAt: null }
+            }
+            return t
+          })
+        } else if (status === 'completed') {
+          tasks = updateTaskInTree(tasks, id, (task) => {
+            updatedTask = {
+              ...task,
+              status: 'completed',
+              completedAt: new Date(),
+              inProgressStartedAt: null,
+            }
+            return updatedTask
+          })
+        } else {
+          tasks = updateTaskInTree(tasks, id, (task) => {
+            updatedTask = { ...task, status, inProgressStartedAt: null }
+            return updatedTask
+          })
+        }
+        if (!updatedTask) {
+          updatedTask = findTaskInTree(tasks, id)
+        }
+        return tasks
+      })
+      return updatedTask!
+    },
+    [],
+  )
+
+  const deleteDemoTask = useCallback((id: number) => {
+    setDemoTasks((prev) => deleteTaskFromTree(prev, id))
   }, [])
 
   const value = useMemo(
@@ -196,11 +361,26 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
       isDemo,
       enterDemo,
       exitDemo,
-      demoTasks: DEMO_TASKS,
+      demoTasks,
       demoSettings,
       updateDemoSettings,
+      createDemoTask,
+      updateDemoTask,
+      setDemoTaskStatus,
+      deleteDemoTask,
     }),
-    [isDemo, enterDemo, exitDemo, demoSettings, updateDemoSettings],
+    [
+      isDemo,
+      enterDemo,
+      exitDemo,
+      demoTasks,
+      demoSettings,
+      updateDemoSettings,
+      createDemoTask,
+      updateDemoTask,
+      setDemoTaskStatus,
+      deleteDemoTask,
+    ],
   )
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>
@@ -222,6 +402,10 @@ export const useDemoSafe = () => {
       demoTasks: [],
       demoSettings: DEMO_SETTINGS,
       updateDemoSettings: () => {},
+      createDemoTask: () => ({} as TaskResponse),
+      updateDemoTask: () => ({} as TaskResponse),
+      setDemoTaskStatus: () => ({} as TaskResponse),
+      deleteDemoTask: () => {},
     }
   )
 }
