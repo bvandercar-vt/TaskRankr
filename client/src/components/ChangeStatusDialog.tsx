@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Clock, Pin, PinOff, StopCircle, X } from 'lucide-react'
+import { Clock, type LucideIcon, Pin, PinOff, StopCircle, X } from 'lucide-react'
 
 import { Button } from '@/components/primitives/button'
 import { Input } from '@/components/primitives/forms/input'
@@ -15,6 +15,32 @@ import {
 import { getSettings } from '@/hooks/use-settings'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
 import type { TaskStatus } from '~/shared/schema'
+
+interface StatusButtonProps {
+  icon: LucideIcon
+  label: string
+  onClick: () => void
+  testId: string
+  colorClass?: string
+}
+
+const StatusButton = ({
+  icon: Icon,
+  label,
+  onClick,
+  testId,
+  colorClass = 'border-slate-400/50 text-slate-400 hover:bg-slate-500/10',
+}: StatusButtonProps) => (
+  <Button
+    onClick={onClick}
+    variant="outline"
+    className={cn('w-full h-11 text-base font-semibold gap-2', colorClass)}
+    data-testid={testId}
+  >
+    <Icon className="w-4 h-4" />
+    {label}
+  </Button>
+)
 
 interface ChangeStatusDialogProps {
   open: boolean
@@ -90,50 +116,37 @@ export const ChangeStatusDialog = ({
           <div className="flex flex-col gap-3 w-full">
             {!isCompleted && (
               <>
-                {/* Start/Stop Working button */}
                 {isInProgress ? (
-                  <Button
+                  <StatusButton
+                    icon={StopCircle}
+                    label="Stop Progress"
                     onClick={() => onSetStatus('open')}
-                    variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
-                    data-testid="button-stop-progress"
-                  >
-                    <StopCircle className="w-4 h-4" />
-                    Stop Progress
-                  </Button>
+                    testId="button-stop-progress"
+                  />
                 ) : (
-                  <Button
+                  <StatusButton
+                    icon={Clock}
+                    label="In Progress"
                     onClick={() => onSetStatus('in_progress')}
-                    variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                    data-testid="button-start-progress"
-                  >
-                    <Clock className="w-4 h-4" />
-                    In Progress
-                  </Button>
+                    testId="button-start-progress"
+                    colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                  />
                 )}
 
-                {/* Pin/Unpin button */}
                 {isInProgress || isPinned ? (
-                  <Button
+                  <StatusButton
+                    icon={PinOff}
+                    label="Unpin"
                     onClick={() => onSetStatus('open')}
-                    variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
-                    data-testid="button-unpin"
-                  >
-                    <PinOff className="w-4 h-4" />
-                    Unpin
-                  </Button>
+                    testId="button-unpin"
+                  />
                 ) : (
-                  <Button
+                  <StatusButton
+                    icon={Pin}
+                    label="Pin to Top"
                     onClick={() => onSetStatus('pinned')}
-                    variant="outline"
-                    className="w-full h-11 text-base font-semibold gap-2 border-slate-400/50 text-slate-400 hover:bg-slate-500/10"
-                    data-testid="button-pin"
-                  >
-                    <Pin className="w-4 h-4" />
-                    Pin to Top
-                  </Button>
+                    testId="button-pin"
+                  />
                 )}
               </>
             )}
