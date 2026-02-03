@@ -3,8 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest } from '@/lib/queryClient'
-import { api, buildUrl, type TaskInput } from '~/shared/routes'
-import type { TaskStatus } from '~/shared/schema'
+import { api, buildUrl } from '~/shared/routes'
+import type {
+  CreateTaskRequest,
+  TaskStatus,
+  UpdateTaskRequest,
+} from '~/shared/schema'
 
 // Fetch all tasks
 export const useTasks = () => {
@@ -63,7 +67,7 @@ export const useCreateTask = () => {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (data: TaskInput) => {
+    mutationFn: async (data: CreateTaskRequest) => {
       const res = await apiRequest(
         api.tasks.create.method,
         api.tasks.create.path,
@@ -108,7 +112,7 @@ export const useUpdateTask = () => {
     mutationFn: async ({
       id,
       ...updates
-    }: { id: number } & Partial<TaskInput>) => {
+    }: { id: number } & UpdateTaskRequest) => {
       const url = buildUrl(api.tasks.update.path, { id })
       const res = await apiRequest(api.tasks.update.method, url, updates)
       return api.tasks.update.responses[200].parse(await res.json())

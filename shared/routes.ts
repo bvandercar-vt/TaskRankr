@@ -1,15 +1,11 @@
 import { z } from 'zod'
 
 import {
-  easeEnum,
-  enjoymentEnum,
   insertTaskSchema,
   insertUserSettingsSchema,
-  priorityEnum,
+  taskSchema,
   taskStatusEnum,
-  type tasks,
-  timeEnum,
-  type userSettings,
+  userSettingsSchema,
 } from './schema'
 
 export const errorSchemas = {
@@ -31,14 +27,14 @@ export const api = {
       method: 'GET',
       path: '/api/tasks',
       responses: {
-        200: z.array(z.custom<typeof tasks.$inferSelect>()),
+        200: z.array(taskSchema),
       },
     },
     get: {
       method: 'GET',
       path: '/api/tasks/:id',
       responses: {
-        200: z.custom<typeof tasks.$inferSelect>(),
+        200: taskSchema,
         404: errorSchemas.notFound,
       },
     },
@@ -47,7 +43,7 @@ export const api = {
       path: '/api/tasks',
       input: insertTaskSchema,
       responses: {
-        201: z.custom<typeof tasks.$inferSelect>(),
+        201: taskSchema,
         400: errorSchemas.validation,
       },
     },
@@ -56,7 +52,7 @@ export const api = {
       path: '/api/tasks/:id',
       input: insertTaskSchema.partial(),
       responses: {
-        200: z.custom<typeof tasks.$inferSelect>(),
+        200: taskSchema,
         400: errorSchemas.validation,
         404: errorSchemas.notFound,
       },
@@ -74,7 +70,7 @@ export const api = {
       path: '/api/tasks/:id/status',
       input: z.object({ status: taskStatusEnum }),
       responses: {
-        200: z.custom<typeof tasks.$inferSelect>(),
+        200: taskSchema,
         400: errorSchemas.validation,
         404: errorSchemas.notFound,
       },
@@ -86,9 +82,7 @@ export const api = {
         200: z.object({
           version: z.number(),
           exportedAt: z.string(),
-          tasks: z.array(
-            z.custom<Omit<typeof tasks.$inferSelect, 'id' | 'userId'>>(),
-          ),
+          tasks: z.array(taskSchema.omit({ userId: true })),
         }),
       },
     },
@@ -97,27 +91,18 @@ export const api = {
       path: '/api/tasks/import',
       input: z.object({
         tasks: z.array(
-          z.object({
-            id: z.number().optional(),
-            name: z.string(),
-            description: z.string().nullish(),
-            priority: priorityEnum.nullish(),
-            ease: easeEnum.nullish(),
-            enjoyment: enjoymentEnum.nullish(),
-            time: timeEnum.nullish(),
+          insertTaskSchema.extend({
+            id: z.number().nullish(),
+            status: insertTaskSchema.shape.status.nullish(),
             parentId: z.number().nullish(),
-            status: taskStatusEnum.optional(),
-            inProgressTime: z.number().optional(),
-            createdAt: z.string().optional(),
+            inProgressTime: z.number().nullish(),
+            createdAt: z.string().nullish(),
             completedAt: z.string().nullish(),
           }),
         ),
       }),
       responses: {
-        200: z.object({
-          message: z.string(),
-          imported: z.number(),
-        }),
+        200: z.object({ message: z.string(), imported: z.number() }),
         400: errorSchemas.validation,
       },
     },
@@ -127,7 +112,7 @@ export const api = {
       method: 'GET',
       path: '/api/settings',
       responses: {
-        200: z.custom<typeof userSettings.$inferSelect>(),
+        200: userSettingsSchema,
       },
     },
     update: {
@@ -135,7 +120,7 @@ export const api = {
       path: '/api/settings',
       input: insertUserSettingsSchema.omit({ userId: true }).partial(),
       responses: {
-        200: z.custom<typeof userSettings.$inferSelect>(),
+        200: userSettingsSchema,
       },
     },
   },
@@ -173,6 +158,3 @@ export function buildUrl(
   }
   return url
 }
-
-export type TaskInput = z.infer<typeof api.tasks.create.input>
-export type TaskResponse = z.infer<(typeof api.tasks.create.responses)[201]>
