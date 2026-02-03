@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
-import { tsr } from '@/lib/api-client'
+import { type ClientInferRequestBody, QueryKeys, tsr } from '@/lib/ts-rest'
+import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
 export const useTasks = () => {
   const query = tsr.tasks.list.useQuery({
-    queryKey: ['tasks'],
+    queryKey: QueryKeys.getTasks,
   })
 
   return {
@@ -41,7 +42,7 @@ export const useTaskParentChain = (parentId?: number) => {
 
 export const useTask = (id: number) => {
   const query = tsr.tasks.get.useQuery({
-    queryKey: ['tasks', id],
+    queryKey: [...QueryKeys.getTasks, id],
     queryData: { params: { id } },
     enabled: !!id,
   })
@@ -60,7 +61,7 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: async (
       data: Omit<
-        Parameters<typeof tsr.tasks.create.mutate>[0]['body'],
+        ClientInferRequestBody<typeof contract.tasks.create>,
         'userId'
       >,
     ) => {
@@ -84,7 +85,7 @@ export const useCreateTask = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
     },
     onError: (error) => {
       toast({
@@ -115,7 +116,7 @@ export const useUpdateTask = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
     },
     onError: (error) => {
       toast({
@@ -143,7 +144,7 @@ export const useSetTaskStatus = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
     },
     onError: (error) => {
       toast({
@@ -165,11 +166,11 @@ export const useDeleteTask = () => {
         params: { id },
       })
       if (result.status !== 204) {
-        throw new Error((result.body as { message: string }).message)
+        throw new Error(result.body.message)
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
     },
     onError: (error) => {
       toast({
