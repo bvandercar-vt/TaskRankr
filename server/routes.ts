@@ -1,70 +1,71 @@
-import type { Express } from "express";
-import type { Server } from "http";
-import { storage } from "./storage";
-import { api } from "@shared/routes";
-import { z } from "zod";
+import type { Server } from 'http'
+import type { Express } from 'express'
+import { z } from 'zod'
+
+import { api } from '@shared/routes'
 import {
-  setupAuth,
-  registerAuthRoutes,
   isAuthenticated,
-} from "./replit_integrations/auth";
+  registerAuthRoutes,
+  setupAuth,
+} from './replit_integrations/auth'
+import { storage } from './storage'
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
   // Setup auth before other routes
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  await setupAuth(app)
+  registerAuthRoutes(app)
 
   // Helper to get userId from request
-  const getUserId = (req: any): string => req.user?.claims?.sub;
+  const getUserId = (req: any): string => req.user?.claims?.sub
 
   app.get(api.tasks.list.path, isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const tasks = await storage.getTasks(userId);
-    res.json(tasks);
-  });
+    const userId = getUserId(req)
+    const tasks = await storage.getTasks(userId)
+    res.json(tasks)
+  })
 
   // Export all tasks as JSON (must be before /api/tasks/:id)
-  app.get("/api/tasks/export", isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const tasks = await storage.getTasks(userId);
+  app.get('/api/tasks/export', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req)
+    const tasks = await storage.getTasks(userId)
 
     // Remove userId and id from exported tasks for privacy/portability
-    const exportData = tasks.map(({ id, userId: _, ...task }) => task);
+    const exportData = tasks.map(({ id, userId: _, ...task }) => task)
 
-    res.setHeader("Content-Type", "application/json");
+    res.setHeader('Content-Type', 'application/json')
     res.setHeader(
-      "Content-Disposition",
+      'Content-Disposition',
       'attachment; filename="tasks-export.json"',
-    );
+    )
     res.json({
       version: 1,
       exportedAt: new Date().toISOString(),
       tasks: exportData,
-    });
-  });
+    })
+  })
 
   // Import tasks from JSON
-  app.post("/api/tasks/import", isAuthenticated, async (req, res) => {
+  app.post('/api/tasks/import', isAuthenticated, async (req, res) => {
     try {
-      const userId = getUserId(req);
-      const { tasks } = req.body;
+      const userId = getUserId(req)
+      const { tasks } = req.body
 
       if (!Array.isArray(tasks)) {
         return res
           .status(400)
-          .json({ message: "Invalid import format: tasks must be an array" });
+          .json({ message: 'Invalid import format: tasks must be an array' })
       }
 
       // Map old IDs to new IDs for preserving hierarchy
-      const idMap = new Map<number, number>();
+      const idMap = new Map<number, number>()
 
       // First pass: create all tasks without parentId
       for (const taskData of tasks) {
-        const oldId = taskData.id;
-        const { id, ...rest } = taskData;
+        const oldId = taskData.id
+        const { id, ...rest } = taskData
 
         const newTask = await storage.createTask({
           name: rest.name,
@@ -75,15 +76,15 @@ export async function registerRoutes(
           time: rest.time || null,
           userId,
           parentId: null, // Set in second pass
-          status: rest.status || "open",
+          status: rest.status || 'open',
           inProgressTime: rest.inProgressTime || 0,
           inProgressStartedAt: null,
           createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
           completedAt: rest.completedAt ? new Date(rest.completedAt) : null,
-        });
+        })
 
         if (oldId && newTask) {
-          idMap.set(oldId, newTask.id);
+          idMap.set(oldId, newTask.id)
         }
       }
 
@@ -94,124 +95,124 @@ export async function registerRoutes(
           idMap.has(taskData.id) &&
           idMap.has(taskData.parentId)
         ) {
-          const newId = idMap.get(taskData.id)!;
-          const newParentId = idMap.get(taskData.parentId)!;
-          await storage.updateTask(newId, userId, { parentId: newParentId });
+          const newId = idMap.get(taskData.id)!
+          const newParentId = idMap.get(taskData.parentId)!
+          await storage.updateTask(newId, userId, { parentId: newParentId })
         }
       }
 
       res.json({
         message: `Successfully imported ${idMap.size} tasks`,
         imported: idMap.size,
-      });
+      })
     } catch (err) {
       if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid task data in import" });
+        return res.status(400).json({ message: 'Invalid task data in import' })
       }
-      throw err;
+      throw err
     }
-  });
+  })
 
   app.get(api.tasks.get.path, isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const task = await storage.getTask(Number(req.params.id), userId);
+    const userId = getUserId(req)
+    const task = await storage.getTask(Number(req.params.id), userId)
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' })
     }
-    res.json(task);
-  });
+    res.json(task)
+  })
 
   app.post(api.tasks.create.path, isAuthenticated, async (req, res) => {
     try {
-      const userId = getUserId(req);
-      const input = api.tasks.create.input.parse({ ...req.body, userId });
-      const task = await storage.createTask(input);
-      res.status(201).json(task);
+      const userId = getUserId(req)
+      const input = api.tasks.create.input.parse({ ...req.body, userId })
+      const task = await storage.createTask(input)
+      res.status(201).json(task)
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
-          field: err.errors[0].path.join("."),
-        });
+          field: err.errors[0].path.join('.'),
+        })
       }
-      throw err;
+      throw err
     }
-  });
+  })
 
   app.put(api.tasks.update.path, isAuthenticated, async (req, res) => {
     try {
-      const userId = getUserId(req);
-      const input = api.tasks.update.input.parse(req.body);
-      const existing = await storage.getTask(Number(req.params.id), userId);
+      const userId = getUserId(req)
+      const input = api.tasks.update.input.parse(req.body)
+      const existing = await storage.getTask(Number(req.params.id), userId)
       if (!existing) {
-        return res.status(404).json({ message: "Task not found" });
+        return res.status(404).json({ message: 'Task not found' })
       }
 
       const task = await storage.updateTask(
         Number(req.params.id),
         userId,
         input,
-      );
-      res.json(task);
+      )
+      res.json(task)
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
-          field: err.errors[0].path.join("."),
-        });
+          field: err.errors[0].path.join('.'),
+        })
       }
-      throw err;
+      throw err
     }
-  });
+  })
 
   app.put(api.tasks.setStatus.path, isAuthenticated, async (req, res) => {
     try {
-      const userId = getUserId(req);
-      const input = api.tasks.setStatus.input.parse(req.body);
-      const existing = await storage.getTask(Number(req.params.id), userId);
+      const userId = getUserId(req)
+      const input = api.tasks.setStatus.input.parse(req.body)
+      const existing = await storage.getTask(Number(req.params.id), userId)
       if (!existing) {
-        return res.status(404).json({ message: "Task not found" });
+        return res.status(404).json({ message: 'Task not found' })
       }
 
       const task = await storage.setTaskStatus(
         Number(req.params.id),
         userId,
         input.status,
-      );
-      res.json(task);
+      )
+      res.json(task)
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0].message,
-          field: err.errors[0].path.join("."),
-        });
+          field: err.errors[0].path.join('.'),
+        })
       }
-      throw err;
+      throw err
     }
-  });
+  })
 
   app.delete(api.tasks.delete.path, isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const existing = await storage.getTask(Number(req.params.id), userId);
+    const userId = getUserId(req)
+    const existing = await storage.getTask(Number(req.params.id), userId)
     if (!existing) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' })
     }
-    await storage.deleteTask(Number(req.params.id), userId);
-    res.status(204).send();
-  });
+    await storage.deleteTask(Number(req.params.id), userId)
+    res.status(204).send()
+  })
 
   // Settings routes
-  app.get("/api/settings", isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const settings = await storage.getSettings(userId);
-    res.json(settings);
-  });
+  app.get('/api/settings', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req)
+    const settings = await storage.getSettings(userId)
+    res.json(settings)
+  })
 
-  app.put("/api/settings", isAuthenticated, async (req, res) => {
-    const userId = getUserId(req);
-    const settings = await storage.updateSettings(userId, req.body);
-    res.json(settings);
-  });
+  app.put('/api/settings', isAuthenticated, async (req, res) => {
+    const userId = getUserId(req)
+    const settings = await storage.updateSettings(userId, req.body)
+    res.json(settings)
+  })
 
-  return httpServer;
+  return httpServer
 }

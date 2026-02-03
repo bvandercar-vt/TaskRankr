@@ -7,13 +7,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/primitives/overlays/alert-dialog";
+} from '@/components/primitives/overlays/alert-dialog'
 
 interface ConfirmDeleteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  taskName: string;
-  onConfirm: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  taskName: string
+  onConfirm: () => void
 }
 
 export const ConfirmDeleteDialog = ({
@@ -44,4 +44,4 @@ export const ConfirmDeleteDialog = ({
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
-);
+)

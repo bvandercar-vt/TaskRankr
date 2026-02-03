@@ -1,81 +1,107 @@
+import { relations } from 'drizzle-orm'
 import {
-  pgTable,
-  text,
-  serial,
-  integer,
   boolean,
+  integer,
+  pgTable,
+  serial,
+  text,
   timestamp,
   varchar,
-} from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+} from 'drizzle-orm/pg-core'
+import { createInsertSchema } from 'drizzle-zod'
+import { z } from 'zod'
 
 // Re-export auth models
-export * from "./models/auth";
+export * from './models/auth'
 
-export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(), // Owner of the task
-  name: text("name").notNull(),
-  description: text("description"),
-  priority: text("priority"),
-  ease: text("ease"),
-  enjoyment: text("enjoyment"),
-  time: text("time"),
-  parentId: integer("parent_id"),
-  status: text("status").default("open").notNull(), // open, in_progress, pinned, completed
-  inProgressTime: integer("in_progress_time").default(0).notNull(), // Cumulative time in milliseconds
-  inProgressStartedAt: timestamp("in_progress_started_at"), // When current in-progress session started
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-});
+export const tasks = pgTable('tasks', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(), // Owner of the task
+  name: text('name').notNull(),
+  description: text('description'),
+  priority: text('priority'),
+  ease: text('ease'),
+  enjoyment: text('enjoyment'),
+  time: text('time'),
+  parentId: integer('parent_id'),
+  status: text('status').default('open').notNull(), // open, in_progress, pinned, completed
+  inProgressTime: integer('in_progress_time').default(0).notNull(), // Cumulative time in milliseconds
+  inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+})
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
   parent: one(tasks, {
     fields: [tasks.parentId],
     references: [tasks.id],
-    relationName: "subtasks",
+    relationName: 'subtasks',
   }),
   subtasks: many(tasks, {
-    relationName: "subtasks",
+    relationName: 'subtasks',
   }),
-}));
+}))
 
 // Status constants and types
-export const TASK_STATUSES = ["open", "in_progress", "pinned", "completed"] as const;
-export type TaskStatus = (typeof TASK_STATUSES)[number];
-export const taskStatusEnum = z.enum(TASK_STATUSES);
+export const TASK_STATUSES = [
+  'open',
+  'in_progress',
+  'pinned',
+  'completed',
+] as const
+export type TaskStatus = (typeof TASK_STATUSES)[number]
+export const taskStatusEnum = z.enum(TASK_STATUSES)
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
-  "none",
-  "lowest",
-  "low",
-  "medium",
-  "high",
-  "highest",
-] as const;
-export const EASE_LEVELS = ["none", "easiest", "easy", "medium", "hard", "hardest"] as const;
-export const ENJOYMENT_LEVELS = ["none", "lowest", "low", "medium", "high", "highest"] as const;
-export const TIME_LEVELS = ["none", "lowest", "low", "medium", "high", "highest"] as const;
+  'none',
+  'lowest',
+  'low',
+  'medium',
+  'high',
+  'highest',
+] as const
+export const EASE_LEVELS = [
+  'none',
+  'easiest',
+  'easy',
+  'medium',
+  'hard',
+  'hardest',
+] as const
+export const ENJOYMENT_LEVELS = [
+  'none',
+  'lowest',
+  'low',
+  'medium',
+  'high',
+  'highest',
+] as const
+export const TIME_LEVELS = [
+  'none',
+  'lowest',
+  'low',
+  'medium',
+  'high',
+  'highest',
+] as const
 
-export type Priority = (typeof PRIORITY_LEVELS)[number];
-export type Ease = (typeof EASE_LEVELS)[number];
-export type Enjoyment = (typeof ENJOYMENT_LEVELS)[number];
-export type Time = (typeof TIME_LEVELS)[number];
+export type Priority = (typeof PRIORITY_LEVELS)[number]
+export type Ease = (typeof EASE_LEVELS)[number]
+export type Enjoyment = (typeof ENJOYMENT_LEVELS)[number]
+export type Time = (typeof TIME_LEVELS)[number]
 
-export type TaskSortField = "priority" | "ease" | "enjoyment" | "time";
+export type TaskSortField = 'priority' | 'ease' | 'enjoyment' | 'time'
 
 // Zod enums for validation
-export const priorityEnum = z.enum(PRIORITY_LEVELS);
-export const easeEnum = z.enum(EASE_LEVELS);
-export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS);
-export const timeEnum = z.enum(TIME_LEVELS);
+export const priorityEnum = z.enum(PRIORITY_LEVELS)
+export const easeEnum = z.enum(EASE_LEVELS)
+export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS)
+export const timeEnum = z.enum(TIME_LEVELS)
 
 export const insertTaskSchema = createInsertSchema(tasks, {
-  name: z.string().min(1, "Name is required"),
-  userId: z.string().min(1, "User ID is required"),
+  name: z.string().min(1, 'Name is required'),
+  userId: z.string().min(1, 'User ID is required'),
   status: taskStatusEnum.optional(),
   priority: priorityEnum.nullable().optional(),
   ease: easeEnum.nullable().optional(),
@@ -86,50 +112,63 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   inProgressStartedAt: z.coerce.date().optional().nullable(),
 }).omit({
   id: true,
-});
+})
 
 // Base type from Drizzle, then override attribute fields with enum types
-type TaskBase = typeof tasks.$inferSelect;
-export type Task = Omit<TaskBase, "status" | "priority" | "ease" | "enjoyment" | "time"> & {
-  status: TaskStatus;
-  priority: Priority | null;
-  ease: Ease | null;
-  enjoyment: Enjoyment | null;
-  time: Time | null;
-};
+type TaskBase = typeof tasks.$inferSelect
+export type Task = Omit<
+  TaskBase,
+  'status' | 'priority' | 'ease' | 'enjoyment' | 'time'
+> & {
+  status: TaskStatus
+  priority: Priority | null
+  ease: Ease | null
+  enjoyment: Enjoyment | null
+  time: Time | null
+}
 
-export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type InsertTask = z.infer<typeof insertTaskSchema>
 
 // Request/Response types
-export type CreateTaskRequest = InsertTask;
-export type UpdateTaskRequest = Partial<InsertTask>;
-export type TaskResponse = Task & { subtasks?: TaskResponse[] };
+export type CreateTaskRequest = InsertTask
+export type UpdateTaskRequest = Partial<InsertTask>
+export type TaskResponse = Task & { subtasks?: TaskResponse[] }
 
 // User Settings
-export const SORT_OPTIONS = ["date", "priority", "ease", "enjoyment", "time"] as const;
-export type SortOption = (typeof SORT_OPTIONS)[number];
+export const SORT_OPTIONS = [
+  'date',
+  'priority',
+  'ease',
+  'enjoyment',
+  'time',
+] as const
+export type SortOption = (typeof SORT_OPTIONS)[number]
 
-export const userSettings = pgTable("user_settings", {
-  userId: varchar("user_id").primaryKey(),
-  autoPinNewTasks: boolean("auto_pin_new_tasks").default(true).notNull(),
-  enableInProgressTime: boolean("enable_in_progress_time").default(true).notNull(),
-  alwaysSortPinnedByPriority: boolean("always_sort_pinned_by_priority").default(true).notNull(),
-  sortBy: text("sort_by").default("priority").notNull(),
+export const userSettings = pgTable('user_settings', {
+  userId: varchar('user_id').primaryKey(),
+  autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),
+  enableInProgressTime: boolean('enable_in_progress_time')
+    .default(true)
+    .notNull(),
+  alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
+    .default(true)
+    .notNull(),
+  sortBy: text('sort_by').default('priority').notNull(),
   // Attribute visibility settings
-  priorityVisible: boolean("priority_visible").default(true).notNull(),
-  priorityRequired: boolean("priority_required").default(true).notNull(),
-  easeVisible: boolean("ease_visible").default(true).notNull(),
-  easeRequired: boolean("ease_required").default(true).notNull(),
-  enjoymentVisible: boolean("enjoyment_visible").default(true).notNull(),
-  enjoymentRequired: boolean("enjoyment_required").default(true).notNull(),
-  timeVisible: boolean("time_visible").default(true).notNull(),
-  timeRequired: boolean("time_required").default(true).notNull(),
-});
+  priorityVisible: boolean('priority_visible').default(true).notNull(),
+  priorityRequired: boolean('priority_required').default(true).notNull(),
+  easeVisible: boolean('ease_visible').default(true).notNull(),
+  easeRequired: boolean('ease_required').default(true).notNull(),
+  enjoymentVisible: boolean('enjoyment_visible').default(true).notNull(),
+  enjoymentRequired: boolean('enjoyment_required').default(true).notNull(),
+  timeVisible: boolean('time_visible').default(true).notNull(),
+  timeRequired: boolean('time_required').default(true).notNull(),
+})
 
 export const insertUserSettingsSchema = createInsertSchema(userSettings, {
   userId: z.string().min(1),
   sortBy: z.enum(SORT_OPTIONS).optional(),
-}).omit({});
+}).omit({})
 
-export type UserSettings = typeof userSettings.$inferSelect;
-export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+export type UserSettings = typeof userSettings.$inferSelect
+export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>

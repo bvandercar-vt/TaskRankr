@@ -1,87 +1,88 @@
-import { useState, useRef, useEffect } from "react";
-import type { TaskResponse, TaskStatus } from "@shared/schema";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronDown, Pin } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/primitives/badge";
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
+
+import type { TaskResponse, TaskStatus } from '@shared/schema'
+import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
+import { Badge } from '@/components/primitives/badge'
+import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { getSettings } from '@/hooks/use-settings'
 import {
-  useSetTaskStatus,
   useDeleteTask,
+  useSetTaskStatus,
   useUpdateTask,
-} from "@/hooks/use-tasks";
-import { getSettings } from "@/hooks/use-settings";
-import { useTaskDialog } from "@/components/TaskDialogProvider";
-import { getAttributeStyle } from "@/lib/taskStyles";
-import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+} from '@/hooks/use-tasks'
+import { getAttributeStyle } from '@/lib/taskStyles'
+import { cn } from '@/lib/utils'
 
 interface TaskBadgeProps {
-  value: string;
-  styleClass: string;
+  value: string
+  styleClass: string
 }
 
 const TaskBadge = ({ value, styleClass }: TaskBadgeProps) => (
   <Badge
     variant="outline"
     className={cn(
-      "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
+      'px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0',
       styleClass,
     )}
     data-testid={`badge-${value}`}
   >
     {value}
   </Badge>
-);
+)
 
 interface TaskCardProps {
-  task: TaskResponse;
-  level?: number;
-  showRestore?: boolean;
-  showCompletedDate?: boolean;
+  task: TaskResponse
+  level?: number
+  showRestore?: boolean
+  showCompletedDate?: boolean
 }
 
 // Format date helper
 const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
-  if (!dateValue) return null;
-  const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
+  if (!dateValue) return null
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
 
 // Format duration helper (milliseconds to human-readable)
 const formatDuration = (ms: number) => {
-  if (ms <= 0) return null;
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (ms <= 0) return null
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
 
   if (hours > 0 && minutes > 0) {
-    return `${hours}h ${minutes}m`;
+    return `${hours}h ${minutes}m`
   } else if (hours > 0) {
-    return `${hours}h`;
+    return `${hours}h`
   } else if (minutes > 0) {
-    return `${minutes}m`;
+    return `${minutes}m`
   } else {
-    return `${totalSeconds}s`;
+    return `${totalSeconds}s`
   }
-};
+}
 
 // Calculate current accumulated time for in-progress tasks
 const getCurrentAccumulatedTime = (task: TaskResponse): number => {
-  let total = task.inProgressTime;
-  if (task.status === "in_progress" && task.inProgressStartedAt) {
+  let total = task.inProgressTime
+  if (task.status === 'in_progress' && task.inProgressStartedAt) {
     const startedAt =
-      typeof task.inProgressStartedAt === "string"
+      typeof task.inProgressStartedAt === 'string'
         ? new Date(task.inProgressStartedAt)
-        : task.inProgressStartedAt;
-    const elapsed = Date.now() - startedAt.getTime();
-    total += elapsed;
+        : task.inProgressStartedAt
+    const elapsed = Date.now() - startedAt.getTime()
+    total += elapsed
   }
-  return total;
-};
+  return total
+}
 
 export const TaskCard = ({
   task,
@@ -89,49 +90,49 @@ export const TaskCard = ({
   showRestore = false,
   showCompletedDate = false,
 }: TaskCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isHolding, setIsHolding] = useState(false);
-  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isHolding, setIsHolding] = useState(false)
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const setTaskStatus = useSetTaskStatus();
-  const deleteTask = useDeleteTask();
-  const updateTask = useUpdateTask();
-  const settings = getSettings();
-  const { openEditDialog } = useTaskDialog();
+  const setTaskStatus = useSetTaskStatus()
+  const deleteTask = useDeleteTask()
+  const updateTask = useUpdateTask()
+  const settings = getSettings()
+  const { openEditDialog } = useTaskDialog()
 
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-  const isInProgress = task.status === "in_progress";
-  const isPinned = task.status === "pinned";
+  const hasSubtasks = task.subtasks && task.subtasks.length > 0
+  const isInProgress = task.status === 'in_progress'
+  const isPinned = task.status === 'pinned'
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest("button")) return;
+    if ((e.target as HTMLElement).closest('button')) return
 
-    setIsHolding(true);
-    const duration = 800;
+    setIsHolding(true)
+    const duration = 800
 
     holdTimerRef.current = setTimeout(() => {
-      setShowConfirm(true);
-      setIsHolding(false);
-    }, duration);
-  };
+      setShowConfirm(true)
+      setIsHolding(false)
+    }, duration)
+  }
 
   const cancelHold = () => {
-    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    setIsHolding(false);
-  };
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
+    setIsHolding(false)
+  }
 
   useEffect(() => {
     return () => {
-      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    };
-  }, []);
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
+    }
+  }, [])
 
   const handleSetStatus = (status: TaskStatus) => {
-    setTaskStatus.mutate({ id: task.id, status });
-    setShowConfirm(false);
-  };
+    setTaskStatus.mutate({ id: task.id, status })
+    setShowConfirm(false)
+  }
 
   return (
     <div className="group relative">
@@ -140,13 +141,13 @@ export const TaskCard = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
+          'relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer',
           isInProgress
-            ? "border-blue-500/30 bg-blue-500/5"
+            ? 'border-blue-500/30 bg-blue-500/5'
             : isPinned
-              ? "border-slate-400/30 bg-slate-500/5"
-              : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
-          isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
+              ? 'border-slate-400/30 bg-slate-500/5'
+              : 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]',
+          isHolding && 'bg-white/[0.05] scale-[0.99] transition-transform',
         )}
         style={{ marginLeft: `${level * 16}px` }}
         data-testid={`task-${task.status}-${task.id}`}
@@ -161,8 +162,8 @@ export const TaskCard = ({
           {hasSubtasks ? (
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
               }}
               className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
             >
@@ -185,8 +186,8 @@ export const TaskCard = ({
             {isInProgress && (
               <div
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setShowConfirm(true);
+                  e.stopPropagation()
+                  setShowConfirm(true)
                 }}
                 className="cursor-pointer"
               >
@@ -201,8 +202,8 @@ export const TaskCard = ({
                 className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer"
                 data-testid="icon-pinned"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setShowConfirm(true);
+                  e.stopPropagation()
+                  setShowConfirm(true)
                 }}
               />
             )}
@@ -210,22 +211,22 @@ export const TaskCard = ({
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {(["priority", "ease", "enjoyment", "time"] as const).map(
+              {(['priority', 'ease', 'enjoyment', 'time'] as const).map(
                 (field) => {
-                  const visibleKey = `${field}Visible` as keyof typeof settings;
-                  if (!settings[visibleKey]) return null;
-                  const value = task[field] ?? "none";
+                  const visibleKey = `${field}Visible` as keyof typeof settings
+                  if (!settings[visibleKey]) return null
+                  const value = task[field] ?? 'none'
                   return (
                     <TaskBadge
                       key={field}
                       value={value}
                       styleClass={
-                        value !== "none"
+                        value !== 'none'
                           ? getAttributeStyle(field, value)
-                          : "opacity-0"
+                          : 'opacity-0'
                       }
                     />
-                  );
+                  )
                 },
               )}
             </div>
@@ -251,7 +252,7 @@ export const TaskCard = ({
         {isExpanded && hasSubtasks && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
+            animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
@@ -282,11 +283,11 @@ export const TaskCard = ({
         inProgressTime={getCurrentAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
-          updateTask.mutate({ id: task.id, inProgressTime: timeMs });
+          updateTask.mutate({ id: task.id, inProgressTime: timeMs })
         }}
         onDeleteClick={() => {
-          setShowConfirm(false);
-          setTimeout(() => setShowDeleteConfirm(true), 100);
+          setShowConfirm(false)
+          setTimeout(() => setShowDeleteConfirm(true), 100)
         }}
       />
 
@@ -295,10 +296,10 @@ export const TaskCard = ({
         onOpenChange={setShowDeleteConfirm}
         taskName={task.name}
         onConfirm={() => {
-          deleteTask.mutate(task.id);
-          setShowDeleteConfirm(false);
+          deleteTask.mutate(task.id)
+          setShowDeleteConfirm(false)
         }}
       />
     </div>
-  );
-};
+  )
+}

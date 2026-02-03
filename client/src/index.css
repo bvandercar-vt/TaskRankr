@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -8,28 +8,28 @@
   /* Rich, modern palette - Deep Indigo & Vibrant Accents */
   --background: 224 71% 4%;
   --foreground: 210 40% 98%;
-  
+
   --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
-  
+
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
-  
+
   --primary: 263 70% 50%;
   --primary-foreground: 210 40% 98%;
-  
+
   --secondary: 217 19% 27%;
   --secondary-foreground: 210 40% 98%;
-  
+
   --muted: 217 19% 27%;
   --muted-foreground: 215 20% 65%;
-  
+
   --accent: 175 80% 40%;
   --accent-foreground: 210 40% 98%;
-  
+
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  
+
   --border: 217 19% 27%;
   --input: 217 19% 27%;
   --ring: 263 70% 50%;
@@ -37,8 +37,8 @@
   --radius: 0.75rem;
 
   /* Custom Fonts */
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Outfit", sans-serif;
 }
 
 @layer base {
@@ -46,7 +46,12 @@
     @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-white;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     @apply tracking-tight font-bold;
   }
@@ -56,7 +61,7 @@
   .glass-panel {
     @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-xl;
   }
-  
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60;
   }

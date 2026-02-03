@@ -1,147 +1,204 @@
-import { db } from "./db";
+import { and, eq } from 'drizzle-orm'
+
 import {
-  tasks,
-  userSettings,
-  type Task,
   type InsertTask,
-  type UpdateTaskRequest,
+  type Task,
   type TaskStatus,
-  type UserSettings
-} from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+  tasks,
+  type UpdateTaskRequest,
+  type UserSettings,
+  userSettings,
+} from '@shared/schema'
+import { db } from './db'
 
 export interface IStorage {
-  getTasks(userId: string): Promise<Task[]>;
-  getTask(id: number, userId: string): Promise<Task | undefined>;
-  createTask(task: InsertTask): Promise<Task>;
-  updateTask(id: number, userId: string, updates: UpdateTaskRequest): Promise<Task>;
-  deleteTask(id: number, userId: string): Promise<void>;
-  setTaskStatus(id: number, userId: string, newStatus: TaskStatus): Promise<Task>;
-  getSettings(userId: string): Promise<UserSettings>;
-  updateSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings>;
+  getTasks(userId: string): Promise<Task[]>
+  getTask(id: number, userId: string): Promise<Task | undefined>
+  createTask(task: InsertTask): Promise<Task>
+  updateTask(
+    id: number,
+    userId: string,
+    updates: UpdateTaskRequest,
+  ): Promise<Task>
+  deleteTask(id: number, userId: string): Promise<void>
+  setTaskStatus(
+    id: number,
+    userId: string,
+    newStatus: TaskStatus,
+  ): Promise<Task>
+  getSettings(userId: string): Promise<UserSettings>
+  updateSettings(
+    userId: string,
+    updates: Partial<UserSettings>,
+  ): Promise<UserSettings>
 }
 
 export class DatabaseStorage implements IStorage {
   async getTasks(userId: string): Promise<Task[]> {
-    const result = await db.select().from(tasks).where(eq(tasks.userId, userId)).orderBy(tasks.id);
-    return result as Task[];
+    const result = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.userId, userId))
+      .orderBy(tasks.id)
+    return result as Task[]
   }
 
   async getTask(id: number, userId: string): Promise<Task | undefined> {
-    const [task] = await db.select().from(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
-    return task as Task | undefined;
+    const [task] = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+    return task as Task | undefined
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const [task] = await db.insert(tasks).values(insertTask).returning();
-    return task as Task;
+    const [task] = await db.insert(tasks).values(insertTask).returning()
+    return task as Task
   }
 
-  async setTaskStatus(id: number, userId: string, newStatus: TaskStatus): Promise<Task> {
-    const currentTask = await this.getTask(id, userId);
+  async setTaskStatus(
+    id: number,
+    userId: string,
+    newStatus: TaskStatus,
+  ): Promise<Task> {
+    const currentTask = await this.getTask(id, userId)
     if (!currentTask) {
-      throw new Error('Task not found');
+      throw new Error('Task not found')
     }
 
-    const oldStatus = currentTask.status;
-    const updates: Partial<InsertTask> & { completedAt?: Date | null } = { status: newStatus };
+    const oldStatus = currentTask.status
+    const updates: Partial<InsertTask> & { completedAt?: Date | null } = {
+      status: newStatus,
+    }
 
     // Handle status transitions
     if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
       // Starting in-progress: demote current in_progress task to pinned
-      const allTasks = await this.getTasks(userId);
-      const currentInProgressTask = allTasks.find(t => t.status === 'in_progress' && t.id !== id);
+      const allTasks = await this.getTasks(userId)
+      const currentInProgressTask = allTasks.find(
+        (t) => t.status === 'in_progress' && t.id !== id,
+      )
       if (currentInProgressTask) {
         // Stop timer on old in-progress task and set to pinned
-        const elapsed = currentInProgressTask.inProgressStartedAt 
-          ? Date.now() - currentInProgressTask.inProgressStartedAt.getTime() 
-          : 0;
-        await db.update(tasks)
+        const elapsed = currentInProgressTask.inProgressStartedAt
+          ? Date.now() - currentInProgressTask.inProgressStartedAt.getTime()
+          : 0
+        await db
+          .update(tasks)
           .set({
             status: 'pinned',
-            inProgressTime: (currentInProgressTask.inProgressTime || 0) + elapsed,
-            inProgressStartedAt: null
+            inProgressTime:
+              (currentInProgressTask.inProgressTime || 0) + elapsed,
+            inProgressStartedAt: null,
           })
-          .where(eq(tasks.id, currentInProgressTask.id));
+          .where(eq(tasks.id, currentInProgressTask.id))
       }
       // Start timer on new in-progress task
-      updates.inProgressStartedAt = new Date();
+      updates.inProgressStartedAt = new Date()
     }
 
-    if (oldStatus === 'in_progress' && newStatus !== 'in_progress' && currentTask.inProgressStartedAt) {
+    if (
+      oldStatus === 'in_progress' &&
+      newStatus !== 'in_progress' &&
+      currentTask.inProgressStartedAt
+    ) {
       // Leaving in-progress: accumulate time
-      const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime();
-      updates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed;
-      updates.inProgressStartedAt = null;
+      const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
+      updates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed
+      updates.inProgressStartedAt = null
     }
 
     if (newStatus === 'completed') {
-      updates.completedAt = new Date();
+      updates.completedAt = new Date()
     }
 
     if (oldStatus === 'completed' && newStatus !== 'completed') {
-      updates.completedAt = null;
+      updates.completedAt = null
     }
 
     const [task] = await db
       .update(tasks)
       .set(updates)
       .where(eq(tasks.id, id))
-      .returning();
+      .returning()
 
     // Cascade status to children for completed/restored
-    if (newStatus === 'completed' || (oldStatus === 'completed' && newStatus === 'open')) {
-      const childTasks = await db.select().from(tasks).where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)));
+    if (
+      newStatus === 'completed' ||
+      (oldStatus === 'completed' && newStatus === 'open')
+    ) {
+      const childTasks = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
       for (const child of childTasks) {
-        await this.setTaskStatus(child.id, userId, newStatus);
+        await this.setTaskStatus(child.id, userId, newStatus)
       }
     }
 
-    return task as Task;
+    return task as Task
   }
 
-  async updateTask(id: number, userId: string, updates: UpdateTaskRequest): Promise<Task> {
+  async updateTask(
+    id: number,
+    userId: string,
+    updates: UpdateTaskRequest,
+  ): Promise<Task> {
     const [task] = await db
       .update(tasks)
       .set(updates)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-      .returning();
+      .returning()
 
-    return task as Task;
+    return task as Task
   }
 
   async deleteTask(id: number, userId: string): Promise<void> {
     // Delete all subtasks first (recursive)
-    const childTasks = await db.select().from(tasks).where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)));
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
     for (const child of childTasks) {
-      await this.deleteTask(child.id, userId);
+      await this.deleteTask(child.id, userId)
     }
-    
-    await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+
+    await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
   }
 
   async getSettings(userId: string): Promise<UserSettings> {
-    const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, userId));
+    const [settings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
     if (settings) {
-      return settings;
+      return settings
     }
     // Create default settings for new user
-    const [newSettings] = await db.insert(userSettings).values({ userId }).returning();
-    return newSettings;
+    const [newSettings] = await db
+      .insert(userSettings)
+      .values({ userId })
+      .returning()
+    return newSettings
   }
 
-  async updateSettings(userId: string, updates: Partial<UserSettings>): Promise<UserSettings> {
+  async updateSettings(
+    userId: string,
+    updates: Partial<UserSettings>,
+  ): Promise<UserSettings> {
     // Ensure settings exist first
-    await this.getSettings(userId);
-    
-    const { userId: _, ...updateData } = updates;
+    await this.getSettings(userId)
+
+    const { userId: _, ...updateData } = updates
     const [settings] = await db
       .update(userSettings)
       .set(updateData)
       .where(eq(userSettings.userId, userId))
-      .returning();
-    return settings;
+      .returning()
+    return settings
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new DatabaseStorage()

@@ -1,27 +1,28 @@
-import { useState, useMemo } from "react";
-import { useTasks } from "@/hooks/use-tasks";
-import { useSettings, getSettings } from "@/hooks/use-settings";
-import type { TaskResponse, TaskSortField, SortOption } from "@shared/schema";
-import { TaskCard } from "@/components/TaskCard";
-import { Button } from "@/components/primitives/button";
-import { useTaskDialog } from "@/components/TaskDialogProvider";
+import { useMemo, useState } from 'react'
 import {
-  Plus,
-  Search,
-  Menu,
   CheckCircle2,
   LayoutList,
+  Menu,
+  Plus,
+  Search,
   Settings,
-} from "lucide-react";
-import { Input } from "@/components/primitives/forms/input";
-import { cn } from "@/lib/utils";
-import { Link } from "wouter";
+} from 'lucide-react'
+import { Link } from 'wouter'
+
+import type { SortOption, TaskResponse } from '@shared/schema'
+import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/primitives/dropdown-menu";
+} from '@/components/primitives/dropdown-menu'
+import { Input } from '@/components/primitives/forms/input'
+import { TaskCard } from '@/components/TaskCard'
+import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { getSettings, useSettings } from '@/hooks/use-settings'
+import { useTasks } from '@/hooks/use-tasks'
+import { cn } from '@/lib/utils'
 
 const SortButton = ({
   label,
@@ -30,28 +31,28 @@ const SortButton = ({
   current,
   onSelect,
 }: {
-  label: string;
-  value: SortOption;
-  className?: string;
-  current: SortOption;
-  onSelect: (v: SortOption) => void;
+  label: string
+  value: SortOption
+  className?: string
+  current: SortOption
+  onSelect: (v: SortOption) => void
 }) => (
   <Button
-    variant={current === value ? "default" : "ghost"}
+    variant={current === value ? 'default' : 'ghost'}
     size="sm"
     onClick={() => onSelect(value)}
     className={cn(
-      "h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+      'h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate',
       current === value
-        ? "bg-primary text-primary-foreground"
-        : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+        ? 'bg-primary text-primary-foreground'
+        : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
       className,
     )}
     data-testid={`button-sort-${value}`}
   >
     {label}
   </Button>
-);
+)
 
 const LEVEL_WEIGHTS: Record<string, number> = {
   highest: 5,
@@ -61,76 +62,77 @@ const LEVEL_WEIGHTS: Record<string, number> = {
   low: 2,
   easy: 2,
   lowest: 1,
-};
+}
 
-const SORT_DIRECTIONS: Record<string, "asc" | "desc"> = {
-  date: "desc",
-  priority: "desc",
-  ease: "asc",
-  enjoyment: "desc",
-  time: "asc",
-};
+const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
+  date: 'desc',
+  priority: 'desc',
+  ease: 'asc',
+  enjoyment: 'desc',
+  time: 'asc',
+}
 
 const Home = () => {
-  const { data: tasks, isLoading, error } = useTasks();
-  const { openCreateDialog } = useTaskDialog();
-  const { settings, updateSetting } = useSettings();
-  const [search, setSearch] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  
-  const sortBy = settings.sortBy;
-  const setSortBy = (value: SortOption) => updateSetting("sortBy", value);
+  const { data: tasks, isLoading, error } = useTasks()
+  const { openCreateDialog } = useTaskDialog()
+  const { settings, updateSetting } = useSettings()
+  const [search, setSearch] = useState('')
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+
+  const sortBy = settings.sortBy
+  const setSortBy = (value: SortOption) => updateSetting('sortBy', value)
 
   // Sort function for tasks
-  const sortTasks = (tasks: TaskResponse[], sort: SortOption): TaskResponse[] => {
-    const sorted = [...tasks];
-    if (sort === "date") {
+  const sortTasks = (
+    tasks: TaskResponse[],
+    sort: SortOption,
+  ): TaskResponse[] => {
+    const sorted = [...tasks]
+    if (sort === 'date') {
       sorted.sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return dateB - dateA;
-      });
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return dateB - dateA
+      })
     } else {
       sorted.sort((a, b) => {
-        const direction = SORT_DIRECTIONS[sort] || "desc";
-        const valA =
-          LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0;
-        const valB =
-          LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0;
+        const direction = SORT_DIRECTIONS[sort] || 'desc'
+        const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0
+        const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0
 
         if (valA !== valB) {
-          return direction === "desc" ? valB - valA : valA - valB;
+          return direction === 'desc' ? valB - valA : valA - valB
         }
 
-        const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
-        const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
-        const eA = LEVEL_WEIGHTS[a.ease as string] || 0;
-        const eB = LEVEL_WEIGHTS[b.ease as string] || 0;
-        const jA = LEVEL_WEIGHTS[a.enjoyment as string] || 0;
-        const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0;
+        const pA = LEVEL_WEIGHTS[a.priority as string] || 0
+        const pB = LEVEL_WEIGHTS[b.priority as string] || 0
+        const eA = LEVEL_WEIGHTS[a.ease as string] || 0
+        const eB = LEVEL_WEIGHTS[b.ease as string] || 0
+        const jA = LEVEL_WEIGHTS[a.enjoyment as string] || 0
+        const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0
 
-        if (sort === "priority") {
-          if (eA !== eB) return eA - eB;
-          return jB - jA;
+        if (sort === 'priority') {
+          if (eA !== eB) return eA - eB
+          return jB - jA
         }
-        if (sort === "ease") {
-          if (pA !== pB) return pB - pA;
-          return jB - jA;
+        if (sort === 'ease') {
+          if (pA !== pB) return pB - pA
+          return jB - jA
         }
-        if (sort === "enjoyment") {
-          if (pA !== pB) return pB - pA;
-          return eA - eB;
+        if (sort === 'enjoyment') {
+          if (pA !== pB) return pB - pA
+          return eA - eB
         }
-        if (sort === "time") {
-          if (pA !== pB) return pB - pA;
-          if (eA !== eB) return eA - eB;
-          return pB - pA;
+        if (sort === 'time') {
+          if (pA !== pB) return pB - pA
+          if (eA !== eB) return eA - eB
+          return pB - pA
         }
-        return 0;
-      });
+        return 0
+      })
     }
-    return sorted;
-  };
+    return sorted
+  }
 
   // Recursive function to filter task tree
   const filterAndSortTree = (
@@ -139,120 +141,126 @@ const Home = () => {
     sort: SortOption,
   ): TaskResponse[] => {
     const result = nodes.reduce((acc: TaskResponse[], node) => {
-      const matches = node.name.toLowerCase().includes(term.toLowerCase());
+      const matches = node.name.toLowerCase().includes(term.toLowerCase())
       const filteredSubtasks = node.subtasks
         ? filterAndSortTree(node.subtasks, term, sort)
-        : [];
+        : []
 
       if (matches || filteredSubtasks.length > 0) {
-        acc.push({ ...node, subtasks: filteredSubtasks });
+        acc.push({ ...node, subtasks: filteredSubtasks })
       }
-      return acc;
-    }, []);
+      return acc
+    }, [])
 
-    return sortTasks(result, sort);
-  };
+    return sortTasks(result, sort)
+  }
 
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pending tasks to be hoisted to top
   const { taskTree, pinnedTasks } = useMemo(() => {
-    if (!tasks) return { taskTree: [], pinnedTasks: [] };
+    if (!tasks) return { taskTree: [], pinnedTasks: [] }
 
     // Filter out completed tasks
-    const activeTasks = tasks.filter((task) => task.status !== "completed");
+    const activeTasks = tasks.filter((task) => task.status !== 'completed')
 
     // Collect pinned tasks (in_progress first, then pinned) to display at top
-    const pinnedTaskIds = new Set<number>();
-    const inProgressList: TaskResponse[] = [];
-    const pinnedList: TaskResponse[] = [];
+    const pinnedTaskIds = new Set<number>()
+    const inProgressList: TaskResponse[] = []
+    const pinnedList: TaskResponse[] = []
 
     activeTasks.forEach((task) => {
-      if (task.status === "in_progress") {
-        pinnedTaskIds.add(task.id);
-        inProgressList.push({ ...task, subtasks: [] } as TaskResponse);
-      } else if (task.status === "pinned") {
-        pinnedTaskIds.add(task.id);
-        pinnedList.push({ ...task, subtasks: [] } as TaskResponse);
+      if (task.status === 'in_progress') {
+        pinnedTaskIds.add(task.id)
+        inProgressList.push({ ...task, subtasks: [] } as TaskResponse)
+      } else if (task.status === 'pinned') {
+        pinnedTaskIds.add(task.id)
+        pinnedList.push({ ...task, subtasks: [] } as TaskResponse)
       }
-    });
+    })
 
     // Hoisted order: in_progress first, then pinned
-    const hoistedList = [...inProgressList, ...pinnedList];
+    const hoistedList = [...inProgressList, ...pinnedList]
 
-    const nodes: Record<number, TaskResponse> = {};
-    const roots: TaskResponse[] = [];
-
-    activeTasks.forEach((task) => {
-      if (pinnedTaskIds.has(task.id)) return;
-      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse;
-    });
+    const nodes: Record<number, TaskResponse> = {}
+    const roots: TaskResponse[] = []
 
     activeTasks.forEach((task) => {
-      if (pinnedTaskIds.has(task.id)) return;
+      if (pinnedTaskIds.has(task.id)) return
+      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse
+    })
+
+    activeTasks.forEach((task) => {
+      if (pinnedTaskIds.has(task.id)) return
 
       // If parent is pinned, treat as root level
       if (task.parentId && nodes[task.parentId]) {
-        nodes[task.parentId].subtasks?.push(nodes[task.id]);
+        nodes[task.parentId].subtasks?.push(nodes[task.id])
       } else if (!task.parentId || !pinnedTaskIds.has(task.parentId)) {
-        roots.push(nodes[task.id]);
+        roots.push(nodes[task.id])
       } else {
         // Parent is pinned, so this becomes a root
-        roots.push(nodes[task.id]);
+        roots.push(nodes[task.id])
       }
-    });
+    })
 
-    return { taskTree: roots, pinnedTasks: hoistedList };
-  }, [tasks]);
+    return { taskTree: roots, pinnedTasks: hoistedList }
+  }, [tasks])
 
   const displayedTasks = useMemo(() => {
-    if (!taskTree) return [];
-    const sortedTree = filterAndSortTree(taskTree, search, sortBy);
+    if (!taskTree) return []
+    const sortedTree = filterAndSortTree(taskTree, search, sortBy)
 
     // Filter pinned tasks by search term
     const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
-    );
+    )
 
     // Separate in_progress (always first) from pinned, then sort pinned
-    const inProgressTask = filteredPinned.filter((t) => t.status === "in_progress");
-    const pinnedOnly = filteredPinned.filter((t) => t.status === "pinned");
-    
+    const inProgressTask = filteredPinned.filter(
+      (t) => t.status === 'in_progress',
+    )
+    const pinnedOnly = filteredPinned.filter((t) => t.status === 'pinned')
+
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    const settings = getSettings();
-    let sortedPinned: TaskResponse[];
-    if (settings.alwaysSortPinnedByPriority && sortBy !== "priority") {
+    const settings = getSettings()
+    let sortedPinned: TaskResponse[]
+    if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
-        const pA = LEVEL_WEIGHTS[a.priority as string] || 0;
-        const pB = LEVEL_WEIGHTS[b.priority as string] || 0;
-        if (pA !== pB) return pB - pA; // Priority descending
-        
+        const pA = LEVEL_WEIGHTS[a.priority as string] || 0
+        const pB = LEVEL_WEIGHTS[b.priority as string] || 0
+        if (pA !== pB) return pB - pA // Priority descending
+
         // Secondary sort by current sortBy
-        if (sortBy === "date") {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (sortBy === 'date') {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
         }
-        const direction = SORT_DIRECTIONS[sortBy] || "desc";
-        const valA = LEVEL_WEIGHTS[a[sortBy as keyof TaskResponse] as string] || 0;
-        const valB = LEVEL_WEIGHTS[b[sortBy as keyof TaskResponse] as string] || 0;
-        return direction === "desc" ? valB - valA : valA - valB;
-      });
+        const direction = SORT_DIRECTIONS[sortBy] || 'desc'
+        const valA =
+          LEVEL_WEIGHTS[a[sortBy as keyof TaskResponse] as string] || 0
+        const valB =
+          LEVEL_WEIGHTS[b[sortBy as keyof TaskResponse] as string] || 0
+        return direction === 'desc' ? valB - valA : valA - valB
+      })
     } else {
-      sortedPinned = sortTasks(pinnedOnly, sortBy);
+      sortedPinned = sortTasks(pinnedOnly, sortBy)
     }
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
-    return [...inProgressTask, ...sortedPinned, ...sortedTree];
-  }, [taskTree, pinnedTasks, search, sortBy]);
+    return [...inProgressTask, ...sortedPinned, ...sortedTree]
+  }, [taskTree, pinnedTasks, search, sortBy])
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-secondary/50"></div>
-          <div className="h-4 w-32 bg-secondary/50 rounded"></div>
+          <div className="w-12 h-12 rounded-full bg-secondary/50" />
+          <div className="h-4 w-32 bg-secondary/50 rounded" />
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -260,7 +268,7 @@ const Home = () => {
       <div className="min-h-screen flex items-center justify-center text-destructive">
         Error loading tasks. Please try again.
       </div>
-    );
+    )
   }
 
   return (
@@ -391,15 +399,15 @@ const Home = () => {
         <Plus className="h-6 w-6" />
       </Button>
     </div>
-  );
-};
+  )
+}
 
 const EmptyState = ({
   onAdd,
   isSearch,
 }: {
-  onAdd: () => void;
-  isSearch: boolean;
+  onAdd: () => void
+  isSearch: boolean
 }) => (
   <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
     <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
@@ -410,12 +418,12 @@ const EmptyState = ({
       )}
     </div>
     <h3 className="text-xl font-medium text-foreground">
-      {isSearch ? "No matching tasks found" : "Your list is empty"}
+      {isSearch ? 'No matching tasks found' : 'Your list is empty'}
     </h3>
     <p className="text-muted-foreground max-w-sm">
       {isSearch
-        ? "Try adjusting your search terms."
-        : "Start by adding your first task to get organized."}
+        ? 'Try adjusting your search terms.'
+        : 'Start by adding your first task to get organized.'}
     </p>
     {!isSearch && (
       <Button onClick={onAdd} variant="secondary" className="mt-4">
@@ -423,6 +431,6 @@ const EmptyState = ({
       </Button>
     )}
   </div>
-);
+)
 
-export default Home;
+export default Home
