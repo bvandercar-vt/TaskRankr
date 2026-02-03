@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/primitives/overlays/alert-dialog'
+} from '@/components/primitives/overlays/alertDialog'
 import { getSettings } from '@/hooks/use-settings'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'

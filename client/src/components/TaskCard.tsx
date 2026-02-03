@@ -20,6 +20,7 @@ import {
   type TaskResponse,
   type TaskStatus,
 } from '~/shared/schema'
+import { Icon } from './primitives/lucideIcon'
 
 interface TaskBadgeProps {
   value: string
@@ -173,11 +174,12 @@ export const TaskCard = ({
               className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
               type="button"
             >
-              {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-              )}
+              {
+                <Icon
+                  icon={isExpanded ? ChevronDown : ChevronRight}
+                  className="w-3.5 h-3.5 text-muted-foreground"
+                />
+              }
             </button>
           ) : (
             <div className="w-3.5" />

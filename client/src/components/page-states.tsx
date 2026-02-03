@@ -9,7 +9,11 @@ export const PageLoading = () => (
   </div>
 )
 
-export const PageError = ({ message = 'Error loading tasks. Please try again.' }: { message?: string }) => (
+export const PageError = ({
+  message = 'Error loading tasks. Please try again.',
+}: {
+  message?: string
+}) => (
   <div className="min-h-screen flex items-center justify-center text-destructive">
     {message}
   </div>
