@@ -1,17 +1,16 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */
-/** biome-ignore-all lint/suspicious/noExplicitAny: added by Replit */
 import type { Express } from 'express'
 
 import { authPaths } from '~/shared/routes'
-import { isAuthenticated } from './replitAuth'
+import { isAuthenticated, type UserSession } from './replitAuth'
 import { authStorage } from './storage'
 
 // Register auth-specific routes
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
-  app.get(authPaths.user, isAuthenticated, async (req: any, res) => {
+  app.get(authPaths.user, isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub
+      // biome-ignore lint/style/noNonNullAssertion: is always present
+      const userId = (req.user as UserSession)!.claims!.sub
       const user = await authStorage.getUser(userId)
       res.json(user)
     } catch (error) {

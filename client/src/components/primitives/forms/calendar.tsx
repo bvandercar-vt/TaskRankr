@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
 import { buttonVariants } from '@/components/primitives/button'
@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils'
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
-const ChevronIcon =
-  (Icon: typeof ChevronLeft | typeof ChevronRight) =>
-  ({ className, ...props }: React.ComponentProps<typeof Icon>) => (
+const GetIconRenderer =
+  (Icon: LucideIcon) =>
+  ({ className, ...props }: React.ComponentProps<LucideIcon>) => (
     <Icon className={cn(IconSizeStyle.small, className)} {...props} />
   )
 
@@ -57,8 +57,8 @@ export const Calendar = ({
       ...classNames,
     }}
     components={{
-      IconLeft: ChevronIcon(ChevronLeft),
-      IconRight: ChevronIcon(ChevronRight),
+      IconLeft: GetIconRenderer(ChevronLeft),
+      IconRight: GetIconRenderer(ChevronRight),
     }}
     {...props}
   />

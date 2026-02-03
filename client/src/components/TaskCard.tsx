@@ -12,6 +12,7 @@ import {
   useSetTaskStatus,
   useUpdateTask,
 } from '@/hooks/use-tasks'
+import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
 import { cn, getIsVisible } from '@/lib/utils'
 import {
@@ -19,6 +20,7 @@ import {
   type TaskResponse,
   type TaskStatus,
 } from '~/shared/schema'
+import { Icon } from './primitives/lucideIcon'
 
 interface TaskBadgeProps {
   value: string
@@ -172,11 +174,12 @@ export const TaskCard = ({
               className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
               type="button"
             >
-              {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-              )}
+              {
+                <Icon
+                  icon={isExpanded ? ChevronDown : ChevronRight}
+                  className="w-3.5 h-3.5 text-muted-foreground"
+                />
+              }
             </button>
           ) : (
             <div className="w-3.5" />
@@ -206,7 +209,10 @@ export const TaskCard = ({
             )}
             {isPinned && (
               <Pin
-                className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer"
+                className={cn(
+                  IconSizeStyle.small,
+                  'text-slate-400 shrink-0 rotate-45 cursor-pointer',
+                )}
                 data-testid="icon-pinned"
                 onClick={(e) => {
                   e.stopPropagation()

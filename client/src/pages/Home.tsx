@@ -9,14 +9,16 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/primitives/dropdown-menu'
+} from '@/components/primitives/dropdownMenu'
 import { Input } from '@/components/primitives/forms/input'
+import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
 import { getSettings, useSettings } from '@/hooks/use-settings'
@@ -265,24 +267,8 @@ const Home = () => {
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
   }, [taskTree, pinnedTasks, search, sortBy, sortTasks, filterAndSortTree])
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-secondary/50" />
-          <div className="h-4 w-32 bg-secondary/50 rounded" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-destructive">
-        Error loading tasks. Please try again.
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoading />
+  if (error) return <PageError />
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
@@ -376,7 +362,31 @@ const Home = () => {
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (
-            <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
+            <EmptyState
+              icon={
+                <Icon
+                  icon={search ? Search : LayoutList}
+                  className="w-8 h-8 text-muted-foreground"
+                />
+              }
+              title={search ? 'No matching tasks found' : 'Your list is empty'}
+              description={
+                search
+                  ? 'Try adjusting your search terms.'
+                  : 'Start by adding your first task to get organized.'
+              }
+              action={
+                !search && (
+                  <Button
+                    onClick={() => openCreateDialog()}
+                    variant="secondary"
+                    className="mt-4"
+                  >
+                    Create First Task
+                  </Button>
+                )
+              }
+            />
           ) : (
             displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}
@@ -389,41 +399,10 @@ const Home = () => {
         className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground z-50 transition-transform active:scale-95 border-0"
         data-testid="button-create-task"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className={IconSizeStyle.medium} />
       </Button>
     </div>
   )
 }
-
-const EmptyState = ({
-  onAdd,
-  isSearch,
-}: {
-  onAdd: () => void
-  isSearch: boolean
-}) => (
-  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-    <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-      {isSearch ? (
-        <Search className="w-8 h-8 text-muted-foreground" />
-      ) : (
-        <LayoutList className="w-8 h-8 text-muted-foreground" />
-      )}
-    </div>
-    <h3 className="text-xl font-medium text-foreground">
-      {isSearch ? 'No matching tasks found' : 'Your list is empty'}
-    </h3>
-    <p className="text-muted-foreground max-w-sm">
-      {isSearch
-        ? 'Try adjusting your search terms.'
-        : 'Start by adding your first task to get organized.'}
-    </p>
-    {!isSearch && (
-      <Button onClick={onAdd} variant="secondary" className="mt-4">
-        Create First Task
-      </Button>
-    )}
-  </div>
-)
 
 export default Home
