@@ -22,7 +22,7 @@ import { useTaskDialog } from '@/components/TaskDialogProvider'
 import { getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+import { cn, getIsVisible } from '@/lib/utils'
 import {
   type Ease,
   type Enjoyment,
@@ -357,10 +357,8 @@ const Home = () => {
               current={sortBy}
               onSelect={setSortBy}
             />
-            {RANK_FIELDS_CRITERIA.map((field) => {
-              const visibleKey = `${field.name}Visible` as const
-              if (!settings[visibleKey]) return null
-              return (
+            {RANK_FIELDS_CRITERIA.map((field) =>
+              getIsVisible(field.name, settings) ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}
                   label={'labelShort' in field ? field.labelShort : field.label}
@@ -369,8 +367,8 @@ const Home = () => {
                   current={sortBy}
                   onSelect={setSortBy}
                 />
-              )
-            })}
+              ) : null,
+            )}
           </div>
         </div>
 
