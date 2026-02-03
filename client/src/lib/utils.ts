@@ -2,6 +2,9 @@ import { forwardRef } from 'react'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
+import type { PickByKey } from '@/types'
+import type { RankField, UserSettings } from '~/shared/schema'
+
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
 
 export const hoursMinutesToMs = (hours: number, minutes: number): number =>
@@ -16,6 +19,22 @@ export const msToHoursMinutes = (
     minutes: totalMinutes % 60,
   }
 }
+
+export const getIsVisibleKey = <T extends RankField>(field: T) =>
+  `${field}Visible` as const satisfies keyof UserSettings
+
+export const getIsRequiredKey = <T extends RankField>(field: T) =>
+  `${field}Required` as const satisfies keyof UserSettings
+
+export const getIsVisible = (
+  field: RankField,
+  settings: PickByKey<UserSettings, `${string}Visible`>,
+) => settings[getIsVisibleKey(field)]
+
+export const getIsRequired = (
+  field: RankField,
+  settings: PickByKey<UserSettings, `${string}Required`>,
+) => settings[getIsRequiredKey(field)]
 
 type ForwardRefRenderFunction<T, P> = React.ForwardRefRenderFunction<
   T,

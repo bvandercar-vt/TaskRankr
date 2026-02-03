@@ -37,7 +37,7 @@ import { useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
-import { cn } from '@/lib/utils'
+import { cn, getIsRequired, getIsVisible } from '@/lib/utils'
 import {
   insertTaskSchema,
   type MutateTaskRequest,
@@ -67,20 +67,14 @@ export const TaskForm = ({
   const { settings } = useSettings()
 
   const getVisibility = useCallback(
-    (attr: RankField): boolean => {
-      const key = `${attr}Visible` as const
-      return settings[key]
-    },
+    (attr: RankField) => getIsVisible(attr, settings),
     [settings],
   )
 
   const getRequired = useCallback(
-    (attr: RankField): boolean => {
-      if (!getVisibility(attr)) return false
-      const key = `${attr}Required` as const
-      return settings[key]
-    },
-    [settings, getVisibility],
+    (attr: RankField) =>
+      getIsVisible(attr, settings) && getIsRequired(attr, settings),
+    [settings],
   )
 
   const visibleAttributes = useMemo(
