@@ -170,14 +170,16 @@ export const TaskCard = ({
               e.stopPropagation()
               setIsExpanded(!isExpanded)
             }}
-            className="w-5 flex items-center justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 cursor-pointer"
+            className="group/expand w-5 flex items-center justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 cursor-pointer"
             type="button"
             data-testid={`button-expand-${task.id}`}
           >
-            <Icon
-              icon={isExpanded ? ChevronDown : ChevronRight}
-              className="w-3.5 h-3.5 text-muted-foreground"
-            />
+            <span className="p-0.5 rounded-full group-hover/expand:bg-white/10 transition-colors">
+              <Icon
+                icon={isExpanded ? ChevronDown : ChevronRight}
+                className="w-3.5 h-3.5 text-muted-foreground"
+              />
+            </span>
           </button>
         ) : (
           <div className="w-5 flex justify-center shrink-0">
