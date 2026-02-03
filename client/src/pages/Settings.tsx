@@ -13,6 +13,7 @@ import { api } from '@/lib/api-client'
 import { queryClient } from '@/lib/queryClient'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
+import { contract } from '~/shared/contract'
 import { authPaths } from '~/shared/routes'
 import { SORT_FIELD_CONFIG, type TaskSortField } from '~/shared/schema'
 
@@ -86,7 +87,7 @@ const Settings = () => {
   const hasNoTasks = !tasks || tasks.length === 0
 
   const handleExport = () => {
-    window.location.href = '/api/tasks/export'
+    window.location.href = contract.tasks.export.path
   }
 
   const handleImportClick = () => {

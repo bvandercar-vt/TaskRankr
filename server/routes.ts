@@ -1,6 +1,6 @@
 import type { Server } from 'node:http'
 import { createExpressEndpoints, initServer } from '@ts-rest/express'
-import { isNil } from 'es-toolkit'
+import { isNil, omit } from 'es-toolkit'
 import type { Express } from 'express'
 
 import { contract } from '~/shared/contract'
@@ -86,13 +86,12 @@ const router = s.router(contract, {
       handler: async ({ req }) => {
         const userId = getUserId(req)
         const tasks = await storage.getTasks(userId)
-        const exportData = tasks.map(({ id, userId: _, ...task }) => task)
         return {
           status: 200,
           body: {
             version: 1,
             exportedAt: new Date().toISOString(),
-            tasks: exportData,
+            tasks: tasks.map((t) => omit(t, ['userId'])),
           },
         }
       },

@@ -134,7 +134,9 @@ export async function setupAuth(app: Express) {
   })
 }
 
-export const isAuthenticated: RequestHandler = async (req, res, next) => {
+export const isAuthenticated: RequestHandler<
+  Record<string, string | number>
+> = async (req, res, next) => {
   const user = req.user as
     | { expires_at?: number; refresh_token?: string }
     | undefined
