@@ -9,12 +9,15 @@ import {
   registerAuthRoutes,
   setupAuth,
 } from './replit_integrations/auth'
+import type { UserSession } from './replit_integrations/auth/replitAuth'
 import { storage } from './storage'
 
 const s = initServer()
 
-// biome-ignore lint/suspicious/noExplicitAny: from Replit auth
-const getUserId = (req: Record<string, any>): string => req.user.claims?.sub
+// biome-ignore lint/suspicious/noExplicitAny: is always present
+const getUserId = (req: Record<string, any>): string =>
+  // biome-ignore lint/style/noNonNullAssertion: is always present
+  (req.user as UserSession).claims!.sub
 
 const router = s.router(contract, {
   tasks: {

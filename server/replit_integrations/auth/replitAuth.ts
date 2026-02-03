@@ -44,8 +44,15 @@ export function getSession() {
   })
 }
 
+export type UserSession = {
+  claims?: client.IDToken
+  expires_at?: number
+  refresh_token?: string
+  access_token?: string
+}
+
 function updateUserSession(
-  user: any,
+  user: UserSession,
   tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
 ) {
   user.claims = tokens.claims()
@@ -137,9 +144,7 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler<
   Record<string, string | number>
 > = async (req, res, next) => {
-  const user = req.user as
-    | { expires_at?: number; refresh_token?: string }
-    | undefined
+  const user = req.user as UserSession | undefined
 
   if (!req.isAuthenticated() || !user?.expires_at) {
     return res.status(401).json({ message: 'Unauthorized' })
