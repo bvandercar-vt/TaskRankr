@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
@@ -26,6 +26,46 @@ import {
   type SortFieldValueMap,
   type SortOption,
 } from '~/shared/schema'
+
+const SettingsCard = ({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) => (
+  <div
+    className={cn('p-4 bg-card rounded-lg border border-white/10', className)}
+  >
+    {children}
+  </div>
+)
+
+const SettingsSwitchRow = ({
+  title,
+  description,
+  checked,
+  onCheckedChange,
+  testId,
+}: {
+  title: string
+  description: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  testId: string
+}) => (
+  <SettingsCard className="flex items-center justify-between">
+    <div className="flex-1">
+      <h3 className="font-semibold text-foreground">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-1">{description}</p>
+    </div>
+    <Switch
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+      data-testid={testId}
+    />
+  </SettingsCard>
+)
 
 type SortCriterion = {
   attr: SortOption
@@ -147,64 +187,30 @@ const Settings = () => {
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">
-                Automatically Pin new tasks
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                When enabled, new tasks will be pinned to the top of your list
-                automatically.
-              </p>
-            </div>
-            <Switch
-              checked={settings.autoPinNewTasks}
-              onCheckedChange={(checked: boolean) =>
-                updateSetting('autoPinNewTasks', checked)
-              }
-              data-testid="switch-auto-pin"
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">
-                Enable In Progress Time
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Track and display time spent working on tasks.
-              </p>
-            </div>
-            <Switch
-              checked={settings.enableInProgressTime}
-              onCheckedChange={(checked: boolean) =>
-                updateSetting('enableInProgressTime', checked)
-              }
-              data-testid="switch-enable-time"
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-white/10">
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">
-                Always sort pinned by Priority
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Pinned tasks are always sorted by priority first, then by your
-                selected sort.
-              </p>
-            </div>
-            <Switch
-              checked={settings.alwaysSortPinnedByPriority}
-              onCheckedChange={(checked: boolean) =>
-                updateSetting('alwaysSortPinnedByPriority', checked)
-              }
-              data-testid="switch-sort-pinned-priority"
-            />
-          </div>
+          <SettingsSwitchRow
+            title="Automatically Pin new tasks"
+            description="When enabled, new tasks will be pinned to the top of your list automatically."
+            checked={settings.autoPinNewTasks}
+            onCheckedChange={(checked) => updateSetting('autoPinNewTasks', checked)}
+            testId="switch-auto-pin"
+          />
+          <SettingsSwitchRow
+            title="Enable In Progress Time"
+            description="Track and display time spent working on tasks."
+            checked={settings.enableInProgressTime}
+            onCheckedChange={(checked) => updateSetting('enableInProgressTime', checked)}
+            testId="switch-enable-time"
+          />
+          <SettingsSwitchRow
+            title="Always sort pinned by Priority"
+            description="Pinned tasks are always sorted by priority first, then by your selected sort."
+            checked={settings.alwaysSortPinnedByPriority}
+            onCheckedChange={(checked) => updateSetting('alwaysSortPinnedByPriority', checked)}
+            testId="switch-sort-pinned-priority"
+          />
         </div>
 
-        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+        <SettingsCard className="mt-8">
           <h3 className="font-semibold text-foreground mb-4">
             Attribute Settings
           </h3>
@@ -266,9 +272,9 @@ const Settings = () => {
               })}
             </tbody>
           </table>
-        </div>
+        </SettingsCard>
 
-        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+        <SettingsCard className="mt-8">
           <button
             onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
             className="w-full flex items-center justify-start gap-2 cursor-pointer"
@@ -339,9 +345,9 @@ const Settings = () => {
               </div>
             </div>
           )}
-        </div>
+        </SettingsCard>
 
-        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+        <SettingsCard className="mt-8">
           <h3 className="font-semibold text-foreground mb-3 text-center">
             Data
           </h3>
@@ -378,36 +384,34 @@ const Settings = () => {
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.
           </p>
-        </div>
+        </SettingsCard>
 
-        <div className="mt-4 p-4 bg-card rounded-lg border border-white/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p
-                className="font-semibold text-foreground"
-                data-testid="text-user-name"
-              >
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="text-user-email"
-              >
-                {user?.email}
-              </p>
-            </div>
-            <a href={authPaths.logout}>
-              <Button
-                variant="outline"
-                className="gap-2"
-                data-testid="button-logout"
-              >
-                <LogOut className="w-4 h-4" />
-                Log Out
-              </Button>
-            </a>
+        <SettingsCard className="mt-4 flex items-center justify-between">
+          <div>
+            <p
+              className="font-semibold text-foreground"
+              data-testid="text-user-name"
+            >
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p
+              className="text-sm text-muted-foreground"
+              data-testid="text-user-email"
+            >
+              {user?.email}
+            </p>
           </div>
-        </div>
+          <a href={authPaths.logout}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              data-testid="button-logout"
+            >
+              <LogOut className="w-4 h-4" />
+              Log Out
+            </Button>
+          </a>
+        </SettingsCard>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
