@@ -288,6 +288,7 @@ const Home = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <div className="flex items-center justify-between mb-4 pr-2">
+          {/* Hamburger Menu */}
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -308,7 +309,7 @@ const Home = () => {
                   className="cursor-pointer"
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                 >
-                  <Search className={cn(IconSizeStyle, 'mr-2')} />
+                  <Search className={cn(IconSizeStyle.small, 'mr-2')} />
                   Search
                 </DropdownMenuItem>
                 <Link href="/completed">
@@ -316,7 +317,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-completed"
                   >
-                    <CheckCircle2 className={cn(IconSizeStyle, 'mr-2')} />
+                    <CheckCircle2 className={cn(IconSizeStyle.small, 'mr-2')} />
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
@@ -325,7 +326,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-settings"
                   >
-                    <Settings className={cn(IconSizeStyle, 'mr-2')} />
+                    <Settings className={cn(IconSizeStyle.small, 'mr-2')} />
                     Settings
                   </DropdownMenuItem>
                 </Link>
@@ -335,7 +336,7 @@ const Home = () => {
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
                 <Search
-                  className={cn(IconSizeStyle, 'shrink-0 text-primary')}
+                  className={cn(IconSizeStyle.small, 'shrink-0 text-primary')}
                 />
                 <Input
                   placeholder="Search..."
@@ -349,6 +350,7 @@ const Home = () => {
             )}
           </div>
 
+          {/* Sort Buttons */}
           <div className="flex items-center gap-1">
             <SortButton
               label="Date"
