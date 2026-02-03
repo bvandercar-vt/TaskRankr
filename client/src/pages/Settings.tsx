@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, LogOut, Download, Upload } from "lucide-react";
+import { ArrowLeft, LogOut, Download, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Switch } from "@/components/primitives/forms/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/use-tasks";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { getPriorityStyle, getEaseStyle, getEnjoymentStyle, getTimeStyle } from "@/lib/taskStyles";
+import { cn } from "@/lib/utils";
 
 type AttributeKey = "priority" | "ease" | "enjoyment" | "time";
 const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
@@ -18,6 +20,63 @@ const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
   { key: "time", label: "Time" },
 ];
 
+type SortCriterion = {
+  label: string;
+  value: string;
+  style: string;
+};
+
+type SortInfoItem = {
+  name: string;
+  fullWidth?: boolean;
+  criteria: SortCriterion[];
+};
+
+const getSortInfoConfig = (
+  priorityStyle: (v: string) => string,
+  easeStyle: (v: string) => string,
+  enjoymentStyle: (v: string) => string,
+  timeStyle: (v: string) => string
+): SortInfoItem[] => [
+  {
+    name: "Date",
+    fullWidth: true,
+    criteria: [{ label: "Date created", value: "newest", style: "" }],
+  },
+  {
+    name: "Priority",
+    criteria: [
+      { label: "Priority", value: "highest", style: priorityStyle("highest") },
+      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
+      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
+    ],
+  },
+  {
+    name: "Ease",
+    criteria: [
+      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
+      { label: "Priority", value: "highest", style: priorityStyle("highest") },
+      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
+    ],
+  },
+  {
+    name: "Enjoyment",
+    criteria: [
+      { label: "Enjoyment", value: "highest", style: enjoymentStyle("highest") },
+      { label: "Priority", value: "highest", style: priorityStyle("highest") },
+      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
+    ],
+  },
+  {
+    name: "Time",
+    criteria: [
+      { label: "Time", value: "lowest", style: timeStyle("lowest") },
+      { label: "Priority", value: "highest", style: priorityStyle("highest") },
+      { label: "Ease", value: "easiest", style: easeStyle("easiest") },
+    ],
+  },
+];
+
 const Settings = () => {
   const { settings, updateSetting } = useSettings();
   const { user } = useAuth();
@@ -25,6 +84,7 @@ const Settings = () => {
   const { data: tasks } = useTasks();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [sortInfoExpanded, setSortInfoExpanded] = useState(false);
   const hasNoTasks = !tasks || tasks.length === 0;
 
   const handleExport = () => {
@@ -168,6 +228,48 @@ const Settings = () => {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
+          <button
+            onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
+            className="w-full flex items-center justify-start gap-2 cursor-pointer"
+            data-testid="button-sort-info-toggle"
+          >
+            <h3 className="font-semibold text-foreground">Sort Info</h3>
+            <ChevronDown 
+              className={cn(
+                "w-4 h-4 text-muted-foreground transition-transform",
+                sortInfoExpanded && "rotate-180"
+              )} 
+            />
+          </button>
+          {sortInfoExpanded && (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-3 text-center">
+                When tasks have the same value, they are sorted by secondary attributes.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                {getSortInfoConfig(getPriorityStyle, getEaseStyle, getEnjoymentStyle, getTimeStyle).map((item) => (
+                  <div 
+                    key={item.name} 
+                    className={cn("p-3 bg-secondary/20 rounded-md", item.fullWidth && "sm:col-span-2")}
+                  >
+                    <p className="font-medium text-foreground mb-1">{item.name}</p>
+                    <ol className={cn("text-xs list-decimal list-inside", item.criteria.length > 1 && "space-y-0.5")}>
+                      {item.criteria.map((criterion, idx) => (
+                        <li key={idx} className="text-muted-foreground">
+                          {criterion.label} ({criterion.style ? (
+                            <span className={cn("font-medium", criterion.style)}>{criterion.value}</span>
+                          ) : criterion.value} first)
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 p-4 bg-card rounded-lg border border-white/10">
