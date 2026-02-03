@@ -16,6 +16,7 @@ interface DemoContextValue {
   exitDemo: () => void
   demoTasks: TaskResponse[]
   demoSettings: AppSettings
+  updateDemoSettings: (updates: Partial<AppSettings>) => void
 }
 
 const DemoContext = createContext<DemoContextValue | null>(null)
@@ -178,9 +179,17 @@ const DEMO_SETTINGS: AppSettings = {
 
 export const DemoProvider = ({ children }: { children: ReactNode }) => {
   const [isDemo, setIsDemo] = useState(false)
+  const [demoSettings, setDemoSettings] = useState<AppSettings>(DEMO_SETTINGS)
 
   const enterDemo = useCallback(() => setIsDemo(true), [])
-  const exitDemo = useCallback(() => setIsDemo(false), [])
+  const exitDemo = useCallback(() => {
+    setIsDemo(false)
+    setDemoSettings(DEMO_SETTINGS)
+  }, [])
+
+  const updateDemoSettings = useCallback((updates: Partial<AppSettings>) => {
+    setDemoSettings((prev) => ({ ...prev, ...updates }))
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -188,9 +197,10 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
       enterDemo,
       exitDemo,
       demoTasks: DEMO_TASKS,
-      demoSettings: DEMO_SETTINGS,
+      demoSettings,
+      updateDemoSettings,
     }),
-    [isDemo, enterDemo, exitDemo],
+    [isDemo, enterDemo, exitDemo, demoSettings, updateDemoSettings],
   )
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>
@@ -206,5 +216,12 @@ export const useDemo = () => {
 
 export const useDemoSafe = () => {
   const context = useContext(DemoContext)
-  return context ?? { isDemo: false, demoTasks: [], demoSettings: DEMO_SETTINGS }
+  return (
+    context ?? {
+      isDemo: false,
+      demoTasks: [],
+      demoSettings: DEMO_SETTINGS,
+      updateDemoSettings: () => {},
+    }
+  )
 }
