@@ -10,7 +10,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 const ChevronIcon =
   (Icon: typeof ChevronLeft | typeof ChevronRight) =>
   ({ className, ...props }: React.ComponentProps<typeof Icon>) => (
-    <Icon className={cn(IconSizeStyle, className)} {...props} />
+    <Icon className={cn(IconSizeStyle.small, className)} {...props} />
   )
 
 export const Calendar = ({
