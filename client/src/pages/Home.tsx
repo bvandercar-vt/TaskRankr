@@ -420,7 +420,7 @@ const Home = () => {
           ) : (
             displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}
-          
+
           {hasDemoData && displayedTasks.length > 0 && (
             <div className="mt-8 flex justify-center">
               <Button
