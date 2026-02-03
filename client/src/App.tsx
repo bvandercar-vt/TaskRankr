@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 
-import { DemoProvider, useDemo } from '@/components/DemoProvider'
+import { OfflineModeProvider, useOfflineMode } from '@/components/DemoProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { Toaster } from '@/components/primitives/overlays/toaster'
@@ -27,14 +27,14 @@ const Router = () => (
 )
 
 const StatusBanner = () => {
-  const { isDemo, exitDemo } = useDemo()
+  const { isOfflineMode, exitOfflineMode } = useOfflineMode()
   const sync = useSyncSafe()
 
-  if (isDemo) {
+  if (isOfflineMode) {
     return (
       <div
         className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
-        data-testid="banner-demo-mode"
+        data-testid="banner-offline-mode"
       >
         <span>Log in to back up your data and use it across devices.</span>
         <a href={authPaths.login}>
@@ -51,10 +51,10 @@ const StatusBanner = () => {
           size="sm"
           variant="ghost"
           className="h-7 text-primary-foreground hover:bg-white/20"
-          onClick={exitDemo}
+          onClick={exitOfflineMode}
           data-testid="button-banner-exit"
         >
-          Exit Demo
+          Exit
         </Button>
       </div>
     )
@@ -90,9 +90,9 @@ const StatusBanner = () => {
 
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
-  const { isDemo } = useDemo()
+  const { isOfflineMode } = useOfflineMode()
 
-  if (isLoading && !isDemo) {
+  if (isLoading && !isOfflineMode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -100,11 +100,15 @@ const AuthenticatedApp = () => {
     )
   }
 
-  if (!isAuthenticated && !isDemo) {
-    return <Landing />
+  if (!isAuthenticated && !isOfflineMode) {
+    return (
+      <LocalStateProvider shouldSync={false}>
+        <Landing />
+      </LocalStateProvider>
+    )
   }
 
-  const shouldSync = isAuthenticated && !isDemo
+  const shouldSync = isAuthenticated && !isOfflineMode
 
   return (
     <LocalStateProvider shouldSync={shouldSync}>
@@ -121,10 +125,10 @@ const AuthenticatedApp = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <DemoProvider>
+      <OfflineModeProvider>
         <Toaster />
         <AuthenticatedApp />
-      </DemoProvider>
+      </OfflineModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 )

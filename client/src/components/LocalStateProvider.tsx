@@ -29,6 +29,7 @@ interface LocalStateContextValue {
   settings: AppSettings
   syncQueue: SyncOperation[]
   isInitialized: boolean
+  hasDemoData: boolean
   createTask: (data: Omit<CreateTaskRequest, 'userId'>) => TaskResponse
   updateTask: (id: number, updates: UpdateTaskRequest) => TaskResponse
   setTaskStatus: (id: number, status: TaskStatus) => TaskResponse
@@ -40,6 +41,8 @@ interface LocalStateContextValue {
   setTasksFromServer: (tasks: TaskResponse[]) => void
   setSettingsFromServer: (settings: AppSettings) => void
   resetToDefaults: () => void
+  initDemoData: () => void
+  deleteDemoData: () => void
 }
 
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
@@ -68,6 +71,90 @@ const DEFAULT_SETTINGS: AppSettings = {
 }
 
 const DEFAULT_TASKS: TaskResponse[] = []
+
+const DEMO_TASK_IDS_KEY = 'taskrankr-demo-task-ids'
+
+const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
+  const now = new Date()
+  
+  const getNextId = () => {
+    const id = nextIdRef.current--
+    return id
+  }
+  
+  const demoTasks: TaskResponse[] = [
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Try creating your first task',
+      description: 'Tap the + button in the bottom right corner to create a new task.',
+      priority: 'high',
+      ease: 'easy',
+      enjoyment: 'medium',
+      time: 'low',
+      parentId: null,
+      status: 'pinned',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 60000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Explore task attributes',
+      description: 'Each task can have Priority, Ease, Enjoyment, and Time ratings. Use the sort buttons at the top to organize your tasks.',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'high',
+      time: 'low',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 120000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Long-press for status options',
+      description: 'Long-press any task to change its status: Open, In Progress, Pinned, or Completed.',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'medium',
+      time: 'lowest',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 180000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Create nested subtasks',
+      description: 'When editing a task, you can add subtasks to break down complex work.',
+      priority: 'low',
+      ease: 'medium',
+      enjoyment: 'medium',
+      time: 'medium',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 240000),
+      completedAt: null,
+      subtasks: [],
+    },
+  ]
+  
+  return demoTasks
+}
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -170,6 +257,7 @@ export const LocalStateProvider = ({
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [tasks, setTasks] = useState<TaskResponse[]>(DEFAULT_TASKS)
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
+  const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
 
   useEffect(() => {
@@ -177,10 +265,12 @@ export const LocalStateProvider = ({
     const loadedTasks = loadFromStorage(STORAGE_KEYS.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(STORAGE_KEYS.nextId, -1)
     const loadedQueue = loadFromStorage<SyncOperation[]>(STORAGE_KEYS.syncQueue, [])
+    const loadedDemoIds = loadFromStorage<number[]>(DEMO_TASK_IDS_KEY, [])
 
     setSettings(loadedSettings)
     setTasks(loadedTasks)
     setSyncQueue(loadedQueue)
+    setDemoTaskIds(loadedDemoIds)
     nextIdRef.current = loadedNextId
     setIsInitialized(true)
   }, [])
@@ -360,12 +450,44 @@ export const LocalStateProvider = ({
     setTasks(DEFAULT_TASKS)
     setSettings(DEFAULT_SETTINGS)
     setSyncQueue([])
+    setDemoTaskIds([])
     nextIdRef.current = -1
     localStorage.removeItem(STORAGE_KEYS.tasks)
     localStorage.removeItem(STORAGE_KEYS.settings)
     localStorage.removeItem(STORAGE_KEYS.syncQueue)
     localStorage.removeItem(STORAGE_KEYS.nextId)
+    localStorage.removeItem(DEMO_TASK_IDS_KEY)
   }, [])
+
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem(DEMO_TASK_IDS_KEY, JSON.stringify(demoTaskIds))
+    }
+  }, [demoTaskIds, isInitialized])
+
+  const initDemoData = useCallback(() => {
+    const demoTasks = createDemoTasks(nextIdRef)
+    localStorage.setItem(STORAGE_KEYS.nextId, JSON.stringify(nextIdRef.current))
+    const demoIds = demoTasks.map((t) => t.id)
+    setDemoTaskIds(demoIds)
+    setTasks((prev) => [...prev, ...demoTasks])
+  }, [])
+
+  const deleteDemoData = useCallback(() => {
+    const idsToDelete = new Set(demoTaskIds)
+    const filterDemoTasks = (taskList: TaskResponse[]): TaskResponse[] => {
+      return taskList
+        .filter((task) => !idsToDelete.has(task.id))
+        .map((task) => ({
+          ...task,
+          subtasks: filterDemoTasks(task.subtasks ?? []),
+        }))
+    }
+    setTasks((prev) => filterDemoTasks(prev))
+    setDemoTaskIds([])
+  }, [demoTaskIds])
+
+  const hasDemoData = demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
   const value = useMemo(
     () => ({
@@ -373,6 +495,7 @@ export const LocalStateProvider = ({
       settings,
       syncQueue,
       isInitialized,
+      hasDemoData,
       createTask,
       updateTask,
       setTaskStatus,
@@ -384,12 +507,15 @@ export const LocalStateProvider = ({
       setTasksFromServer,
       setSettingsFromServer,
       resetToDefaults,
+      initDemoData,
+      deleteDemoData,
     }),
     [
       tasks,
       settings,
       syncQueue,
       isInitialized,
+      hasDemoData,
       createTask,
       updateTask,
       setTaskStatus,
@@ -401,6 +527,8 @@ export const LocalStateProvider = ({
       setTasksFromServer,
       setSettingsFromServer,
       resetToDefaults,
+      initDemoData,
+      deleteDemoData,
     ],
   )
 

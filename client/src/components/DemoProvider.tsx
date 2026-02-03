@@ -7,41 +7,45 @@ import {
   type ReactNode,
 } from 'react'
 
-interface DemoContextValue {
-  isDemo: boolean
-  enterDemo: () => void
-  exitDemo: () => void
+interface OfflineModeContextValue {
+  isOfflineMode: boolean
+  enterOfflineMode: () => void
+  exitOfflineMode: () => void
 }
 
-const DemoContext = createContext<DemoContextValue | null>(null)
+const OfflineModeContext = createContext<OfflineModeContextValue | null>(null)
 
-export const DemoProvider = ({ children }: { children: ReactNode }) => {
-  const [isDemo, setIsDemo] = useState(false)
+export const OfflineModeProvider = ({ children }: { children: ReactNode }) => {
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
 
-  const enterDemo = useCallback(() => setIsDemo(true), [])
-  const exitDemo = useCallback(() => setIsDemo(false), [])
+  const enterOfflineMode = useCallback(() => setIsOfflineMode(true), [])
+  const exitOfflineMode = useCallback(() => setIsOfflineMode(false), [])
 
   const value = useMemo(
     () => ({
-      isDemo,
-      enterDemo,
-      exitDemo,
+      isOfflineMode,
+      enterOfflineMode,
+      exitOfflineMode,
     }),
-    [isDemo, enterDemo, exitDemo],
+    [isOfflineMode, enterOfflineMode, exitOfflineMode],
   )
 
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>
+  return <OfflineModeContext.Provider value={value}>{children}</OfflineModeContext.Provider>
 }
 
-export const useDemo = () => {
-  const context = useContext(DemoContext)
+export const useOfflineMode = () => {
+  const context = useContext(OfflineModeContext)
   if (!context) {
-    throw new Error('useDemo must be used within a DemoProvider')
+    throw new Error('useOfflineMode must be used within an OfflineModeProvider')
   }
   return context
 }
 
-export const useDemoSafe = () => {
-  const context = useContext(DemoContext)
-  return context ?? { isDemo: false, enterDemo: () => {}, exitDemo: () => {} }
+export const useOfflineModeSafe = () => {
+  const context = useContext(OfflineModeContext)
+  return context ?? { isOfflineMode: false, enterOfflineMode: () => {}, exitOfflineMode: () => {} }
 }
+
+export const DemoProvider = OfflineModeProvider
+export const useDemo = useOfflineMode
+export const useDemoSafe = useOfflineModeSafe
