@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { type ReactNode, useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
+import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { getAttributeStyle } from '@/lib/task-styles'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
@@ -27,7 +28,7 @@ import {
   type SortOption,
 } from '~/shared/schema'
 
-const SettingsCard = ({
+const Card = ({
   children,
   className,
 }: {
@@ -41,7 +42,7 @@ const SettingsCard = ({
   </div>
 )
 
-const SettingsSwitchRow = ({
+const SwitchCard = ({
   title,
   description,
   checked,
@@ -54,7 +55,7 @@ const SettingsSwitchRow = ({
   onCheckedChange: (checked: boolean) => void
   testId: string
 }) => (
-  <SettingsCard className="flex items-center justify-between">
+  <Card className="flex items-center justify-between">
     <div className="flex-1">
       <h3 className="font-semibold text-foreground">{title}</h3>
       <p className="text-sm text-muted-foreground mt-1">{description}</p>
@@ -64,21 +65,25 @@ const SettingsSwitchRow = ({
       onCheckedChange={onCheckedChange}
       data-testid={testId}
     />
-  </SettingsCard>
+  </Card>
 )
 
-type SortCriterion = {
-  attr: SortOption
-  value: string
-}
+const SORT_INFO_ATTR_LABELS = {
+  priority: 'Priority',
+  ease: 'Ease',
+  enjoyment: 'Enjoyment',
+  time: 'Time',
+  date: 'Date created',
+} as const satisfies Record<SortOption, string>
 
-type SortInfoItem = {
+const SORT_INFO_CONFIG: {
   name: string
   fullWidth?: boolean
-  criteria: SortCriterion[]
-}
-
-const SORT_INFO_CONFIG: SortInfoItem[] = [
+  criteria: {
+    attr: SortOption
+    value: string
+  }[]
+}[] = [
   {
     name: 'Date',
     fullWidth: true,
@@ -117,14 +122,6 @@ const SORT_INFO_CONFIG: SortInfoItem[] = [
     ],
   },
 ]
-
-const ATTR_LABELS: Record<string, string> = {
-  priority: 'Priority',
-  ease: 'Ease',
-  enjoyment: 'Enjoyment',
-  time: 'Time',
-  date: 'Date created',
-}
 
 const Settings = () => {
   const { settings, updateSetting } = useSettings()
@@ -187,30 +184,36 @@ const Settings = () => {
         </div>
 
         <div className="space-y-4">
-          <SettingsSwitchRow
+          <SwitchCard
             title="Automatically Pin new tasks"
             description="When enabled, new tasks will be pinned to the top of your list automatically."
             checked={settings.autoPinNewTasks}
-            onCheckedChange={(checked) => updateSetting('autoPinNewTasks', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('autoPinNewTasks', checked)
+            }
             testId="switch-auto-pin"
           />
-          <SettingsSwitchRow
+          <SwitchCard
             title="Enable In Progress Time"
             description="Track and display time spent working on tasks."
             checked={settings.enableInProgressTime}
-            onCheckedChange={(checked) => updateSetting('enableInProgressTime', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('enableInProgressTime', checked)
+            }
             testId="switch-enable-time"
           />
-          <SettingsSwitchRow
+          <SwitchCard
             title="Always sort pinned by Priority"
             description="Pinned tasks are always sorted by priority first, then by your selected sort."
             checked={settings.alwaysSortPinnedByPriority}
-            onCheckedChange={(checked) => updateSetting('alwaysSortPinnedByPriority', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('alwaysSortPinnedByPriority', checked)
+            }
             testId="switch-sort-pinned-priority"
           />
         </div>
 
-        <SettingsCard className="mt-8">
+        <Card className="mt-8">
           <h3 className="font-semibold text-foreground mb-4">
             Attribute Settings
           </h3>
@@ -272,9 +275,9 @@ const Settings = () => {
               })}
             </tbody>
           </table>
-        </SettingsCard>
+        </Card>
 
-        <SettingsCard className="mt-8">
+        <Card className="mt-8">
           <button
             onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
             className="w-full flex items-center justify-start gap-2 cursor-pointer"
@@ -284,7 +287,8 @@ const Settings = () => {
             <h3 className="font-semibold text-foreground">Sort Info</h3>
             <ChevronDown
               className={cn(
-                'w-4 h-4 text-muted-foreground transition-transform',
+                IconSizeStyle.small,
+                'text-muted-foreground transition-transform',
                 sortInfoExpanded && 'rotate-180',
               )}
             />
@@ -327,7 +331,7 @@ const Settings = () => {
                             key={`${c.attr} ${c.value}`}
                             className="text-muted-foreground"
                           >
-                            {ATTR_LABELS[c.attr]} (
+                            {SORT_INFO_ATTR_LABELS[c.attr]} (
                             {style ? (
                               <span className={cn('font-medium', style)}>
                                 {c.value}
@@ -345,9 +349,9 @@ const Settings = () => {
               </div>
             </div>
           )}
-        </SettingsCard>
+        </Card>
 
-        <SettingsCard className="mt-8">
+        <Card className="mt-8">
           <h3 className="font-semibold text-foreground mb-3 text-center">
             Data
           </h3>
@@ -359,7 +363,7 @@ const Settings = () => {
               disabled={hasNoTasks}
               data-testid="button-export"
             >
-              <Download className="w-4 h-4" />
+              <Download className={IconSizeStyle.small} />
               Export Tasks
             </Button>
             <Button
@@ -369,7 +373,7 @@ const Settings = () => {
               disabled={isImporting}
               data-testid="button-import"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className={IconSizeStyle.small} />
               {isImporting ? 'Importing...' : 'Import Tasks'}
             </Button>
             <input
@@ -384,9 +388,9 @@ const Settings = () => {
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.
           </p>
-        </SettingsCard>
+        </Card>
 
-        <SettingsCard className="mt-4 flex items-center justify-between">
+        <Card className="mt-4 flex items-center justify-between">
           <div>
             <p
               className="font-semibold text-foreground"
@@ -407,11 +411,11 @@ const Settings = () => {
               className="gap-2"
               data-testid="button-logout"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className={IconSizeStyle.small} />
               Log Out
             </Button>
           </a>
-        </SettingsCard>
+        </Card>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">

@@ -450,7 +450,7 @@ export const TaskForm = ({
               className="w-full bg-secondary/10 border-white/5 hover:bg-secondary/20 h-10"
               onClick={() => onAddChild(initialData.id)}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className={cn(IconSizeStyle.small, 'mr-2')} />
               Add Subtask
             </Button>
           )}

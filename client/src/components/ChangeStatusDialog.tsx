@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/components/primitives/overlays/alert-dialog'
 import { getSettings } from '@/hooks/use-settings'
+import { IconSizeStyle } from '@/lib/constants'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
 import type { TaskStatus } from '~/shared/schema'
 
@@ -44,7 +45,7 @@ const StatusButton = ({
     className={cn('w-full h-11 text-base font-semibold gap-2', colorClass)}
     data-testid={testId}
   >
-    <Icon className="w-4 h-4" />
+    <Icon className={IconSizeStyle.small} />
     {label}
   </Button>
 )
@@ -107,7 +108,7 @@ export const ChangeStatusDialog = ({
           onClick={() => onOpenChange(false)}
           data-testid="button-close-status-dialog"
         >
-          <X className="w-4 h-4" />
+          <X className={IconSizeStyle.small} />
         </Button>
         <AlertDialogHeader>
           <AlertDialogTitle>
