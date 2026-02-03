@@ -1,33 +1,27 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import { useDemoSafe } from '@/components/DemoProvider'
-import { getSettings } from '@/hooks/use-settings'
-import { type ClientInferRequestBody, QueryKeys, tsr } from '@/lib/ts-rest'
+import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import type { ClientInferRequestBody } from '@/lib/ts-rest'
 import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
 export const useTasks = () => {
-  const { isDemo, demoTasks } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
-  const query = tsr.tasks.list.useQuery({
-    queryKey: QueryKeys.getTasks,
-    enabled: !isDemo,
-  })
-
-  if (isDemo) {
+  if (!localState) {
     return {
-      data: demoTasks,
-      isLoading: false,
+      data: undefined,
+      isLoading: true,
       error: null,
       refetch: () => Promise.resolve(),
     }
   }
 
   return {
-    data: query.data?.status === 200 ? query.data.body : undefined,
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
+    data: localState.tasks,
+    isLoading: !localState.isInitialized,
+    error: null,
+    refetch: () => Promise.resolve(),
   }
 }
 
@@ -53,22 +47,32 @@ export const useTaskParentChain = (parentId?: number) => {
 }
 
 export const useTask = (id: number) => {
-  const query = tsr.tasks.get.useQuery({
-    queryKey: [...QueryKeys.getTasks, id],
-    queryData: { params: { id } },
-    enabled: !!id,
-  })
+  const { data: tasks, isLoading } = useTasks()
+
+  const findTask = (
+    taskList: typeof tasks,
+    targetId: number,
+  ): NonNullable<typeof tasks>[number] | undefined => {
+    if (!taskList) return undefined
+    for (const task of taskList) {
+      if (task.id === targetId) return task
+      if (task.subtasks) {
+        const found = findTask(task.subtasks, targetId)
+        if (found) return found
+      }
+    }
+    return undefined
+  }
 
   return {
-    data: query.data?.status === 200 ? query.data.body : undefined,
-    isLoading: query.isLoading,
-    error: query.error,
+    data: tasks ? findTask(tasks, id) : undefined,
+    isLoading,
+    error: null,
   }
 }
 
 export const useCreateTask = () => {
-  const queryClient = useQueryClient()
-  const { isDemo, createDemoTask } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
   return useMutation({
     mutationFn: async (
@@ -77,116 +81,52 @@ export const useCreateTask = () => {
         'userId'
       >,
     ) => {
-      if (isDemo) {
-        return createDemoTask(data)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-
-      const result = await tsr.tasks.create.mutate({ body: data })
-      if (result.status !== 201) {
-        throw new Error(result.body.message)
-      }
-
-      const settings = getSettings()
-      if (settings.autoPinNewTasks) {
-        try {
-          await tsr.tasks.setStatus.mutate({
-            params: { id: result.body.id },
-            body: { status: 'pinned' },
-          })
-        } catch (e) {
-          console.error('Failed to auto-pin task:', e)
-        }
-      }
-
-      return result.body
-    },
-    onSuccess: () => {
-      if (!isDemo) {
-        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-      }
+      return localState.createTask(data)
     },
   })
 }
 
 export const useUpdateTask = () => {
-  const queryClient = useQueryClient()
-  const { isDemo, updateDemoTask } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
   return useMutation({
     mutationFn: async ({
       id,
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
-      if (isDemo) {
-        return updateDemoTask(id, updates)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-
-      const result = await tsr.tasks.update.mutate({
-        params: { id },
-        body: updates,
-      })
-      if (result.status !== 200) {
-        throw new Error(result.body.message)
-      }
-      return result.body
-    },
-    onSuccess: () => {
-      if (!isDemo) {
-        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-      }
+      return localState.updateTask(id, updates)
     },
   })
 }
 
 export const useSetTaskStatus = () => {
-  const queryClient = useQueryClient()
-  const { isDemo, setDemoTaskStatus } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
-      if (isDemo) {
-        return setDemoTaskStatus(id, status)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-
-      const result = await tsr.tasks.setStatus.mutate({
-        params: { id },
-        body: { status },
-      })
-      if (result.status !== 200) {
-        throw new Error(result.body.message)
-      }
-      return result.body
-    },
-    onSuccess: () => {
-      if (!isDemo) {
-        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-      }
+      return localState.setTaskStatus(id, status)
     },
   })
 }
 
 export const useDeleteTask = () => {
-  const queryClient = useQueryClient()
-  const { isDemo, deleteDemoTask } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
   return useMutation({
     mutationFn: async (id: number) => {
-      if (isDemo) {
-        deleteDemoTask(id)
-        return
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-
-      const result = await tsr.tasks.delete.mutate({
-        params: { id },
-      })
-      if (result.status !== 204) {
-        throw new Error(result.body.message)
-      }
-    },
-    onSuccess: () => {
-      if (!isDemo) {
-        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-      }
+      localState.deleteTask(id)
     },
   })
 }

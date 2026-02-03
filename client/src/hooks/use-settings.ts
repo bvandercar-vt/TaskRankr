@@ -1,8 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { useDemoSafe } from '@/components/DemoProvider'
+import { useLocalStateSafe } from '@/components/LocalStateProvider'
 import { queryClient } from '@/lib/query-client'
-import { QueryKeys, tsr } from '@/lib/ts-rest'
+import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
 import type { RankField, SortOption, UserSettings } from '~/shared/schema'
 
@@ -15,7 +13,8 @@ export interface AppSettings extends Omit<UserSettings, 'sortBy'> {
   sortBy: SortOption
 }
 
-const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {
+const DEFAULT_SETTINGS: AppSettings = {
+  userId: '',
   autoPinNewTasks: true,
   enableInProgressTime: true,
   alwaysSortPinnedByPriority: true,
@@ -31,59 +30,17 @@ const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {
 }
 
 export const useSettings = () => {
-  const qc = useQueryClient()
-  const { isDemo, demoSettings, updateDemoSettings } = useDemoSafe()
+  const localState = useLocalStateSafe()
 
-  const { data, isLoading } = tsr.settings.get.useQuery({
-    queryKey: QueryKeys.getSettings,
-    enabled: !isDemo,
-  })
-
-  const settings: AppSettings | undefined = isDemo ? demoSettings : data?.body
-
-  const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<AppSettings>) => {
-      const result = await tsr.settings.update.mutate({ body: updates })
-      if (result.status !== 200) {
-        throw new Error('Failed to update settings')
-      }
-      return result.body
-    },
-    onMutate: async (updates) => {
-      await qc.cancelQueries({ queryKey: QueryKeys.getSettings })
-      const previousSettings = qc.getQueryData<{
-        status: number
-        body: AppSettings
-      }>(QueryKeys.getSettings)
-
-      if (previousSettings) {
-        qc.setQueryData(QueryKeys.getSettings, {
-          ...previousSettings,
-          body: { ...previousSettings.body, ...updates },
-        })
-      }
-
-      return { previousSettings }
-    },
-    onError: (_err, _updates, context) => {
-      if (context?.previousSettings) {
-        qc.setQueryData(QueryKeys.getSettings, context.previousSettings)
-      }
-    },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: QueryKeys.getSettings })
-    },
-  })
+  const settings: AppSettings = localState?.settings ?? DEFAULT_SETTINGS
+  const isLoading = !localState?.isInitialized
 
   const updateSetting = <K extends keyof Omit<AppSettings, 'userId'>>(
     key: K,
     value: AppSettings[K],
   ) => {
-    if (isDemo) {
-      updateDemoSettings({ [key]: value })
-      return
-    }
-    updateMutation.mutate({ [key]: value })
+    if (!localState) return
+    localState.updateSettings({ [key]: value })
   }
 
   const updateVisibility = (field: RankField, visible: boolean) =>
@@ -93,8 +50,8 @@ export const useSettings = () => {
     updateSetting(getIsRequiredKey(field), required)
 
   return {
-    settings: settings || { ...DEFAULT_SETTINGS, userId: '' },
-    isLoading: isDemo ? false : isLoading,
+    settings,
+    isLoading,
     updateSetting,
     updateVisibility,
     updateRequired,
@@ -117,7 +74,7 @@ export const getIsRequired = (
   settings: PickByKey<UserSettings, `${string}Required`>,
 ) => settings[getIsRequiredKey(field)]
 
-export const getSettings = (): Omit<AppSettings, 'userId'> => {
+export const getSettings = (): AppSettings => {
   const cached = queryClient.getQueryData<{
     status: number
     body: AppSettings
