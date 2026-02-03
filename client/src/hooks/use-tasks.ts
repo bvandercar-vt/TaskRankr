@@ -1,15 +1,30 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { useDemoSafe } from '@/components/DemoProvider'
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { type ClientInferRequestBody, QueryKeys, tsr } from '@/lib/ts-rest'
 import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
+const DEMO_ERROR_MESSAGE = 'Create an account to save your tasks'
+
 export const useTasks = () => {
+  const { isDemo, demoTasks } = useDemoSafe()
+
   const query = tsr.tasks.list.useQuery({
     queryKey: QueryKeys.getTasks,
+    enabled: !isDemo,
   })
+
+  if (isDemo) {
+    return {
+      data: demoTasks,
+      isLoading: false,
+      error: null,
+      refetch: () => Promise.resolve(),
+    }
+  }
 
   return {
     data: query.data?.status === 200 ? query.data.body : undefined,
@@ -57,6 +72,7 @@ export const useTask = (id: number) => {
 export const useCreateTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { isDemo } = useDemoSafe()
 
   return useMutation({
     mutationFn: async (
@@ -65,6 +81,10 @@ export const useCreateTask = () => {
         'userId'
       >,
     ) => {
+      if (isDemo) {
+        throw new Error(DEMO_ERROR_MESSAGE)
+      }
+
       const result = await tsr.tasks.create.mutate({ body: data })
       if (result.status !== 201) {
         throw new Error(result.body.message)
@@ -89,7 +109,7 @@ export const useCreateTask = () => {
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: 'Demo Mode',
         description: error.message,
         variant: 'destructive',
       })
@@ -100,12 +120,17 @@ export const useCreateTask = () => {
 export const useUpdateTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { isDemo } = useDemoSafe()
 
   return useMutation({
     mutationFn: async ({
       id,
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
+      if (isDemo) {
+        throw new Error(DEMO_ERROR_MESSAGE)
+      }
+
       const result = await tsr.tasks.update.mutate({
         params: { id },
         body: updates,
@@ -120,7 +145,7 @@ export const useUpdateTask = () => {
     },
     onError: (error) => {
       toast({
-        title: 'Update Failed',
+        title: 'Demo Mode',
         description: error.message,
         variant: 'destructive',
       })
@@ -131,9 +156,14 @@ export const useUpdateTask = () => {
 export const useSetTaskStatus = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { isDemo } = useDemoSafe()
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
+      if (isDemo) {
+        throw new Error(DEMO_ERROR_MESSAGE)
+      }
+
       const result = await tsr.tasks.setStatus.mutate({
         params: { id },
         body: { status },
@@ -148,7 +178,7 @@ export const useSetTaskStatus = () => {
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: 'Demo Mode',
         description: error.message,
         variant: 'destructive',
       })
@@ -159,9 +189,14 @@ export const useSetTaskStatus = () => {
 export const useDeleteTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { isDemo } = useDemoSafe()
 
   return useMutation({
     mutationFn: async (id: number) => {
+      if (isDemo) {
+        throw new Error(DEMO_ERROR_MESSAGE)
+      }
+
       const result = await tsr.tasks.delete.mutate({
         params: { id },
       })
@@ -174,7 +209,7 @@ export const useDeleteTask = () => {
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: 'Demo Mode',
         description: error.message,
         variant: 'destructive',
       })
