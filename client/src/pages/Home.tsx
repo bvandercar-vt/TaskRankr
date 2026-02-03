@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   CheckCircle2,
   LayoutList,
+  LogIn,
+  LogOut,
   Menu,
   Plus,
   Search,
@@ -9,12 +11,14 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { useDemo } from '@/components/DemoProvider'
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdownMenu'
 import { Input } from '@/components/primitives/forms/input'
@@ -25,6 +29,7 @@ import { getIsVisible, getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/routes'
 import {
   type Ease,
   type Enjoyment,
@@ -94,6 +99,7 @@ const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSetting } = useSettings()
+  const { isDemo, exitDemo } = useDemo()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
@@ -316,6 +322,28 @@ const Home = () => {
                     Settings
                   </DropdownMenuItem>
                 </Link>
+                {isDemo && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <a href={authPaths.login}>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        data-testid="menu-item-signup"
+                      >
+                        <LogIn className={cn(IconSizeStyle.small, 'mr-2')} />
+                        Sign Up
+                      </DropdownMenuItem>
+                    </a>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={exitDemo}
+                      data-testid="menu-item-exit-demo"
+                    >
+                      <LogOut className={cn(IconSizeStyle.small, 'mr-2')} />
+                      Exit Demo
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
