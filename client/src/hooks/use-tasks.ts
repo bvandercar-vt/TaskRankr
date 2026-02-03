@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
-import { api, tsr } from '@/lib/api-client'
+import { tsr } from '@/lib/api-client'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
 export const useTasks = () => {
@@ -59,9 +59,12 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async (
-      data: Omit<Parameters<typeof api.tasks.create>[0]['body'], 'userId'>,
+      data: Omit<
+        Parameters<typeof tsr.tasks.create.mutate>[0]['body'],
+        'userId'
+      >,
     ) => {
-      const result = await api.tasks.create({ body: data })
+      const result = await tsr.tasks.create.mutate({ body: data })
       if (result.status !== 201) {
         throw new Error(result.body.message)
       }
@@ -69,7 +72,7 @@ export const useCreateTask = () => {
       const settings = getSettings()
       if (settings.autoPinNewTasks) {
         try {
-          await api.tasks.setStatus({
+          await tsr.tasks.setStatus.mutate({
             params: { id: result.body.id },
             body: { status: 'pinned' },
           })
@@ -102,7 +105,7 @@ export const useUpdateTask = () => {
       id,
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
-      const result = await api.tasks.update({
+      const result = await tsr.tasks.update.mutate({
         params: { id },
         body: updates,
       })
@@ -130,7 +133,7 @@ export const useSetTaskStatus = () => {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
-      const result = await api.tasks.setStatus({
+      const result = await tsr.tasks.setStatus.mutate({
         params: { id },
         body: { status },
       })
@@ -158,11 +161,11 @@ export const useDeleteTask = () => {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const result = await api.tasks.delete({
+      const result = await tsr.tasks.delete.mutate({
         params: { id },
       })
       if (result.status !== 204) {
-        throw new Error(result.body.message)
+        throw new Error((result.body as { message: string }).message)
       }
     },
     onSuccess: () => {
