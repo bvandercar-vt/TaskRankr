@@ -35,14 +35,15 @@ import {
 } from '@/components/primitives/overlays/popover'
 import { useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
+import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
   type MutateTaskRequest,
-  SORT_FIELD_CONFIG,
+  RANK_FIELDS_CRITERIA,
+  type RankField,
   type Task,
-  type TaskSortField,
 } from '~/shared/schema'
 
 export interface TaskFormProps {
@@ -66,7 +67,7 @@ export const TaskForm = ({
   const { settings } = useSettings()
 
   const getVisibility = useCallback(
-    (attr: TaskSortField): boolean => {
+    (attr: RankField): boolean => {
       const key = `${attr}Visible` as const
       return settings[key]
     },
@@ -74,7 +75,7 @@ export const TaskForm = ({
   )
 
   const getRequired = useCallback(
-    (attr: TaskSortField): boolean => {
+    (attr: RankField): boolean => {
       if (!getVisibility(attr)) return false
       const key = `${attr}Required` as const
       return settings[key]
@@ -83,7 +84,7 @@ export const TaskForm = ({
   )
 
   const visibleAttributes = useMemo(
-    () => SORT_FIELD_CONFIG.filter((attr) => getVisibility(attr.name)),
+    () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
     [getVisibility],
   )
 
@@ -475,7 +476,9 @@ export const TaskForm = ({
             disabled={isPending || !isValid}
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending && (
+              <Loader2 className={cn(IconSizeStyle, 'mr-2 animate-spin')} />
+            )}
             {initialData ? 'Save' : 'Create'}
           </Button>
         </div>

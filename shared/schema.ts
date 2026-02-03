@@ -91,16 +91,44 @@ export type Ease = (typeof EASE_LEVELS)[number]
 export type Enjoyment = (typeof ENJOYMENT_LEVELS)[number]
 export type Time = (typeof TIME_LEVELS)[number]
 
-export type TaskSortField = 'priority' | 'ease' | 'enjoyment' | 'time'
+export const SORT_OPTIONS = [
+  'date',
+  'priority',
+  'ease',
+  'enjoyment',
+  'time',
+] as const
+export type SortOption = (typeof SORT_OPTIONS)[number]
 
-export const SORT_FIELD_CONFIG = [
-  { name: 'priority', label: 'Priority', levels: PRIORITY_LEVELS },
-  { name: 'ease', label: 'Ease', levels: EASE_LEVELS },
-  { name: 'enjoyment', label: 'Enjoyment', levels: ENJOYMENT_LEVELS },
-  { name: 'time', label: 'Time', levels: TIME_LEVELS },
+export type RankField = Exclude<SortOption, 'date'>
+
+/** Are in display order. */
+export const RANK_FIELDS_CRITERIA = [
+  {
+    name: 'priority',
+    label: 'Priority',
+    levels: PRIORITY_LEVELS,
+  },
+  {
+    name: 'ease',
+    label: 'Ease',
+    levels: EASE_LEVELS,
+  },
+  {
+    name: 'enjoyment',
+    label: 'Enjoyment',
+    labelShort: 'Enjoy',
+    levels: ENJOYMENT_LEVELS,
+  },
+  {
+    name: 'time',
+    label: 'Time',
+    levels: TIME_LEVELS,
+  },
 ] as const satisfies {
-  name: TaskSortField
+  name: RankField
   label: string
+  labelShort?: string
   levels: readonly string[]
 }[]
 
@@ -153,15 +181,6 @@ export type UpdateTaskRequest = Partial<InsertTask>
 export type TaskResponse = Task & { subtasks?: TaskResponse[] }
 
 // User Settings
-export const SORT_OPTIONS = [
-  'date',
-  'priority',
-  'ease',
-  'enjoyment',
-  'time',
-] as const
-export type SortOption = (typeof SORT_OPTIONS)[number]
-
 export const userSettings = pgTable('user_settings', {
   userId: varchar('user_id').primaryKey(),
   autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),

@@ -16,13 +16,13 @@ import { cn } from '@/lib/utils'
 import { contract } from '~/shared/contract'
 import { authPaths } from '~/shared/routes'
 import {
-  SORT_FIELD_CONFIG,
+  RANK_FIELDS_CRITERIA,
   type SortFieldValueMap,
-  type TaskSortField,
+  type SortOption,
 } from '~/shared/schema'
 
 type SortCriterion = {
-  attr: TaskSortField | 'date'
+  attr: SortOption
   value: string
 }
 
@@ -220,7 +220,7 @@ const Settings = () => {
               </tr>
             </thead>
             <tbody>
-              {SORT_FIELD_CONFIG.map(({ name, label }) => {
+              {RANK_FIELDS_CRITERIA.map(({ name, label }) => {
                 const visibleKey = `${name}Visible` as const
                 const requiredKey = `${name}Required` as const
                 const isVisible: boolean = settings[visibleKey]

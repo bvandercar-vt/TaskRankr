@@ -1,4 +1,4 @@
-import type { SortFieldValueMap, TaskSortField } from '~/shared/schema'
+import type { RankField, SortFieldValueMap } from '~/shared/schema'
 
 const STYLES_COMMON = {
   red: 'text-red-400 bg-red-400/10 border-red-500/20',
@@ -13,7 +13,7 @@ const STYLES_COMMON = {
 
 const DEFAULT_STYLE = 'text-slate-400'
 
-const TASK_SORT_FIELD_STYLES = {
+const RANK_STYLES = {
   priority: {
     highest: STYLES_COMMON.red_bold,
     high: STYLES_COMMON.red,
@@ -47,18 +47,18 @@ const TASK_SORT_FIELD_STYLES = {
     none: STYLES_COMMON.none,
   },
 } as const satisfies {
-  [Field in TaskSortField]: Record<SortFieldValueMap[Field], string>
+  [F in RankField]: Record<SortFieldValueMap[F], string>
 }
 
 export const getAttributeStyle = <
-  Field extends TaskSortField,
+  Field extends RankField,
   Value extends SortFieldValueMap[Field],
 >(
   field: Field,
   value: Value | null | undefined,
   defaultStyle: string = DEFAULT_STYLE,
 ): string => {
-  const styles = TASK_SORT_FIELD_STYLES[field] as Record<Value, string>
+  const styles = RANK_STYLES[field] as Record<Value, string>
   if (!styles || !value) return defaultStyle
   const style = styles[value] ?? defaultStyle
   return style === DEFAULT_STYLE ? defaultStyle : style

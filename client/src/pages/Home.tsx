@@ -21,14 +21,16 @@ import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
 import { getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
+import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type {
-  Ease,
-  Enjoyment,
-  Priority,
-  SortOption,
-  TaskResponse,
-  Time,
+import {
+  type Ease,
+  type Enjoyment,
+  type Priority,
+  RANK_FIELDS_CRITERIA,
+  type SortOption,
+  type TaskResponse,
+  type Time,
 } from '~/shared/schema'
 
 const SortButton = ({
@@ -306,7 +308,7 @@ const Home = () => {
                   className="cursor-pointer"
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                 >
-                  <Search className="h-4 w-4 mr-2" />
+                  <Search className={cn(IconSizeStyle, 'mr-2')} />
                   Search
                 </DropdownMenuItem>
                 <Link href="/completed">
@@ -314,7 +316,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-completed"
                   >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    <CheckCircle2 className={cn(IconSizeStyle, 'mr-2')} />
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
@@ -323,7 +325,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-settings"
                   >
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className={cn(IconSizeStyle, 'mr-2')} />
                     Settings
                   </DropdownMenuItem>
                 </Link>
@@ -332,7 +334,9 @@ const Home = () => {
 
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
-                <Search className="h-4 w-4 shrink-0 text-primary" />
+                <Search
+                  className={cn(IconSizeStyle, 'shrink-0 text-primary')}
+                />
                 <Input
                   placeholder="Search..."
                   className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
@@ -353,42 +357,20 @@ const Home = () => {
               current={sortBy}
               onSelect={setSortBy}
             />
-            {settings.priorityVisible && (
-              <SortButton
-                label="Priority"
-                value="priority"
-                className="w-16"
-                current={sortBy}
-                onSelect={setSortBy}
-              />
-            )}
-            {settings.easeVisible && (
-              <SortButton
-                label="Ease"
-                value="ease"
-                className="w-16"
-                current={sortBy}
-                onSelect={setSortBy}
-              />
-            )}
-            {settings.enjoymentVisible && (
-              <SortButton
-                label="Enjoy"
-                value="enjoyment"
-                className="w-16"
-                current={sortBy}
-                onSelect={setSortBy}
-              />
-            )}
-            {settings.timeVisible && (
-              <SortButton
-                label="Time"
-                value="time"
-                className="w-16"
-                current={sortBy}
-                onSelect={setSortBy}
-              />
-            )}
+            {RANK_FIELDS_CRITERIA.map((field) => {
+              const visibleKey = `${field.name}Visible` as const
+              if (!settings[visibleKey]) return null
+              return (
+                <SortButton
+                  key={`${field.name}-sort-btn`}
+                  label={'labelShort' in field ? field.labelShort : field.label}
+                  value={field.name}
+                  className="w-16"
+                  current={sortBy}
+                  onSelect={setSortBy}
+                />
+              )
+            })}
           </div>
         </div>
 
