@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 
-import type { SortOption, UserSettings } from '@shared/schema'
 import { apiRequest, queryClient } from '@/lib/queryClient'
+import type { SortOption, UserSettings } from '~/shared/schema'
 
 export interface AttributeVisibility {
   visible: boolean

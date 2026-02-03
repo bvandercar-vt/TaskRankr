@@ -7,7 +7,6 @@ import {
 } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import type { Task } from '@shared/schema'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/primitives/overlays/dialog'
 import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
+import type { Task } from '~/shared/schema'
 import { TaskForm, type TaskFormProps, type TaskFormValues } from './TaskForm'
 
 interface TaskDialogContextType {

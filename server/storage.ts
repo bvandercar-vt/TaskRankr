@@ -8,7 +8,7 @@ import {
   type UpdateTaskRequest,
   type UserSettings,
   userSettings,
-} from '@shared/schema'
+} from '~/shared/schema'
 import { db } from './db'
 
 export interface IStorage {

@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { api, buildUrl, type TaskInput } from '@shared/routes'
-import type { TaskStatus } from '@shared/schema'
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
+import { api, buildUrl, type TaskInput } from '~/shared/routes'
+import type { TaskStatus } from '~/shared/schema'
 
 // Fetch all tasks
 export const useTasks = () => {

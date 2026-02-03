@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */
+/** biome-ignore-all lint/complexity/useLiteralKeys: added by Replit */
+/** biome-ignore-all lint/suspicious/noExplicitAny: added by Replit */
 import connectPg from 'connect-pg-simple'
 import type { Express, RequestHandler } from 'express'
 import session from 'express-session'
@@ -155,7 +158,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken)
     updateUserSession(user, tokenResponse)
     return next()
-  } catch (error) {
+  } catch (_error) {
     res.status(401).json({ message: 'Unauthorized' })
     return
   }

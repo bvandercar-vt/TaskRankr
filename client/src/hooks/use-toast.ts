@@ -41,16 +41,14 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({
-      type: 'REMOVE_TOAST',
-      toastId: toastId,
-    })
+    dispatch({ type: 'REMOVE_TOAST', toastId })
   }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
 }
 
 export const reducer = (state: State, action: Action): State => {
+  // biome-ignore lint/style/useDefaultSwitchClause: is exhaustive for the type
   switch (action.type) {
     case 'ADD_TOAST':
       return {
@@ -74,8 +72,8 @@ export const reducer = (state: State, action: Action): State => {
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
-        state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+        state.toasts.forEach((t) => {
+          addToRemoveQueue(t.id)
         })
       }
 
@@ -121,11 +119,13 @@ type Toast = Omit<ToasterToast, 'id'>
 const toast = ({ ...props }: Toast) => {
   const id = genId()
 
+  // biome-ignore lint/nursery/noShadow: is fine
   const update = (props: ToasterToast) =>
     dispatch({
       type: 'UPDATE_TOAST',
       toast: { ...props, id },
     })
+
   const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id })
 
   dispatch({
@@ -141,7 +141,7 @@ const toast = ({ ...props }: Toast) => {
   })
 
   return {
-    id: id,
+    id,
     dismiss,
     update,
   }
@@ -150,6 +150,7 @@ const toast = ({ ...props }: Toast) => {
 const useToast = () => {
   const [state, setState] = useState<State>(memoryState)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: added by Replit
   useEffect(() => {
     listeners.push(setState)
     return () => {

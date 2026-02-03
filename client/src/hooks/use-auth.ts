@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { User } from '@shared/models/auth'
+import type { User } from '~/shared/models/auth'
 
 async function fetchUser(): Promise<User | null> {
   const response = await fetch('/api/auth/user', {
@@ -18,6 +18,7 @@ async function fetchUser(): Promise<User | null> {
   return response.json()
 }
 
+// biome-ignore lint/suspicious/useAwait: involved window.href logging out, allow it.
 async function logout(): Promise<void> {
   window.location.href = '/api/logout'
 }

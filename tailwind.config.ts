@@ -103,5 +103,6 @@ export default {
       },
     },
   },
+  // biome-ignore lint/style/noCommonJs: added by Replit, don't break...
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 } satisfies Config

@@ -1,8 +1,8 @@
-import type { Server } from 'http'
-import type { Express } from 'express'
+import type { Server } from 'node:http'
+import type { Express, Request } from 'express'
 import { z } from 'zod'
 
-import { api } from '@shared/routes'
+import { api } from '~/shared/routes'
 import {
   isAuthenticated,
   registerAuthRoutes,
@@ -19,7 +19,9 @@ export async function registerRoutes(
   registerAuthRoutes(app)
 
   // Helper to get userId from request
-  const getUserId = (req: any): string => req.user?.claims?.sub
+  const getUserId = (req: Request): string =>
+    // biome-ignore lint/suspicious/noExplicitAny: from Replit auth
+    (req.user as Record<string, any>).claims?.sub
 
   app.get(api.tasks.list.path, isAuthenticated, async (req, res) => {
     const userId = getUserId(req)
@@ -90,13 +92,10 @@ export async function registerRoutes(
 
       // Second pass: update parentIds using the ID map
       for (const taskData of tasks) {
-        if (
-          taskData.parentId &&
-          idMap.has(taskData.id) &&
-          idMap.has(taskData.parentId)
-        ) {
-          const newId = idMap.get(taskData.id)!
-          const newParentId = idMap.get(taskData.parentId)!
+        if (!taskData.parentId) continue
+        const newId = idMap.get(taskData.id)
+        const newParentId = idMap.get(taskData.parentId)
+        if (newId !== undefined && newParentId !== undefined) {
           await storage.updateTask(newId, userId, { parentId: newParentId })
         }
       }

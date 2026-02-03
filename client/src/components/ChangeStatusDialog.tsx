@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Clock, Pin, PinOff, StopCircle, X } from 'lucide-react'
 
-import type { TaskStatus } from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import { Input } from '@/components/primitives/forms/input'
 import {
@@ -15,6 +14,7 @@ import {
 } from '@/components/primitives/overlays/alert-dialog'
 import { getSettings } from '@/hooks/use-settings'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
+import type { TaskStatus } from '~/shared/schema'
 
 interface ChangeStatusDialogProps {
   open: boolean

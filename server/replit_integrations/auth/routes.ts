@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */
+/** biome-ignore-all lint/suspicious/noExplicitAny: added by Replit */
 import type { Express } from 'express'
 
 import { isAuthenticated } from './replitAuth'

@@ -1,4 +1,4 @@
-import { createServer } from 'http'
+import { createServer } from 'node:http'
 import express, {
   type NextFunction,
   type Request,
@@ -41,7 +41,7 @@ export function log(message: string, source = 'express') {
 app.use((req, res, next) => {
   const start = Date.now()
   const path = req.path
-  let capturedJsonResponse: Record<string, any> | undefined
+  let capturedJsonResponse: Record<string, unknown> | undefined
 
   const originalResJson = res.json
   res.json = (bodyJson, ...args) => {
@@ -64,9 +64,11 @@ app.use((req, res, next) => {
   next()
 })
 
+// biome-ignore lint/nursery/noFloatingPromises: added by Replit, don't break...
 ;(async () => {
   await registerRoutes(httpServer, app)
 
+  // biome-ignore lint/suspicious/noExplicitAny: error type comes from somethere else
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500
     const message = err.message || 'Internal Server Error'

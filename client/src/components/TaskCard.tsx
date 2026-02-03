@@ -2,11 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
-import {
-  SORT_FIELD_CONFIG,
-  type TaskResponse,
-  type TaskStatus,
-} from '@shared/schema'
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/badge'
@@ -19,6 +14,11 @@ import {
 } from '@/hooks/use-tasks'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
+import {
+  SORT_FIELD_CONFIG,
+  type TaskResponse,
+  type TaskStatus,
+} from '~/shared/schema'
 
 interface TaskBadgeProps {
   value: string
@@ -170,6 +170,7 @@ export const TaskCard = ({
                 setIsExpanded(!isExpanded)
               }}
               className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
+              type="button"
             >
               {isExpanded ? (
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
@@ -188,6 +189,8 @@ export const TaskCard = ({
               {task.name}
             </h3>
             {isInProgress && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: TODO: resolve
+              // biome-ignore lint/a11y/useKeyWithClickEvents: TODO: resolve
               <div
                 onClick={(e) => {
                   e.stopPropagation()

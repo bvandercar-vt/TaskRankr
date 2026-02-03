@@ -1,4 +1,4 @@
-import { readFile, rm } from 'fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import { build as esbuild } from 'esbuild'
 import { build as viteBuild } from 'vite'
 
