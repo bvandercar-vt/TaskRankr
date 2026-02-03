@@ -1,10 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import {
@@ -128,7 +122,10 @@ const MobileDialog = ({
   </AnimatePresence>
 )
 
-export const TaskDialogProvider = ({ children }: { children: ReactNode }) => {
+export const TaskDialogProvider = ({
+  children,
+  // biome-ignore lint/complexity/noBannedTypes: is fine
+}: React.PropsWithChildren<{}>) => {
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [activeTask, setActiveTask] = useState<Task | undefined>(undefined)

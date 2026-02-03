@@ -6,7 +6,7 @@ import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/badge'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { getSettings } from '@/hooks/use-settings'
+import { getIsVisible, getSettings } from '@/hooks/use-settings'
 import {
   useDeleteTask,
   useSetTaskStatus,
@@ -14,7 +14,7 @@ import {
 } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
-import { cn, getIsVisible } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import {
   RANK_FIELDS_CRITERIA,
   type TaskResponse,

@@ -33,11 +33,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/primitives/overlays/popover'
-import { useSettings } from '@/hooks/use-settings'
+import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
-import { cn, getIsRequired, getIsVisible } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
   type MutateTaskRequest,
