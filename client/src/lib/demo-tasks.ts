@@ -1,9 +1,5 @@
 import type { TaskResponse } from '~/shared/schema'
 
-export const collectAllTaskIds = (tasks: TaskResponse[]): number[] => {
-  return tasks.map((t) => t.id)
-}
-
 export const createDemoTasks = (nextIdRef: {
   current: number
 }): TaskResponse[] => {
@@ -72,7 +68,8 @@ export const createDemoTasks = (nextIdRef: {
       id: parentWithSubtasksId,
       userId: 'local',
       name: 'Demo task with subtasks',
-      description: 'This task has nested subtasks to show how you can break down complex work.',
+      description:
+        'This task has nested subtasks to show how you can break down complex work.',
       priority: 'medium',
       ease: 'medium',
       enjoyment: 'medium',
