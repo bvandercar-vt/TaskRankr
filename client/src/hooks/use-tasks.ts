@@ -59,10 +59,7 @@ export const useCreateTask = () => {
 
   return useMutation({
     mutationFn: async (
-      data: Omit<
-        Parameters<typeof api.tasks.create>[0]['body'],
-        'userId'
-      >,
+      data: Omit<Parameters<typeof api.tasks.create>[0]['body'], 'userId'>,
     ) => {
       const result = await api.tasks.create({ body: data })
       if (result.status !== 201) {

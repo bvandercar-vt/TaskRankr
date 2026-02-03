@@ -1,7 +1,7 @@
 import type { Server } from 'node:http'
 import { createExpressEndpoints, initServer } from '@ts-rest/express'
 import { isNil } from 'es-toolkit'
-import type { Express, Request } from 'express'
+import type { Express } from 'express'
 
 import { contract } from '~/shared/contract'
 import {
@@ -13,9 +13,8 @@ import { storage } from './storage'
 
 const s = initServer()
 
-const getUserId = (req: Request): string =>
-  // biome-ignore lint/suspicious/noExplicitAny: from Replit auth
-  (req.user as Record<string, any>).claims?.sub
+// biome-ignore lint/suspicious/noExplicitAny: from Replit auth
+const getUserId = (req: Record<string, any>): string => req.user.claims?.sub
 
 const router = s.router(contract, {
   tasks: {
@@ -55,7 +54,7 @@ const router = s.router(contract, {
           return { status: 404, body: { message: 'Task not found' } }
         }
         const task = await storage.updateTask(params.id, userId, body)
-        return { status: 200, body: task! }
+        return { status: 200, body: task }
       },
     },
     delete: {
