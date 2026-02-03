@@ -1,4 +1,5 @@
 import type { Server } from 'node:http'
+import { isNil } from 'es-toolkit'
 import type { Express, Request } from 'express'
 import { z } from 'zod'
 
@@ -87,7 +88,7 @@ export async function registerRoutes(
 
       // Second pass: update parentIds using the ID map
       for (const taskData of tasks) {
-        if (!taskData.parentId || taskData.id === undefined) continue
+        if (isNil(taskData.parentId) || isNil(taskData.id)) continue
         const newId = idMap.get(taskData.id)
         const newParentId = idMap.get(taskData.parentId)
         if (newId !== undefined && newParentId !== undefined) {
