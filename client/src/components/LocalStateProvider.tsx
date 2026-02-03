@@ -10,6 +10,7 @@ import {
 } from 'react'
 
 import type { AppSettings } from '@/hooks/use-settings'
+import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTaskRequest,
   TaskResponse,
@@ -78,92 +79,6 @@ const DEFAULT_SETTINGS: AppSettings = {
 }
 
 const DEFAULT_TASKS: TaskResponse[] = []
-
-const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
-  const now = new Date()
-
-  const getNextId = () => {
-    const id = nextIdRef.current--
-    return id
-  }
-
-  const demoTasks: TaskResponse[] = [
-    {
-      id: getNextId(),
-      userId: 'local',
-      name: 'Try creating your first task',
-      description:
-        'Tap the + button in the bottom right corner to create a new task.',
-      priority: 'high',
-      ease: 'easy',
-      enjoyment: 'medium',
-      time: 'low',
-      parentId: null,
-      status: 'pinned',
-      inProgressTime: 0,
-      inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 60_000),
-      completedAt: null,
-      subtasks: [],
-    },
-    {
-      id: getNextId(),
-      userId: 'local',
-      name: 'Explore task attributes',
-      description:
-        'Each task can have Priority, Ease, Enjoyment, and Time ratings. Use the sort buttons at the top to organize your tasks.',
-      priority: 'medium',
-      ease: 'easy',
-      enjoyment: 'high',
-      time: 'low',
-      parentId: null,
-      status: 'open',
-      inProgressTime: 0,
-      inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 120_000),
-      completedAt: null,
-      subtasks: [],
-    },
-    {
-      id: getNextId(),
-      userId: 'local',
-      name: 'Long-press for status options',
-      description:
-        'Long-press any task to change its status: Open, In Progress, Pinned, or Completed.',
-      priority: 'medium',
-      ease: 'easy',
-      enjoyment: 'medium',
-      time: 'lowest',
-      parentId: null,
-      status: 'open',
-      inProgressTime: 0,
-      inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 180_000),
-      completedAt: null,
-      subtasks: [],
-    },
-    {
-      id: getNextId(),
-      userId: 'local',
-      name: 'Create nested subtasks',
-      description:
-        'When editing a task, you can add subtasks to break down complex work.',
-      priority: 'low',
-      ease: 'medium',
-      enjoyment: 'medium',
-      time: 'medium',
-      parentId: null,
-      status: 'open',
-      inProgressTime: 0,
-      inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 240_000),
-      completedAt: null,
-      subtasks: [],
-    },
-  ]
-
-  return demoTasks
-}
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
