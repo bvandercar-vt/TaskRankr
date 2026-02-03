@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { useDemoSafe } from '@/components/DemoProvider'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
@@ -31,11 +32,14 @@ const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {
 
 export const useSettings = () => {
   const qc = useQueryClient()
+  const { isDemo, demoSettings, updateDemoSettings } = useDemoSafe()
+
   const { data, isLoading } = tsr.settings.get.useQuery({
     queryKey: QueryKeys.getSettings,
+    enabled: !isDemo,
   })
 
-  const settings: AppSettings | undefined = data?.body
+  const settings: AppSettings | undefined = isDemo ? demoSettings : data?.body
 
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AppSettings>) => {
@@ -75,6 +79,10 @@ export const useSettings = () => {
     key: K,
     value: AppSettings[K],
   ) => {
+    if (isDemo) {
+      updateDemoSettings({ [key]: value })
+      return
+    }
     updateMutation.mutate({ [key]: value })
   }
 
@@ -86,7 +94,7 @@ export const useSettings = () => {
 
   return {
     settings: settings || { ...DEFAULT_SETTINGS, userId: '' },
-    isLoading,
+    isLoading: isDemo ? false : isLoading,
     updateSetting,
     updateVisibility,
     updateRequired,

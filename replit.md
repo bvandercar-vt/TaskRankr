@@ -2,7 +2,7 @@
 
 ## Overview
 
-TaskRankr is a multi-user task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Each attribute has 6 levels (including "none") with configurable visibility and required settings. Features hierarchical/nested task support, status-based workflow, a modern dark-themed mobile-first UI, and per-user task isolation with Replit Auth.
+TaskRankr is a multi-user task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Each attribute has 6 levels (including "none") with configurable visibility and required settings. Features hierarchical/nested task support, status-based workflow, a modern dark-themed mobile-first UI, per-user task isolation with Replit Auth, and a demo mode for trying the app without an account.
 
 ## User Preferences
 
@@ -47,6 +47,7 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 │       │   │   ├── dropdownMenu.tsx
 │       │   │   └── lucideIcon.tsx  # Dynamic icon helper
 │       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
+│       │   ├── DemoProvider.tsx  # Demo mode context with mock data
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
