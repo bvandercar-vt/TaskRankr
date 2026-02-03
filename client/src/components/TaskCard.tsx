@@ -12,7 +12,7 @@ import {
   useSetTaskStatus,
   useUpdateTask,
 } from '@/hooks/use-tasks'
-import { getAttributeStyle } from '@/lib/taskStyles'
+import { getAttributeStyle } from '@/lib/task-styles'
 import { cn } from '@/lib/utils'
 import {
   SORT_FIELD_CONFIG,

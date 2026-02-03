@@ -10,7 +10,7 @@ import Home from '@/pages/Home'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
-import { queryClient } from './lib/queryClient'
+import { queryClient } from './lib/query-client'
 
 const Router = () => (
   <Switch>

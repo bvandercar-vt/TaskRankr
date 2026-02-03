@@ -8,7 +8,6 @@ import {
   Plus,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import type { z } from 'zod'
 
 import { Button } from '@/components/primitives/button'
 import { Calendar } from '@/components/primitives/forms/calendar'
@@ -36,20 +35,18 @@ import {
 } from '@/components/primitives/overlays/popover'
 import { useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
-import { getAttributeStyle } from '@/lib/taskStyles'
+import { getAttributeStyle } from '@/lib/task-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
+  type MutateTaskRequest,
   SORT_FIELD_CONFIG,
   type Task,
   type TaskSortField,
 } from '~/shared/schema'
 
-const formSchema = insertTaskSchema
-export type TaskFormValues = z.infer<typeof formSchema>
-
 export interface TaskFormProps {
-  onSubmit: (data: TaskFormValues) => void
+  onSubmit: (data: MutateTaskRequest) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -94,7 +91,7 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
-  const form = useForm<TaskFormValues>({
+  const form = useForm<MutateTaskRequest>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
     defaultValues: initialData
@@ -162,7 +159,7 @@ export const TaskForm = ({
     )
   }, [initialData, parentId, form])
 
-  const onSubmitWithNulls = (data: TaskFormValues) => {
+  const onSubmitWithNulls = (data: MutateTaskRequest) => {
     const formattedData = {
       ...data,
       priority: data.priority === 'none' ? null : data.priority,

@@ -9,13 +9,17 @@ import { useAuth } from '@/hooks/use-auth'
 import { useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
-import { tsr } from '@/lib/api-client'
-import { queryClient } from '@/lib/queryClient'
-import { getAttributeStyle } from '@/lib/taskStyles'
+import { queryClient } from '@/lib/query-client'
+import { getAttributeStyle } from '@/lib/task-styles'
+import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { contract } from '~/shared/contract'
 import { authPaths } from '~/shared/routes'
-import { SORT_FIELD_CONFIG, type TaskSortField } from '~/shared/schema'
+import {
+  SORT_FIELD_CONFIG,
+  type SortFieldValueMap,
+  type TaskSortField,
+} from '~/shared/schema'
 
 type SortCriterion = {
   attr: TaskSortField | 'date'
@@ -110,7 +114,7 @@ const Settings = () => {
         throw new Error('Import failed')
       }
 
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
       toast({ title: 'Tasks imported successfully' })
     } catch (_error) {
       toast({ title: 'Failed to import tasks', variant: 'destructive' })
@@ -302,9 +306,7 @@ const Settings = () => {
                           c.attr !== 'date'
                             ? getAttributeStyle(
                                 c.attr,
-                                c.value satisfies string as Parameters<
-                                  typeof getAttributeStyle
-                                >[1],
+                                c.value satisfies string as SortFieldValueMap[typeof c.attr],
                                 '',
                               )
                             : ''

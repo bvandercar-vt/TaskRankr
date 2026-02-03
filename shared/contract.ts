@@ -161,7 +161,3 @@ export const contract = c.router(
     strictStatusCodes: true,
   },
 )
-
-export type TaskInput = z.infer<typeof insertTaskSchema>
-export type TaskResponse = z.infer<typeof taskSchema>
-export type UserSettingsResponse = z.infer<typeof userSettingsSchema>

@@ -147,6 +147,7 @@ export const insertTaskSchema = createInsertSchema(tasks, {
 export type InsertTask = z.infer<typeof insertTaskSchema>
 
 // Request/Response types
+export type MutateTaskRequest = InsertTask
 export type CreateTaskRequest = InsertTask
 export type UpdateTaskRequest = Partial<InsertTask>
 export type TaskResponse = Task & { subtasks?: TaskResponse[] }
@@ -184,7 +185,7 @@ export const userSettings = pgTable('user_settings', {
 
 const userSettingsCommon = {
   userId: z.string().min(1),
-  sortBy: z.enum(SORT_OPTIONS).optional(),
+  sortBy: z.enum(SORT_OPTIONS).optional().default('date'),
 }
 
 export const userSettingsSchema = createSelectSchema(

@@ -15,8 +15,8 @@ import {
   DialogTitle,
 } from '@/components/primitives/overlays/dialog'
 import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
-import type { Task } from '~/shared/schema'
-import { TaskForm, type TaskFormProps, type TaskFormValues } from './TaskForm'
+import type { MutateTaskRequest, Task } from '~/shared/schema'
+import { TaskForm, type TaskFormProps } from './TaskForm'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -159,7 +159,7 @@ export const TaskDialogProvider = ({ children }: { children: ReactNode }) => {
     }, 300)
   }
 
-  const handleSubmit = (data: TaskFormValues) => {
+  const handleSubmit = (data: MutateTaskRequest) => {
     if (mode === 'create') {
       createTask.mutate({ ...data, parentId }, { onSuccess: closeDialog })
     } else if (mode === 'edit' && activeTask) {
