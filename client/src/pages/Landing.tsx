@@ -1,7 +1,6 @@
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
 import { useOfflineMode } from '@/components/DemoProvider'
-import { useLocalState } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -9,12 +8,8 @@ import { authPaths } from '~/shared/routes'
 
 const Landing = () => {
   const { enterOfflineMode } = useOfflineMode()
-  const { initDemoData, tasks } = useLocalState()
   
   const handleTryOfflineMode = () => {
-    if (tasks.length === 0) {
-      initDemoData()
-    }
     enterOfflineMode()
   }
 
