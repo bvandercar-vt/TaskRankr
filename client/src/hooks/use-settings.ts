@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {
 export const useSettings = () => {
   const qc = useQueryClient()
   const { data, isLoading } = tsr.settings.get.useQuery({
-    queryKey: [QueryKeys.getSettings],
+    queryKey: QueryKeys.getSettings,
   })
 
   const settings: AppSettings | undefined = data?.body
