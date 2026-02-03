@@ -22,8 +22,9 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express
 - **Language**: TypeScript (ES modules)
-- **API Pattern**: RESTful API with typed routes defined in `shared/routes.ts`
-- **Validation**: Zod schemas for request/response validation
+- **API Pattern**: RESTful API using ts-rest for end-to-end type safety
+- **API Contract**: `shared/contract.ts` - defines all endpoints with Zod schemas
+- **Validation**: Automatic validation via ts-rest using Zod schemas
 
 ### Data Storage
 - **Database**: PostgreSQL
@@ -46,15 +47,17 @@ Preferred communication style: Simple, everyday language.
 │   └── db.ts         # Database connection
 ├── shared/           # Shared code between client/server
 │   ├── schema.ts     # Drizzle schema + Zod types
-│   └── routes.ts     # API route definitions with Zod validation
+│   ├── contract.ts   # ts-rest API contract with Zod schemas
+│   └── routes.ts     # Auth path constants
 └── migrations/       # Database migrations
 ```
 
-### API Design
-Routes are defined declaratively in `shared/routes.ts` with:
-- HTTP method and path
-- Input validation schema (Zod)
-- Response schemas for different status codes
+### API Design (ts-rest)
+API is defined using ts-rest contract in `shared/contract.ts`:
+- Type-safe endpoints with automatic request/response validation
+- Client and server share the same contract for end-to-end type safety
+- Server implementation in `server/routes.ts` using `@ts-rest/express`
+- Client in `client/src/lib/api-client.ts` using `@ts-rest/react-query`
 
 Key endpoints:
 - `GET /api/tasks` - List all tasks
@@ -109,3 +112,4 @@ Status behaviors:
 - **esbuild**: Server bundling for production
 - **Drizzle Kit**: Database migration tool
 - **TypeScript**: Type checking across the stack
+- **ts-rest**: Type-safe REST API framework (@ts-rest/core, @ts-rest/express, @ts-rest/react-query)
