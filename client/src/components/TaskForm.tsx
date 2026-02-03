@@ -471,7 +471,9 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && (
-              <Loader2 className={cn(IconSizeStyle, 'mr-2 animate-spin')} />
+              <Loader2
+                className={cn(IconSizeStyle.small, 'mr-2 animate-spin')}
+              />
             )}
             {initialData ? 'Save' : 'Create'}
           </Button>

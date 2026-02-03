@@ -5,7 +5,7 @@ import { Link } from 'wouter'
 import { Button } from '@/components/primitives/button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/use-tasks'
-import type { TaskResponse } from '~/shared/schema'
+import { RANK_FIELDS_CRITERIA, type TaskResponse } from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
@@ -84,18 +84,14 @@ const Completed = () => {
             <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
               <div className="flex-1 hidden md:block" />
               <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
-                  Priority
-                </span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
-                  Ease
-                </span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
-                  Enjoy
-                </span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center">
-                  Time
-                </span>
+                {RANK_FIELDS_CRITERIA.map((field) => (
+                  <span
+                    key={`${field.name}-col-header`}
+                    className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
+                  >
+                    {'labelShort' in field ? field.labelShort : field.label}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
