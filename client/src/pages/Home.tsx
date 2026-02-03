@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { PageError, PageLoading } from '@/components/PageStates'
+import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
@@ -361,7 +361,32 @@ const Home = () => {
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (
-            <EmptyState onAdd={() => openCreateDialog()} isSearch={!!search} />
+            <EmptyState
+              icon={
+                search ? (
+                  <Search className="w-8 h-8 text-muted-foreground" />
+                ) : (
+                  <LayoutList className="w-8 h-8 text-muted-foreground" />
+                )
+              }
+              title={search ? 'No matching tasks found' : 'Your list is empty'}
+              description={
+                search
+                  ? 'Try adjusting your search terms.'
+                  : 'Start by adding your first task to get organized.'
+              }
+              action={
+                !search && (
+                  <Button
+                    onClick={() => openCreateDialog()}
+                    variant="secondary"
+                    className="mt-4"
+                  >
+                    Create First Task
+                  </Button>
+                )
+              }
+            />
           ) : (
             displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}
@@ -379,36 +404,5 @@ const Home = () => {
     </div>
   )
 }
-
-const EmptyState = ({
-  onAdd,
-  isSearch,
-}: {
-  onAdd: () => void
-  isSearch: boolean
-}) => (
-  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-    <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-      {isSearch ? (
-        <Search className="w-8 h-8 text-muted-foreground" />
-      ) : (
-        <LayoutList className="w-8 h-8 text-muted-foreground" />
-      )}
-    </div>
-    <h3 className="text-xl font-medium text-foreground">
-      {isSearch ? 'No matching tasks found' : 'Your list is empty'}
-    </h3>
-    <p className="text-muted-foreground max-w-sm">
-      {isSearch
-        ? 'Try adjusting your search terms.'
-        : 'Start by adding your first task to get organized.'}
-    </p>
-    {!isSearch && (
-      <Button onClick={onAdd} variant="secondary" className="mt-4">
-        Create First Task
-      </Button>
-    )}
-  </div>
-)
 
 export default Home
