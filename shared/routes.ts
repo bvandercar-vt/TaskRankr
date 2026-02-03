@@ -1,6 +1,16 @@
 import { z } from 'zod'
 
-import { insertTaskSchema, taskStatusEnum, type tasks } from './schema'
+import { 
+  insertTaskSchema, 
+  insertUserSettingsSchema, 
+  taskStatusEnum, 
+  priorityEnum,
+  easeEnum,
+  enjoymentEnum,
+  timeEnum,
+  type tasks, 
+  type userSettings 
+} from './schema'
 
 export const errorSchemas = {
   validation: z.object({
@@ -67,6 +77,61 @@ export const api = {
         200: z.custom<typeof tasks.$inferSelect>(),
         400: errorSchemas.validation,
         404: errorSchemas.notFound,
+      },
+    },
+    export: {
+      method: 'GET',
+      path: '/api/tasks/export',
+      responses: {
+        200: z.object({
+          version: z.number(),
+          exportedAt: z.string(),
+          tasks: z.array(z.custom<Omit<typeof tasks.$inferSelect, 'id' | 'userId'>>()),
+        }),
+      },
+    },
+    import: {
+      method: 'POST',
+      path: '/api/tasks/import',
+      input: z.object({
+        tasks: z.array(z.object({
+          id: z.number().optional(),
+          name: z.string(),
+          description: z.string().nullish(),
+          priority: priorityEnum.nullish(),
+          ease: easeEnum.nullish(),
+          enjoyment: enjoymentEnum.nullish(),
+          time: timeEnum.nullish(),
+          parentId: z.number().nullish(),
+          status: taskStatusEnum.optional(),
+          inProgressTime: z.number().optional(),
+          createdAt: z.string().optional(),
+          completedAt: z.string().nullish(),
+        })),
+      }),
+      responses: {
+        200: z.object({
+          message: z.string(),
+          imported: z.number(),
+        }),
+        400: errorSchemas.validation,
+      },
+    },
+  },
+  settings: {
+    get: {
+      method: 'GET',
+      path: '/api/settings',
+      responses: {
+        200: z.custom<typeof userSettings.$inferSelect>(),
+      },
+    },
+    update: {
+      method: 'PUT',
+      path: '/api/settings',
+      input: insertUserSettingsSchema.omit({ userId: true }).partial(),
+      responses: {
+        200: z.custom<typeof userSettings.$inferSelect>(),
       },
     },
   },
