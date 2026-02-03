@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { api, tsr } from '@/lib/api-client'
+import { tsr } from '@/lib/api-client'
 import { queryClient } from '@/lib/queryClient'
 import type { SortOption, UserSettings } from '~/shared/schema'
 
@@ -39,7 +39,7 @@ export const useSettings = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AppSettings>) => {
-      const result = await api.settings.update({ body: updates })
+      const result = await tsr.settings.update.mutate({ body: updates })
       if (result.status !== 200) {
         throw new Error('Failed to update settings')
       }

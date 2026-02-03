@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/api-client'
+import { tsr } from '@/lib/api-client'
 import { queryClient } from '@/lib/queryClient'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
@@ -103,7 +103,7 @@ const Settings = () => {
       const text = await file.text()
       const data = JSON.parse(text)
 
-      const result = await api.tasks.import({
+      const result = await tsr.tasks.import.mutate({
         body: { tasks: data.tasks || data },
       })
       if (result.status !== 200) {
