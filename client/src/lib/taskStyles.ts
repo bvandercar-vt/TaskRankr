@@ -79,17 +79,24 @@ type TaksSortFieldMap = {
 export const getAttributeStyle = <Field extends TaskSortField>(
   field: Field,
   value: TaksSortFieldMap[Field] | null | undefined,
+  defaultStyle: string = DEFAULT_STYLE,
 ): string => {
+  let style: string;
   switch (field) {
     case "priority":
-      return getPriorityStyle(value as Priority);
+      style = getPriorityStyle(value as Priority);
+      break;
     case "ease":
-      return getEaseStyle(value as Ease);
+      style = getEaseStyle(value as Ease);
+      break;
     case "enjoyment":
-      return getEnjoymentStyle(value as Enjoyment);
+      style = getEnjoymentStyle(value as Enjoyment);
+      break;
     case "time":
-      return getTimeStyle(value as Time);
+      style = getTimeStyle(value as Time);
+      break;
     default:
-      return DEFAULT_STYLE;
+      return defaultStyle;
   }
+  return style === DEFAULT_STYLE ? defaultStyle : style;
 };
