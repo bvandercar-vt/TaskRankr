@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
@@ -265,24 +266,8 @@ const Home = () => {
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
   }, [taskTree, pinnedTasks, search, sortBy, sortTasks, filterAndSortTree])
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-secondary/50" />
-          <div className="h-4 w-32 bg-secondary/50 rounded" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-destructive">
-        Error loading tasks. Please try again.
-      </div>
-    )
-  }
+  if (isLoading) return <PageLoading />
+  if (error) return <PageError />
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
