@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { PageError, PageLoading } from '@/components/PageStates'
+import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/use-tasks'
@@ -84,7 +84,11 @@ const Completed = () => {
 
         <div className="space-y-1">
           {completedTasks.length === 0 ? (
-            <EmptyState />
+            <EmptyState
+              icon={<CheckCircle2 className="w-8 h-8 text-muted-foreground" />}
+              title="No completed tasks yet"
+              description="Long-press on any task to mark it as complete."
+            />
           ) : (
             completedTasks.map((task) => (
               <TaskCard
@@ -100,19 +104,5 @@ const Completed = () => {
     </div>
   )
 }
-
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-    <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">
-      <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-    </div>
-    <h3 className="text-xl font-medium text-foreground">
-      No completed tasks yet
-    </h3>
-    <p className="text-muted-foreground max-w-sm">
-      Long-press on any task to mark it as complete.
-    </p>
-  </div>
-)
 
 export default Completed
