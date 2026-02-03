@@ -1,0 +1,167 @@
+import { initContract } from '@ts-rest/core'
+import { z } from 'zod'
+
+import {
+  insertTaskSchema,
+  insertUserSettingsSchema,
+  taskSchema,
+  taskStatusEnum,
+  userSettingsSchema,
+} from './schema'
+
+const c = initContract()
+
+const errorSchemas = {
+  validation: z.object({
+    message: z.string(),
+    field: z.string().optional(),
+  }),
+  notFound: z.object({
+    message: z.string(),
+  }),
+  unauthorized: z.object({
+    message: z.string(),
+  }),
+}
+
+const tasksContract = c.router({
+  list: {
+    method: 'GET',
+    path: '/api/tasks',
+    responses: {
+      200: z.array(taskSchema),
+    },
+    summary: 'List all tasks for the authenticated user',
+  },
+  get: {
+    method: 'GET',
+    path: '/api/tasks/:id',
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    responses: {
+      200: taskSchema,
+      404: errorSchemas.notFound,
+    },
+    summary: 'Get a single task by ID',
+  },
+  create: {
+    method: 'POST',
+    path: '/api/tasks',
+    body: insertTaskSchema.omit({ userId: true }),
+    responses: {
+      201: taskSchema,
+      400: errorSchemas.validation,
+    },
+    summary: 'Create a new task',
+  },
+  update: {
+    method: 'PUT',
+    path: '/api/tasks/:id',
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    body: insertTaskSchema.omit({ userId: true }).partial(),
+    responses: {
+      200: taskSchema,
+      400: errorSchemas.validation,
+      404: errorSchemas.notFound,
+    },
+    summary: 'Update a task',
+  },
+  delete: {
+    method: 'DELETE',
+    path: '/api/tasks/:id',
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    body: z.undefined(),
+    responses: {
+      204: z.undefined(),
+      404: errorSchemas.notFound,
+    },
+    summary: 'Delete a task',
+  },
+  setStatus: {
+    method: 'PUT',
+    path: '/api/tasks/:id/status',
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    body: z.object({ status: taskStatusEnum }),
+    responses: {
+      200: taskSchema,
+      400: errorSchemas.validation,
+      404: errorSchemas.notFound,
+    },
+    summary: 'Set task status',
+  },
+  export: {
+    method: 'GET',
+    path: '/api/tasks/export',
+    responses: {
+      200: z.object({
+        version: z.number(),
+        exportedAt: z.string(),
+        tasks: z.array(taskSchema.omit({ userId: true })),
+      }),
+    },
+    summary: 'Export all tasks as JSON',
+  },
+  import: {
+    method: 'POST',
+    path: '/api/tasks/import',
+    body: z.object({
+      tasks: z.array(
+        insertTaskSchema.omit({ userId: true }).extend({
+          id: z.number().nullish(),
+          status: insertTaskSchema.shape.status.nullish(),
+          parentId: z.number().nullish(),
+          inProgressTime: z.number().nullish(),
+          createdAt: z.string().nullish(),
+          completedAt: z.string().nullish(),
+        }),
+      ),
+    }),
+    responses: {
+      200: z.object({ message: z.string(), imported: z.number() }),
+      400: errorSchemas.validation,
+    },
+    summary: 'Import tasks from JSON',
+  },
+})
+
+const settingsContract = c.router({
+  get: {
+    method: 'GET',
+    path: '/api/settings',
+    responses: {
+      200: userSettingsSchema,
+    },
+    summary: 'Get user settings',
+  },
+  update: {
+    method: 'PUT',
+    path: '/api/settings',
+    body: insertUserSettingsSchema.omit({ userId: true }).partial(),
+    responses: {
+      200: userSettingsSchema,
+    },
+    summary: 'Update user settings',
+  },
+})
+
+export const contract = c.router(
+  {
+    tasks: tasksContract,
+    settings: settingsContract,
+  },
+  {
+    pathPrefix: '',
+    strictStatusCodes: true,
+  },
+)
+
+export type TaskInput = z.infer<typeof insertTaskSchema>
+export type TaskResponse = z.infer<typeof taskSchema>
+export type UserSettingsResponse = z.infer<typeof userSettingsSchema>

@@ -1,27 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
-import { apiRequest } from '@/lib/queryClient'
-import { api, buildUrl } from '~/shared/routes'
-import type {
-  CreateTaskRequest,
-  TaskStatus,
-  UpdateTaskRequest,
-} from '~/shared/schema'
+import { api, tsr } from '@/lib/api-client'
+import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
-// Fetch all tasks
 export const useTasks = () => {
-  return useQuery({
-    queryKey: [api.tasks.list.path],
-    queryFn: async () => {
-      const res = await apiRequest('GET', api.tasks.list.path)
-      return api.tasks.list.responses[200].parse(await res.json())
-    },
+  const query = tsr.tasks.list.useQuery({
+    queryKey: ['tasks'],
   })
+
+  return {
+    data: query.data?.status === 200 ? query.data.body : undefined,
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  }
 }
 
-// Custom hook to get parent chain for a task
 export const useTaskParentChain = (parentId?: number) => {
   const { data: tasks } = useTasks()
 
@@ -43,55 +39,52 @@ export const useTaskParentChain = (parentId?: number) => {
   return chain
 }
 
-// Fetch single task
 export const useTask = (id: number) => {
-  return useQuery({
-    queryKey: [api.tasks.get.path, id],
-    queryFn: async () => {
-      const url = buildUrl(api.tasks.get.path, { id })
-      try {
-        const res = await apiRequest('GET', url)
-        return api.tasks.get.responses[200].parse(await res.json())
-      } catch (e) {
-        if (e instanceof Error && e.message.startsWith('404:')) return null
-        throw e
-      }
-    },
+  const query = tsr.tasks.get.useQuery({
+    queryKey: ['tasks', id],
+    queryData: { params: { id } },
     enabled: !!id,
   })
+
+  return {
+    data: query.data?.status === 200 ? query.data.body : undefined,
+    isLoading: query.isLoading,
+    error: query.error,
+  }
 }
 
-// Create a new task
 export const useCreateTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async (data: CreateTaskRequest) => {
-      const res = await apiRequest(
-        api.tasks.create.method,
-        api.tasks.create.path,
-        data,
-      )
-      const task = api.tasks.create.responses[201].parse(await res.json())
+    mutationFn: async (
+      data: Omit<
+        Parameters<typeof api.tasks.create>[0]['body'],
+        'userId'
+      >,
+    ) => {
+      const result = await api.tasks.create({ body: data })
+      if (result.status !== 201) {
+        throw new Error(result.body.message)
+      }
 
-      // Auto-pin new task if setting is enabled
       const settings = getSettings()
       if (settings.autoPinNewTasks) {
         try {
-          const pinUrl = buildUrl(api.tasks.setStatus.path, { id: task.id })
-          await apiRequest(api.tasks.setStatus.method, pinUrl, {
-            status: 'pinned',
+          await api.tasks.setStatus({
+            params: { id: result.body.id },
+            body: { status: 'pinned' },
           })
         } catch (e) {
           console.error('Failed to auto-pin task:', e)
         }
       }
 
-      return task
+      return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
     onError: (error) => {
       toast({
@@ -103,7 +96,6 @@ export const useCreateTask = () => {
   })
 }
 
-// Update a task
 export const useUpdateTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -113,12 +105,17 @@ export const useUpdateTask = () => {
       id,
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
-      const url = buildUrl(api.tasks.update.path, { id })
-      const res = await apiRequest(api.tasks.update.method, url, updates)
-      return api.tasks.update.responses[200].parse(await res.json())
+      const result = await api.tasks.update({
+        params: { id },
+        body: updates,
+      })
+      if (result.status !== 200) {
+        throw new Error(result.body.message)
+      }
+      return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
     onError: (error) => {
       toast({
@@ -130,19 +127,23 @@ export const useUpdateTask = () => {
   })
 }
 
-// Set task status
 export const useSetTaskStatus = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
-      const url = buildUrl(api.tasks.setStatus.path, { id })
-      const res = await apiRequest(api.tasks.setStatus.method, url, { status })
-      return res.json()
+      const result = await api.tasks.setStatus({
+        params: { id },
+        body: { status },
+      })
+      if (result.status !== 200) {
+        throw new Error(result.body.message)
+      }
+      return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
     onError: (error) => {
       toast({
@@ -154,18 +155,21 @@ export const useSetTaskStatus = () => {
   })
 }
 
-// Delete a task (for actual deletion if ever needed)
 export const useDeleteTask = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const url = buildUrl(api.tasks.delete.path, { id })
-      await apiRequest(api.tasks.delete.method, url)
+      const result = await api.tasks.delete({
+        params: { id },
+      })
+      if (result.status !== 204) {
+        throw new Error(result.body.message)
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
     onError: (error) => {
       toast({

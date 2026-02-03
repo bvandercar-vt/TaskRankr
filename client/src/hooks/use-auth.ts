@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { User } from '~/shared/models/auth'
-import { api } from '~/shared/routes'
+import { authPaths } from '~/shared/routes'
 
 async function fetchUser(): Promise<User | null> {
-  const response = await fetch(api.auth.user.path, {
+  const response = await fetch(authPaths.user, {
     credentials: 'include',
   })
 
@@ -21,13 +21,13 @@ async function fetchUser(): Promise<User | null> {
 
 // biome-ignore lint/suspicious/useAwait: involved window.href logging out, allow it.
 async function logout(): Promise<void> {
-  window.location.href = api.auth.logout.path
+  window.location.href = authPaths.logout
 }
 
 export function useAuth() {
   const queryClient = useQueryClient()
   const { data: user, isLoading } = useQuery<User | null>({
-    queryKey: [api.auth.user.path],
+    queryKey: [authPaths.user],
     queryFn: fetchUser,
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -36,7 +36,7 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.setQueryData([api.auth.user.path], null)
+      queryClient.setQueryData([authPaths.user], null)
     },
   })
 

@@ -9,7 +9,7 @@ import * as client from 'openid-client'
 import { Strategy, type VerifyFunction } from 'openid-client/passport'
 import passport from 'passport'
 
-import { api } from '~/shared/routes'
+import { authPaths } from '~/shared/routes'
 import { authStorage } from './storage'
 
 const getOidcConfig = memoize(
@@ -94,7 +94,7 @@ export async function setupAuth(app: Express) {
           name: strategyName,
           config,
           scope: 'openid email profile offline_access',
-          callbackURL: `https://${domain}${api.auth.callback.path}`,
+          callbackURL: `https://${domain}${authPaths.callback}`,
         },
         verify,
       )
@@ -106,7 +106,7 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user))
   passport.deserializeUser((user: Express.User, cb) => cb(null, user))
 
-  app.get(api.auth.login.path, (req, res, next) => {
+  app.get(authPaths.login, (req, res, next) => {
     ensureStrategy(req.hostname)
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: 'login consent',
@@ -114,15 +114,15 @@ export async function setupAuth(app: Express) {
     })(req, res, next)
   })
 
-  app.get(api.auth.callback.path, (req, res, next) => {
+  app.get(authPaths.callback, (req, res, next) => {
     ensureStrategy(req.hostname)
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: '/',
-      failureRedirect: api.auth.login.path,
+      failureRedirect: authPaths.login,
     })(req, res, next)
   })
 
-  app.get(api.auth.logout.path, (req, res) => {
+  app.get(authPaths.logout, (req, res) => {
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
