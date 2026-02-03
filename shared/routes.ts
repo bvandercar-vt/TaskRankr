@@ -18,14 +18,14 @@ export const errorSchemas = {
 export const api = {
   tasks: {
     list: {
-      method: 'GET' as const,
+      method: 'GET',
       path: '/api/tasks',
       responses: {
         200: z.array(z.custom<typeof tasks.$inferSelect>()),
       },
     },
     get: {
-      method: 'GET' as const,
+      method: 'GET',
       path: '/api/tasks/:id',
       responses: {
         200: z.custom<typeof tasks.$inferSelect>(),
@@ -33,7 +33,7 @@ export const api = {
       },
     },
     create: {
-      method: 'POST' as const,
+      method: 'POST',
       path: '/api/tasks',
       input: insertTaskSchema,
       responses: {
@@ -42,7 +42,7 @@ export const api = {
       },
     },
     update: {
-      method: 'PUT' as const,
+      method: 'PUT',
       path: '/api/tasks/:id',
       input: insertTaskSchema.partial(),
       responses: {
@@ -52,7 +52,7 @@ export const api = {
       },
     },
     delete: {
-      method: 'DELETE' as const,
+      method: 'DELETE',
       path: '/api/tasks/:id',
       responses: {
         204: z.void(),
@@ -60,7 +60,7 @@ export const api = {
       },
     },
     setStatus: {
-      method: 'PUT' as const,
+      method: 'PUT',
       path: '/api/tasks/:id/status',
       input: z.object({ status: taskStatusEnum }),
       responses: {
@@ -70,7 +70,7 @@ export const api = {
       },
     },
   },
-}
+} as const
 
 export function buildUrl(
   path: string,

@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
-import type { TaskResponse, TaskStatus } from '@shared/schema'
+import {
+  SORT_FIELD_CONFIG,
+  type TaskResponse,
+  type TaskStatus,
+} from '@shared/schema'
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/badge'
@@ -211,24 +215,22 @@ export const TaskCard = ({
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {(['priority', 'ease', 'enjoyment', 'time'] as const).map(
-                (field) => {
-                  const visibleKey = `${field}Visible` as keyof typeof settings
-                  if (!settings[visibleKey]) return null
-                  const value = task[field] ?? 'none'
-                  return (
-                    <TaskBadge
-                      key={field}
-                      value={value}
-                      styleClass={
-                        value !== 'none'
-                          ? getAttributeStyle(field, value)
-                          : 'opacity-0'
-                      }
-                    />
-                  )
-                },
-              )}
+              {SORT_FIELD_CONFIG.map(({ name: field }) => {
+                const visibleKey = `${field}Visible` as const
+                if (!settings[visibleKey]) return null
+                const value = task[field] ?? 'none'
+                return (
+                  <TaskBadge
+                    key={field}
+                    value={value}
+                    styleClass={
+                      value === 'none'
+                        ? 'opacity-0'
+                        : getAttributeStyle(field, value)
+                    }
+                  />
+                )
+              })}
             </div>
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">

@@ -2,25 +2,17 @@ import { useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
-import type { TaskSortField } from '@shared/schema'
+import { SORT_FIELD_CONFIG, type TaskSortField } from '@shared/schema'
 import { Button } from '@/components/primitives/button'
+import { Checkbox } from '@/components/primitives/forms/checkbox'
 import { Switch } from '@/components/primitives/forms/switch'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useAuth } from '@/hooks/use-auth'
-import { type AppSettings, useSettings } from '@/hooks/use-settings'
+import { useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
-
-type AttributeKey = 'priority' | 'ease' | 'enjoyment' | 'time'
-const ATTRIBUTES: { key: AttributeKey; label: string }[] = [
-  { key: 'priority', label: 'Priority' },
-  { key: 'ease', label: 'Ease' },
-  { key: 'enjoyment', label: 'Enjoyment' },
-  { key: 'time', label: 'Time' },
-]
 
 type SortCriterion = {
   attr: TaskSortField | 'date'
@@ -218,14 +210,14 @@ const Settings = () => {
               </tr>
             </thead>
             <tbody>
-              {ATTRIBUTES.map(({ key, label }) => {
-                const visibleKey = `${key}Visible` as keyof AppSettings
-                const requiredKey = `${key}Required` as keyof AppSettings
-                const isVisible = settings[visibleKey] as boolean
-                const isRequired = settings[requiredKey] as boolean
+              {SORT_FIELD_CONFIG.map(({ name, label }) => {
+                const visibleKey = `${name}Visible` as const
+                const requiredKey = `${name}Required` as const
+                const isVisible: boolean = settings[visibleKey]
+                const isRequired: boolean = settings[requiredKey]
 
                 return (
-                  <tr key={key} className="border-b border-white/5">
+                  <tr key={name} className="border-b border-white/5">
                     <td className="py-3 text-foreground">{label}</td>
                     <td className="py-3 text-center">
                       <Checkbox
@@ -234,23 +226,23 @@ const Settings = () => {
                           checked: boolean | 'indeterminate',
                         ) => {
                           const newVisible = !!checked
-                          updateSetting(visibleKey as any, newVisible)
+                          updateSetting(visibleKey, newVisible)
                           if (!newVisible && isRequired) {
-                            updateSetting(requiredKey as any, false)
+                            updateSetting(requiredKey, false)
                           }
                         }}
-                        data-testid={`checkbox-${key}-visible`}
+                        data-testid={`checkbox-${name}-visible`}
                       />
                     </td>
                     <td className="py-3 text-center">
                       <Checkbox
                         checked={isRequired}
                         onCheckedChange={(checked: boolean | 'indeterminate') =>
-                          updateSetting(requiredKey as any, !!checked)
+                          updateSetting(requiredKey, !!checked)
                         }
                         disabled={!isVisible}
                         className={!isVisible ? 'opacity-50' : ''}
-                        data-testid={`checkbox-${key}-required`}
+                        data-testid={`checkbox-${name}-required`}
                       />
                     </td>
                   </tr>
@@ -301,7 +293,11 @@ const Settings = () => {
                       {item.criteria.map((c, idx) => {
                         const style =
                           c.attr !== 'date'
-                            ? getAttributeStyle(c.attr, c.value as any, '')
+                            ? getAttributeStyle(
+                                c.attr,
+                                c.value satisfies string as any,
+                                '',
+                              )
                             : ''
                         return (
                           <li key={idx} className="text-muted-foreground">

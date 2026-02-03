@@ -93,6 +93,24 @@ export type Time = (typeof TIME_LEVELS)[number]
 
 export type TaskSortField = 'priority' | 'ease' | 'enjoyment' | 'time'
 
+export const SORT_FIELD_CONFIG = [
+  { name: 'priority', label: 'Priority', levels: PRIORITY_LEVELS },
+  { name: 'ease', label: 'Ease', levels: EASE_LEVELS },
+  { name: 'enjoyment', label: 'Enjoyment', levels: ENJOYMENT_LEVELS },
+  { name: 'time', label: 'Time', levels: TIME_LEVELS },
+] as const satisfies {
+  name: TaskSortField
+  label: string
+  levels: readonly string[]
+}[]
+
+export type SortFieldValueMap = {
+  priority: Priority
+  ease: Ease
+  enjoyment: Enjoyment
+  time: Time
+}
+
 // Zod enums for validation
 export const priorityEnum = z.enum(PRIORITY_LEVELS)
 export const easeEnum = z.enum(EASE_LEVELS)
@@ -116,10 +134,7 @@ export const insertTaskSchema = createInsertSchema(tasks, {
 
 // Base type from Drizzle, then override attribute fields with enum types
 type TaskBase = typeof tasks.$inferSelect
-export type Task = Omit<
-  TaskBase,
-  'status' | 'priority' | 'ease' | 'enjoyment' | 'time'
-> & {
+export type Task = Omit<TaskBase, 'status' | TaskSortField> & {
   status: TaskStatus
   priority: Priority | null
   ease: Ease | null

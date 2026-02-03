@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 
-import type { SortOption } from '@shared/schema'
+import type { SortOption, UserSettings } from '@shared/schema'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 
 export interface AttributeVisibility {
@@ -8,21 +8,8 @@ export interface AttributeVisibility {
   required: boolean
 }
 
-export interface AppSettings {
-  userId: string
-  autoPinNewTasks: boolean
-  enableInProgressTime: boolean
-  alwaysSortPinnedByPriority: boolean
+export interface AppSettings extends Omit<UserSettings, 'sortBy'> {
   sortBy: SortOption
-  // Attribute visibility settings
-  priorityVisible: boolean
-  priorityRequired: boolean
-  easeVisible: boolean
-  easeRequired: boolean
-  enjoymentVisible: boolean
-  enjoymentRequired: boolean
-  timeVisible: boolean
-  timeRequired: boolean
 }
 
 const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {

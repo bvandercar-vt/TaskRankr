@@ -9,7 +9,14 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import type { SortOption, TaskResponse } from '@shared/schema'
+import type {
+  Ease,
+  Enjoyment,
+  Priority,
+  SortOption,
+  TaskResponse,
+  Time,
+} from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
@@ -54,15 +61,22 @@ const SortButton = ({
   </Button>
 )
 
-const LEVEL_WEIGHTS: Record<string, number> = {
+const LEVEL_WEIGHTS = {
   highest: 5,
+  hardest: 5,
   high: 4,
   hard: 4,
   medium: 3,
   low: 2,
   easy: 2,
   lowest: 1,
-}
+  easiest: 1,
+  none: 0,
+} as const satisfies Record<Priority | Ease | Enjoyment | Time, number>
+
+const getLevelWeight = (
+  level: keyof typeof LEVEL_WEIGHTS | null | undefined,
+): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
 
 const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
   date: 'desc',
@@ -97,19 +111,19 @@ const Home = () => {
     } else {
       sorted.sort((a, b) => {
         const direction = SORT_DIRECTIONS[sort] || 'desc'
-        const valA = LEVEL_WEIGHTS[a[sort as keyof TaskResponse] as string] || 0
-        const valB = LEVEL_WEIGHTS[b[sort as keyof TaskResponse] as string] || 0
+        const valA = getLevelWeight(a[sort])
+        const valB = getLevelWeight(b[sort])
 
         if (valA !== valB) {
           return direction === 'desc' ? valB - valA : valA - valB
         }
 
-        const pA = LEVEL_WEIGHTS[a.priority as string] || 0
-        const pB = LEVEL_WEIGHTS[b.priority as string] || 0
-        const eA = LEVEL_WEIGHTS[a.ease as string] || 0
-        const eB = LEVEL_WEIGHTS[b.ease as string] || 0
-        const jA = LEVEL_WEIGHTS[a.enjoyment as string] || 0
-        const jB = LEVEL_WEIGHTS[b.enjoyment as string] || 0
+        const pA = getLevelWeight(a.priority)
+        const pB = getLevelWeight(b.priority)
+        const eA = getLevelWeight(a.ease)
+        const eB = getLevelWeight(b.ease)
+        const jA = getLevelWeight(a.enjoyment)
+        const jB = getLevelWeight(b.enjoyment)
 
         if (sort === 'priority') {
           if (eA !== eB) return eA - eB
@@ -227,8 +241,8 @@ const Home = () => {
     if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
-        const pA = LEVEL_WEIGHTS[a.priority as string] || 0
-        const pB = LEVEL_WEIGHTS[b.priority as string] || 0
+        const pA = getLevelWeight(a.priority)
+        const pB = getLevelWeight(b.priority)
         if (pA !== pB) return pB - pA // Priority descending
 
         // Secondary sort by current sortBy
@@ -238,10 +252,8 @@ const Home = () => {
           )
         }
         const direction = SORT_DIRECTIONS[sortBy] || 'desc'
-        const valA =
-          LEVEL_WEIGHTS[a[sortBy as keyof TaskResponse] as string] || 0
-        const valB =
-          LEVEL_WEIGHTS[b[sortBy as keyof TaskResponse] as string] || 0
+        const valA = getLevelWeight(a[sortBy])
+        const valB = getLevelWeight(b[sortBy])
         return direction === 'desc' ? valB - valA : valA - valB
       })
     } else {

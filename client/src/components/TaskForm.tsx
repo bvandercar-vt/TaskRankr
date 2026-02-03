@@ -11,12 +11,10 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
 import {
-  EASE_LEVELS,
-  ENJOYMENT_LEVELS,
   insertTaskSchema,
-  PRIORITY_LEVELS,
+  SORT_FIELD_CONFIG,
   type Task,
-  TIME_LEVELS,
+  type TaskSortField,
 } from '@shared/schema'
 import { Button } from '@/components/primitives/button'
 import { Calendar } from '@/components/primitives/forms/calendar'
@@ -42,39 +40,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/primitives/overlays/popover'
-import { type AppSettings, useSettings } from '@/hooks/use-settings'
+import { useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
 
 const formSchema = insertTaskSchema
-type FormValues = z.infer<typeof formSchema>
+export type TaskFormValues = z.infer<typeof formSchema>
 
 export interface TaskFormProps {
-  onSubmit: (data: FormValues) => void
+  onSubmit: (data: TaskFormValues) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
   onAddChild?: (parentId: number) => void
 }
-
-type AttributeName = 'priority' | 'ease' | 'enjoyment' | 'time'
-
-const ATTRIBUTE_CONFIG = [
-  {
-    name: 'priority' as const,
-    label: 'Priority',
-    levels: PRIORITY_LEVELS,
-  },
-  { name: 'ease' as const, label: 'Ease', levels: EASE_LEVELS },
-  {
-    name: 'enjoyment' as const,
-    label: 'Enjoyment',
-    levels: ENJOYMENT_LEVELS,
-  },
-  { name: 'time' as const, label: 'Time', levels: TIME_LEVELS },
-]
 
 export const TaskForm = ({
   onSubmit,
@@ -87,19 +68,19 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
 
-  const getVisibility = (attr: AttributeName): boolean => {
-    const key = `${attr}Visible` as keyof AppSettings
-    return settings[key] as boolean
+  const getVisibility = (attr: TaskSortField): boolean => {
+    const key = `${attr}Visible` as const
+    return settings[key]
   }
 
-  const getRequired = (attr: AttributeName): boolean => {
+  const getRequired = (attr: TaskSortField): boolean => {
     if (!getVisibility(attr)) return false
-    const key = `${attr}Required` as keyof AppSettings
-    return settings[key] as boolean
+    const key = `${attr}Required` as const
+    return settings[key]
   }
 
   const visibleAttributes = useMemo(
-    () => ATTRIBUTE_CONFIG.filter((attr) => getVisibility(attr.name)),
+    () => SORT_FIELD_CONFIG.filter((attr) => getVisibility(attr.name)),
     [settings],
   )
 
@@ -107,7 +88,7 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
-  const form = useForm<FormValues>({
+  const form = useForm<TaskFormValues>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
     defaultValues: initialData
@@ -175,7 +156,7 @@ export const TaskForm = ({
     )
   }, [initialData, parentId, form])
 
-  const onSubmitWithNulls = (data: FormValues) => {
+  const onSubmitWithNulls = (data: TaskFormValues) => {
     const formattedData = {
       ...data,
       priority: data.priority === 'none' ? null : data.priority,
@@ -183,7 +164,7 @@ export const TaskForm = ({
       enjoyment: data.enjoyment === 'none' ? null : data.enjoyment,
       time: data.time === 'none' ? null : data.time,
     }
-    onSubmit(formattedData as any)
+    onSubmit(formattedData)
   }
 
   const watchedValues = form.watch()
@@ -191,7 +172,7 @@ export const TaskForm = ({
   const requiredAttributesFilled = useMemo(() => {
     for (const attr of visibleAttributes) {
       if (getRequired(attr.name)) {
-        const value = watchedValues[attr.name as keyof typeof watchedValues]
+        const value = watchedValues[attr.name]
         if (!value || value === 'none') {
           return false
         }
@@ -251,7 +232,7 @@ export const TaskForm = ({
                   <FormField
                     key={attr.name}
                     control={form.control}
-                    name={attr.name as any}
+                    name={attr.name}
                     render={({ field }) => {
                       const hasError =
                         isRequired && (!field.value || field.value === 'none')

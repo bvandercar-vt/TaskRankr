@@ -108,7 +108,7 @@ const Completed = () => {
             completedTasks.map((task) => (
               <TaskCard
                 key={task.id}
-                task={task as TaskResponse}
+                task={task}
                 showRestore
                 showCompletedDate
               />
