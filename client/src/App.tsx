@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 
+import { DemoProvider, useDemo } from '@/components/DemoProvider'
 import { Toaster } from '@/components/primitives/overlays/toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/tooltip'
 import { TaskDialogProvider } from '@/components/TaskDialogProvider'
@@ -23,8 +24,9 @@ const Router = () => (
 
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
+  const { isDemo } = useDemo()
 
-  if (isLoading) {
+  if (isLoading && !isDemo) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -32,7 +34,7 @@ const AuthenticatedApp = () => {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isDemo) {
     return <Landing />
   }
 
@@ -46,8 +48,10 @@ const AuthenticatedApp = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <AuthenticatedApp />
+      <DemoProvider>
+        <Toaster />
+        <AuthenticatedApp />
+      </DemoProvider>
     </TooltipProvider>
   </QueryClientProvider>
 )
