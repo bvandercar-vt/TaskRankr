@@ -12,17 +12,23 @@ import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/query-client'
 import { getAttributeStyle } from '@/lib/task-styles'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
-import { cn } from '@/lib/utils'
+import {
+  cn,
+  getIsRequired,
+  getIsRequiredKey,
+  getIsVisible,
+  getIsVisibleKey,
+} from '@/lib/utils'
 import { contract } from '~/shared/contract'
 import { authPaths } from '~/shared/routes'
 import {
-  SORT_FIELD_CONFIG,
+  RANK_FIELDS_CRITERIA,
   type SortFieldValueMap,
-  type TaskSortField,
+  type SortOption,
 } from '~/shared/schema'
 
 type SortCriterion = {
-  attr: TaskSortField | 'date'
+  attr: SortOption
   value: string
 }
 
@@ -220,11 +226,11 @@ const Settings = () => {
               </tr>
             </thead>
             <tbody>
-              {SORT_FIELD_CONFIG.map(({ name, label }) => {
-                const visibleKey = `${name}Visible` as const
-                const requiredKey = `${name}Required` as const
-                const isVisible: boolean = settings[visibleKey]
-                const isRequired: boolean = settings[requiredKey]
+              {RANK_FIELDS_CRITERIA.map(({ name, label }) => {
+                const visibleKey = getIsVisibleKey(name)
+                const requiredKey = getIsRequiredKey(name)
+                const isVisible = getIsVisible(name, settings)
+                const isRequired = getIsRequired(name, settings)
 
                 return (
                   <tr key={name} className="border-b border-white/5">

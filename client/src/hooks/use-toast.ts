@@ -116,7 +116,7 @@ const dispatch = (action: Action) => {
 
 type Toast = Omit<ToasterToast, 'id'>
 
-const toast = ({ ...props }: Toast) => {
+export const toast = ({ ...props }: Toast) => {
   const id = genId()
 
   // biome-ignore lint/nursery/noShadow: is fine
@@ -147,7 +147,7 @@ const toast = ({ ...props }: Toast) => {
   }
 }
 
-const useToast = () => {
+export const useToast = () => {
   const [state, setState] = useState<State>(memoryState)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: added by Replit
@@ -167,5 +167,3 @@ const useToast = () => {
     dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
   }
 }
-
-export { useToast, toast }

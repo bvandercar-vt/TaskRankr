@@ -13,9 +13,9 @@ import {
   useUpdateTask,
 } from '@/hooks/use-tasks'
 import { getAttributeStyle } from '@/lib/task-styles'
-import { cn } from '@/lib/utils'
+import { cn, getIsVisible } from '@/lib/utils'
 import {
-  SORT_FIELD_CONFIG,
+  RANK_FIELDS_CRITERIA,
   type TaskResponse,
   type TaskStatus,
 } from '~/shared/schema'
@@ -218,9 +218,8 @@ export const TaskCard = ({
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {SORT_FIELD_CONFIG.map(({ name: field }) => {
-                const visibleKey = `${field}Visible` as const
-                if (!settings[visibleKey]) return null
+              {RANK_FIELDS_CRITERIA.map(({ name: field }) => {
+                if (!getIsVisible(field, settings)) return null
                 const value = task[field] ?? 'none'
                 return (
                   <TaskBadge

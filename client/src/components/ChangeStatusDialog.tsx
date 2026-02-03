@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Clock, type LucideIcon, Pin, PinOff, StopCircle, X } from 'lucide-react'
+import {
+  Clock,
+  type LucideIcon,
+  Pin,
+  PinOff,
+  StopCircle,
+  X,
+} from 'lucide-react'
 
 import { Button } from '@/components/primitives/button'
 import { Input } from '@/components/primitives/forms/input'
