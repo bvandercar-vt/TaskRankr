@@ -12,7 +12,7 @@ const ChevronIcon =
     <Icon className={cn('h-4 w-4', className)} {...props} />
   )
 
-const Calendar = ({
+export const Calendar = ({
   className,
   classNames,
   showOutsideDays = true,
@@ -62,6 +62,3 @@ const Calendar = ({
     {...props}
   />
 )
-Calendar.displayName = 'Calendar'
-
-export { Calendar }
