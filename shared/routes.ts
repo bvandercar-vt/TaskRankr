@@ -1,15 +1,15 @@
 import { z } from 'zod'
 
-import { 
-  insertTaskSchema, 
-  insertUserSettingsSchema, 
-  taskStatusEnum, 
-  priorityEnum,
+import {
   easeEnum,
   enjoymentEnum,
+  insertTaskSchema,
+  insertUserSettingsSchema,
+  priorityEnum,
+  taskStatusEnum,
+  type tasks,
   timeEnum,
-  type tasks, 
-  type userSettings 
+  type userSettings,
 } from './schema'
 
 export const errorSchemas = {
@@ -86,7 +86,9 @@ export const api = {
         200: z.object({
           version: z.number(),
           exportedAt: z.string(),
-          tasks: z.array(z.custom<Omit<typeof tasks.$inferSelect, 'id' | 'userId'>>()),
+          tasks: z.array(
+            z.custom<Omit<typeof tasks.$inferSelect, 'id' | 'userId'>>(),
+          ),
         }),
       },
     },
@@ -94,20 +96,22 @@ export const api = {
       method: 'POST',
       path: '/api/tasks/import',
       input: z.object({
-        tasks: z.array(z.object({
-          id: z.number().optional(),
-          name: z.string(),
-          description: z.string().nullish(),
-          priority: priorityEnum.nullish(),
-          ease: easeEnum.nullish(),
-          enjoyment: enjoymentEnum.nullish(),
-          time: timeEnum.nullish(),
-          parentId: z.number().nullish(),
-          status: taskStatusEnum.optional(),
-          inProgressTime: z.number().optional(),
-          createdAt: z.string().optional(),
-          completedAt: z.string().nullish(),
-        })),
+        tasks: z.array(
+          z.object({
+            id: z.number().optional(),
+            name: z.string(),
+            description: z.string().nullish(),
+            priority: priorityEnum.nullish(),
+            ease: easeEnum.nullish(),
+            enjoyment: enjoymentEnum.nullish(),
+            time: timeEnum.nullish(),
+            parentId: z.number().nullish(),
+            status: taskStatusEnum.optional(),
+            inProgressTime: z.number().optional(),
+            createdAt: z.string().optional(),
+            completedAt: z.string().nullish(),
+          }),
+        ),
       }),
       responses: {
         200: z.object({
