@@ -193,6 +193,12 @@ const Settings = () => {
                 When tasks have the same value, they are sorted by secondary attributes.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="p-3 bg-secondary/20 rounded-md sm:col-span-2">
+                  <p className="font-medium text-foreground mb-1">Date</p>
+                  <ol className="text-xs list-decimal list-inside">
+                    <li className="text-muted-foreground">Date created (newest first)</li>
+                  </ol>
+                </div>
                 <div className="p-3 bg-secondary/20 rounded-md">
                   <p className="font-medium text-foreground mb-1">Priority</p>
                   <ol className="text-xs list-decimal list-inside space-y-0.5">
@@ -223,12 +229,6 @@ const Settings = () => {
                     <li className="text-muted-foreground">Time (<span className={cn("font-medium", getTimeStyle("lowest"))}>lowest</span> first)</li>
                     <li className="text-muted-foreground">Priority (<span className={cn("font-medium", getPriorityStyle("highest"))}>highest</span> first)</li>
                     <li className="text-muted-foreground">Ease (<span className={cn("font-medium", getEaseStyle("easiest"))}>easiest</span> first)</li>
-                  </ol>
-                </div>
-                <div className="p-3 bg-secondary/20 rounded-md sm:col-span-2">
-                  <p className="font-medium text-foreground mb-1">Date</p>
-                  <ol className="text-xs list-decimal list-inside">
-                    <li className="text-muted-foreground">Date created (newest first)</li>
                   </ol>
                 </div>
               </div>
