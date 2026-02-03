@@ -1,46 +1,37 @@
-import { type ReactNode, useRef, useState } from "react";
-import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from "lucide-react";
-import { Link } from "wouter";
+import { useRef, useState } from 'react'
+import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
+import { Link } from 'wouter'
 
-import { Button } from "@/components/primitives/button";
-import { Checkbox } from "@/components/primitives/forms/checkbox";
-import { Switch } from "@/components/primitives/forms/switch";
-import { useAuth } from "@/hooks/use-auth";
-import { useSettings } from "@/hooks/use-settings";
-import { useTasks } from "@/hooks/use-tasks";
-import { useToast } from "@/hooks/use-toast";
-import { IconSizeStyle } from "@/lib/constants";
-import { queryClient } from "@/lib/query-client";
-import { getAttributeStyle } from "@/lib/task-styles";
-import { QueryKeys, tsr } from "@/lib/ts-rest";
-import {
-  cn,
-  getIsRequired,
-  getIsRequiredKey,
-  getIsVisible,
-  getIsVisibleKey,
-} from "@/lib/utils";
-import { contract } from "~/shared/contract";
-import { authPaths } from "~/shared/routes";
+import { Button } from '@/components/primitives/button'
+import { Checkbox } from '@/components/primitives/forms/checkbox'
+import { Switch } from '@/components/primitives/forms/switch'
+import { useAuth } from '@/hooks/use-auth'
+import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
+import { useTasks } from '@/hooks/use-tasks'
+import { useToast } from '@/hooks/use-toast'
+import { IconSizeStyle } from '@/lib/constants'
+import { queryClient } from '@/lib/query-client'
+import { getAttributeStyle } from '@/lib/task-styles'
+import { QueryKeys, tsr } from '@/lib/ts-rest'
+import { cn } from '@/lib/utils'
+import { contract } from '~/shared/contract'
+import { authPaths } from '~/shared/routes'
 import {
   RANK_FIELDS_CRITERIA,
   type SortFieldValueMap,
   type SortOption,
-} from "~/shared/schema";
+} from '~/shared/schema'
 
 const Card = ({
   children,
   className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => (
+}: React.PropsWithChildren<{ className?: string }>) => (
   <div
-    className={cn("p-4 bg-card rounded-lg border border-white/10", className)}
+    className={cn('p-4 bg-card rounded-lg border border-white/10', className)}
   >
     {children}
   </div>
-);
+)
 
 const SwitchCard = ({
   title,
@@ -49,11 +40,11 @@ const SwitchCard = ({
   onCheckedChange,
   testId,
 }: {
-  title: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  testId: string;
+  title: string
+  description: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  testId: string
 }) => (
   <Card className="flex items-center justify-between">
     <div className="flex-1">
@@ -66,106 +57,107 @@ const SwitchCard = ({
       data-testid={testId}
     />
   </Card>
-);
+)
 
 const SORT_INFO_ATTR_LABELS = {
-  priority: "Priority",
-  ease: "Ease",
-  enjoyment: "Enjoyment",
-  time: "Time",
-  date: "Date created",
-} as const satisfies Record<SortOption, string>;
+  priority: 'Priority',
+  ease: 'Ease',
+  enjoyment: 'Enjoyment',
+  time: 'Time',
+  date: 'Date created',
+} as const satisfies Record<SortOption, string>
 
 const SORT_INFO_CONFIG: {
-  name: string;
+  name: string
   criteria: {
-    attr: SortOption;
-    value: string;
-  }[];
+    attr: SortOption
+    value: string
+  }[]
 }[] = [
   {
-    name: "Priority",
+    name: 'Priority',
     criteria: [
-      { attr: "priority", value: "highest" },
-      { attr: "ease", value: "easiest" },
-      { attr: "enjoyment", value: "highest" },
+      { attr: 'priority', value: 'highest' },
+      { attr: 'ease', value: 'easiest' },
+      { attr: 'enjoyment', value: 'highest' },
     ],
   },
   {
-    name: "Ease",
+    name: 'Ease',
     criteria: [
-      { attr: "ease", value: "easiest" },
-      { attr: "priority", value: "highest" },
-      { attr: "enjoyment", value: "highest" },
+      { attr: 'ease', value: 'easiest' },
+      { attr: 'priority', value: 'highest' },
+      { attr: 'enjoyment', value: 'highest' },
     ],
   },
   {
-    name: "Enjoyment",
+    name: 'Enjoyment',
     criteria: [
-      { attr: "enjoyment", value: "highest" },
-      { attr: "priority", value: "highest" },
-      { attr: "ease", value: "easiest" },
+      { attr: 'enjoyment', value: 'highest' },
+      { attr: 'priority', value: 'highest' },
+      { attr: 'ease', value: 'easiest' },
     ],
   },
   {
-    name: "Time",
+    name: 'Time',
     criteria: [
-      { attr: "time", value: "lowest" },
-      { attr: "priority", value: "highest" },
-      { attr: "ease", value: "easiest" },
+      { attr: 'time', value: 'lowest' },
+      { attr: 'priority', value: 'highest' },
+      { attr: 'ease', value: 'easiest' },
     ],
   },
   {
-    name: "Date",
-    criteria: [{ attr: "date", value: "newest" }],
+    name: 'Date',
+    criteria: [{ attr: 'date', value: 'newest' }],
   },
-];
+]
 
 const Settings = () => {
-  const { settings, updateSetting } = useSettings();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const { data: tasks } = useTasks();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [sortInfoExpanded, setSortInfoExpanded] = useState(false);
-  const hasNoTasks = !tasks || tasks.length === 0;
+  const { settings, updateSetting, updateVisibility, updateRequired } =
+    useSettings()
+  const { user } = useAuth()
+  const { toast } = useToast()
+  const { data: tasks } = useTasks()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const [sortInfoExpanded, setSortInfoExpanded] = useState(false)
+  const hasNoTasks = !tasks || tasks.length === 0
 
   const handleExport = () => {
-    window.location.href = contract.tasks.export.path;
-  };
+    window.location.href = contract.tasks.export.path
+  }
 
   const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    setIsImporting(true);
+    setIsImporting(true)
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const text = await file.text()
+      const data = JSON.parse(text)
 
       const result = await tsr.tasks.import.mutate({
         body: { tasks: data.tasks || data },
-      });
+      })
       if (result.status !== 200) {
-        throw new Error("Import failed");
+        throw new Error('Import failed')
       }
 
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks });
-      toast({ title: "Tasks imported successfully" });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      toast({ title: 'Tasks imported successfully' })
     } catch (_error) {
-      toast({ title: "Failed to import tasks", variant: "destructive" });
+      toast({ title: 'Failed to import tasks', variant: 'destructive' })
     } finally {
-      setIsImporting(false);
+      setIsImporting(false)
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = ''
       }
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -187,7 +179,7 @@ const Settings = () => {
             description="When enabled, new tasks will be pinned to the top of your list automatically."
             checked={settings.autoPinNewTasks}
             onCheckedChange={(checked) =>
-              updateSetting("autoPinNewTasks", checked)
+              updateSetting('autoPinNewTasks', checked)
             }
             testId="switch-auto-pin"
           />
@@ -196,7 +188,7 @@ const Settings = () => {
             description="Track and display time spent working on tasks."
             checked={settings.enableInProgressTime}
             onCheckedChange={(checked) =>
-              updateSetting("enableInProgressTime", checked)
+              updateSetting('enableInProgressTime', checked)
             }
             testId="switch-enable-time"
           />
@@ -205,7 +197,7 @@ const Settings = () => {
             description="Pinned tasks are always sorted by priority first, then by your selected sort."
             checked={settings.alwaysSortPinnedByPriority}
             onCheckedChange={(checked) =>
-              updateSetting("alwaysSortPinnedByPriority", checked)
+              updateSetting('alwaysSortPinnedByPriority', checked)
             }
             testId="switch-sort-pinned-priority"
           />
@@ -234,10 +226,8 @@ const Settings = () => {
             </thead>
             <tbody>
               {RANK_FIELDS_CRITERIA.map(({ name, label }) => {
-                const visibleKey = getIsVisibleKey(name);
-                const requiredKey = getIsRequiredKey(name);
-                const isVisible = getIsVisible(name, settings);
-                const isRequired = getIsRequired(name, settings);
+                const isVisible = getIsVisible(name, settings)
+                const isRequired = getIsRequired(name, settings)
 
                 return (
                   <tr key={name} className="border-b border-white/5">
@@ -246,12 +236,12 @@ const Settings = () => {
                       <Checkbox
                         checked={isVisible}
                         onCheckedChange={(
-                          checked: boolean | "indeterminate",
+                          checked: boolean | 'indeterminate',
                         ) => {
-                          const newVisible = !!checked;
-                          updateSetting(visibleKey, newVisible);
+                          const newVisible = !!checked
+                          updateVisibility(name, newVisible)
                           if (!newVisible && isRequired) {
-                            updateSetting(requiredKey, false);
+                            updateRequired(name, false)
                           }
                         }}
                         data-testid={`checkbox-${name}-visible`}
@@ -260,16 +250,16 @@ const Settings = () => {
                     <td className="py-3 text-center">
                       <Checkbox
                         checked={isRequired}
-                        onCheckedChange={(checked: boolean | "indeterminate") =>
-                          updateSetting(requiredKey, !!checked)
+                        onCheckedChange={(checked: boolean | 'indeterminate') =>
+                          updateRequired(name, !!checked)
                         }
                         disabled={!isVisible}
-                        className={!isVisible ? "opacity-50" : ""}
+                        className={!isVisible ? 'opacity-50' : ''}
                         data-testid={`checkbox-${name}-required`}
                       />
                     </td>
                   </tr>
-                );
+                )
               })}
             </tbody>
           </table>
@@ -286,8 +276,8 @@ const Settings = () => {
             <ChevronDown
               className={cn(
                 IconSizeStyle.small,
-                "text-muted-foreground transition-transform",
-                sortInfoExpanded && "rotate-180",
+                'text-muted-foreground transition-transform',
+                sortInfoExpanded && 'rotate-180',
               )}
             />
           </button>
@@ -301,26 +291,26 @@ const Settings = () => {
                 {SORT_INFO_CONFIG.map((item) => (
                   <div
                     key={item.name}
-                    className={"p-3 bg-secondary/20 rounded-md"}
+                    className={'p-3 bg-secondary/20 rounded-md'}
                   >
                     <p className="font-medium text-foreground mb-1">
                       {item.name}
                     </p>
                     <ol
                       className={cn(
-                        "text-xs list-decimal list-inside",
-                        item.criteria.length > 1 && "space-y-0.5",
+                        'text-xs list-decimal list-inside',
+                        item.criteria.length > 1 && 'space-y-0.5',
                       )}
                     >
                       {item.criteria.map((c) => {
                         const style =
-                          c.attr !== "date"
+                          c.attr !== 'date'
                             ? getAttributeStyle(
                                 c.attr,
                                 c.value satisfies string as SortFieldValueMap[typeof c.attr],
-                                "",
+                                '',
                               )
-                            : "";
+                            : ''
                         return (
                           <li
                             key={`${c.attr} ${c.value}`}
@@ -328,15 +318,15 @@ const Settings = () => {
                           >
                             {SORT_INFO_ATTR_LABELS[c.attr]} (
                             {style ? (
-                              <span className={cn("font-medium", style)}>
+                              <span className={cn('font-medium', style)}>
                                 {c.value}
                               </span>
                             ) : (
                               c.value
-                            )}{" "}
+                            )}{' '}
                             first)
                           </li>
-                        );
+                        )
                       })}
                     </ol>
                   </div>
@@ -369,7 +359,7 @@ const Settings = () => {
               data-testid="button-import"
             >
               <Upload className={IconSizeStyle.small} />
-              {isImporting ? "Importing..." : "Import Tasks"}
+              {isImporting ? 'Importing...' : 'Import Tasks'}
             </Button>
             <input
               ref={fileInputRef}
@@ -422,7 +412,7 @@ const Settings = () => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings
