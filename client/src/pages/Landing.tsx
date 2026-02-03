@@ -1,7 +1,7 @@
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
 import { Button } from '@/components/primitives/button'
-import { api } from '~/shared/routes'
+import { authPaths } from '~/shared/routes'
 
 const Landing = () => (
   <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -9,7 +9,7 @@ const Landing = () => (
       <h1 className="text-xl font-bold" data-testid="text-logo">
         TaskRankr
       </h1>
-      <a href={api.auth.login.path}>
+      <a href={authPaths.login}>
         <Button data-testid="button-login-header">Log In</Button>
       </a>
     </header>
@@ -29,7 +29,7 @@ const Landing = () => (
           Rate priority, ease, enjoyment, and time for each task. Sort by any
           attribute at a glance.
         </p>
-        <a href={api.auth.login.path} className="mt-4 inline-block">
+        <a href={authPaths.login} className="mt-4 inline-block">
           <Button
             size="lg"
             className="text-lg px-8"

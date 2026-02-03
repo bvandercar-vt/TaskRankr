@@ -1,10 +1,9 @@
-import { api } from '~/shared/routes'
+import { authPaths } from '~/shared/routes'
 
 export function isUnauthorizedError(error: Error): boolean {
   return /^401: .*Unauthorized/.test(error.message)
 }
 
-// Redirect to login with a toast notification
 export function redirectToLogin(
   toast?: (options: {
     title: string
@@ -20,6 +19,6 @@ export function redirectToLogin(
     })
   }
   setTimeout(() => {
-    window.location.href = api.auth.login.path
+    window.location.href = authPaths.login
   }, 500)
 }
