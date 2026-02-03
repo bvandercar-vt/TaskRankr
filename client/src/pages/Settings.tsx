@@ -383,7 +383,7 @@ const Settings = () => {
                 {user?.email}
               </p>
             </div>
-            <a href="/api/logout">
+            <a href={api.auth.logout.path}>
               <Button
                 variant="outline"
                 className="gap-2"
