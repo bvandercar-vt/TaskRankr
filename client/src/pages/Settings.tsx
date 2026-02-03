@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { getAttributeStyle } from '@/lib/taskStyles'
 import { cn } from '@/lib/utils'
+import { api } from '~/shared/routes'
 import { SORT_FIELD_CONFIG, type TaskSortField } from '~/shared/schema'
 
 type SortCriterion = {
@@ -84,7 +85,7 @@ const Settings = () => {
   const hasNoTasks = !tasks || tasks.length === 0
 
   const handleExport = () => {
-    window.location.href = '/api/tasks/export'
+    window.location.href = api.tasks.export.path
   }
 
   const handleImportClick = () => {
@@ -100,11 +101,11 @@ const Settings = () => {
       const text = await file.text()
       const data = JSON.parse(text)
 
-      await apiRequest('POST', '/api/tasks/import', {
+      await apiRequest('POST', api.tasks.import.path, {
         tasks: data.tasks || data,
       })
 
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] })
+      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] })
       toast({ title: 'Tasks imported successfully' })
     } catch (_error) {
       toast({ title: 'Failed to import tasks', variant: 'destructive' })
@@ -382,7 +383,7 @@ const Settings = () => {
                 {user?.email}
               </p>
             </div>
-            <a href="/api/logout">
+            <a href={api.auth.logout.path}>
               <Button
                 variant="outline"
                 className="gap-2"

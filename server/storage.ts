@@ -174,14 +174,14 @@ export class DatabaseStorage implements IStorage {
       .from(userSettings)
       .where(eq(userSettings.userId, userId))
     if (settings) {
-      return settings
+      return settings as UserSettings
     }
     // Create default settings for new user
     const [newSettings] = await db
       .insert(userSettings)
       .values({ userId })
       .returning()
-    return newSettings
+    return newSettings as UserSettings
   }
 
   async updateSettings(
@@ -197,7 +197,7 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(userSettings.userId, userId))
       .returning()
-    return settings
+    return settings as UserSettings
   }
 }
 

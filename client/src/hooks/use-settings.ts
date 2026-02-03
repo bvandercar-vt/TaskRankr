@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { apiRequest, queryClient } from '@/lib/queryClient'
+import { api } from '~/shared/routes'
 import type { SortOption, UserSettings } from '~/shared/schema'
 
 export interface AttributeVisibility {
@@ -29,26 +30,26 @@ const DEFAULT_SETTINGS: Omit<AppSettings, 'userId'> = {
 
 export const useSettings = () => {
   const { data: settings, isLoading } = useQuery<AppSettings>({
-    queryKey: ['/api/settings'],
+    queryKey: [api.settings.get.path],
   })
 
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AppSettings>) => {
-      const res = await apiRequest('PUT', '/api/settings', updates)
+      const res = await apiRequest('PUT', api.settings.update.path, updates)
       return res.json()
     },
     onMutate: async (updates) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/settings'] })
+      await queryClient.cancelQueries({ queryKey: [api.settings.get.path] })
 
       // Snapshot previous value
       const previousSettings = queryClient.getQueryData<AppSettings>([
-        '/api/settings',
+        api.settings.get.path,
       ])
 
       // Optimistically update
       if (previousSettings) {
-        queryClient.setQueryData<AppSettings>(['/api/settings'], {
+        queryClient.setQueryData<AppSettings>([api.settings.get.path], {
           ...previousSettings,
           ...updates,
         })
@@ -59,11 +60,14 @@ export const useSettings = () => {
     onError: (_err, _updates, context) => {
       // Rollback on error
       if (context?.previousSettings) {
-        queryClient.setQueryData(['/api/settings'], context.previousSettings)
+        queryClient.setQueryData(
+          [api.settings.get.path],
+          context.previousSettings,
+        )
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/settings'] })
+      queryClient.invalidateQueries({ queryKey: [api.settings.get.path] })
     },
   })
 
@@ -82,6 +86,6 @@ export const useSettings = () => {
 }
 
 export const getSettings = (): Omit<AppSettings, 'userId'> => {
-  const cached = queryClient.getQueryData<AppSettings>(['/api/settings'])
+  const cached = queryClient.getQueryData<AppSettings>([api.settings.get.path])
   return cached || DEFAULT_SETTINGS
 }

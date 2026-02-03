@@ -8,7 +8,7 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { createInsertSchema } from 'drizzle-zod'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
 // Re-export auth models
@@ -117,30 +117,32 @@ export const easeEnum = z.enum(EASE_LEVELS)
 export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS)
 export const timeEnum = z.enum(TIME_LEVELS)
 
+const taskSchemaCommon = {
+  status: taskStatusEnum,
+  priority: priorityEnum.nullable(),
+  ease: easeEnum.nullable(),
+  enjoyment: enjoymentEnum.nullable(),
+  time: timeEnum.nullable(),
+} as const
+
+export const taskSchema = createSelectSchema(tasks).extend(taskSchemaCommon)
+
+export type Task = z.infer<typeof taskSchema>
+
 export const insertTaskSchema = createInsertSchema(tasks, {
   name: z.string().min(1, 'Name is required'),
   userId: z.string().min(1, 'User ID is required'),
-  status: taskStatusEnum.optional(),
-  priority: priorityEnum.nullable().optional(),
-  ease: easeEnum.nullable().optional(),
-  enjoyment: enjoymentEnum.nullable().optional(),
-  time: timeEnum.nullable().optional(),
+  status: taskSchemaCommon.status.optional(),
+  priority: taskSchemaCommon.priority.optional(),
+  ease: taskSchemaCommon.ease.optional(),
+  enjoyment: taskSchemaCommon.enjoyment.optional(),
+  time: taskSchemaCommon.time.optional(),
   createdAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   inProgressStartedAt: z.coerce.date().optional().nullable(),
 }).omit({
   id: true,
 })
-
-// Base type from Drizzle, then override attribute fields with enum types
-type TaskBase = typeof tasks.$inferSelect
-export type Task = Omit<TaskBase, 'status' | TaskSortField> & {
-  status: TaskStatus
-  priority: Priority | null
-  ease: Ease | null
-  enjoyment: Enjoyment | null
-  time: Time | null
-}
 
 export type InsertTask = z.infer<typeof insertTaskSchema>
 
@@ -180,10 +182,20 @@ export const userSettings = pgTable('user_settings', {
   timeRequired: boolean('time_required').default(true).notNull(),
 })
 
-export const insertUserSettingsSchema = createInsertSchema(userSettings, {
+const userSettingsCommon = {
   userId: z.string().min(1),
   sortBy: z.enum(SORT_OPTIONS).optional(),
-}).omit({})
+}
 
-export type UserSettings = typeof userSettings.$inferSelect
+export const userSettingsSchema = createSelectSchema(
+  userSettings,
+  userSettingsCommon,
+)
+
+export const insertUserSettingsSchema = createInsertSchema(
+  userSettings,
+  userSettingsCommon,
+)
+
+export type UserSettings = z.infer<typeof userSettingsSchema>
 export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>

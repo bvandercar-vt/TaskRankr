@@ -2,13 +2,14 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: added by Replit */
 import type { Express } from 'express'
 
+import { api } from '~/shared/routes'
 import { isAuthenticated } from './replitAuth'
 import { authStorage } from './storage'
 
 // Register auth-specific routes
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get(api.auth.user.path, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub
       const user = await authStorage.getUser(userId)
