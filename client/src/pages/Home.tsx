@@ -9,15 +9,16 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
+import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/primitives/dropdown-menu'
+} from '@/components/primitives/dropdownMenu'
 import { Input } from '@/components/primitives/forms/input'
+import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
 import { getSettings, useSettings } from '@/hooks/use-settings'
@@ -363,11 +364,10 @@ const Home = () => {
           {displayedTasks.length === 0 ? (
             <EmptyState
               icon={
-                search ? (
-                  <Search className="w-8 h-8 text-muted-foreground" />
-                ) : (
-                  <LayoutList className="w-8 h-8 text-muted-foreground" />
-                )
+                <Icon
+                  icon={search ? Search : LayoutList}
+                  className="w-8 h-8 text-muted-foreground"
+                />
               }
               title={search ? 'No matching tasks found' : 'Your list is empty'}
               description={

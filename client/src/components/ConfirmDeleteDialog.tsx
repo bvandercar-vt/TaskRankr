@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/primitives/overlays/alert-dialog'
+} from '@/components/primitives/overlays/alertDialog'
 
 interface ConfirmDeleteDialogProps {
   open: boolean
