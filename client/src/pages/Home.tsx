@@ -21,10 +21,10 @@ import { Input } from '@/components/primitives/forms/input'
 import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { getSettings, useSettings } from '@/hooks/use-settings'
+import { getIsVisible, getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { cn, getIsVisible } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import {
   type Ease,
   type Enjoyment,

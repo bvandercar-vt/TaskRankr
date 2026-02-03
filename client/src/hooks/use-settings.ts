@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
-import type { SortOption, UserSettings } from '~/shared/schema'
+import type { PickByKey } from '@/types'
+import type { RankField, SortOption, UserSettings } from '~/shared/schema'
 
 export interface AttributeVisibility {
   visible: boolean
@@ -77,12 +78,36 @@ export const useSettings = () => {
     updateMutation.mutate({ [key]: value })
   }
 
+  const updateVisibility = (field: RankField, visible: boolean) =>
+    updateSetting(getIsVisibleKey(field), visible)
+
+  const updateRequired = (field: RankField, required: boolean) =>
+    updateSetting(getIsRequiredKey(field), required)
+
   return {
     settings: settings || { ...DEFAULT_SETTINGS, userId: '' },
     isLoading,
     updateSetting,
+    updateVisibility,
+    updateRequired,
   }
 }
+
+const getIsVisibleKey = <T extends RankField>(field: T) =>
+  `${field}Visible` as const satisfies keyof UserSettings
+
+const getIsRequiredKey = <T extends RankField>(field: T) =>
+  `${field}Required` as const satisfies keyof UserSettings
+
+export const getIsVisible = (
+  field: RankField,
+  settings: PickByKey<UserSettings, `${string}Visible`>,
+) => settings[getIsVisibleKey(field)]
+
+export const getIsRequired = (
+  field: RankField,
+  settings: PickByKey<UserSettings, `${string}Required`>,
+) => settings[getIsRequiredKey(field)]
 
 export const getSettings = (): Omit<AppSettings, 'userId'> => {
   const cached = queryClient.getQueryData<{
