@@ -12,6 +12,7 @@ import {
   useSetTaskStatus,
   useUpdateTask,
 } from '@/hooks/use-tasks'
+import { IconSizeStyle } from '@/lib/constants'
 import { getAttributeStyle } from '@/lib/task-styles'
 import { cn, getIsVisible } from '@/lib/utils'
 import {
@@ -206,7 +207,10 @@ export const TaskCard = ({
             )}
             {isPinned && (
               <Pin
-                className="w-4 h-4 text-slate-400 shrink-0 rotate-45 cursor-pointer"
+                className={cn(
+                  IconSizeStyle.small,
+                  'text-slate-400 shrink-0 rotate-45 cursor-pointer',
+                )}
                 data-testid="icon-pinned"
                 onClick={(e) => {
                   e.stopPropagation()
