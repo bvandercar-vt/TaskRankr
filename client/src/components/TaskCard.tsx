@@ -216,7 +216,7 @@ export const TaskCard = ({
             {isPinned && (
               <Pin
                 className={cn(
-                  IconSizeStyle.small,
+                  IconSizeStyle.HW4,
                   'text-slate-400 shrink-0 rotate-45 cursor-pointer',
                 )}
                 data-testid="icon-pinned"

@@ -60,21 +60,21 @@ const Landing = () => {
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSizeStyle.medium, 'text-primary')} />
+            <Star className={cn(IconSizeStyle.HW6, 'text-primary')} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <CheckCircle
-              className={cn(IconSizeStyle.medium, 'text-emerald-500')}
+              className={cn(IconSizeStyle.HW6, 'text-emerald-500')}
             />
             <span>Easy tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSizeStyle.medium, 'text-blue-500')} />
+            <Clock className={cn(IconSizeStyle.HW6, 'text-blue-500')} />
             <span>Time tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSizeStyle.medium, 'text-amber-500')} />
+            <ListTodo className={cn(IconSizeStyle.HW6, 'text-amber-500')} />
             <span>Nested tasks</span>
           </div>
         </div>
