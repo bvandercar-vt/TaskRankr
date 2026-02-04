@@ -1,17 +1,13 @@
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
-import { useOfflineMode } from '@/components/DemoProvider'
+import { useGuestMode } from '@/components/GuestProvider'
 import { Button } from '@/components/primitives/button'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/routes'
 
 const Landing = () => {
-  const { enterOfflineMode } = useOfflineMode()
-
-  const handleTryOfflineMode = () => {
-    enterOfflineMode()
-  }
+  const { enterGuestMode } = useGuestMode()
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -45,10 +41,10 @@ const Landing = () => {
                 size="lg"
                 variant="outline"
                 className="text-lg px-8"
-                data-testid="button-try-offline"
-                onClick={handleTryOfflineMode}
+                data-testid="button-try-guest"
+                onClick={enterGuestMode}
               >
-                Try Offline Mode
+                Try as Guest
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { useOfflineMode } from '@/components/DemoProvider'
+import { useGuestMode } from '@/components/GuestProvider'
 import { useLocalState } from '@/components/LocalStateProvider'
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
@@ -100,7 +100,7 @@ const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSetting } = useSettings()
-  const { isOfflineMode, exitOfflineMode } = useOfflineMode()
+  const { isGuestMode, exitGuestMode } = useGuestMode()
   const { hasDemoData, deleteDemoData } = useLocalState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
@@ -324,7 +324,7 @@ const Home = () => {
                     Settings
                   </DropdownMenuItem>
                 </Link>
-                {isOfflineMode && (
+                {isGuestMode && (
                   <>
                     <DropdownMenuSeparator />
                     <a href={authPaths.login}>
@@ -338,11 +338,11 @@ const Home = () => {
                     </a>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={exitOfflineMode}
-                      data-testid="menu-item-exit-offline"
+                      onClick={exitGuestMode}
+                      data-testid="menu-item-exit-guest"
                     >
                       <LogOut className={cn(IconSizeStyle.small, 'mr-2')} />
-                      Exit Offline Mode
+                      Exit Guest Mode
                     </DropdownMenuItem>
                   </>
                 )}
