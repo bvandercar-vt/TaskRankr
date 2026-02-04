@@ -225,6 +225,9 @@ export const TaskForm = ({
         <div className="flex-1 space-y-6">
           {parentChain.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap px-1 mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                {parentChain.length === 1 ? 'Parent:' : 'Parents:'}
+              </span>
               {parentChain.map((p, idx) => (
                 <div key={p.id} className="flex items-center gap-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-secondary/10 px-2 py-0.5 rounded border border-white/5">
