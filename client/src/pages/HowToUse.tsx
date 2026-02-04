@@ -86,16 +86,16 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<PlayCircle className="h-5 w-5" />}
-                title="In Progress (if enabled)"
-                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
-                testId="card-in-progress"
-              />
-              <InstructionCard
                 icon={<Pin className="h-5 w-5" />}
                 title="Pinned"
                 description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
                 testId="card-pinned"
+              />
+              <InstructionCard
+                icon={<PlayCircle className="h-5 w-5" />}
+                title="In Progress (if enabled)"
+                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
+                testId="card-in-progress"
               />
               <InstructionCard
                 icon={<CheckCircle2 className="h-5 w-5" />}
