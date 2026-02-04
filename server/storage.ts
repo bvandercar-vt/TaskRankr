@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Database access layer implementing the IStorage interface.
+ *
+ * Provides CRUD operations for tasks and user settings using Drizzle ORM.
+ * Handles task status transitions including in-progress time tracking,
+ * cascading status changes to subtasks, and recursive task deletion.
+ */
+
 import { and, eq } from 'drizzle-orm'
 
 import {

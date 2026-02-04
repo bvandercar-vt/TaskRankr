@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Modal dialog component built on @radix-ui primitives.
+ */
+
 'use client'
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'

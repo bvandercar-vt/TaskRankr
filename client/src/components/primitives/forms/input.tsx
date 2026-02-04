@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Text input component
+ */
+
 import { forwardRef } from 'react'
 
 import { cn } from '@/lib/utils'

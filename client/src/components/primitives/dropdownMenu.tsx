@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Dropdown menu primitive components.
+ * Wraps @radix-ui/react-dropdown-menu with styled variants.
+ */
+
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronRight, Circle } from 'lucide-react'
 
