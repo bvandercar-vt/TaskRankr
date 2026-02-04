@@ -25,7 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/primitives/overlays/alertDialog'
-import { getSettings } from '@/hooks/use-settings'
+import { useSettings } from '@/hooks/use-settings'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
 import type { TaskStatus } from '~/shared/schema'
@@ -81,7 +81,7 @@ export const ChangeStatusDialog = ({
   const isInProgress = status === 'in_progress'
   const isPinned = status === 'pinned'
 
-  const settings = getSettings()
+  const { settings } = useSettings()
   const showInProgressOption = settings.enableInProgressStatus
   const showTimeInputs = settings.enableInProgressTime
 
