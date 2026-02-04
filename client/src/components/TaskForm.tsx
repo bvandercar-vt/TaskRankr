@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
   ChevronDown,
-  ChevronRight,
   Loader2,
   Pencil,
   Plus,
@@ -17,6 +16,7 @@ import {
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/primitives/button";
+import { TagChain } from "@/components/primitives/tagChain";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Calendar } from "@/components/primitives/forms/calendar";
 import {
@@ -221,23 +221,12 @@ export const TaskForm = ({
         className="flex flex-col h-full space-y-6"
       >
         <div className="flex-1 space-y-6">
-          {parentChain.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap px-1 mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                {parentChain.length === 1 ? "Parent:" : "Parents:"}
-              </span>
-              {parentChain.map((p, idx) => (
-                <div key={p.id} className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground bg-secondary/10 px-2 py-0.5 rounded border border-gray-400">
-                    {p.name}
-                  </span>
-                  {idx < parentChain.length - 1 && (
-                    <ChevronRight className="w-3 h-3 text-muted-foreground/30" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          <TagChain
+            items={parentChain}
+            label="Parent:"
+            labelPlural="Parents:"
+            className="px-1 mb-2"
+          />
           <FormField
             control={form.control}
             name="name"
