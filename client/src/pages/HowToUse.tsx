@@ -5,6 +5,7 @@
 import {
   ArrowLeft,
   ArrowUpDown,
+  CheckCircle2,
   FolderTree,
   Hand,
   MousePointer2,
@@ -95,6 +96,12 @@ const HowToUse = () => {
                 title="Pinned"
                 description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
                 testId="card-pinned"
+              />
+              <InstructionCard
+                icon={<CheckCircle2 className="h-5 w-5" />}
+                title="Completed"
+                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
+                testId="card-completed"
               />
             </div>
           </section>
