@@ -1,7 +1,5 @@
 /**
- * @fileoverview Toggle switch component
- *
- * Binary toggle built on @radix-ui primitives.
+ * @fileoverview Toggle switch component built on @radix-ui primitives.
  */
 
 import * as SwitchPrimitives from '@radix-ui/react-switch'

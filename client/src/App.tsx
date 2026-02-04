@@ -1,7 +1,5 @@
 /**
  * @fileoverview Main application component with routing and provider setup
- *
- * Root component with authentication, routing, and global providers.
  */
 
 import { QueryClientProvider } from '@tanstack/react-query'

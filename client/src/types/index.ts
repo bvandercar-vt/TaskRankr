@@ -1,6 +1,6 @@
 /**
  * @fileoverview Frontend-specific TypeScript utility types
- * 
+ *
  * Provides generic type utilities for the client application, including
  * PickByKey for extracting object properties matching a key pattern.
  */

@@ -1,9 +1,5 @@
 /**
- * @fileoverview Mobile device detection hook
- * 
- * Provides the useIsMobile hook that detects viewport width changes
- * using matchMedia API. Returns true when viewport is below 768px,
- * enabling responsive behavior in components.
+ * @fileoverview Mobile device detection hook based on viewport width.
  */
 
 import { useEffect, useState } from 'react'

@@ -1,6 +1,5 @@
 /**
- * @fileoverview Form field components with validation support
- *
+ * @fileoverview Form field components with validation support.
  * Integrates react-hook-form with @radix-ui primitives.
  */
 

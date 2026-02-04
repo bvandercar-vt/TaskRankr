@@ -16,7 +16,7 @@ import * as client from 'openid-client'
 import { Strategy, type VerifyFunction } from 'openid-client/passport'
 import passport from 'passport'
 
-import { authPaths } from '~/shared/routes'
+import { authPaths } from '~/shared/constants'
 import { authStorage } from './storage'
 
 const getOidcConfig = memoize(

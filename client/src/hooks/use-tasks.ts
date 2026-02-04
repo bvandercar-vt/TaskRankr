@@ -1,7 +1,6 @@
 /**
- * @fileoverview Task CRUD operations hooks
- *
- * Hooks for task listing, creation, updates, deletion, and status changes.
+ * @fileoverview Task CRUD operations hooks (for listing, creation, updates,
+ * deletion, and status changes, etc.)
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'

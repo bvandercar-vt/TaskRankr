@@ -1,8 +1,6 @@
 /**
- * @fileoverview Button primitive component
- *
- * Multiple variants (default, destructive, outline, secondary, ghost)
- * and sizes (default, sm, lg, icon) with hover/active elevation effects.
+ * @fileoverview Button primitive component.
+ * Multiple variants and sizes with hover/active elevation effects.
  */
 
 import { Slot } from '@radix-ui/react-slot'

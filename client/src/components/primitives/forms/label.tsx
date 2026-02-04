@@ -1,7 +1,5 @@
 /**
- * @fileoverview Form label component
- *
- * Accessible label built on @radix-ui primitives.
+ * @fileoverview Form label component built on @radix-ui primitives.
  */
 
 import * as LabelPrimitive from '@radix-ui/react-label'

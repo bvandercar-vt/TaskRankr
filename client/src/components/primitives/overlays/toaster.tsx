@@ -1,7 +1,6 @@
 /**
- * @fileoverview Toast notification container
- *
- * Renders active toast notifications with viewport positioning.
+ * @fileoverview Toast notification container. Renders active toast
+ * notifications with viewport positioning.
  */
 
 import {

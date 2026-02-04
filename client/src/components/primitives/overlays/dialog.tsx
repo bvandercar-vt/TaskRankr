@@ -1,7 +1,5 @@
 /**
- * @fileoverview Modal dialog component
- *
- * Accessible dialog built on @radix-ui primitives.
+ * @fileoverview Modal dialog component built on @radix-ui primitives.
  */
 
 'use client'

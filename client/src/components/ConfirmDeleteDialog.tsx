@@ -1,9 +1,5 @@
 /**
  * @fileoverview Confirmation dialog for permanent task deletion
- *
- * Displays a warning modal before permanently deleting a task and its
- * subtasks. Requires explicit user confirmation to prevent accidental
- * data loss.
  */
 
 import {

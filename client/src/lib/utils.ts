@@ -1,7 +1,5 @@
 /**
- * @fileoverview General utility functions for the application
- *
- * Class merging, time conversions, and typed forwardRef helper.
+ * @fileoverview General utility functions.
  */
 
 import { forwardRef } from 'react'

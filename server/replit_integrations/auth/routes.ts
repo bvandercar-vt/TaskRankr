@@ -4,7 +4,7 @@
 
 import type { Express } from 'express'
 
-import { authPaths } from '~/shared/routes'
+import { authPaths } from '~/shared/constants'
 import { isAuthenticated, type UserSession } from './replitAuth'
 import { authStorage } from './storage'
 

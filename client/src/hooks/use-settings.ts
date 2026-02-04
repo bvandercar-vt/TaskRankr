@@ -1,7 +1,6 @@
 /**
- * @fileoverview User settings hook with visibility and required field helpers
- *
- * Manages user preferences with optimistic updates.
+ * @fileoverview User settings hook. Manages user preferences with optimistic
+ * updates.
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'

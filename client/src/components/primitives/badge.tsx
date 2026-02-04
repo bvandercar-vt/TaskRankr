@@ -1,7 +1,5 @@
 /**
- * @fileoverview Badge primitive component
- *
- * Styled badge with variant support and hover elevation effects.
+ * @fileoverview Badge primitive component.
  */
 
 import { cva, type VariantProps } from 'class-variance-authority'

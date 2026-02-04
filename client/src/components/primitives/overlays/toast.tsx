@@ -1,7 +1,5 @@
 /**
- * @fileoverview Toast notification primitives
- *
- * Notification system built on @radix-ui primitives.
+ * @fileoverview Toast notification system built on @radix-ui primitives.
  */
 
 import * as ToastPrimitives from '@radix-ui/react-toast'
