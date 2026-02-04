@@ -191,6 +191,9 @@ export type TaskResponse = Task & { subtasks?: TaskResponse[] }
 export const userSettings = pgTable('user_settings', {
   userId: varchar('user_id').primaryKey(),
   autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),
+  enableInProgressStatus: boolean('enable_in_progress_status')
+    .default(true)
+    .notNull(),
   enableInProgressTime: boolean('enable_in_progress_time')
     .default(true)
     .notNull(),

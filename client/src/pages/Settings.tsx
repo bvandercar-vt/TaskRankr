@@ -200,15 +200,47 @@ const Settings = () => {
             }
             testId="switch-sort-pinned-priority"
           />
-          <SwitchCard
-            title="Enable In Progress Time"
-            description="Track and display time spent working on tasks."
-            checked={settings.enableInProgressTime}
-            onCheckedChange={(checked) =>
-              updateSetting('enableInProgressTime', checked)
-            }
-            testId="switch-enable-time"
-          />
+          <Card>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">
+                  Enable In Progress Status
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Allow tasks to be marked as "In Progress" to track active work.
+                </p>
+              </div>
+              <Switch
+                checked={settings.enableInProgressStatus}
+                onCheckedChange={(checked) => {
+                  updateSetting('enableInProgressStatus', checked)
+                  if (!checked) {
+                    updateSetting('enableInProgressTime', false)
+                  }
+                }}
+                data-testid="switch-enable-in-progress"
+              />
+            </div>
+            {settings.enableInProgressStatus && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">
+                    Enable In Progress Time
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Track and display time spent working on tasks.
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.enableInProgressTime}
+                  onCheckedChange={(checked) =>
+                    updateSetting('enableInProgressTime', checked)
+                  }
+                  data-testid="switch-enable-time"
+                />
+              </div>
+            )}
+          </Card>
         </div>
 
         <Card className="mt-8">

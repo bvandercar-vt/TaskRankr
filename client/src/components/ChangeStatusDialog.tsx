@@ -82,6 +82,7 @@ export const ChangeStatusDialog = ({
   const isPinned = status === 'pinned'
 
   const settings = getSettings()
+  const showInProgressOption = settings.enableInProgressStatus
   const showTimeInputs = settings.enableInProgressTime
 
   const { hours: initialHours, minutes: initialMinutes } =
@@ -130,21 +131,25 @@ export const ChangeStatusDialog = ({
           <div className="flex flex-col gap-3 w-full">
             {!isCompleted && (
               <>
-                {isInProgress ? (
-                  <StatusButton
-                    icon={StopCircle}
-                    label="Stop Progress"
-                    onClick={() => onSetStatus('open')}
-                    testId="button-stop-progress"
-                  />
-                ) : (
-                  <StatusButton
-                    icon={Clock}
-                    label="In Progress"
-                    onClick={() => onSetStatus('in_progress')}
-                    testId="button-start-progress"
-                    colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                  />
+                {showInProgressOption && (
+                  <>
+                    {isInProgress ? (
+                      <StatusButton
+                        icon={StopCircle}
+                        label="Stop Progress"
+                        onClick={() => onSetStatus('open')}
+                        testId="button-stop-progress"
+                      />
+                    ) : (
+                      <StatusButton
+                        icon={Clock}
+                        label="In Progress"
+                        onClick={() => onSetStatus('in_progress')}
+                        testId="button-start-progress"
+                        colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                      />
+                    )}
+                  </>
                 )}
 
                 {isInProgress || isPinned ? (
