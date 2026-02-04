@@ -15,11 +15,37 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter (lightweight React router)
-- **State Management**: TanStack React Query for server state, React Context for UI state (task dialogs)
+- **State Management**: Offline-first architecture with LocalStateProvider + SyncProvider
 - **Styling**: Tailwind CSS with custom theme configuration, CSS variables for theming
 - **UI Components**: shadcn/ui component library (Radix UI primitives + Tailwind)
 - **Animations**: Framer Motion for list reordering and transitions
 - **Build Tool**: Vite with React plugin
+
+### Offline-First Architecture
+The app uses a local-first data model where all changes happen locally first, then sync to the server:
+
+- **LocalStateProvider** (`client/src/components/LocalStateProvider.tsx`):
+  - Manages tasks and settings in localStorage
+  - All CRUD operations update local state immediately
+  - Enqueues sync operations when `shouldSync` is true (authenticated mode)
+  - Uses negative temp IDs for locally-created tasks until synced
+
+- **SyncProvider** (`client/src/components/SyncProvider.tsx`):
+  - Processes sync queue in background when online and authenticated
+  - Maintains idMap to resolve temp IDs to real server IDs during batch processing
+  - Fetches server data on auth (waits for queue to drain first)
+  - Shows offline/syncing status via StatusBanner
+
+- **DemoProvider** (`client/src/components/DemoProvider.tsx`):
+  - Simple flag for demo mode (`isDemo`)
+  - When demo: uses LocalStateProvider with `shouldSync=false`
+  - All features work offline, data persists in localStorage
+
+- **Data Flow**:
+  1. User action → LocalStateProvider updates local state + enqueues sync op
+  2. SyncProvider debounces (500ms) then processes queue
+  3. For creates: temp ID replaced with real ID in both local state and pending ops
+  4. UI always reads from local state (instant updates)
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
@@ -47,7 +73,9 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 │       │   │   ├── dropdownMenu.tsx
 │       │   │   └── lucideIcon.tsx  # Dynamic icon helper
 │       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
-│       │   ├── DemoProvider.tsx  # Demo mode context with mock data
+│       │   ├── LocalStateProvider.tsx  # Offline-first local state + sync queue
+│       │   ├── SyncProvider.tsx  # Background sync to API
+│       │   ├── DemoProvider.tsx  # Demo mode flag (isDemo)
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
