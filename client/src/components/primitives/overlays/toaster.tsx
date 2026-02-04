@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Toast notification container. Renders active toast
+ * notifications with viewport positioning.
+ */
+
 import {
   Toast,
   ToastClose,

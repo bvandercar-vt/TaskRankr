@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Select dropdown component built on @radix-ui primitives.
+ */
+
 'use client'
 
 import * as SelectPrimitive from '@radix-ui/react-select'

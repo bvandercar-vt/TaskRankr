@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Form field components with validation support.
+ * Integrates react-hook-form with @radix-ui primitives.
+ */
+
 'use client'
 
 import { createContext, useContext, useId } from 'react'

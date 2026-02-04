@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Main task list (tree) page with sorting and filtering
+ * capabilities.
+ *
+ */
+
 import { useCallback, useMemo, useState } from 'react'
 import {
   CheckCircle2,

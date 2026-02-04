@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Button primitive component.
+ * Multiple variants and sizes with hover/active elevation effects.
+ */
+
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 

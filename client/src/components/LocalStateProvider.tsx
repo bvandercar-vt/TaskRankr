@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Local-first state provider for tasks and settings.
+ * Manages localStorage persistence with sync queue for server synchronization.
+ */
+
 import {
   createContext,
   type ReactNode,

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Guest task migration utilities.
+ * Migrates guest mode tasks to authenticated storage on login.
+ */
+
 import { omit } from 'es-toolkit'
 
 import type { TaskResponse } from '~/shared/schema'

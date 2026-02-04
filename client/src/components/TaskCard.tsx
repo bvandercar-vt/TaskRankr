@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Task display card with status indicators, expandable subtasks,
+ * and interactions (single click and long press).
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
@@ -13,7 +18,7 @@ import {
   useUpdateTask,
 } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { getAttributeStyle } from '@/lib/task-styles'
+import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   RANK_FIELDS_CRITERIA,
@@ -235,7 +240,7 @@ export const TaskCard = ({
                     styleClass={
                       value === 'none'
                         ? 'opacity-0'
-                        : getAttributeStyle(field, value)
+                        : getRankFieldStyle(field, value)
                     }
                   />
                 )

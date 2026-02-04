@@ -1,5 +1,10 @@
-import { useLocalStateSafe } from '@/components/LocalStateProvider'
-import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/constants'
+/**
+ * @fileoverview User settings hook. Manages user preferences with optimistic
+ * updates.
+ */
+
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Demo task data for guest mode.
+ */
+
 import type { TaskResponse } from '~/shared/schema'
 
 export const createDemoTasks = (nextIdRef: {

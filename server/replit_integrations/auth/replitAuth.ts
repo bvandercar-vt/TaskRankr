@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Replit OpenID Connect authentication implementation.
+ *
+ * Configures Passport.js with OIDC strategy for Replit authentication.
+ * Handles session management, token refresh, and user upsert on login.
+ */
+
 /** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */
 /** biome-ignore-all lint/complexity/useLiteralKeys: added by Replit */
 /** biome-ignore-all lint/suspicious/noExplicitAny: added by Replit */
@@ -9,7 +16,7 @@ import * as client from 'openid-client'
 import { Strategy, type VerifyFunction } from 'openid-client/passport'
 import passport from 'passport'
 
-import { authPaths } from '~/shared/routes'
+import { authPaths } from '~/shared/constants'
 import { authStorage } from './storage'
 
 const getOidcConfig = memoize(

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Card primitive components
+ */
+
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const Card = forwardRefHelper<HTMLDivElement>(

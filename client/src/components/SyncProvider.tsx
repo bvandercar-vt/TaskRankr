@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Background sync provider for server synchronization.
+ * Processes sync queue from LocalStateProvider when online and authenticated.
+ */
+
 import {
   createContext,
   type ReactNode,

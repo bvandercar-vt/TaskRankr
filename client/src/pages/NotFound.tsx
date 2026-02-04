@@ -1,3 +1,7 @@
+/**
+ * @fileoverview 404 Not Found error page.
+ */
+
 import { AlertCircle } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/primitives/card'

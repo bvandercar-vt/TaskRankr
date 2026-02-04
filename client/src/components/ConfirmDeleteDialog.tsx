@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Confirmation dialog for permanent task deletion
+ */
+
 import {
   AlertDialog,
   AlertDialogAction,

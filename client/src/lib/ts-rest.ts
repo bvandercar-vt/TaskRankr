@@ -1,3 +1,7 @@
+/**
+ * @fileoverview @ts-rest client configuration and QueryKey definitions
+ */
+
 import type { QueryKey } from '@tanstack/react-query'
 import type { AppRouteMutation, ClientInferRequest } from '@ts-rest/core'
 import { initTsrReactQuery } from '@ts-rest/react-query/v5'

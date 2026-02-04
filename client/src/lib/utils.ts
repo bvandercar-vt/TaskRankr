@@ -1,3 +1,7 @@
+/**
+ * @fileoverview General utility functions.
+ */
+
 import { forwardRef } from 'react'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'

@@ -1,4 +1,6 @@
-import type { SortOption, UserSettings } from '~/shared/schema'
+/**
+ * @fileoverview Application-wide constants and configuration values
+ */
 
 export const IconSizeStyle = {
   small: 'h-4 w-4',
