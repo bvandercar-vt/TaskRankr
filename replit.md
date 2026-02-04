@@ -2,7 +2,7 @@
 
 ## Overview
 
-TaskRankr is a multi-user task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Each attribute has 6 levels (including "none") with configurable visibility and required settings. Features hierarchical/nested task support, status-based workflow, a modern dark-themed mobile-first UI, per-user task isolation with Replit Auth, and a demo mode for trying the app without an account.
+TaskRankr is a multi-user task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Each rank field has 6 levels (including "none") with configurable visibility and required settings. Features hierarchical/nested task support, status-based workflow, a modern dark-themed mobile-first UI, per-user task isolation with Replit Auth, and a guest mode for trying the app without an account.
 
 ## User Preferences
 
@@ -28,7 +28,7 @@ The app uses a local-first data model where all changes happen locally first, th
 
 - **LocalStateProvider** (`client/src/components/LocalStateProvider.tsx`):
   - Manages tasks and settings in localStorage
-  - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-offline-*` for offline mode
+  - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-guest-*` for guest mode
   - All CRUD operations update local state immediately
   - Enqueues sync operations when `shouldSync` is true (authenticated mode)
   - Uses negative temp IDs for locally-created tasks until synced
@@ -39,12 +39,17 @@ The app uses a local-first data model where all changes happen locally first, th
   - Fetches server data on auth (waits for queue to drain first)
   - Shows offline/syncing status via StatusBanner
 
-- **OfflineModeProvider** (`client/src/components/DemoProvider.tsx`):
-  - Simple flag for offline mode (`isOfflineMode`)
-  - When in offline mode: uses LocalStateProvider with `shouldSync=false`
+- **GuestModeProvider** (`client/src/components/GuestModeProvider.tsx`):
+  - Simple flag for guest mode (`isGuestMode`)
+  - When in guest mode: uses LocalStateProvider with `shouldSync=false`
   - Demo data (sample tasks) created on first entry to help users learn the app
   - "Delete Demo Data" button available to remove sample tasks
-  - All features work offline, data persists in localStorage
+  - All features work in guest mode, data persists in localStorage
+
+- **Guest Task Migration** (`client/src/lib/migrate-guest-tasks.ts`):
+  - On login, migrates guest tasks (excluding demo tasks) to authenticated storage
+  - Filters out demo tasks by tracking their IDs separately
+  - Clears guest storage after successful migration
 
 - **Data Flow**:
   1. User action → LocalStateProvider updates local state + enqueues sync op
@@ -78,9 +83,9 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   │   ├── dropdownMenu.tsx
 │       │   │   └── lucideIcon.tsx  # Dynamic icon helper
 │       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
-│       │   ├── LocalStateProvider.tsx  # Offline-first local state + sync queue + demo data
+│       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   ├── SyncProvider.tsx  # Background sync to API
-│       │   ├── DemoProvider.tsx  # Offline mode flag (isOfflineMode)
+│       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
@@ -98,11 +103,13 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   └── NotFound.tsx
 │       ├── lib/
 │       │   ├── ts-rest.ts        # ts-rest client + QueryKeys
-│       │   ├── query-client.ts   # TanStack Query client
-│       │   ├── utils.ts          # Utility functions (cn, getIsVisible, etc.)
-│       │   ├── task-styles.ts    # Status/priority color mappings
+│       │   ├── query-client.ts   # @tanstack/react-query client
+│       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
+│       │   ├── rank-field-styles.ts  # Rank field color mappings
 │       │   ├── auth-utils.ts     # Authentication helpers
-│       │   └── constants.ts      # IconSizeStyle constants
+│       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
+│       │   ├── demo-tasks.ts     # Demo task data for guest mode
+│       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
 │       └── types/
 │           └── index.ts          # Frontend-specific types
 ├── server/
@@ -110,11 +117,12 @@ The app uses a local-first data model where all changes happen locally first, th
 │   ├── routes.ts         # API route handlers (ts-rest)
 │   ├── storage.ts        # Database access layer
 │   ├── db.ts             # Database connection
-│   └── replitAuth.ts     # Replit Auth middleware
+│   ├── static.ts         # Static file serving
+│   └── replit_integrations/auth/  # Replit Auth (OIDC)
 ├── shared/
 │   ├── schema.ts         # Drizzle schema + Zod types + RANK_FIELDS_CRITERIA
 │   ├── contract.ts       # ts-rest API contract
-│   ├── routes.ts         # Auth path constants
+│   ├── constants.ts      # Auth path constants
 │   └── models/           # Shared model utilities
 └── migrations/           # Database migrations
 ```
@@ -174,7 +182,7 @@ Status behaviors:
 - Visual indicators: blue border for in_progress, slate blue-gray border + pin icon for pinned
 
 ### Shared Utilities
-- `RANK_FIELDS_CRITERIA` in `shared/schema.ts` - Central config for attribute fields (name, label, levels, colors)
+- `RANK_FIELDS_CRITERIA` in `shared/schema.ts` - Central config for rank fields (name, label, levels, colors)
 - `getIsVisible(field, settings)` / `getIsRequired(field, settings)` - Type-safe settings access
 - `PickByKey<T, Matcher>` - Type utility for selecting keys matching a pattern
 
