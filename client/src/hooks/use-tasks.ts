@@ -3,24 +3,30 @@
  * deletion, and status changes, etc.)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import { getSettings } from '@/hooks/use-settings'
-import { useToast } from '@/hooks/use-toast'
-import { type ClientInferRequestBody, QueryKeys, tsr } from '@/lib/ts-rest'
+import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import type { ClientInferRequestBody } from '@/lib/ts-rest'
 import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
 
 export const useTasks = () => {
-  const query = tsr.tasks.list.useQuery({
-    queryKey: QueryKeys.getTasks,
-  })
+  const localState = useLocalStateSafe()
+
+  if (!localState) {
+    return {
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: () => Promise.resolve(),
+    }
+  }
 
   return {
-    data: query.data?.status === 200 ? query.data.body : undefined,
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
+    data: localState.tasks,
+    isLoading: !localState.isInitialized,
+    error: null,
+    refetch: () => Promise.resolve(),
   }
 }
 
@@ -46,143 +52,90 @@ export const useTaskParentChain = (parentId?: number) => {
 }
 
 export const useTask = (id: number) => {
-  const query = tsr.tasks.get.useQuery({
-    queryKey: [...QueryKeys.getTasks, id],
-    queryData: { params: { id } },
-    enabled: !!id,
-  })
+  const { data: tasks, isLoading } = useTasks()
+
+  const findTask = (
+    taskList: typeof tasks,
+    targetId: number,
+  ): NonNullable<typeof tasks>[number] | undefined => {
+    if (!taskList) return undefined
+    for (const task of taskList) {
+      if (task.id === targetId) return task
+      if (task.subtasks) {
+        const found = findTask(task.subtasks, targetId)
+        if (found) return found
+      }
+    }
+    return undefined
+  }
 
   return {
-    data: query.data?.status === 200 ? query.data.body : undefined,
-    isLoading: query.isLoading,
-    error: query.error,
+    data: tasks ? findTask(tasks, id) : undefined,
+    isLoading,
+    error: null,
   }
 }
 
 export const useCreateTask = () => {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async (
       data: Omit<
         ClientInferRequestBody<typeof contract.tasks.create>,
         'userId'
       >,
     ) => {
-      const result = await tsr.tasks.create.mutate({ body: data })
-      if (result.status !== 201) {
-        throw new Error(result.body.message)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-
-      const settings = getSettings()
-      if (settings.autoPinNewTasks) {
-        try {
-          await tsr.tasks.setStatus.mutate({
-            params: { id: result.body.id },
-            body: { status: 'pinned' },
-          })
-        } catch (e) {
-          console.error('Failed to auto-pin task:', e)
-        }
-      }
-
-      return result.body
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      })
+      return localState.createTask(data)
     },
   })
 }
 
 export const useUpdateTask = () => {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async ({
       id,
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
-      const result = await tsr.tasks.update.mutate({
-        params: { id },
-        body: updates,
-      })
-      if (result.status !== 200) {
-        throw new Error(result.body.message)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-      return result.body
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Update Failed',
-        description: error.message,
-        variant: 'destructive',
-      })
+      return localState.updateTask(id, updates)
     },
   })
 }
 
 export const useSetTaskStatus = () => {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
-      const result = await tsr.tasks.setStatus.mutate({
-        params: { id },
-        body: { status },
-      })
-      if (result.status !== 200) {
-        throw new Error(result.body.message)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-      return result.body
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      })
+      return localState.setTaskStatus(id, status)
     },
   })
 }
 
 export const useDeleteTask = () => {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async (id: number) => {
-      const result = await tsr.tasks.delete.mutate({
-        params: { id },
-      })
-      if (result.status !== 204) {
-        throw new Error(result.body.message)
+      if (!localState) {
+        throw new Error('Local state not initialized')
       }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      })
+      localState.deleteTask(id)
     },
   })
 }
