@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { Button } from "@/components/primitives/button";
-import { TagChain } from "@/components/primitives/tagChain";
+import { Button } from "@/components/primitives/Button";
+import { TagChain } from "@/components/primitives/TagChain";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { Calendar } from "@/components/primitives/forms/calendar";
+import { Calendar } from "@/components/primitives/forms/Calendar";
 import {
   Form,
   FormControl,
@@ -26,23 +26,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/primitives/forms/form";
-import { Input } from "@/components/primitives/forms/input";
+} from "@/components/primitives/forms/Form";
+import { Input } from "@/components/primitives/forms/Input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/primitives/forms/select";
-import { Textarea } from "@/components/primitives/forms/textarea";
+} from "@/components/primitives/forms/Select";
+import { Textarea } from "@/components/primitives/forms/Textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/primitives/overlays/popover";
-import { getIsRequired, getIsVisible, useSettings } from "@/hooks/use-settings";
-import { useDeleteTask, useTaskParentChain, useTasks } from "@/hooks/use-tasks";
+} from "@/components/primitives/overlays/Popover";
+import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
+import { useDeleteTask, useTaskParentChain, useTasks } from "@/hooks/useTasks";
 import { IconSizeStyle } from "@/lib/constants";
 import { getRankFieldStyle } from "@/lib/rank-field-styles";
 import { cn } from "@/lib/utils";

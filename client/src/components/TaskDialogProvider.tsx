@@ -12,8 +12,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/primitives/overlays/dialog'
-import { useCreateTask, useUpdateTask } from '@/hooks/use-tasks'
+} from '@/components/primitives/overlays/Dialog'
+import { useCreateTask, useUpdateTask } from '@/hooks/useTasks'
 import type { MutateTaskRequest, Task } from '~/shared/schema'
 import { TaskForm, type TaskFormProps } from './TaskForm'
 

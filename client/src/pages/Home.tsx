@@ -20,21 +20,21 @@ import {
 import { Link } from 'wouter'
 
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
-import { Button } from '@/components/primitives/button'
+import { Button } from '@/components/primitives/Button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/primitives/dropdownMenu'
-import { Input } from '@/components/primitives/forms/input'
-import { Icon } from '@/components/primitives/lucideIcon'
+} from '@/components/primitives/DropdownMenu'
+import { Input } from '@/components/primitives/forms/Input'
+import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { useGuestModeState } from '@/hooks/use-guest-mode-state'
-import { getIsVisible, useSettings } from '@/hooks/use-settings'
-import { useTasks } from '@/hooks/use-tasks'
+import { useGuestModeState } from '@/hooks/useGuestModeState'
+import { getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'

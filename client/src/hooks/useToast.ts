@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import type {
   ToastActionElement,
   ToastProps,
-} from '@/components/primitives/overlays/toast'
+} from '@/components/primitives/overlays/Toast'
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1500

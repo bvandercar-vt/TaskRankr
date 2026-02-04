@@ -7,8 +7,8 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 ## User Preferences
 
 - Preferred communication style: Simple, everyday language.
-- File naming: kebab-case for utility/helper files (e.g., `page-states.tsx`), camelCase for component primitives (e.g., `dropdownMenu.tsx`, `alertDialog.tsx`)
-- Icon helper: Use `Icon` component from `lucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
+- File naming: kebab-case for utility/helper files (e.g., `page-states.tsx`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useSettings.ts`, `useTasks.ts`)
+- Icon helper: Use `Icon` component from `LucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
@@ -80,9 +80,9 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── primitives/       # Base UI components (shadcn/ui)
 │       │   │   ├── forms/        # Form controls (input, select, calendar, etc.)
 │       │   │   ├── overlays/     # Dialogs, sheets, tooltips
-│       │   │   ├── button.tsx, badge.tsx, card.tsx, toggle.tsx
-│       │   │   ├── dropdownMenu.tsx
-│       │   │   └── lucideIcon.tsx  # Dynamic icon helper
+│       │   │   ├── Button.tsx, Badge.tsx, Card.tsx, Toggle.tsx
+│       │   │   ├── DropdownMenu.tsx, TagChain.tsx
+│       │   │   └── LucideIcon.tsx  # Dynamic icon helper
 │       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
 │       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   ├── SyncProvider.tsx  # Background sync to API
@@ -93,9 +93,9 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
 │       │   └── ConfirmDeleteDialog.tsx
 │       ├── hooks/
-│       │   ├── use-tasks.ts      # Task CRUD operations
-│       │   ├── use-settings.ts   # User settings with optimistic updates
-│       │   └── use-toast.ts      # Toast notifications
+│       │   ├── useTasks.ts       # Task CRUD operations
+│       │   ├── useSettings.ts    # User settings with optimistic updates
+│       │   └── useToast.ts       # Toast notifications
 │       ├── pages/
 │       │   ├── Home.tsx          # Main task list with sorting
 │       │   ├── Settings.tsx      # User preferences & attribute visibility

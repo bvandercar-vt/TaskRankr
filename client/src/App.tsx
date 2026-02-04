@@ -8,13 +8,13 @@ import { Route, Switch, useLocation } from 'wouter'
 
 import { GuestModeProvider, useGuestMode } from '@/components/GuestModeProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
-import { Button } from '@/components/primitives/button'
-import { Toaster } from '@/components/primitives/overlays/toaster'
-import { TooltipProvider } from '@/components/primitives/overlays/tooltip'
+import { Button } from '@/components/primitives/Button'
+import { Toaster } from '@/components/primitives/overlays/Toaster'
+import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
 import { SyncProvider, useSyncSafe } from '@/components/SyncProvider'
 import { TaskDialogProvider } from '@/components/TaskDialogProvider'
-import { useAuth } from '@/hooks/use-auth'
-import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import {
   clearGuestStorage,
   migrateGuestTasksToAuth,
