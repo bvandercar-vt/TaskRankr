@@ -31,7 +31,7 @@ const Landing = () => {
               <a href={authPaths.login}>
                 <Button
                   size="lg"
-                  className="text-lg px-8"
+                  className="text-lg px-8 min-w-[200px]"
                   data-testid="button-get-started"
                 >
                   Log In / Sign Up*
@@ -40,7 +40,7 @@ const Landing = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-lg px-8"
+                className="text-lg px-8 min-w-[200px]"
                 data-testid="button-try-guest"
                 onClick={enterGuestMode}
               >
