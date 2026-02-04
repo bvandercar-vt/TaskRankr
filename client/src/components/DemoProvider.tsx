@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -253,18 +254,58 @@ const addTaskToTree = (
   })
 }
 
+const STORAGE_KEYS = {
+  tasks: 'taskrankr-demo-tasks',
+  settings: 'taskrankr-demo-settings',
+  nextId: 'taskrankr-demo-next-id',
+}
+
+const loadFromStorage = <T,>(key: string, fallback: T): T => {
+  try {
+    const stored = localStorage.getItem(key)
+    if (!stored) return fallback
+    const parsed = JSON.parse(stored)
+    if (key === STORAGE_KEYS.tasks) {
+      const reviveDates = (tasks: TaskResponse[]): TaskResponse[] =>
+        tasks.map((t) => ({
+          ...t,
+          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
+          completedAt: t.completedAt ? new Date(t.completedAt) : null,
+          inProgressStartedAt: t.inProgressStartedAt
+            ? new Date(t.inProgressStartedAt)
+            : null,
+          subtasks: t.subtasks ? reviveDates(t.subtasks) : [],
+        }))
+      return reviveDates(parsed) as T
+    }
+    return parsed
+  } catch {
+    return fallback
+  }
+}
+
 export const DemoProvider = ({ children }: { children: ReactNode }) => {
   const [isDemo, setIsDemo] = useState(false)
-  const [demoSettings, setDemoSettings] = useState<AppSettings>(DEMO_SETTINGS)
-  const [demoTasks, setDemoTasks] = useState<TaskResponse[]>(DEMO_TASKS)
-  const nextIdRef = useRef(100)
+  const [demoSettings, setDemoSettings] = useState<AppSettings>(() =>
+    loadFromStorage(STORAGE_KEYS.settings, DEMO_SETTINGS),
+  )
+  const [demoTasks, setDemoTasks] = useState<TaskResponse[]>(() =>
+    loadFromStorage(STORAGE_KEYS.tasks, DEMO_TASKS),
+  )
+  const nextIdRef = useRef(
+    loadFromStorage(STORAGE_KEYS.nextId, 100),
+  )
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(demoTasks))
+  }, [demoTasks])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(demoSettings))
+  }, [demoSettings])
 
   const enterDemo = useCallback(() => setIsDemo(true), [])
-  const exitDemo = useCallback(() => {
-    setIsDemo(false)
-    setDemoSettings(DEMO_SETTINGS)
-    setDemoTasks(DEMO_TASKS)
-  }, [])
+  const exitDemo = useCallback(() => setIsDemo(false), [])
 
   const updateDemoSettings = useCallback((updates: Partial<AppSettings>) => {
     setDemoSettings((prev) => ({ ...prev, ...updates }))
@@ -272,8 +313,10 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
 
   const createDemoTask = useCallback(
     (data: CreateDemoTaskInput): TaskResponse => {
+      const newId = nextIdRef.current++
+      localStorage.setItem(STORAGE_KEYS.nextId, JSON.stringify(nextIdRef.current))
       const newTask: TaskResponse = {
-        id: nextIdRef.current++,
+        id: newId,
         userId: 'demo',
         name: data.name,
         description: data.description ?? null,
