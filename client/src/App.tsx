@@ -1,4 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
 import { Route, Switch } from 'wouter'
 
 import { GuestModeProvider, useGuestMode } from '@/components/GuestProvider'
@@ -9,6 +10,11 @@ import { TooltipProvider } from '@/components/primitives/overlays/tooltip'
 import { SyncProvider, useSyncSafe } from '@/components/SyncProvider'
 import { TaskDialogProvider } from '@/components/TaskDialogProvider'
 import { useAuth } from '@/hooks/use-auth'
+import { useToast } from '@/hooks/use-toast'
+import {
+  clearGuestStorage,
+  migrateGuestTasksToAuth,
+} from '@/lib/migrate-guest-tasks'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
 import Landing from '@/pages/Landing'
@@ -91,6 +97,22 @@ const StatusBanner = () => {
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
   const { isGuestMode } = useGuestMode()
+  const { toast } = useToast()
+  const hasMigrated = useRef(false)
+
+  useEffect(() => {
+    if (isAuthenticated && !isGuestMode && !hasMigrated.current) {
+      hasMigrated.current = true
+      const result = migrateGuestTasksToAuth()
+      if (result.migratedCount > 0) {
+        clearGuestStorage()
+        toast({
+          title: 'Tasks imported',
+          description: `${result.migratedCount} task${result.migratedCount === 1 ? '' : 's'} from guest mode ${result.migratedCount === 1 ? 'has' : 'have'} been added to your account.`,
+        })
+      }
+    }
+  }, [isAuthenticated, isGuestMode, toast])
 
   if (isLoading && !isGuestMode) {
     return (
