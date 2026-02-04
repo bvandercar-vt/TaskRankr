@@ -135,11 +135,15 @@ export const TaskDialogProvider = ({
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [activeTask, setActiveTask] = useState<Task | undefined>(undefined)
   const [parentId, setParentId] = useState<number | undefined>(undefined)
+  const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
 
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
 
   const openCreateDialog = (pid?: number) => {
+    if (mode === 'edit' && activeTask && pid !== undefined) {
+      setReturnToTask(activeTask)
+    }
     setMode('create')
     setParentId(pid)
     setActiveTask(undefined)
@@ -150,15 +154,24 @@ export const TaskDialogProvider = ({
     setMode('edit')
     setActiveTask(task)
     setParentId(task.parentId || undefined)
+    setReturnToTask(undefined)
     setIsOpen(true)
   }
 
   const closeDialog = () => {
-    setIsOpen(false)
-    setTimeout(() => {
-      setActiveTask(undefined)
-      setParentId(undefined)
-    }, 300)
+    if (returnToTask) {
+      const taskToReturn = returnToTask
+      setReturnToTask(undefined)
+      setMode('edit')
+      setActiveTask(taskToReturn)
+      setParentId(taskToReturn.parentId || undefined)
+    } else {
+      setIsOpen(false)
+      setTimeout(() => {
+        setActiveTask(undefined)
+        setParentId(undefined)
+      }, 300)
+    }
   }
 
   const handleSubmit = (data: MutateTaskRequest) => {
