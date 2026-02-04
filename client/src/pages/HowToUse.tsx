@@ -11,12 +11,12 @@ import {
   MousePointer2,
   Pin,
   PlayCircle,
-} from 'lucide-react'
-import { Link } from 'wouter'
+} from "lucide-react";
+import { Link } from "wouter";
 
-import { Button } from '@/components/primitives/button'
-import { Card, CardContent } from '@/components/primitives/card'
-import { SortInfo } from '@/components/SortInfo'
+import { Button } from "@/components/primitives/button";
+import { Card, CardContent } from "@/components/primitives/card";
+import { SortInfo } from "@/components/SortInfo";
 
 const InstructionCard = ({
   icon,
@@ -24,10 +24,10 @@ const InstructionCard = ({
   description,
   testId,
 }: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  testId: string
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  testId: string;
 }) => (
   <Card className="bg-card/50 border-white/10" data-testid={testId}>
     <CardContent className="p-4 flex items-start gap-4">
@@ -40,7 +40,7 @@ const InstructionCard = ({
       </div>
     </CardContent>
   </Card>
-)
+);
 
 const HowToUse = () => {
   return (
@@ -48,11 +48,7 @@ const HowToUse = () => {
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Link href="/">
-            <Button
-              variant="ghost"
-              size="icon"
-              data-testid="button-back"
-            >
+            <Button variant="ghost" size="icon" data-testid="button-back">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -74,34 +70,8 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<Hand className="h-5 w-5" />}
                 title="Hold to Change Status"
-                description="Press and hold a task card for about a second to open the status menu. From there you can mark it as In Progress (if enabled), Pinned, or Completed."
+                description="Press and hold a task card for about a second to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), or Completed."
                 testId="card-hold-to-change-status"
-              />
-            </div>
-          </section>
-
-          <section data-testid="section-task-statuses">
-            <h2 className="text-lg font-semibold mb-3 text-primary">
-              Task Statuses
-            </h2>
-            <div className="space-y-3">
-              <InstructionCard
-                icon={<Pin className="h-5 w-5" />}
-                title="Pinned"
-                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
-                testId="card-pinned"
-              />
-              <InstructionCard
-                icon={<PlayCircle className="h-5 w-5" />}
-                title="In Progress (if enabled)"
-                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
-                testId="card-in-progress"
-              />
-              <InstructionCard
-                icon={<CheckCircle2 className="h-5 w-5" />}
-                title="Completed"
-                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
-                testId="card-completed"
               />
             </div>
           </section>
@@ -132,10 +102,36 @@ const HowToUse = () => {
               testId="card-subtasks"
             />
           </section>
+
+          <section data-testid="section-task-statuses">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Task Statuses
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Pin className="h-5 w-5" />}
+                title="Pinned"
+                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
+                testId="card-pinned"
+              />
+              <InstructionCard
+                icon={<PlayCircle className="h-5 w-5" />}
+                title="In Progress (if setting enabled)"
+                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
+                testId="card-in-progress"
+              />
+              <InstructionCard
+                icon={<CheckCircle2 className="h-5 w-5" />}
+                title="Completed"
+                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
+                testId="card-completed"
+              />
+            </div>
+          </section>
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default HowToUse
+export default HowToUse;
