@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Toggle switch component built on @radix-ui primitives.
+ */
+
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 
 import { cn, forwardRefHelper } from '@/lib/utils'

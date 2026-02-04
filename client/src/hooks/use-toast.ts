@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Toast notification hook and state management.
+ */
+
 import { useEffect, useState } from 'react'
 
 import type {

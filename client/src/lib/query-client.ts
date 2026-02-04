@@ -1,3 +1,8 @@
+/**
+ * @fileoverview @tanstack/react-query global QueryClient with default caching
+ * and retry options.
+ */
+
 import { QueryClient } from '@tanstack/react-query'
 
 export const queryClient = new QueryClient({

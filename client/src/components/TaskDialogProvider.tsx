@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Context provider for task create/edit dialog with
+ * desktop/mobile variants.
+ */
+
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 

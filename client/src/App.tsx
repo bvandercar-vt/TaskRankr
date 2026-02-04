@@ -1,8 +1,12 @@
-import { QueryClientProvider } from '@tanstack/react-query'
+/**
+ * @fileoverview Main application component with routing and provider setup
+ */
+
 import { useEffect, useRef } from 'react'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 
-import { GuestModeProvider, useGuestMode } from '@/components/GuestProvider'
+import { GuestModeProvider, useGuestMode } from '@/components/GuestModeProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { Toaster } from '@/components/primitives/overlays/toaster'
@@ -20,7 +24,7 @@ import Home from '@/pages/Home'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
-import { authPaths } from '~/shared/routes'
+import { authPaths } from '~/shared/constants'
 import { queryClient } from './lib/query-client'
 
 const Router = () => (

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Wrapper component for Lucide React icons.
+ *
+ * Provides an Icon component that accepts a Lucide icon as a prop,
+ * enabling dynamic icon rendering while preserving all standard
+ * Lucide icon props for customization.
+ */
+
 import type { LucideIcon } from 'lucide-react'
 
 export const Icon = ({

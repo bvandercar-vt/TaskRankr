@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Shared UI components for page loading, error, and empty states.
+ */
+
 import type { ReactNode } from 'react'
 
 export const PageLoading = () => (

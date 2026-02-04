@@ -1,3 +1,8 @@
+/**
+ * @fileoverview User settings hook. Manages user preferences with optimistic
+ * updates.
+ */
+
 import { useLocalStateSafe } from '@/components/LocalStateProvider'
 import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'

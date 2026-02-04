@@ -1,4 +1,4 @@
-import { useGuestMode } from '@/components/GuestProvider'
+import { useGuestMode } from '@/components/GuestModeProvider'
 import { useLocalState } from '@/components/LocalStateProvider'
 
 export const useGuestModeState = () => {
