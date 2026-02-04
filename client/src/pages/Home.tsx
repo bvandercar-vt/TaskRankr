@@ -69,7 +69,9 @@ const HowToUseBanner = () => {
   const dismiss = () => {
     try {
       localStorage.setItem(HOW_TO_USE_BANNER_KEY, 'true')
-    } catch {}
+    } catch {
+      // noop
+    }
     setIsDismissed(true)
   }
 

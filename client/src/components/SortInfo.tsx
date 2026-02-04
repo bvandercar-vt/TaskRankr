@@ -8,7 +8,7 @@ import { ChevronDown } from 'lucide-react'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
-import { type RankFieldValueMap, type SortOption } from '~/shared/schema'
+import type { RankFieldValueMap, SortOption } from '~/shared/schema'
 
 const SORT_INFO_ATTR_LABELS = {
   priority: 'Priority',

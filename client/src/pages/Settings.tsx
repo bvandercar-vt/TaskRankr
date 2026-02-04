@@ -17,11 +17,10 @@ import { useToast } from '@/hooks/use-toast'
 import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
+import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { RANK_FIELDS_CRITERIA } from '~/shared/schema'
-
-import { cn } from '@/lib/utils'
 
 const Card = ({
   children,

@@ -6,17 +6,16 @@ import {
   ArrowLeft,
   ArrowUpDown,
   CheckCircle2,
-  FolderTree,
   Hand,
   MousePointer2,
   Pin,
   PlayCircle,
-} from "lucide-react";
-import { Link } from "wouter";
+} from 'lucide-react'
+import { Link } from 'wouter'
 
-import { Button } from "@/components/primitives/button";
-import { Card, CardContent } from "@/components/primitives/card";
-import { SortInfo } from "@/components/SortInfo";
+import { Button } from '@/components/primitives/button'
+import { Card, CardContent } from '@/components/primitives/card'
+import { SortInfo } from '@/components/SortInfo'
 
 const InstructionCard = ({
   icon,
@@ -24,10 +23,10 @@ const InstructionCard = ({
   description,
   testId,
 }: {
-  icon: React.ReactNode;
-  title: React.ReactNode;
-  description: React.ReactNode;
-  testId: string;
+  icon: React.ReactNode
+  title: React.ReactNode
+  description: React.ReactNode
+  testId: string
 }) => (
   <Card className="bg-card/50 border-white/10" data-testid={testId}>
     <CardContent className="p-4 flex items-start gap-4">
@@ -40,7 +39,7 @@ const InstructionCard = ({
       </div>
     </CardContent>
   </Card>
-);
+)
 
 const HowToUse = () => {
   return (
@@ -128,7 +127,7 @@ const HowToUse = () => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default HowToUse;
+export default HowToUse
