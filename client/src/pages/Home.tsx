@@ -11,8 +11,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { useGuestMode } from '@/components/GuestProvider'
 import { useLocalState } from '@/components/LocalStateProvider'
+import { useGuestModeState } from '@/hooks/use-guest-mode-state'
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
@@ -100,8 +100,8 @@ const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSetting } = useSettings()
-  const { isGuestMode, exitGuestMode } = useGuestMode()
-  const { hasDemoData, deleteDemoData } = useLocalState()
+  const { isGuestMode, exitGuestMode, hasDemoData, deleteDemoData } =
+    useGuestModeState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
