@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Guest mode context provider.
+ * Manages guest mode state for trying the app without authentication.
+ */
+
 import {
   createContext,
   type ReactNode,
