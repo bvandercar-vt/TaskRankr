@@ -1,5 +1,5 @@
 import { useLocalStateSafe } from '@/components/LocalStateProvider'
-import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/default-settings'
+import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
