@@ -15,13 +15,10 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="p-6 flex justify-between items-center">
+      <header className="p-6">
         <h1 className="text-xl font-bold" data-testid="text-logo">
           TaskRankr
         </h1>
-        <a href={authPaths.login}>
-          <Button data-testid="button-login-header">Log In</Button>
-        </a>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
@@ -40,7 +37,7 @@ const Landing = () => {
                 className="text-lg px-8"
                 data-testid="button-get-started"
               >
-                Get Started
+                Log In / Sign Up
               </Button>
             </a>
             <Button
