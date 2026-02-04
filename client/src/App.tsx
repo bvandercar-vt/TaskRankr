@@ -34,7 +34,7 @@ const DemoBanner = () => {
       className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
       data-testid="banner-demo-mode"
     >
-      <span>You are viewing a demo. Changes won't be saved.</span>
+      <span>Log in to back up your data and use it across devices.</span>
       <a href={authPaths.login}>
         <Button
           size="sm"

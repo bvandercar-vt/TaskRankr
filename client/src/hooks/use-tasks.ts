@@ -2,12 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useDemoSafe } from '@/components/DemoProvider'
 import { getSettings } from '@/hooks/use-settings'
-import { useToast } from '@/hooks/use-toast'
 import { type ClientInferRequestBody, QueryKeys, tsr } from '@/lib/ts-rest'
 import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'
-
-const DEMO_ERROR_MESSAGE = 'Create an account to save your tasks'
 
 export const useTasks = () => {
   const { isDemo, demoTasks } = useDemoSafe()
@@ -71,8 +68,7 @@ export const useTask = (id: number) => {
 
 export const useCreateTask = () => {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
-  const { isDemo } = useDemoSafe()
+  const { isDemo, createDemoTask } = useDemoSafe()
 
   return useMutation({
     mutationFn: async (
@@ -82,7 +78,7 @@ export const useCreateTask = () => {
       >,
     ) => {
       if (isDemo) {
-        throw new Error(DEMO_ERROR_MESSAGE)
+        return createDemoTask(data)
       }
 
       const result = await tsr.tasks.create.mutate({ body: data })
@@ -105,22 +101,16 @@ export const useCreateTask = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Demo Mode',
-        description: error.message,
-        variant: 'destructive',
-      })
+      if (!isDemo) {
+        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      }
     },
   })
 }
 
 export const useUpdateTask = () => {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
-  const { isDemo } = useDemoSafe()
+  const { isDemo, updateDemoTask } = useDemoSafe()
 
   return useMutation({
     mutationFn: async ({
@@ -128,7 +118,7 @@ export const useUpdateTask = () => {
       ...updates
     }: { id: number } & UpdateTaskRequest) => {
       if (isDemo) {
-        throw new Error(DEMO_ERROR_MESSAGE)
+        return updateDemoTask(id, updates)
       }
 
       const result = await tsr.tasks.update.mutate({
@@ -141,27 +131,21 @@ export const useUpdateTask = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Demo Mode',
-        description: error.message,
-        variant: 'destructive',
-      })
+      if (!isDemo) {
+        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      }
     },
   })
 }
 
 export const useSetTaskStatus = () => {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
-  const { isDemo } = useDemoSafe()
+  const { isDemo, setDemoTaskStatus } = useDemoSafe()
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
       if (isDemo) {
-        throw new Error(DEMO_ERROR_MESSAGE)
+        return setDemoTaskStatus(id, status)
       }
 
       const result = await tsr.tasks.setStatus.mutate({
@@ -174,27 +158,22 @@ export const useSetTaskStatus = () => {
       return result.body
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Demo Mode',
-        description: error.message,
-        variant: 'destructive',
-      })
+      if (!isDemo) {
+        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      }
     },
   })
 }
 
 export const useDeleteTask = () => {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
-  const { isDemo } = useDemoSafe()
+  const { isDemo, deleteDemoTask } = useDemoSafe()
 
   return useMutation({
     mutationFn: async (id: number) => {
       if (isDemo) {
-        throw new Error(DEMO_ERROR_MESSAGE)
+        deleteDemoTask(id)
+        return
       }
 
       const result = await tsr.tasks.delete.mutate({
@@ -205,14 +184,9 @@ export const useDeleteTask = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
-    },
-    onError: (error) => {
-      toast({
-        title: 'Demo Mode',
-        description: error.message,
-        variant: 'destructive',
-      })
+      if (!isDemo) {
+        queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      }
     },
   })
 }
