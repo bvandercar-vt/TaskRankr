@@ -33,7 +33,7 @@ const Card = ({
   </div>
 )
 
-type SwitchSettingProps = {
+interface SwitchSettingProps {
   title: string
   description: string
   checked: boolean

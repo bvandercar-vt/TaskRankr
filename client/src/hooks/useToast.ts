@@ -12,7 +12,7 @@ import type {
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1500
 
-type ToasterToast = ToastProps & {
+interface ToasterToast extends Omit<ToastProps, 'title' | 'description'> {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
