@@ -30,29 +30,31 @@ const Landing = () => {
             Rate priority, ease, enjoyment, and time for each task. Sort by any
             attribute at a glance.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={authPaths.login}>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href={authPaths.login}>
+                <Button
+                  size="lg"
+                  className="text-lg px-8"
+                  data-testid="button-get-started"
+                >
+                  Log In / Sign Up
+                </Button>
+              </a>
               <Button
                 size="lg"
+                variant="outline"
                 className="text-lg px-8"
-                data-testid="button-get-started"
+                data-testid="button-try-offline"
+                onClick={handleTryOfflineMode}
               >
-                Log In / Sign Up
+                Try Offline Mode
               </Button>
-            </a>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8"
-              data-testid="button-try-offline"
-              onClick={handleTryOfflineMode}
-            >
-              Try Offline Mode
-            </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Log in to back up your data and sync across devices.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Log in to back up your data and sync across devices.
-          </p>
         </div>
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
