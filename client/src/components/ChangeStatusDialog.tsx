@@ -34,16 +34,16 @@ interface StatusButtonProps {
   icon: LucideIcon
   label: string
   onClick: () => void
-  testId: string
   colorClass?: string
+  'data-testid': string
 }
 
 const StatusButton = ({
   icon: Icon,
   label,
   onClick,
-  testId,
   colorClass = 'border-slate-400/50 text-slate-400 hover:bg-slate-500/10',
+  'data-testid': testId,
 }: StatusButtonProps) => (
   <Button
     onClick={onClick}
@@ -140,14 +140,14 @@ export const ChangeStatusDialog = ({
                       icon={StopCircle}
                       label="Stop Progress"
                       onClick={() => onSetStatus('open')}
-                      testId="button-stop-progress"
+                      data-testid="button-stop-progress"
                     />
                   ) : (
                     <StatusButton
                       icon={Clock}
                       label="In Progress"
                       onClick={() => onSetStatus('in_progress')}
-                      testId="button-start-progress"
+                      data-testid="button-start-progress"
                       colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
                     />
                   ))}
@@ -156,14 +156,14 @@ export const ChangeStatusDialog = ({
                     icon={PinOff}
                     label="Unpin"
                     onClick={() => onSetStatus('open')}
-                    testId="button-unpin"
+                    data-testid="button-unpin"
                   />
                 ) : (
                   <StatusButton
                     icon={Pin}
                     label="Pin to Top"
                     onClick={() => onSetStatus('pinned')}
-                    testId="button-pin"
+                    data-testid="button-pin"
                   />
                 )}
               </>

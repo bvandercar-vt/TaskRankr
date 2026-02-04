@@ -37,20 +37,22 @@ const Card = ({
   </div>
 )
 
-const SwitchCard = ({
-  title,
-  description,
-  checked,
-  onCheckedChange,
-  testId,
-}: {
+type SwitchSettingProps = {
   title: string
   description: string
   checked: boolean
   onCheckedChange: (checked: boolean) => void
-  testId: string
-}) => (
-  <Card className="flex items-center justify-between">
+  'data-testid': string
+}
+
+const SwitchSetting = ({
+  title,
+  description,
+  checked,
+  onCheckedChange,
+  'data-testid': testId,
+}: SwitchSettingProps) => (
+  <>
     <div className="flex-1 mr-2">
       <h3 className="font-semibold text-foreground">{title}</h3>
       <p className="text-sm text-muted-foreground mt-1">{description}</p>
@@ -60,6 +62,12 @@ const SwitchCard = ({
       onCheckedChange={onCheckedChange}
       data-testid={testId}
     />
+  </>
+)
+
+const SwitchCard = (props: SwitchSettingProps) => (
+  <Card className="flex items-center justify-between">
+    <SwitchSetting {...props} />
   </Card>
 )
 
@@ -186,7 +194,7 @@ const Settings = () => {
             onCheckedChange={(checked) =>
               updateSetting('autoPinNewTasks', checked)
             }
-            testId="switch-auto-pin"
+            data-testid="switch-auto-pin"
           />
           <SwitchCard
             title="Always sort pinned by Priority"
@@ -199,20 +207,15 @@ const Settings = () => {
             onCheckedChange={(checked) =>
               updateSetting('alwaysSortPinnedByPriority', checked)
             }
-            testId="switch-sort-pinned-priority"
+            data-testid="switch-sort-pinned-priority"
           />
           <Card>
             <div className="flex items-center justify-between">
-              <div className="flex-1 mr-2">
-                <h3 className="font-semibold text-foreground">
-                  Enable "In Progress" Status
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Allow tasks to be marked as "In Progress" to pin to the top
-                  and track active work.
-                </p>
-              </div>
-              <Switch
+              <SwitchSetting
+                title='Enable "In Progress" Status'
+                description={
+                  'Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
+                }
                 checked={settings.enableInProgressStatus}
                 onCheckedChange={(checked) => {
                   updateSetting('enableInProgressStatus', checked)
@@ -235,15 +238,9 @@ const Settings = () => {
             </div>
             {settings.enableInProgressStatus && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                <div className="flex-1 mr-2">
-                  <h3 className="font-semibold text-foreground">
-                    Enable "In Progress" Time
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Track and display time spent In Progress.
-                  </p>
-                </div>
-                <Switch
+                <SwitchSetting
+                  title='Enable "In Progress" Time'
+                  description="Track and display time spent In Progress."
                   checked={settings.enableInProgressTime}
                   onCheckedChange={(checked) =>
                     updateSetting('enableInProgressTime', checked)
