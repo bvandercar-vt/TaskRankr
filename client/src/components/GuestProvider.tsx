@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { noop } from 'es-toolkit'
 
 interface GuestModeContextValue {
   isGuestMode: boolean
@@ -44,15 +43,4 @@ export const useGuestMode = () => {
     throw new Error('useGuestMode must be used within a GuestModeProvider')
   }
   return context
-}
-
-export const useGuestModeSafe = () => {
-  const context = useContext(GuestModeContext)
-  return (
-    context ?? {
-      isGuestMode: false,
-      enterGuestMode: noop,
-      exitGuestMode: noop,
-    }
-  )
 }
