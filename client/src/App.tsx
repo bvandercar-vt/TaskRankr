@@ -2,9 +2,11 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 
 import { DemoProvider, useDemo } from '@/components/DemoProvider'
+import { LocalStateProvider } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { Toaster } from '@/components/primitives/overlays/toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/tooltip'
+import { SyncProvider, useSyncSafe } from '@/components/SyncProvider'
 import { TaskDialogProvider } from '@/components/TaskDialogProvider'
 import { useAuth } from '@/hooks/use-auth'
 import Completed from '@/pages/Completed'
@@ -24,38 +26,66 @@ const Router = () => (
   </Switch>
 )
 
-const DemoBanner = () => {
+const StatusBanner = () => {
   const { isDemo, exitDemo } = useDemo()
+  const sync = useSyncSafe()
 
-  if (!isDemo) return null
-
-  return (
-    <div
-      className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
-      data-testid="banner-demo-mode"
-    >
-      <span>Log in to back up your data and use it across devices.</span>
-      <a href={authPaths.login}>
+  if (isDemo) {
+    return (
+      <div
+        className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
+        data-testid="banner-demo-mode"
+      >
+        <span>Log in to back up your data and use it across devices.</span>
+        <a href={authPaths.login}>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7"
+            data-testid="button-banner-signup"
+          >
+            Sign Up
+          </Button>
+        </a>
         <Button
           size="sm"
-          variant="secondary"
-          className="h-7"
-          data-testid="button-banner-signup"
+          variant="ghost"
+          className="h-7 text-primary-foreground hover:bg-white/20"
+          onClick={exitDemo}
+          data-testid="button-banner-exit"
         >
-          Sign Up
+          Exit Demo
         </Button>
-      </a>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="h-7 text-primary-foreground hover:bg-white/20"
-        onClick={exitDemo}
-        data-testid="button-banner-exit"
+      </div>
+    )
+  }
+
+  if (sync && !sync.isOnline) {
+    return (
+      <div
+        className="sticky top-0 z-50 bg-yellow-600/90 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm"
+        data-testid="banner-offline"
       >
-        Exit Demo
-      </Button>
-    </div>
-  )
+        <span>You are offline. Changes will sync when you reconnect.</span>
+        {sync.pendingCount > 0 && (
+          <span className="opacity-75">({sync.pendingCount} pending)</span>
+        )}
+      </div>
+    )
+  }
+
+  if (sync && sync.pendingCount > 0 && sync.isSyncing) {
+    return (
+      <div
+        className="sticky top-0 z-50 bg-blue-600/90 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm"
+        data-testid="banner-syncing"
+      >
+        <span>Syncing changes...</span>
+      </div>
+    )
+  }
+
+  return null
 }
 
 const AuthenticatedApp = () => {
@@ -74,11 +104,17 @@ const AuthenticatedApp = () => {
     return <Landing />
   }
 
+  const shouldSync = isAuthenticated && !isDemo
+
   return (
-    <TaskDialogProvider>
-      <DemoBanner />
-      <Router />
-    </TaskDialogProvider>
+    <LocalStateProvider shouldSync={shouldSync}>
+      <SyncProvider isAuthenticated={shouldSync}>
+        <TaskDialogProvider>
+          <StatusBanner />
+          <Router />
+        </TaskDialogProvider>
+      </SyncProvider>
+    </LocalStateProvider>
   )
 }
 
