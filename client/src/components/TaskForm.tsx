@@ -80,19 +80,20 @@ export const TaskForm = ({
 
   const subtasks = useMemo(() => {
     if (!initialData || !allTasks) return []
-    const findTask = (
+    const flattenTasks = (
       tasks: typeof allTasks,
-      id: number,
-    ): (typeof allTasks)[0] | undefined => {
+    ): typeof allTasks => {
+      const result: typeof allTasks = []
       for (const t of tasks) {
-        if (t.id === id) return t
-        const found = findTask(t.subtasks ?? [], id)
-        if (found) return found
+        result.push(t)
+        if (t.subtasks && t.subtasks.length > 0) {
+          result.push(...flattenTasks(t.subtasks))
+        }
       }
-      return undefined
+      return result
     }
-    const currentTask = findTask(allTasks, initialData.id)
-    return currentTask?.subtasks ?? []
+    const flatList = flattenTasks(allTasks)
+    return flatList.filter((t) => t.parentId === initialData.id)
   }, [initialData, allTasks])
 
   const getVisibility = useCallback(
