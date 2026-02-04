@@ -1,3 +1,5 @@
+import { omit } from 'es-toolkit'
+
 import type { TaskResponse } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
@@ -93,20 +95,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       newSyncOps.push({
         type: 'create_task',
         tempId: newId,
-        data: {
-          name: task.name,
-          description: task.description,
-          priority: task.priority,
-          ease: task.ease,
-          enjoyment: task.enjoyment,
-          time: task.time,
-          parentId: null,
-          status: task.status,
-          inProgressTime: task.inProgressTime,
-          inProgressStartedAt: task.inProgressStartedAt,
-          createdAt: task.createdAt,
-          completedAt: task.completedAt,
-        },
+        data: { ...omit(task, ['id', 'userId', 'subtasks']), parentId: null },
       })
     }
 
@@ -130,20 +119,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       newSyncOps.push({
         type: 'create_task',
         tempId: newId,
-        data: {
-          name: task.name,
-          description: task.description,
-          priority: task.priority,
-          ease: task.ease,
-          enjoyment: task.enjoyment,
-          time: task.time,
-          parentId: newParentId,
-          status: task.status,
-          inProgressTime: task.inProgressTime,
-          inProgressStartedAt: task.inProgressStartedAt,
-          createdAt: task.createdAt,
-          completedAt: task.completedAt,
-        },
+        data: { ...omit(task, ['id', 'userId', 'subtasks']), parentId: newParentId },
       })
     }
 
