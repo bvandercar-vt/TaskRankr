@@ -1,8 +1,7 @@
 /**
  * @fileoverview Tooltip component for contextual hints
  *
- * Hover-triggered overlay built on Radix UI with animated
- * entrance and configurable positioning.
+ * Hover-triggered overlay built on @radix-ui primitives.
  */
 
 'use client'

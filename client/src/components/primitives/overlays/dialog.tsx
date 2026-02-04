@@ -1,8 +1,7 @@
 /**
  * @fileoverview Modal dialog component
  *
- * Accessible dialog overlay built on Radix UI with animated
- * transitions, close button, and structured content areas.
+ * Accessible dialog built on @radix-ui primitives.
  */
 
 'use client'

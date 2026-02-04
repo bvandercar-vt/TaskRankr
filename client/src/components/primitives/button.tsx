@@ -1,9 +1,8 @@
 /**
- * @fileoverview Button primitive component based on shadcn/ui.
+ * @fileoverview Button primitive component
  *
- * Provides a flexible button with multiple variants (default, destructive,
- * outline, secondary, ghost) and sizes (default, sm, lg, icon). Supports
- * composition via asChild prop and includes hover/active elevation effects.
+ * Multiple variants (default, destructive, outline, secondary, ghost)
+ * and sizes (default, sm, lg, icon) with hover/active elevation effects.
  */
 
 import { Slot } from '@radix-ui/react-slot'

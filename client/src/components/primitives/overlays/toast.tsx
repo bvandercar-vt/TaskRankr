@@ -1,8 +1,7 @@
 /**
  * @fileoverview Toast notification primitives
  *
- * Notification system built on Radix UI with swipe-to-dismiss,
- * action buttons, and destructive variant styling.
+ * Notification system built on @radix-ui primitives.
  */
 
 import * as ToastPrimitives from '@radix-ui/react-toast'

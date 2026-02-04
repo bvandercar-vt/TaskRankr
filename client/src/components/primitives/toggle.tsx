@@ -1,9 +1,7 @@
 /**
- * @fileoverview Toggle primitive component based on shadcn/ui.
+ * @fileoverview Toggle primitive component
  *
- * Wraps Radix UI Toggle primitive with styled variants (default, outline)
- * and sizes (default, sm, lg). Provides an accessible two-state toggle
- * button with visual state indication.
+ * Wraps @radix-ui/react-toggle with styled variants.
  */
 
 import * as TogglePrimitive from '@radix-ui/react-toggle'

@@ -1,8 +1,7 @@
 /**
  * @fileoverview Form field components with validation support
  *
- * Integrates React Hook Form with Radix UI primitives to provide
- * accessible form controls with error handling and descriptions.
+ * Integrates react-hook-form with @radix-ui primitives.
  */
 
 'use client'

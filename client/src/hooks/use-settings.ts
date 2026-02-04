@@ -1,9 +1,7 @@
 /**
  * @fileoverview User settings hook with visibility and required field helpers
- * 
- * Provides the useSettings hook for managing user preferences with optimistic
- * updates. Includes helper functions for checking field visibility/required
- * status and accessing settings outside React components.
+ *
+ * Manages user preferences with optimistic updates.
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'

@@ -1,9 +1,7 @@
 /**
  * @fileoverview Task display card with status indicators and interactions
  *
- * Renders individual task items with priority/ease/time badges, expandable
- * subtasks, and status indicators (pinned, in-progress). Supports long-press
- * for status dialog, click to edit, and displays time tracking information.
+ * Renders task items with badges, expandable subtasks, and long-press actions.
  */
 
 import { useEffect, useRef, useState } from 'react'

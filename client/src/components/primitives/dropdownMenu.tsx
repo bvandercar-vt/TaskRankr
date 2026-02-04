@@ -1,9 +1,7 @@
 /**
- * @fileoverview Dropdown menu primitive components based on shadcn/ui.
+ * @fileoverview Dropdown menu primitive components
  *
- * Wraps Radix UI DropdownMenu primitives with styled variants. Exports
- * DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
- * and related subcomponents for building accessible dropdown menus.
+ * Wraps @radix-ui/react-dropdown-menu with styled variants.
  */
 
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'

@@ -1,9 +1,7 @@
 /**
- * @fileoverview TanStack Query client configuration
- * 
- * Configures and exports the global QueryClient instance with default options
- * for queries and mutations, including disabled refetching, infinite stale time,
- * and no automatic retries for consistent caching behavior.
+ * @fileoverview @tanstack/react-query client configuration
+ *
+ * Global QueryClient with default caching and retry options.
  */
 
 import { QueryClient } from '@tanstack/react-query'

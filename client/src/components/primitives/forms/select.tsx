@@ -1,8 +1,7 @@
 /**
  * @fileoverview Select dropdown component
  *
- * Full-featured select menu built on Radix UI with scroll buttons,
- * item indicators, separators, and animated transitions.
+ * Select menu built on @radix-ui primitives.
  */
 
 'use client'

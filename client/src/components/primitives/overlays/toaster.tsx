@@ -1,8 +1,7 @@
 /**
  * @fileoverview Toast notification container
  *
- * Renders and manages active toast notifications from
- * the useToast hook with viewport positioning.
+ * Renders active toast notifications with viewport positioning.
  */
 
 import {

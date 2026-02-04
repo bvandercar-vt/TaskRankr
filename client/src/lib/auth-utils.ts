@@ -1,9 +1,7 @@
 /**
  * @fileoverview Authentication utility functions
- * 
- * Provides helper functions for handling authentication errors and redirects,
- * including detection of 401 unauthorized errors and redirecting users
- * to the login page with optional toast notifications.
+ *
+ * Handles 401 errors and login redirects.
  */
 
 import { authPaths } from '~/shared/routes'

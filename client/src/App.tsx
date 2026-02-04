@@ -1,9 +1,7 @@
 /**
  * @fileoverview Main application component with routing and provider setup
  *
- * Configures the React application with authentication, routing, and global
- * providers including React Query, tooltips, toasts, and task dialog state.
- * Renders the Landing page for unauthenticated users.
+ * Root component with authentication, routing, and global providers.
  */
 
 import { QueryClientProvider } from '@tanstack/react-query'

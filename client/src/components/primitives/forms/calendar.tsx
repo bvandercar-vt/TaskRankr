@@ -2,7 +2,6 @@
  * @fileoverview Calendar date picker component
  *
  * Wraps react-day-picker with custom styling and navigation icons.
- * Supports date selection, ranges, and outside days display.
  */
 
 import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'

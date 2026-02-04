@@ -1,9 +1,7 @@
 /**
- * @fileoverview Badge primitive component based on shadcn/ui.
+ * @fileoverview Badge primitive component
  *
- * Provides a styled badge/tag element with variant support (default,
- * secondary, destructive, outline). Includes built-in hover elevation
- * effects and consistent sizing.
+ * Styled badge with variant support and hover elevation effects.
  */
 
 import { cva, type VariantProps } from 'class-variance-authority'

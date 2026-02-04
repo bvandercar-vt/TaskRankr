@@ -1,9 +1,7 @@
 /**
  * @fileoverview Form component for creating and editing tasks
  *
- * Renders a form with task name, description, and configurable attribute
- * fields (priority, ease, enjoyment, time). Supports parent task breadcrumbs,
- * date pickers, and validates required fields based on user settings.
+ * Task form with name, description, and attribute fields.
  */
 
 import { useCallback, useEffect, useMemo } from 'react'
