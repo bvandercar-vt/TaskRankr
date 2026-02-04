@@ -3,28 +3,25 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
+import { ArrowLeft, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/button'
 import { Checkbox } from '@/components/primitives/forms/checkbox'
 import { Switch } from '@/components/primitives/forms/switch'
+import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/use-auth'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
 import { useSetTaskStatus, useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
-import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
-import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import {
-  RANK_FIELDS_CRITERIA,
-  type RankFieldValueMap,
-  type SortOption,
-} from '~/shared/schema'
+import { RANK_FIELDS_CRITERIA } from '~/shared/schema'
+
+import { cn } from '@/lib/utils'
 
 const Card = ({
   children,
@@ -71,59 +68,6 @@ const SwitchCard = (props: SwitchSettingProps) => (
   </Card>
 )
 
-const SORT_INFO_ATTR_LABELS = {
-  priority: 'Priority',
-  ease: 'Ease',
-  enjoyment: 'Enjoyment',
-  time: 'Time',
-  date: 'Date created',
-} as const satisfies Record<SortOption, string>
-
-const SORT_INFO_CONFIG: {
-  name: string
-  criteria: {
-    attr: SortOption
-    value: string
-  }[]
-}[] = [
-  {
-    name: 'Priority',
-    criteria: [
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
-      { attr: 'enjoyment', value: 'highest' },
-    ],
-  },
-  {
-    name: 'Ease',
-    criteria: [
-      { attr: 'ease', value: 'easiest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'enjoyment', value: 'highest' },
-    ],
-  },
-  {
-    name: 'Enjoyment',
-    criteria: [
-      { attr: 'enjoyment', value: 'highest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
-    ],
-  },
-  {
-    name: 'Time',
-    criteria: [
-      { attr: 'time', value: 'lowest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
-    ],
-  },
-  {
-    name: 'Date',
-    criteria: [{ attr: 'date', value: 'newest' }],
-  },
-]
-
 const Settings = () => {
   const { settings, updateSetting, updateVisibility, updateRequired } =
     useSettings()
@@ -133,7 +77,6 @@ const Settings = () => {
   const setTaskStatus = useSetTaskStatus()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isImporting, setIsImporting] = useState(false)
-  const [sortInfoExpanded, setSortInfoExpanded] = useState(false)
   const hasNoTasks = !tasks || tasks.length === 0
 
   const handleExport = () => {
@@ -314,76 +257,9 @@ const Settings = () => {
           </table>
         </Card>
 
-        <Card className="mt-8">
-          <button
-            onClick={() => setSortInfoExpanded(!sortInfoExpanded)}
-            className="w-full flex items-center justify-start gap-2 cursor-pointer"
-            data-testid="button-sort-info-toggle"
-            type="button"
-          >
-            <h3 className="font-semibold text-foreground">Sort Info</h3>
-            <ChevronDown
-              className={cn(
-                IconSizeStyle.small,
-                'text-muted-foreground transition-transform',
-                sortInfoExpanded && 'rotate-180',
-              )}
-            />
-          </button>
-          {sortInfoExpanded && (
-            <div className="mt-3">
-              <p className="text-xs text-muted-foreground mb-3 text-center">
-                When tasks have the same value, they are sorted by secondary
-                attributes.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                {SORT_INFO_CONFIG.map((item) => (
-                  <div
-                    key={item.name}
-                    className={'p-3 bg-secondary/20 rounded-md'}
-                  >
-                    <p className="font-medium text-foreground mb-1">
-                      {item.name}
-                    </p>
-                    <ol
-                      className={cn(
-                        'text-xs list-decimal list-inside',
-                        item.criteria.length > 1 && 'space-y-0.5',
-                      )}
-                    >
-                      {item.criteria.map((c) => {
-                        const style =
-                          c.attr !== 'date'
-                            ? getRankFieldStyle(
-                                c.attr,
-                                c.value satisfies string as RankFieldValueMap[typeof c.attr],
-                                '',
-                              )
-                            : ''
-                        return (
-                          <li
-                            key={`${c.attr} ${c.value}`}
-                            className="text-muted-foreground"
-                          >
-                            {SORT_INFO_ATTR_LABELS[c.attr]} (
-                            {style ? (
-                              <span className={cn('font-medium', style)}>
-                                {c.value}
-                              </span>
-                            ) : (
-                              c.value
-                            )}{' '}
-                            first)
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
+        <div className="mt-8">
+          <SortInfo testIdPrefix="settings" />
+        </div>
 
         <Card className="mt-8">
           <h3 className="font-semibold text-foreground mb-3 text-center">

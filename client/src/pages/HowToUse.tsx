@@ -2,11 +2,20 @@
  * @fileoverview Instructional page explaining how to use the app
  */
 
-import { ArrowLeft, Hand, MousePointer2, Pin, PlayCircle } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowUpDown,
+  FolderTree,
+  Hand,
+  MousePointer2,
+  Pin,
+  PlayCircle,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/button'
 import { Card, CardContent } from '@/components/primitives/card'
+import { SortInfo } from '@/components/SortInfo'
 
 const InstructionCard = ({
   icon,
@@ -64,7 +73,7 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<Hand className="h-5 w-5" />}
                 title="Hold to Change Status"
-                description="Press and hold a task card for about a second to open the status menu. From there you can mark it as In Progress, Pinned, or Completed."
+                description="Press and hold a task card for about a second to open the status menu. From there you can mark it as In Progress (if enabled), Pinned, or Completed."
                 testId="card-hold-to-change-status"
               />
             </div>
@@ -77,7 +86,7 @@ const HowToUse = () => {
             <div className="space-y-3">
               <InstructionCard
                 icon={<PlayCircle className="h-5 w-5" />}
-                title="In Progress"
+                title="In Progress (if enabled)"
                 description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
                 testId="card-in-progress"
               />
@@ -94,23 +103,27 @@ const HowToUse = () => {
             <h2 className="text-lg font-semibold mb-3 text-primary">
               Sorting & Organization
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Use the sort buttons at the top of the task list to order tasks by
-              date, priority, ease, enjoyment, or time. You can customize which
-              rank fields are visible in Settings.
-            </p>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<ArrowUpDown className="h-5 w-5" />}
+                title="Sort Options"
+                description="Use the sort buttons at the top of the task list to order tasks by date, priority, ease, enjoyment, or time. You can customize which rank fields are visible in Settings."
+                testId="card-sorting"
+              />
+              <SortInfo defaultExpanded={false} testIdPrefix="howto" />
+            </div>
           </section>
 
           <section data-testid="section-subtasks">
             <h2 className="text-lg font-semibold mb-3 text-primary">
               Subtasks
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Tasks can have subtasks nested inside them. When creating or
-              editing a task, you can assign a parent task to create a
-              hierarchy. This helps break down big projects into smaller,
-              manageable pieces.
-            </p>
+            <InstructionCard
+              icon={<FolderTree className="h-5 w-5" />}
+              title="Nested Tasks"
+              description="Tasks can have subtasks nested inside them. When creating or editing a task, you can assign a parent task to create a hierarchy. This helps break down big projects into smaller, manageable pieces."
+              testId="card-subtasks"
+            />
           </section>
         </div>
       </main>

@@ -4,7 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Route, Switch } from 'wouter'
+import { Route, Switch, useLocation } from 'wouter'
 
 import { GuestModeProvider, useGuestMode } from '@/components/GuestModeProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
@@ -41,6 +41,12 @@ const Router = () => (
 const StatusBanner = () => {
   const { isGuestMode, exitGuestMode } = useGuestMode()
   const sync = useSyncSafe()
+  const [location] = useLocation()
+
+  // Hide guest mode banner on How To Use page
+  if (isGuestMode && location === '/how-to-use') {
+    return null
+  }
 
   if (isGuestMode) {
     return (
