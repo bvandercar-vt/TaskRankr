@@ -35,7 +35,10 @@ export const useTaskDialog = () => {
 }
 
 interface DialogProps
-  extends Pick<TaskFormProps, 'isPending' | 'onSubmit' | 'onAddChild'> {
+  extends Pick<
+    TaskFormProps,
+    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild'
+  > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
   mode: 'create' | 'edit'
@@ -54,6 +57,7 @@ const DesktopDialog = ({
   onSubmit,
   onClose,
   onAddChild,
+  onEditChild,
 }: DialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
@@ -86,6 +90,7 @@ const DesktopDialog = ({
               parentId={parentId}
               onCancel={onClose}
               onAddChild={onAddChild}
+              onEditChild={onEditChild}
             />
           </div>
         </div>
@@ -102,6 +107,7 @@ const MobileDialog = ({
   onSubmit,
   onClose,
   onAddChild,
+  onEditChild,
 }: Omit<DialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
@@ -120,6 +126,7 @@ const MobileDialog = ({
             parentId={parentId}
             onCancel={onClose}
             onAddChild={onAddChild}
+            onEditChild={onEditChild}
           />
         </div>
       </motion.div>
@@ -155,6 +162,16 @@ export const TaskDialogProvider = ({
     setActiveTask(task)
     setParentId(task.parentId || undefined)
     setReturnToTask(undefined)
+    setIsOpen(true)
+  }
+
+  const handleEditChild = (task: Task) => {
+    if (activeTask) {
+      setReturnToTask(activeTask)
+    }
+    setMode('edit')
+    setActiveTask(task)
+    setParentId(task.parentId || undefined)
     setIsOpen(true)
   }
 
@@ -214,6 +231,7 @@ export const TaskDialogProvider = ({
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
+        onEditChild={handleEditChild}
       />
 
       <MobileDialog
@@ -224,6 +242,7 @@ export const TaskDialogProvider = ({
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
+        onEditChild={handleEditChild}
       />
     </TaskDialogContext.Provider>
   )

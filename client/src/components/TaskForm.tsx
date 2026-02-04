@@ -2,14 +2,17 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import {
   Calendar as CalendarIcon,
+  ChevronDown,
   ChevronRight,
   Loader2,
+  Pencil,
   Plus,
+  Trash2,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
@@ -38,7 +41,7 @@ import {
   PopoverTrigger,
 } from '@/components/primitives/overlays/popover'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
-import { useTaskParentChain } from '@/hooks/use-tasks'
+import { useDeleteTask, useTaskParentChain, useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
@@ -57,6 +60,7 @@ export interface TaskFormProps {
   parentId?: number | null
   onCancel: () => void
   onAddChild?: (parentId: number) => void
+  onEditChild?: (task: Task) => void
 }
 
 export const TaskForm = ({
@@ -66,9 +70,30 @@ export const TaskForm = ({
   parentId,
   onCancel,
   onAddChild,
+  onEditChild,
 }: TaskFormProps) => {
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
+  const { data: allTasks } = useTasks()
+  const deleteTask = useDeleteTask()
+
+  const subtasks = useMemo(() => {
+    if (!initialData || !allTasks) return []
+    const findTask = (
+      tasks: typeof allTasks,
+      id: number,
+    ): (typeof allTasks)[0] | undefined => {
+      for (const t of tasks) {
+        if (t.id === id) return t
+        const found = findTask(t.subtasks ?? [], id)
+        if (found) return found
+      }
+      return undefined
+    }
+    const currentTask = findTask(allTasks, initialData.id)
+    return currentTask?.subtasks ?? []
+  }, [initialData, allTasks])
 
   const getVisibility = useCallback(
     (attr: RankField) => getIsVisible(attr, settings),
@@ -445,6 +470,70 @@ export const TaskForm = ({
               </div>
             )}
           </div>
+
+          {initialData && subtasks.length > 0 && (
+            <div className="border border-white/10 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setSubtasksExpanded(!subtasksExpanded)}
+                className="w-full flex items-center justify-between gap-2 p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
+                data-testid="button-toggle-subtasks"
+              >
+                <span className="text-sm font-medium">
+                  Subtasks ({subtasks.length})
+                </span>
+                <ChevronDown
+                  className={cn(
+                    IconSizeStyle.HW4,
+                    'text-muted-foreground transition-transform',
+                    subtasksExpanded && 'rotate-180',
+                  )}
+                />
+              </button>
+              {subtasksExpanded && (
+                <div className="divide-y divide-white/5">
+                  {subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/5"
+                      data-testid={`subtask-row-${subtask.id}`}
+                    >
+                      <span className="text-sm truncate flex-1">
+                        {subtask.name}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {onEditChild && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEditChild(subtask as Task)}
+                            data-testid={`button-edit-subtask-${subtask.id}`}
+                          >
+                            <Pencil className={IconSizeStyle.HW4} />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteTask.mutate(subtask.id)}
+                          data-testid={`button-delete-subtask-${subtask.id}`}
+                        >
+                          <Trash2
+                            className={cn(
+                              IconSizeStyle.HW4,
+                              'text-destructive',
+                            )}
+                          />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {initialData && onAddChild && (
             <Button
