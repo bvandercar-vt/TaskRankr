@@ -2,9 +2,9 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { format } from 'date-fns'
 import {
   Calendar as CalendarIcon,
   ChevronDown,
@@ -12,13 +12,12 @@ import {
   Pencil,
   Plus,
   Trash2,
-} from "lucide-react";
-import { useForm } from "react-hook-form";
+} from 'lucide-react'
+import { useForm } from 'react-hook-form'
 
-import { Button } from "@/components/primitives/Button";
-import { TagChain } from "@/components/primitives/TagChain";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
-import { Calendar } from "@/components/primitives/forms/Calendar";
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
+import { Button } from '@/components/primitives/Button'
+import { Calendar } from '@/components/primitives/forms/Calendar'
 import {
   Form,
   FormControl,
@@ -26,42 +25,43 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/primitives/forms/Form";
-import { Input } from "@/components/primitives/forms/Input";
+} from '@/components/primitives/forms/Form'
+import { Input } from '@/components/primitives/forms/Input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/primitives/forms/Select";
-import { Textarea } from "@/components/primitives/forms/Textarea";
+} from '@/components/primitives/forms/Select'
+import { Textarea } from '@/components/primitives/forms/Textarea'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/primitives/overlays/Popover";
-import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
-import { useDeleteTask, useTaskParentChain, useTasks } from "@/hooks/useTasks";
-import { IconSizeStyle } from "@/lib/constants";
-import { getRankFieldStyle } from "@/lib/rank-field-styles";
-import { cn } from "@/lib/utils";
+} from '@/components/primitives/overlays/Popover'
+import { TagChain } from '@/components/primitives/TagChain'
+import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useDeleteTask, useTaskParentChain, useTasks } from '@/hooks/useTasks'
+import { IconSizeStyle } from '@/lib/constants'
+import { getRankFieldStyle } from '@/lib/rank-field-styles'
+import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
   type MutateTaskRequest,
   RANK_FIELDS_CRITERIA,
   type RankField,
   type Task,
-} from "~/shared/schema";
+} from '~/shared/schema'
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskRequest) => void;
-  isPending: boolean;
-  initialData?: Task;
-  parentId?: number | null;
-  onCancel: () => void;
-  onAddChild?: (parentId: number) => void;
-  onEditChild?: (task: Task) => void;
+  onSubmit: (data: MutateTaskRequest) => void
+  isPending: boolean
+  initialData?: Task
+  parentId?: number | null
+  onCancel: () => void
+  onAddChild?: (parentId: number) => void
+  onEditChild?: (task: Task) => void
 }
 
 export const TaskForm = ({
@@ -73,63 +73,63 @@ export const TaskForm = ({
   onAddChild,
   onEditChild,
 }: TaskFormProps) => {
-  const [subtasksExpanded, setSubtasksExpanded] = useState(false);
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
   const [subtaskToDelete, setSubtaskToDelete] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-  const parentChain = useTaskParentChain(parentId || undefined);
-  const { settings } = useSettings();
-  const { data: allTasks } = useTasks();
-  const deleteTask = useDeleteTask();
+    id: number
+    name: string
+  } | null>(null)
+  const parentChain = useTaskParentChain(parentId || undefined)
+  const { settings } = useSettings()
+  const { data: allTasks } = useTasks()
+  const deleteTask = useDeleteTask()
 
   const subtasks = useMemo(() => {
-    if (!initialData || !allTasks) return [];
+    if (!initialData || !allTasks) return []
     const flattenTasks = (tasks: typeof allTasks): typeof allTasks => {
-      const result: typeof allTasks = [];
+      const result: typeof allTasks = []
       for (const t of tasks) {
-        result.push(t);
+        result.push(t)
         if (t.subtasks && t.subtasks.length > 0) {
-          result.push(...flattenTasks(t.subtasks));
+          result.push(...flattenTasks(t.subtasks))
         }
       }
-      return result;
-    };
-    const flatList = flattenTasks(allTasks);
-    return flatList.filter((t) => t.parentId === initialData.id);
-  }, [initialData, allTasks]);
+      return result
+    }
+    const flatList = flattenTasks(allTasks)
+    return flatList.filter((t) => t.parentId === initialData.id)
+  }, [initialData, allTasks])
 
   const getVisibility = useCallback(
     (attr: RankField) => getIsVisible(attr, settings),
     [settings],
-  );
+  )
 
   const getRequired = useCallback(
     (attr: RankField) =>
       getIsVisible(attr, settings) && getIsRequired(attr, settings),
     [settings],
-  );
+  )
 
   const visibleAttributes = useMemo(
     () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
     [getVisibility],
-  );
+  )
 
-  const baseFormSchema = insertTaskSchema.omit({ userId: true });
+  const baseFormSchema = insertTaskSchema.omit({ userId: true })
 
-  const formSchemaToUse = baseFormSchema;
+  const formSchemaToUse = baseFormSchema
 
   const form = useForm<MutateTaskRequest>({
     resolver: zodResolver(formSchemaToUse),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: initialData
       ? {
           name: initialData.name,
-          description: initialData.description || "",
-          priority: initialData.priority || "none",
-          ease: initialData.ease || "none",
-          enjoyment: initialData.enjoyment || "none",
-          time: initialData.time || "none",
+          description: initialData.description || '',
+          priority: initialData.priority || 'none',
+          ease: initialData.ease || 'none',
+          enjoyment: initialData.enjoyment || 'none',
+          time: initialData.time || 'none',
           parentId: initialData.parentId,
           createdAt: initialData.createdAt
             ? new Date(initialData.createdAt)
@@ -140,17 +140,17 @@ export const TaskForm = ({
           inProgressTime: initialData.inProgressTime || 0,
         }
       : {
-          name: "",
-          description: "",
-          priority: "none",
-          ease: "none",
-          enjoyment: "none",
-          time: "none",
+          name: '',
+          description: '',
+          priority: 'none',
+          ease: 'none',
+          enjoyment: 'none',
+          time: 'none',
           parentId: parentId || null,
           createdAt: new Date(),
           inProgressTime: 0,
         },
-  });
+  })
 
   // Use useEffect to reset form when initialData or parentId changes
   // to ensure "Add Subtask" dialog is clean.
@@ -159,11 +159,11 @@ export const TaskForm = ({
       initialData
         ? {
             name: initialData.name,
-            description: initialData.description || "",
-            priority: initialData.priority || "none",
-            ease: initialData.ease || "none",
-            enjoyment: initialData.enjoyment || "none",
-            time: initialData.time || "none",
+            description: initialData.description || '',
+            priority: initialData.priority || 'none',
+            ease: initialData.ease || 'none',
+            enjoyment: initialData.enjoyment || 'none',
+            time: initialData.time || 'none',
             parentId: initialData.parentId,
             createdAt: initialData.createdAt
               ? new Date(initialData.createdAt)
@@ -174,45 +174,45 @@ export const TaskForm = ({
             inProgressTime: initialData.inProgressTime || 0,
           }
         : {
-            name: "",
-            description: "",
-            priority: "none",
-            ease: "none",
-            enjoyment: "none",
-            time: "none",
+            name: '',
+            description: '',
+            priority: 'none',
+            ease: 'none',
+            enjoyment: 'none',
+            time: 'none',
             parentId: parentId || null,
             createdAt: new Date(),
             inProgressTime: 0,
           },
-    );
-  }, [initialData, parentId, form]);
+    )
+  }, [initialData, parentId, form])
 
   const onSubmitWithNulls = (data: MutateTaskRequest) => {
     const formattedData = {
       ...data,
-      priority: data.priority === "none" ? null : data.priority,
-      ease: data.ease === "none" ? null : data.ease,
-      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
-      time: data.time === "none" ? null : data.time,
-    };
-    onSubmit(formattedData);
-  };
+      priority: data.priority === 'none' ? null : data.priority,
+      ease: data.ease === 'none' ? null : data.ease,
+      enjoyment: data.enjoyment === 'none' ? null : data.enjoyment,
+      time: data.time === 'none' ? null : data.time,
+    }
+    onSubmit(formattedData)
+  }
 
-  const watchedValues = form.watch();
+  const watchedValues = form.watch()
 
   const requiredAttributesFilled = useMemo(() => {
     for (const attr of visibleAttributes) {
       if (getRequired(attr.name)) {
-        const value = watchedValues[attr.name];
-        if (!value || value === "none") {
-          return false;
+        const value = watchedValues[attr.name]
+        if (!value || value === 'none') {
+          return false
         }
       }
     }
-    return true;
-  }, [watchedValues, visibleAttributes, getRequired]);
+    return true
+  }, [watchedValues, visibleAttributes, getRequired])
 
-  const isValid = form.formState.isValid && requiredAttributesFilled;
+  const isValid = form.formState.isValid && requiredAttributesFilled
 
   return (
     <Form {...form}>
@@ -248,8 +248,8 @@ export const TaskForm = ({
           {visibleAttributes.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {visibleAttributes.map((attr) => {
-                const isRequired = getRequired(attr.name);
-                const showNoneOption = !isRequired;
+                const isRequired = getRequired(attr.name)
+                const showNoneOption = !isRequired
 
                 return (
                   <FormField
@@ -258,7 +258,7 @@ export const TaskForm = ({
                     name={attr.name}
                     render={({ field }) => {
                       const hasError =
-                        isRequired && (!field.value || field.value === "none");
+                        isRequired && (!field.value || field.value === 'none')
                       return (
                         <FormItem>
                           <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -269,18 +269,18 @@ export const TaskForm = ({
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value || "none"}
+                            value={field.value || 'none'}
                           >
                             <FormControl>
                               <SelectTrigger
                                 className={cn(
-                                  "bg-secondary/20 capitalize font-semibold h-10",
+                                  'bg-secondary/20 capitalize font-semibold h-10',
                                   hasError
-                                    ? "border-destructive/50"
-                                    : "border-white/5",
-                                  field.value && field.value !== "none"
+                                    ? 'border-destructive/50'
+                                    : 'border-white/5',
+                                  field.value && field.value !== 'none'
                                     ? getRankFieldStyle(attr.name, field.value)
-                                    : "text-muted-foreground",
+                                    : 'text-muted-foreground',
                                 )}
                               >
                                 <SelectValue placeholder="Select..." />
@@ -296,13 +296,13 @@ export const TaskForm = ({
                                 </SelectItem>
                               )}
                               {attr.levels
-                                .filter((level) => level !== "none")
+                                .filter((level) => level !== 'none')
                                 .map((level) => (
                                   <SelectItem
                                     key={level}
                                     value={level}
                                     className={cn(
-                                      "capitalize font-semibold",
+                                      'capitalize font-semibold',
                                       getRankFieldStyle(attr.name, level),
                                     )}
                                   >
@@ -317,10 +317,10 @@ export const TaskForm = ({
                             </p>
                           )}
                         </FormItem>
-                      );
+                      )
                     }}
                   />
-                );
+                )
               })}
             </div>
           )}
@@ -338,7 +338,7 @@ export const TaskForm = ({
                     placeholder="Additional details..."
                     className="bg-secondary/20 border-white/5 min-h-[120px] resize-none focus-visible:ring-primary/50"
                     {...field}
-                    value={field.value || ""}
+                    value={field.value || ''}
                   />
                 </FormControl>
               </FormItem>
@@ -360,14 +360,14 @@ export const TaskForm = ({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant={'outline'}
                           className={cn(
-                            "w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal",
-                            !field.value && "text-muted-foreground",
+                            'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
+                            !field.value && 'text-muted-foreground',
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, 'PPP')
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -386,7 +386,7 @@ export const TaskForm = ({
                         mode="single"
                         selected={field.value}
                         onSelect={(date) => {
-                          field.onChange(date);
+                          field.onChange(date)
                         }}
                         initialFocus
                         className="rounded-md border-0"
@@ -397,19 +397,19 @@ export const TaskForm = ({
               )}
             />
 
-            {initialData?.status === "completed" &&
+            {initialData?.status === 'completed' &&
               initialData?.completedAt && (
                 <div className="flex items-center justify-between gap-4">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     Date Completed
                   </div>
                   <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                    {format(new Date(initialData.completedAt), "PPP p")}
+                    {format(new Date(initialData.completedAt), 'PPP p')}
                   </div>
                 </div>
               )}
 
-            {initialData?.status === "completed" && (
+            {initialData?.status === 'completed' && (
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Time Spent
@@ -421,18 +421,18 @@ export const TaskForm = ({
                     placeholder="0"
                     className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
                     value={Math.floor(
-                      (form.watch("inProgressTime") || 0) / 3_600_000,
+                      (form.watch('inProgressTime') || 0) / 3_600_000,
                     )}
                     onChange={(e) => {
-                      const hours = Number.parseInt(e.target.value) || 0;
-                      const currentMs = form.getValues("inProgressTime") || 0;
+                      const hours = Number.parseInt(e.target.value) || 0
+                      const currentMs = form.getValues('inProgressTime') || 0
                       const currentMinutes = Math.floor(
                         (currentMs % 3_600_000) / 60_000,
-                      );
+                      )
                       form.setValue(
-                        "inProgressTime",
+                        'inProgressTime',
                         hours * 3_600_000 + currentMinutes * 60_000,
-                      );
+                      )
                     }}
                     data-testid="input-time-hours"
                   />
@@ -444,20 +444,20 @@ export const TaskForm = ({
                     placeholder="0"
                     className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
                     value={Math.floor(
-                      ((form.watch("inProgressTime") || 0) % 3_600_000) /
+                      ((form.watch('inProgressTime') || 0) % 3_600_000) /
                         60_000,
                     )}
                     onChange={(e) => {
                       const minutes = Math.min(
                         59,
                         Number.parseInt(e.target.value) || 0,
-                      );
-                      const currentMs = form.getValues("inProgressTime") || 0;
-                      const currentHours = Math.floor(currentMs / 3_600_000);
+                      )
+                      const currentMs = form.getValues('inProgressTime') || 0
+                      const currentHours = Math.floor(currentMs / 3_600_000)
                       form.setValue(
-                        "inProgressTime",
+                        'inProgressTime',
                         currentHours * 3_600_000 + minutes * 60_000,
-                      );
+                      )
                     }}
                     data-testid="input-time-minutes"
                   />
@@ -481,8 +481,8 @@ export const TaskForm = ({
                 <ChevronDown
                   className={cn(
                     IconSizeStyle.HW4,
-                    "text-muted-foreground transition-transform",
-                    subtasksExpanded && "rotate-180",
+                    'text-muted-foreground transition-transform',
+                    subtasksExpanded && 'rotate-180',
                   )}
                 />
               </button>
@@ -524,7 +524,7 @@ export const TaskForm = ({
                           <Trash2
                             className={cn(
                               IconSizeStyle.HW4,
-                              "text-destructive",
+                              'text-destructive',
                             )}
                           />
                         </Button>
@@ -544,7 +544,7 @@ export const TaskForm = ({
               className="w-full bg-secondary/10 border-white/5 hover:bg-secondary/20 h-10"
               onClick={() => onAddChild(initialData.id)}
             >
-              <Plus className={cn(IconSizeStyle.HW4, "mr-2")} />
+              <Plus className={cn(IconSizeStyle.HW4, 'mr-2')} />
               Add Subtask
             </Button>
           )}
@@ -565,23 +565,23 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && (
-              <Loader2 className={cn(IconSizeStyle.HW4, "mr-2 animate-spin")} />
+              <Loader2 className={cn(IconSizeStyle.HW4, 'mr-2 animate-spin')} />
             )}
-            {initialData ? "Save" : "Create"}
+            {initialData ? 'Save' : 'Create'}
           </Button>
         </div>
       </form>
       <ConfirmDeleteDialog
         open={!!subtaskToDelete}
         onOpenChange={(open) => !open && setSubtaskToDelete(null)}
-        taskName={subtaskToDelete?.name ?? ""}
+        taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
           if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id);
-            setSubtaskToDelete(null);
+            deleteTask.mutate(subtaskToDelete.id)
+            setSubtaskToDelete(null)
           }
         }}
       />
     </Form>
-  );
-};
+  )
+}

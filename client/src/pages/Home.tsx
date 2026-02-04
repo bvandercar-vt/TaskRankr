@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { EmptyState, PageError, PageLoading } from '@/components/page-states'
+import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import {
   DropdownMenu,
