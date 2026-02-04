@@ -25,8 +25,8 @@ const InstructionCard = ({
   testId,
 }: {
   icon: React.ReactNode;
-  title: string;
-  description: string;
+  title: React.ReactNode;
+  description: React.ReactNode;
   testId: string;
 }) => (
   <Card className="bg-card/50 border-white/10" data-testid={testId}>
@@ -64,7 +64,7 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<MousePointer2 className="h-5 w-5" />}
                 title="Tap to Edit"
-                description="Tap any task card to open the edit form where you can change the name, description, and rank fields like priority, ease, enjoyment, and time."
+                description="Tap any task card to open the edit form where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down big projects."
                 testId="card-tap-to-edit"
               />
               <InstructionCard
@@ -78,29 +78,26 @@ const HowToUse = () => {
 
           <section data-testid="section-sorting">
             <h2 className="text-lg font-semibold mb-3 text-primary">
-              Sorting & Organization
+              Sorting Taks
             </h2>
             <div className="space-y-3">
               <InstructionCard
                 icon={<ArrowUpDown className="h-5 w-5" />}
                 title="Sort Options"
-                description="Use the sort buttons at the top of the task list to order tasks by date created, priority, ease, enjoyment, or time. You can customize which rank fields are visible in Settings."
+                description={
+                  <>
+                    <div className="mb-4">
+                      Use the sort buttons at the top of the task list to order
+                      tasks by date created, priority, ease, enjoyment, or time.
+                      You can customize which rank fields are visible in
+                      Settings.
+                    </div>
+                    <SortInfo defaultExpanded={false} testIdPrefix="howto" />
+                  </>
+                }
                 testId="card-sorting"
               />
-              <SortInfo defaultExpanded={false} testIdPrefix="howto" />
             </div>
-          </section>
-
-          <section data-testid="section-subtasks">
-            <h2 className="text-lg font-semibold mb-3 text-primary">
-              Subtasks
-            </h2>
-            <InstructionCard
-              icon={<FolderTree className="h-5 w-5" />}
-              title="Nested Tasks"
-              description="Tasks can have subtasks nested inside them. From an existing task, you can create a child task to build a hierarchy. This helps break down big projects into smaller, manageable pieces."
-              testId="card-subtasks"
-            />
           </section>
 
           <section data-testid="section-task-statuses">
