@@ -13,7 +13,13 @@ interface TagChainItem {
 
 interface TagChainProps {
   items: TagChainItem[]
+  /**
+   * Appears before the chain of tags.
+   */
   label?: string
+  /**
+   * @default `${label}s`
+   */
   labelPlural?: string
   className?: string
 }
@@ -36,7 +42,7 @@ export const TagChain = ({
     <div className={cn('flex items-center gap-1.5 flex-wrap', className)}>
       {displayLabel && (
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-          {displayLabel}
+          {displayLabel} :
         </span>
       )}
       {items.map((item, idx) => (
