@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Auth storage layer for user data persistence.
+ */
+
 import { eq } from 'drizzle-orm'
 
 import { type UpsertUser, type User, users } from '~/shared/models/auth'

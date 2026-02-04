@@ -1,13 +1,18 @@
-import { CheckCircle, Clock, ListTodo, Star } from "lucide-react";
+/**
+ * @fileoverview Unauthenticated landing page for TaskRankr.
+ * Provides login/signup call-to-action for new users.
+ */
 
-import { useGuestMode } from "@/components/GuestProvider";
-import { Button } from "@/components/primitives/button";
-import { IconSizeStyle } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import { authPaths } from "~/shared/routes";
+import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
+
+import { useGuestMode } from '@/components/GuestModeProvider'
+import { Button } from '@/components/primitives/button'
+import { IconSizeStyle } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 
 const Landing = () => {
-  const { enterGuestMode } = useGuestMode();
+  const { enterGuestMode } = useGuestMode()
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -55,21 +60,21 @@ const Landing = () => {
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSizeStyle.medium, "text-primary")} />
+            <Star className={cn(IconSizeStyle.medium, 'text-primary')} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <CheckCircle
-              className={cn(IconSizeStyle.medium, "text-emerald-500")}
+              className={cn(IconSizeStyle.medium, 'text-emerald-500')}
             />
             <span>Easy tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSizeStyle.medium, "text-blue-500")} />
+            <Clock className={cn(IconSizeStyle.medium, 'text-blue-500')} />
             <span>Time tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSizeStyle.medium, "text-amber-500")} />
+            <ListTodo className={cn(IconSizeStyle.medium, 'text-amber-500')} />
             <span>Nested tasks</span>
           </div>
         </div>
@@ -82,7 +87,7 @@ const Landing = () => {
         <p data-testid="text-footer-brand">TaskRankr</p>
       </footer>
     </div>
-  );
-};
+  )
+}
 
-export default Landing;
+export default Landing

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Application entry point and React root initialization
+ */
+
 import { createRoot } from 'react-dom/client'
 
 import App from './App'

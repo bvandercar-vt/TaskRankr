@@ -1,3 +1,8 @@
+/**
+ * @fileoverview ts-rest API contract defining all endpoint schemas.
+ * Used by both server route handlers and client API calls.
+ */
+
 import { initContract } from '@ts-rest/core'
 import { z } from 'zod'
 

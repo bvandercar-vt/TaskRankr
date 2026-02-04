@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Main task list (tree) page with sorting and filtering
+ * capabilities.
+ *
+ */
+
 import { useCallback, useMemo, useState } from 'react'
 import {
   CheckCircle2,
@@ -11,8 +17,6 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { useLocalState } from '@/components/LocalStateProvider'
-import { useGuestModeState } from '@/hooks/use-guest-mode-state'
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
@@ -26,11 +30,12 @@ import { Input } from '@/components/primitives/forms/input'
 import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { useGuestModeState } from '@/hooks/use-guest-mode-state'
 import { getIsVisible, getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { authPaths } from '~/shared/routes'
+import { authPaths } from '~/shared/constants'
 import {
   type Ease,
   type Enjoyment,

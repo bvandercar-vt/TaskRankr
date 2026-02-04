@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Task CRUD operations hooks (for listing, creation, updates,
+ * deletion, and status changes, etc.)
+ */
+
 import { useMutation } from '@tanstack/react-query'
 
 import { useLocalStateSafe } from '@/components/LocalStateProvider'

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Popover component for floating content, built on @radix-ui
+ * primitives.
+ */
+
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 
 import { cn, forwardRefHelper } from '@/lib/utils'
