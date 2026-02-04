@@ -121,7 +121,7 @@ const HowToUse = () => {
             <InstructionCard
               icon={<FolderTree className="h-5 w-5" />}
               title="Nested Tasks"
-              description="Tasks can have subtasks nested inside them. When creating or editing a task, you can assign a parent task to create a hierarchy. This helps break down big projects into smaller, manageable pieces."
+              description="Tasks can have subtasks nested inside them. From an existing task, you can create a child task to build a hierarchy. This helps break down big projects into smaller, manageable pieces."
               testId="card-subtasks"
             />
           </section>
