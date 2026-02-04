@@ -1,5 +1,5 @@
 /**
- * @fileoverview Authentication route path constants.
+ * @fileoverview Constants shared between client and server.
  */
 
 export const authPaths = {

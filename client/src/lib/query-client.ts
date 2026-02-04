@@ -1,7 +1,6 @@
 /**
- * @fileoverview @tanstack/react-query client configuration
- *
- * Global QueryClient with default caching and retry options.
+ * @fileoverview @tanstack/react-query global QueryClient with default caching
+ * and retry options.
  */
 
 import { QueryClient } from '@tanstack/react-query'

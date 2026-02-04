@@ -1,7 +1,5 @@
 /**
- * @fileoverview Shared UI components for page loading, error, and empty states
- *
- * PageLoading, PageError, and EmptyState components.
+ * @fileoverview Shared UI components for page loading, error, and empty states.
  */
 
 import type { ReactNode } from 'react'

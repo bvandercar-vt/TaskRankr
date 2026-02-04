@@ -1,9 +1,8 @@
 /**
- * @fileoverview Drizzle ORM schema definitions and Zod validation types.
- *
- * Defines database tables for tasks and user settings with relations.
- * Exports TypeScript types, Zod schemas, and constants for task attributes
- * including priority, ease, enjoyment, time levels, and sort options.
+ * @fileoverview Drizzle ORM schema definitions, Zod validation schemas, and
+ * TypeScript types that are inferred from said schemas, including constants
+ * (ie, string enums) that are relevant to these schemas (such as task status,
+ * priority, etc.).
  */
 
 import { relations } from 'drizzle-orm'
@@ -140,7 +139,7 @@ export const RANK_FIELDS_CRITERIA = [
   levels: readonly string[]
 }[]
 
-export type SortFieldValueMap = {
+export type RankFieldValueMap = {
   priority: Priority
   ease: Ease
   enjoyment: Enjoyment

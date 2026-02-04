@@ -1,7 +1,6 @@
 /**
- * @fileoverview Context provider for task create/edit dialog state management
- *
- * React context for opening task dialogs with desktop/mobile variants.
+ * @fileoverview Context provider for task create/edit dialog with
+ * desktop/mobile variants.
  */
 
 import { createContext, useContext, useEffect, useState } from 'react'

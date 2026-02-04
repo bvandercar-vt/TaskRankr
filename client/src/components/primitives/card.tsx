@@ -1,7 +1,5 @@
 /**
  * @fileoverview Card primitive components
- *
- * Card container with Header, Title, Description, Content, Footer.
  */
 
 import { cn, forwardRefHelper } from '@/lib/utils'

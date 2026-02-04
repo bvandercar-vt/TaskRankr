@@ -1,9 +1,5 @@
 /**
  * @fileoverview Completed tasks view page.
- *
- * Displays all completed tasks in a hierarchical tree structure, sorted by
- * completion date (most recent first). Provides option to restore tasks
- * back to active status.
  */
 
 import { useMemo } from 'react'

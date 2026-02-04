@@ -1,8 +1,5 @@
 /**
  * @fileoverview ts-rest API contract defining all endpoint schemas.
- *
- * Provides type-safe API definitions for tasks and settings endpoints.
- * Includes request/response schemas, path parameters, and error types.
  * Used by both server route handlers and client API calls.
  */
 

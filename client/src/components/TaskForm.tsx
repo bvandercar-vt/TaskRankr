@@ -1,7 +1,5 @@
 /**
  * @fileoverview Form component for creating and editing tasks
- *
- * Task form with name, description, and attribute fields.
  */
 
 import { useCallback, useEffect, useMemo } from 'react'
@@ -42,7 +40,7 @@ import {
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
 import { useTaskParentChain } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { getAttributeStyle } from '@/lib/task-styles'
+import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
@@ -260,7 +258,7 @@ export const TaskForm = ({
                                     ? 'border-destructive/50'
                                     : 'border-white/5',
                                   field.value && field.value !== 'none'
-                                    ? getAttributeStyle(attr.name, field.value)
+                                    ? getRankFieldStyle(attr.name, field.value)
                                     : 'text-muted-foreground',
                                 )}
                               >
@@ -284,7 +282,7 @@ export const TaskForm = ({
                                     value={level}
                                     className={cn(
                                       'capitalize font-semibold',
-                                      getAttributeStyle(attr.name, level),
+                                      getRankFieldStyle(attr.name, level),
                                     )}
                                   >
                                     {level}

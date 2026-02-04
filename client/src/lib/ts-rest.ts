@@ -1,7 +1,5 @@
 /**
- * @fileoverview @ts-rest client configuration and query key definitions
- *
- * Type-safe API client with centralized QueryKeys for cache management.
+ * @fileoverview @ts-rest client configuration and QueryKey definitions
  */
 
 import type { QueryKey } from '@tanstack/react-query'

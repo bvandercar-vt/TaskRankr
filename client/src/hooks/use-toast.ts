@@ -1,7 +1,5 @@
 /**
- * @fileoverview Toast notification hook and state management
- *
- * In-memory toast store with useToast hook and toast function.
+ * @fileoverview Toast notification hook and state management.
  */
 
 import { useEffect, useState } from 'react'

@@ -1,9 +1,5 @@
 /**
  * @fileoverview User preferences and settings configuration page.
- *
- * Provides controls for task behavior settings (auto-pin, time tracking),
- * attribute visibility/requirement toggles, and data import/export functionality.
- * Includes sorting criteria reference information for user guidance.
  */
 
 import { useRef, useState } from 'react'
@@ -19,14 +15,14 @@ import { useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
-import { getAttributeStyle } from '@/lib/task-styles'
+import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { authPaths } from '~/shared/routes'
 import {
   RANK_FIELDS_CRITERIA,
-  type SortFieldValueMap,
+  type RankFieldValueMap,
   type SortOption,
 } from '~/shared/schema'
 
@@ -313,9 +309,9 @@ const Settings = () => {
                       {item.criteria.map((c) => {
                         const style =
                           c.attr !== 'date'
-                            ? getAttributeStyle(
+                            ? getRankFieldStyle(
                                 c.attr,
-                                c.value satisfies string as SortFieldValueMap[typeof c.attr],
+                                c.value satisfies string as RankFieldValueMap[typeof c.attr],
                                 '',
                               )
                             : ''

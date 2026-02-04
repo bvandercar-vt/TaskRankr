@@ -1,7 +1,5 @@
 /**
- * @fileoverview Select dropdown component
- *
- * Select menu built on @radix-ui primitives.
+ * @fileoverview Select dropdown component built on @radix-ui primitives.
  */
 
 'use client'

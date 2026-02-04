@@ -1,7 +1,6 @@
 /**
- * @fileoverview Alert dialog component for confirmations
- *
- * Modal dialog built on @radix-ui primitives.
+ * @fileoverview Alert dialog component for confirmations. Modal dialog built on
+ * @radix-ui primitives.
  */
 
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'

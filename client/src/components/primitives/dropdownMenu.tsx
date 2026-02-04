@@ -1,6 +1,5 @@
 /**
- * @fileoverview Dropdown menu primitive components
- *
+ * @fileoverview Dropdown menu primitive components.
  * Wraps @radix-ui/react-dropdown-menu with styled variants.
  */
 

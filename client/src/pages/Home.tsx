@@ -1,9 +1,7 @@
 /**
- * @fileoverview Main task list page with sorting and filtering capabilities.
+ * @fileoverview Main task list (tree) page with sorting and filtering
+ * capabilities.
  *
- * Displays active tasks in a hierarchical tree structure with pinned/in-progress
- * tasks hoisted to the top. Supports sorting by priority, ease, enjoyment, time,
- * or date. Includes search filtering and quick access to task creation.
  */
 
 import { useCallback, useMemo, useState } from 'react'
