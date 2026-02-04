@@ -34,7 +34,7 @@ const Landing = () => {
                   className="text-lg px-8"
                   data-testid="button-get-started"
                 >
-                  Log In / Sign Up
+                  Log In / Sign Up*
                 </Button>
               </a>
               <Button
@@ -48,7 +48,7 @@ const Landing = () => {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Log in to back up your data and sync across devices.
+              *Log in to back up your data and sync across devices.
             </p>
           </div>
         </div>
