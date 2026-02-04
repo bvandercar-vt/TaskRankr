@@ -10,7 +10,7 @@ import {
 } from 'react'
 
 import type { AppSettings } from '@/hooks/use-settings'
-import { createDemoTasks, collectAllTaskIds } from '@/lib/demo-tasks'
+import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTaskRequest,
   TaskResponse,
@@ -212,8 +212,7 @@ export const LocalStateProvider = ({
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
-      const demoIds = collectAllTaskIds(demoTasks)
-      setDemoTaskIds(demoIds)
+      setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
       setTasks(loadedTasks)
@@ -427,8 +426,7 @@ export const LocalStateProvider = ({
   const initDemoData = useCallback(() => {
     const demoTasks = createDemoTasks(nextIdRef)
     localStorage.setItem(storageKeys.nextId, JSON.stringify(nextIdRef.current))
-    const demoIds = collectAllTaskIds(demoTasks)
-    setDemoTaskIds(demoIds)
+    setDemoTaskIds(demoTasks.map((t) => t.id))
     setTasks((prev) => [...prev, ...demoTasks])
   }, [storageKeys])
 
