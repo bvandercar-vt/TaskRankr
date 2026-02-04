@@ -11,7 +11,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { useDemo } from '@/components/DemoProvider'
+import { useOfflineMode } from '@/components/DemoProvider'
+import { useLocalState } from '@/components/LocalStateProvider'
 import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import {
@@ -99,7 +100,8 @@ const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSetting } = useSettings()
-  const { isDemo, exitDemo } = useDemo()
+  const { isOfflineMode, exitOfflineMode } = useOfflineMode()
+  const { hasDemoData, deleteDemoData } = useLocalState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
@@ -322,7 +324,7 @@ const Home = () => {
                     Settings
                   </DropdownMenuItem>
                 </Link>
-                {isDemo && (
+                {isOfflineMode && (
                   <>
                     <DropdownMenuSeparator />
                     <a href={authPaths.login}>
@@ -336,11 +338,11 @@ const Home = () => {
                     </a>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={exitDemo}
-                      data-testid="menu-item-exit-demo"
+                      onClick={exitOfflineMode}
+                      data-testid="menu-item-exit-offline"
                     >
                       <LogOut className={cn(IconSizeStyle.small, 'mr-2')} />
-                      Exit Demo
+                      Exit Offline Mode
                     </DropdownMenuItem>
                   </>
                 )}
@@ -417,6 +419,20 @@ const Home = () => {
             />
           ) : (
             displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
+          )}
+          
+          {hasDemoData && displayedTasks.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={deleteDemoData}
+                data-testid="button-delete-demo-data"
+              >
+                Delete Demo Data
+              </Button>
+            </div>
           )}
         </div>
       </main>

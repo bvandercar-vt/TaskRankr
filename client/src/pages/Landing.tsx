@@ -1,13 +1,22 @@
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
-import { useDemo } from '@/components/DemoProvider'
+import { useOfflineMode } from '@/components/DemoProvider'
+import { useLocalState } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/routes'
 
 const Landing = () => {
-  const { enterDemo } = useDemo()
+  const { enterOfflineMode } = useOfflineMode()
+  const { initDemoData, tasks } = useLocalState()
+  
+  const handleTryOfflineMode = () => {
+    if (tasks.length === 0) {
+      initDemoData()
+    }
+    enterOfflineMode()
+  }
 
   return (
   <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -43,10 +52,10 @@ const Landing = () => {
             size="lg"
             variant="outline"
             className="text-lg px-8"
-            data-testid="button-try-demo"
-            onClick={enterDemo}
+            data-testid="button-try-offline"
+            onClick={handleTryOfflineMode}
           >
-            Try Demo
+            Try Offline Mode
           </Button>
         </div>
       </div>
