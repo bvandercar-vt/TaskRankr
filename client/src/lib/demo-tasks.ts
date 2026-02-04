@@ -57,7 +57,7 @@ export const createDemoTasks = (nextIdRef: {
       name: 'High priority demo task',
       description: 'Example description for a high priority task.',
       priority: 'high',
-      ease: 'easy',
+      ease: 'medium',
       enjoyment: 'medium',
       time: 'low',
       parentId: null,
