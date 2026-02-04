@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/primitives/forms/checkbox";
 import { Switch } from "@/components/primitives/forms/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { getIsRequired, getIsVisible, useSettings } from "@/hooks/use-settings";
-import { useTasks } from "@/hooks/use-tasks";
+import { useSetTaskStatus, useTasks } from "@/hooks/use-tasks";
 import { useToast } from "@/hooks/use-toast";
 import { IconSizeStyle } from "@/lib/constants";
 import { queryClient } from "@/lib/query-client";
@@ -122,6 +122,7 @@ const Settings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: tasks } = useTasks();
+  const setTaskStatus = useSetTaskStatus();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [sortInfoExpanded, setSortInfoExpanded] = useState(false);
@@ -217,6 +218,16 @@ const Settings = () => {
                   updateSetting("enableInProgressStatus", checked);
                   if (!checked) {
                     updateSetting("enableInProgressTime", false);
+                    // Demote any in_progress task to pinned
+                    const inProgressTask = tasks?.find(
+                      (t) => t.status === "in_progress"
+                    );
+                    if (inProgressTask) {
+                      setTaskStatus.mutate({
+                        id: inProgressTask.id,
+                        status: "pinned",
+                      });
+                    }
                   }
                 }}
                 data-testid="switch-enable-in-progress"
