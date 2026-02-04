@@ -26,6 +26,7 @@ The app uses a local-first data model where all changes happen locally first, th
 
 - **LocalStateProvider** (`client/src/components/LocalStateProvider.tsx`):
   - Manages tasks and settings in localStorage
+  - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-offline-*` for offline mode
   - All CRUD operations update local state immediately
   - Enqueues sync operations when `shouldSync` is true (authenticated mode)
   - Uses negative temp IDs for locally-created tasks until synced
@@ -36,9 +37,11 @@ The app uses a local-first data model where all changes happen locally first, th
   - Fetches server data on auth (waits for queue to drain first)
   - Shows offline/syncing status via StatusBanner
 
-- **DemoProvider** (`client/src/components/DemoProvider.tsx`):
-  - Simple flag for demo mode (`isDemo`)
-  - When demo: uses LocalStateProvider with `shouldSync=false`
+- **OfflineModeProvider** (`client/src/components/DemoProvider.tsx`):
+  - Simple flag for offline mode (`isOfflineMode`)
+  - When in offline mode: uses LocalStateProvider with `shouldSync=false`
+  - Demo data (sample tasks) created on first entry to help users learn the app
+  - "Delete Demo Data" button available to remove sample tasks
   - All features work offline, data persists in localStorage
 
 - **Data Flow**:
@@ -73,9 +76,9 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   │   ├── dropdownMenu.tsx
 │       │   │   └── lucideIcon.tsx  # Dynamic icon helper
 │       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
-│       │   ├── LocalStateProvider.tsx  # Offline-first local state + sync queue
+│       │   ├── LocalStateProvider.tsx  # Offline-first local state + sync queue + demo data
 │       │   ├── SyncProvider.tsx  # Background sync to API
-│       │   ├── DemoProvider.tsx  # Demo mode flag (isDemo)
+│       │   ├── DemoProvider.tsx  # Offline mode flag (isOfflineMode)
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state

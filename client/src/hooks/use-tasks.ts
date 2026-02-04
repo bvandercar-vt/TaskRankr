@@ -75,6 +75,7 @@ export const useCreateTask = () => {
   const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async (
       data: Omit<
         ClientInferRequestBody<typeof contract.tasks.create>,
@@ -93,6 +94,7 @@ export const useUpdateTask = () => {
   const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async ({
       id,
       ...updates
@@ -109,6 +111,7 @@ export const useSetTaskStatus = () => {
   const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
       if (!localState) {
         throw new Error('Local state not initialized')
@@ -122,6 +125,7 @@ export const useDeleteTask = () => {
   const localState = useLocalStateSafe()
 
   return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
     mutationFn: async (id: number) => {
       if (!localState) {
         throw new Error('Local state not initialized')
