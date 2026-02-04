@@ -101,17 +101,14 @@ const AuthenticatedApp = () => {
   }
 
   if (!isAuthenticated && !isOfflineMode) {
-    return (
-      <LocalStateProvider shouldSync={false}>
-        <Landing />
-      </LocalStateProvider>
-    )
+    return <Landing />
   }
 
   const shouldSync = isAuthenticated && !isOfflineMode
+  const storageMode = isOfflineMode ? 'offline' : 'auth'
 
   return (
-    <LocalStateProvider shouldSync={shouldSync}>
+    <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
       <SyncProvider isAuthenticated={shouldSync}>
         <TaskDialogProvider>
           <StatusBanner />

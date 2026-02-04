@@ -26,6 +26,7 @@ The app uses a local-first data model where all changes happen locally first, th
 
 - **LocalStateProvider** (`client/src/components/LocalStateProvider.tsx`):
   - Manages tasks and settings in localStorage
+  - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-offline-*` for offline mode
   - All CRUD operations update local state immediately
   - Enqueues sync operations when `shouldSync` is true (authenticated mode)
   - Uses negative temp IDs for locally-created tasks until synced
