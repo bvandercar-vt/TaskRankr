@@ -1,3 +1,11 @@
+/**
+ * @fileoverview API route handlers using ts-rest contract-based routing.
+ *
+ * Defines all task and settings CRUD endpoints with authentication middleware.
+ * Handles task status transitions, import/export functionality, and user settings.
+ * Integrates with Replit Auth for user session management.
+ */
+
 import type { Server } from 'node:http'
 import { createExpressEndpoints, initServer } from '@ts-rest/express'
 import { isNil, omit } from 'es-toolkit'

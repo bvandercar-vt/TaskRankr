@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Unauthenticated landing page for TaskRankr.
+ *
+ * Marketing-focused welcome page showcasing app features including
+ * priority levels, easy tracking, time tracking, and nested tasks.
+ * Provides login/signup call-to-action for new users.
+ */
+
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
 import { Button } from '@/components/primitives/button'

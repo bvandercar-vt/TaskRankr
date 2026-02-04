@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Alert dialog component for confirmations
+ *
+ * Modal dialog built on Radix UI for destructive or important
+ * actions requiring user confirmation before proceeding.
+ */
+
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 
 import { buttonVariants } from '@/components/primitives/button'

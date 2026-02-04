@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Context provider for task create/edit dialog state management
+ *
+ * Provides a React context to open and close task dialogs from anywhere in
+ * the app. Handles both desktop (modal) and mobile (full-screen) dialog
+ * variants, and manages create vs edit modes with form submission.
+ */
+
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 

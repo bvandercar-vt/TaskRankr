@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Multi-line text input component
+ *
+ * Styled textarea with consistent focus states and
+ * placeholder support for longer form content.
+ */
+
 import { forwardRef } from 'react'
 
 import { cn } from '@/lib/utils'

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Task CRUD operations hooks
+ * 
+ * Provides React hooks for task management including listing, creating,
+ * updating, deleting tasks, and setting task status. Includes cache
+ * invalidation and toast notifications for error handling.
+ */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getSettings } from '@/hooks/use-settings'

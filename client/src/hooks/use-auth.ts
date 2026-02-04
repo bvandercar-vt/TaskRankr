@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Authentication hook for user session management
+ * 
+ * Provides the useAuth hook that handles user authentication state,
+ * including fetching the current user, checking authentication status,
+ * and logout functionality with React Query integration.
+ */
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { User } from '~/shared/models/auth'

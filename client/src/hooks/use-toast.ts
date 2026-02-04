@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Toast notification hook and state management
+ * 
+ * Implements a toast notification system with add, update, dismiss, and
+ * remove actions. Uses an in-memory store with listener pattern for state
+ * sharing across components. Exports both the useToast hook and toast function.
+ */
+
 import { useEffect, useState } from 'react'
 
 import type {

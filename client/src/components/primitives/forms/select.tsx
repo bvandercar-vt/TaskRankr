@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Select dropdown component
+ *
+ * Full-featured select menu built on Radix UI with scroll buttons,
+ * item indicators, separators, and animated transitions.
+ */
+
 'use client'
 
 import * as SelectPrimitive from '@radix-ui/react-select'

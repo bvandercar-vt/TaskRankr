@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Card primitive components based on shadcn/ui.
+ *
+ * Provides Card container and related subcomponents (CardHeader, CardTitle,
+ * CardDescription, CardContent, CardFooter) for consistent content grouping
+ * with rounded borders and shadow styling.
+ */
+
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const Card = forwardRefHelper<HTMLDivElement>(

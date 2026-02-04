@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Task attribute styling utilities
+ * 
+ * Defines color and style mappings for task rank fields (priority, ease,
+ * enjoyment, time). Provides the getAttributeStyle function for retrieving
+ * appropriate Tailwind classes based on field type and value.
+ */
+
 import type { RankField, SortFieldValueMap } from '~/shared/schema'
 
 const STYLES_COMMON = {

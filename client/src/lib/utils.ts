@@ -1,3 +1,11 @@
+/**
+ * @fileoverview General utility functions for the application
+ * 
+ * Provides helper functions including className merging with Tailwind support,
+ * time unit conversions (hours/minutes to milliseconds and vice versa),
+ * and a typed forwardRef helper for creating React components with refs.
+ */
+
 import { forwardRef } from 'react'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'

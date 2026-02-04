@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Tooltip component for contextual hints
+ *
+ * Hover-triggered overlay built on Radix UI with animated
+ * entrance and configurable positioning.
+ */
+
 'use client'
 
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'

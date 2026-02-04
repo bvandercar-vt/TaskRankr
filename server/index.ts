@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Express server entry point and HTTP server configuration.
+ *
+ * Sets up the Express application with JSON/URL-encoded body parsing,
+ * request logging middleware, error handling, and route registration.
+ * Configures Vite dev server in development or static file serving in production.
+ */
+
 import { createServer } from 'node:http'
 import express, {
   type NextFunction,

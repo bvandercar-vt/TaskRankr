@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Application entry point and React root initialization
+ *
+ * Bootstraps the React application by mounting the root App component
+ * to the DOM and importing global styles.
+ */
+
 import { createRoot } from 'react-dom/client'
 
 import App from './App'
