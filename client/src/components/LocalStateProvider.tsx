@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 
-import type { AppSettings } from '@/hooks/use-settings'
+import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/default-settings'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTaskRequest,
@@ -61,22 +61,6 @@ const getStorageKeys = (mode: StorageMode) => ({
   syncQueue: `taskrankr-${mode}-sync-queue`,
   demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
 })
-
-const DEFAULT_SETTINGS: AppSettings = {
-  userId: 'local',
-  autoPinNewTasks: true,
-  enableInProgressTime: true,
-  alwaysSortPinnedByPriority: true,
-  sortBy: 'priority',
-  priorityVisible: true,
-  priorityRequired: true,
-  easeVisible: true,
-  easeRequired: false,
-  enjoymentVisible: true,
-  enjoymentRequired: false,
-  timeVisible: true,
-  timeRequired: false,
-}
 
 const DEFAULT_TASKS: TaskResponse[] = []
 
