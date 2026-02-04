@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 
-import { OfflineModeProvider, useOfflineMode } from '@/components/DemoProvider'
+import { GuestModeProvider, useGuestMode } from '@/components/GuestProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/button'
 import { Toaster } from '@/components/primitives/overlays/toaster'
@@ -27,14 +27,14 @@ const Router = () => (
 )
 
 const StatusBanner = () => {
-  const { isOfflineMode, exitOfflineMode } = useOfflineMode()
+  const { isGuestMode, exitGuestMode } = useGuestMode()
   const sync = useSyncSafe()
 
-  if (isOfflineMode) {
+  if (isGuestMode) {
     return (
       <div
         className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
-        data-testid="banner-offline-mode"
+        data-testid="banner-guest-mode"
       >
         <span>Log in to back up your data and use it across devices.</span>
         <a href={authPaths.login}>
@@ -51,7 +51,7 @@ const StatusBanner = () => {
           size="sm"
           variant="ghost"
           className="h-7 text-primary-foreground hover:bg-white/20"
-          onClick={exitOfflineMode}
+          onClick={exitGuestMode}
           data-testid="button-banner-exit"
         >
           Exit
@@ -90,9 +90,9 @@ const StatusBanner = () => {
 
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
-  const { isOfflineMode } = useOfflineMode()
+  const { isGuestMode } = useGuestMode()
 
-  if (isLoading && !isOfflineMode) {
+  if (isLoading && !isGuestMode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
@@ -100,12 +100,12 @@ const AuthenticatedApp = () => {
     )
   }
 
-  if (!isAuthenticated && !isOfflineMode) {
+  if (!isAuthenticated && !isGuestMode) {
     return <Landing />
   }
 
-  const shouldSync = isAuthenticated && !isOfflineMode
-  const storageMode = isOfflineMode ? 'offline' : 'auth'
+  const shouldSync = isAuthenticated && !isGuestMode
+  const storageMode = isGuestMode ? 'guest' : 'auth'
 
   return (
     <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
@@ -122,10 +122,10 @@ const AuthenticatedApp = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <OfflineModeProvider>
+      <GuestModeProvider>
         <Toaster />
         <AuthenticatedApp />
-      </OfflineModeProvider>
+      </GuestModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 )

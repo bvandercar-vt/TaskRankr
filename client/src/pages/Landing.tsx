@@ -1,17 +1,13 @@
-import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
+import { CheckCircle, Clock, ListTodo, Star } from "lucide-react";
 
-import { useOfflineMode } from '@/components/DemoProvider'
-import { Button } from '@/components/primitives/button'
-import { IconSizeStyle } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { authPaths } from '~/shared/routes'
+import { useGuestMode } from "@/components/GuestProvider";
+import { Button } from "@/components/primitives/button";
+import { IconSizeStyle } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { authPaths } from "~/shared/routes";
 
 const Landing = () => {
-  const { enterOfflineMode } = useOfflineMode()
-
-  const handleTryOfflineMode = () => {
-    enterOfflineMode()
-  }
+  const { enterGuestMode } = useGuestMode();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -30,45 +26,50 @@ const Landing = () => {
             Rate priority, ease, enjoyment, and time for each task. Sort by any
             attribute at a glance.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={authPaths.login}>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href={authPaths.login}>
+                <Button
+                  size="lg"
+                  className="text-lg px-8 min-w-[200px]"
+                  data-testid="button-get-started"
+                >
+                  Log In / Sign Up*
+                </Button>
+              </a>
               <Button
                 size="lg"
-                className="text-lg px-8"
-                data-testid="button-get-started"
+                variant="outline"
+                className="text-lg px-8 min-w-[200px]"
+                data-testid="button-try-guest"
+                onClick={enterGuestMode}
               >
-                Log In / Sign Up
+                Try as Guest
               </Button>
-            </a>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8"
-              data-testid="button-try-offline"
-              onClick={handleTryOfflineMode}
-            >
-              Try Offline Mode
-            </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              <sup>*</sup>Log in to back up your data and sync across devices.
+            </p>
           </div>
         </div>
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSizeStyle.medium, 'text-primary')} />
+            <Star className={cn(IconSizeStyle.medium, "text-primary")} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <CheckCircle
-              className={cn(IconSizeStyle.medium, 'text-emerald-500')}
+              className={cn(IconSizeStyle.medium, "text-emerald-500")}
             />
             <span>Easy tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSizeStyle.medium, 'text-blue-500')} />
+            <Clock className={cn(IconSizeStyle.medium, "text-blue-500")} />
             <span>Time tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSizeStyle.medium, 'text-amber-500')} />
+            <ListTodo className={cn(IconSizeStyle.medium, "text-amber-500")} />
             <span>Nested tasks</span>
           </div>
         </div>
@@ -81,7 +82,7 @@ const Landing = () => {
         <p data-testid="text-footer-brand">TaskRankr</p>
       </footer>
     </div>
-  )
-}
+  );
+};
 
-export default Landing
+export default Landing;
