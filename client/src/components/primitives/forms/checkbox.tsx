@@ -1,8 +1,7 @@
 /**
  * @fileoverview Checkbox input component
  *
- * Accessible checkbox built on Radix UI primitives with
- * consistent styling and focus states.
+ * Accessible checkbox built on @radix-ui primitives.
  */
 
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'

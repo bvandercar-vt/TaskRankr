@@ -1,8 +1,5 @@
 /**
  * @fileoverview Application-wide constants and configuration values
- * 
- * Exports reusable constants for consistent styling across components,
- * including icon size definitions used throughout the UI.
  */
 
 export const IconSizeStyle = {

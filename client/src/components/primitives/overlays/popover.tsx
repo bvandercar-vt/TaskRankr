@@ -1,8 +1,7 @@
 /**
  * @fileoverview Popover component for floating content
  *
- * Positioned overlay built on Radix UI with configurable
- * alignment, offset, and animated entrance transitions.
+ * Positioned overlay built on @radix-ui primitives.
  */
 
 import * as PopoverPrimitive from '@radix-ui/react-popover'

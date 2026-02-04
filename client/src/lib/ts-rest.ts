@@ -1,9 +1,7 @@
 /**
- * @fileoverview ts-rest client configuration and query key definitions
- * 
- * Initializes the ts-rest React Query client for type-safe API communication.
- * Exports the tsr client instance, request body type helper, and centralized
- * QueryKeys object for consistent cache key management across the application.
+ * @fileoverview @ts-rest client configuration and query key definitions
+ *
+ * Type-safe API client with centralized QueryKeys for cache management.
  */
 
 import type { QueryKey } from '@tanstack/react-query'

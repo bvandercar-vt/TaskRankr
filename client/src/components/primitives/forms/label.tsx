@@ -1,8 +1,7 @@
 /**
  * @fileoverview Form label component
  *
- * Accessible label built on Radix UI with peer-disabled
- * styling for associated form controls.
+ * Accessible label built on @radix-ui primitives.
  */
 
 import * as LabelPrimitive from '@radix-ui/react-label'

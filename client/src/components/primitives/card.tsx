@@ -1,9 +1,7 @@
 /**
- * @fileoverview Card primitive components based on shadcn/ui.
+ * @fileoverview Card primitive components
  *
- * Provides Card container and related subcomponents (CardHeader, CardTitle,
- * CardDescription, CardContent, CardFooter) for consistent content grouping
- * with rounded borders and shadow styling.
+ * Card container with Header, Title, Description, Content, Footer.
  */
 
 import { cn, forwardRefHelper } from '@/lib/utils'

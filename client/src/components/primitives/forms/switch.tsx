@@ -1,8 +1,7 @@
 /**
  * @fileoverview Toggle switch component
  *
- * Binary toggle control built on Radix UI with smooth
- * thumb transitions and accessible keyboard support.
+ * Binary toggle built on @radix-ui primitives.
  */
 
 import * as SwitchPrimitives from '@radix-ui/react-switch'
