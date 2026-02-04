@@ -11,6 +11,7 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 - Icon helper: Use `Icon` component from `lucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
+- Test IDs: Use `data-testid` as the prop name, not `testId`
 
 ## System Architecture
 
