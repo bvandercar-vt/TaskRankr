@@ -1,16 +1,16 @@
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react'
 
-import { useLocalState, type SyncOperation } from './LocalStateProvider'
 import { tsr } from '@/lib/ts-rest'
+import { useLocalState } from './LocalStateProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -27,7 +27,10 @@ interface SyncProviderProps {
   isAuthenticated: boolean
 }
 
-export const SyncProvider = ({ children, isAuthenticated }: SyncProviderProps) => {
+export const SyncProvider = ({
+  children,
+  isAuthenticated,
+}: SyncProviderProps) => {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [lastSyncError, setLastSyncError] = useState<string | null>(null)
@@ -78,13 +81,32 @@ export const SyncProvider = ({ children, isAuthenticated }: SyncProviderProps) =
     } catch (err) {
       console.error('Failed to load server data:', err)
     }
-  }, [isAuthenticated, isOnline, syncQueue.length, setTasksFromServer, setSettingsFromServer])
+  }, [
+    isAuthenticated,
+    isOnline,
+    syncQueue.length,
+    setTasksFromServer,
+    setSettingsFromServer,
+  ])
 
   useEffect(() => {
-    if (isAuthenticated && isOnline && isInitialized && !hasLoadedServerData.current && syncQueue.length === 0) {
+    if (
+      isAuthenticated &&
+      isOnline &&
+      isInitialized &&
+      !hasLoadedServerData.current &&
+      syncQueue.length === 0
+    ) {
+      // biome-ignore lint/nursery/noFloatingPromises: from replit, TODO: investigate
       loadServerData()
     }
-  }, [isAuthenticated, isOnline, isInitialized, syncQueue.length, loadServerData])
+  }, [
+    isAuthenticated,
+    isOnline,
+    isInitialized,
+    syncQueue.length,
+    loadServerData,
+  ])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -189,10 +211,22 @@ export const SyncProvider = ({ children, isAuthenticated }: SyncProviderProps) =
       isSyncingRef.current = false
       setIsSyncing(false)
     }
-  }, [syncQueue, isOnline, isAuthenticated, replaceTaskId, removeSyncOperation, clearSyncQueue])
+  }, [
+    syncQueue,
+    isOnline,
+    isAuthenticated,
+    replaceTaskId,
+    removeSyncOperation,
+    clearSyncQueue,
+  ])
 
   useEffect(() => {
-    if (isOnline && isAuthenticated && syncQueue.length > 0 && !isSyncingRef.current) {
+    if (
+      isOnline &&
+      isAuthenticated &&
+      syncQueue.length > 0 &&
+      !isSyncingRef.current
+    ) {
       const timer = setTimeout(flushQueue, 500)
       return () => clearTimeout(timer)
     }

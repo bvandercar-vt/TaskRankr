@@ -14,8 +14,8 @@ import Home from '@/pages/Home'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
-import { queryClient } from './lib/query-client'
 import { authPaths } from '~/shared/routes'
+import { queryClient } from './lib/query-client'
 
 const Router = () => (
   <Switch>

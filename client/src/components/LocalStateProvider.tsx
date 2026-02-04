@@ -1,24 +1,28 @@
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react'
 
+import type { AppSettings } from '@/hooks/use-settings'
 import type {
   CreateTaskRequest,
   TaskResponse,
   TaskStatus,
   UpdateTaskRequest,
 } from '~/shared/schema'
-import type { AppSettings } from '@/hooks/use-settings'
 
 export type SyncOperation =
-  | { type: 'create_task'; tempId: number; data: Omit<CreateTaskRequest, 'userId'> }
+  | {
+      type: 'create_task'
+      tempId: number
+      data: Omit<CreateTaskRequest, 'userId'>
+    }
   | { type: 'update_task'; id: number; data: UpdateTaskRequest }
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
@@ -77,18 +81,19 @@ const DEFAULT_TASKS: TaskResponse[] = []
 
 const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
   const now = new Date()
-  
+
   const getNextId = () => {
     const id = nextIdRef.current--
     return id
   }
-  
+
   const demoTasks: TaskResponse[] = [
     {
       id: getNextId(),
       userId: 'local',
       name: 'Try creating your first task',
-      description: 'Tap the + button in the bottom right corner to create a new task.',
+      description:
+        'Tap the + button in the bottom right corner to create a new task.',
       priority: 'high',
       ease: 'easy',
       enjoyment: 'medium',
@@ -97,7 +102,7 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       status: 'pinned',
       inProgressTime: 0,
       inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 60000),
+      createdAt: new Date(now.getTime() - 60_000),
       completedAt: null,
       subtasks: [],
     },
@@ -105,7 +110,8 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       id: getNextId(),
       userId: 'local',
       name: 'Explore task attributes',
-      description: 'Each task can have Priority, Ease, Enjoyment, and Time ratings. Use the sort buttons at the top to organize your tasks.',
+      description:
+        'Each task can have Priority, Ease, Enjoyment, and Time ratings. Use the sort buttons at the top to organize your tasks.',
       priority: 'medium',
       ease: 'easy',
       enjoyment: 'high',
@@ -114,7 +120,7 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       status: 'open',
       inProgressTime: 0,
       inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 120000),
+      createdAt: new Date(now.getTime() - 120_000),
       completedAt: null,
       subtasks: [],
     },
@@ -122,7 +128,8 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       id: getNextId(),
       userId: 'local',
       name: 'Long-press for status options',
-      description: 'Long-press any task to change its status: Open, In Progress, Pinned, or Completed.',
+      description:
+        'Long-press any task to change its status: Open, In Progress, Pinned, or Completed.',
       priority: 'medium',
       ease: 'easy',
       enjoyment: 'medium',
@@ -131,7 +138,7 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       status: 'open',
       inProgressTime: 0,
       inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 180000),
+      createdAt: new Date(now.getTime() - 180_000),
       completedAt: null,
       subtasks: [],
     },
@@ -139,7 +146,8 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       id: getNextId(),
       userId: 'local',
       name: 'Create nested subtasks',
-      description: 'When editing a task, you can add subtasks to break down complex work.',
+      description:
+        'When editing a task, you can add subtasks to break down complex work.',
       priority: 'low',
       ease: 'medium',
       enjoyment: 'medium',
@@ -148,12 +156,12 @@ const createDemoTasks = (nextIdRef: { current: number }): TaskResponse[] => {
       status: 'open',
       inProgressTime: 0,
       inProgressStartedAt: null,
-      createdAt: new Date(now.getTime() - 240000),
+      createdAt: new Date(now.getTime() - 240_000),
       completedAt: null,
       subtasks: [],
     },
   ]
-  
+
   return demoTasks
 }
 
@@ -262,31 +270,40 @@ export const LocalStateProvider = ({
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
-  
+
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   useEffect(() => {
-    const loadedSettings = loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS)
+    const loadedSettings = loadFromStorage(
+      storageKeys.settings,
+      DEFAULT_SETTINGS,
+    )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
-    const loadedQueue = loadFromStorage<SyncOperation[]>(storageKeys.syncQueue, [])
+    const loadedQueue = loadFromStorage<SyncOperation[]>(
+      storageKeys.syncQueue,
+      [],
+    )
     const loadedDemoIds = loadFromStorage<number[]>(storageKeys.demoTaskIds, [])
 
     setSettings(loadedSettings)
     nextIdRef.current = loadedNextId
     setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
-    
+
     if (storageMode === 'offline' && loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
-      localStorage.setItem(storageKeys.nextId, JSON.stringify(nextIdRef.current))
+      localStorage.setItem(
+        storageKeys.nextId,
+        JSON.stringify(nextIdRef.current),
+      )
       const demoIds = demoTasks.map((t) => t.id)
       setDemoTaskIds(demoIds)
       setTasks(demoTasks)
     } else {
       setTasks(loadedTasks)
     }
-    
+
     setIsInitialized(true)
   }, [storageKeys, storageMode])
 
@@ -342,7 +359,10 @@ export const LocalStateProvider = ({
   const createTask = useCallback(
     (data: Omit<CreateTaskRequest, 'userId'>): TaskResponse => {
       const tempId = nextIdRef.current--
-      localStorage.setItem(storageKeys.nextId, JSON.stringify(nextIdRef.current))
+      localStorage.setItem(
+        storageKeys.nextId,
+        JSON.stringify(nextIdRef.current),
+      )
 
       const newTask: TaskResponse = {
         id: tempId,
@@ -380,6 +400,7 @@ export const LocalStateProvider = ({
         }),
       )
       enqueue({ type: 'update_task', id, data: updates })
+      // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
     [enqueue],
@@ -394,7 +415,11 @@ export const LocalStateProvider = ({
         if (status === 'in_progress') {
           newTasks = newTasks.map((t) => {
             if (t.id !== id && t.status === 'in_progress') {
-              return { ...t, status: 'pinned' as const, inProgressStartedAt: null }
+              return {
+                ...t,
+                status: 'pinned' as const,
+                inProgressStartedAt: null,
+              }
             }
             return t
           })
@@ -430,6 +455,7 @@ export const LocalStateProvider = ({
       })
 
       enqueue({ type: 'set_status', id, status })
+      // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
     [enqueue],
@@ -451,11 +477,14 @@ export const LocalStateProvider = ({
     [enqueue],
   )
 
-  const setTasksFromServer = useCallback((serverTasks: TaskResponse[]) => {
-    setTasks(serverTasks)
-    nextIdRef.current = -1
-    localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
-  }, [storageKeys])
+  const setTasksFromServer = useCallback(
+    (serverTasks: TaskResponse[]) => {
+      setTasks(serverTasks)
+      nextIdRef.current = -1
+      localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
+    },
+    [storageKeys],
+  )
 
   const setSettingsFromServer = useCallback((serverSettings: AppSettings) => {
     setSettings(serverSettings)
@@ -502,7 +531,8 @@ export const LocalStateProvider = ({
     setDemoTaskIds([])
   }, [demoTaskIds])
 
-  const hasDemoData = demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
+  const hasDemoData =
+    demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
   const value = useMemo(
     () => ({

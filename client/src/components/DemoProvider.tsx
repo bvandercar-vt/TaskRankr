@@ -1,11 +1,12 @@
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useMemo,
   useState,
-  type ReactNode,
 } from 'react'
+import { noop } from 'es-toolkit'
 
 interface OfflineModeContextValue {
   isOfflineMode: boolean
@@ -30,7 +31,11 @@ export const OfflineModeProvider = ({ children }: { children: ReactNode }) => {
     [isOfflineMode, enterOfflineMode, exitOfflineMode],
   )
 
-  return <OfflineModeContext.Provider value={value}>{children}</OfflineModeContext.Provider>
+  return (
+    <OfflineModeContext.Provider value={value}>
+      {children}
+    </OfflineModeContext.Provider>
+  )
 }
 
 export const useOfflineMode = () => {
@@ -43,7 +48,13 @@ export const useOfflineMode = () => {
 
 export const useOfflineModeSafe = () => {
   const context = useContext(OfflineModeContext)
-  return context ?? { isOfflineMode: false, enterOfflineMode: () => {}, exitOfflineMode: () => {} }
+  return (
+    context ?? {
+      isOfflineMode: false,
+      enterOfflineMode: noop,
+      exitOfflineMode: noop,
+    }
+  )
 }
 
 export const DemoProvider = OfflineModeProvider
