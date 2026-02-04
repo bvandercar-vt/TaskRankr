@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Drizzle ORM schema definitions, Zod validation schemas, and
+ * TypeScript types that are inferred from said schemas, including constants
+ * (ie, string enums) that are relevant to these schemas (such as task status,
+ * priority, etc.).
+ */
+
 import { relations } from 'drizzle-orm'
 import {
   boolean,
@@ -132,7 +139,7 @@ export const RANK_FIELDS_CRITERIA = [
   levels: readonly string[]
 }[]
 
-export type SortFieldValueMap = {
+export type RankFieldValueMap = {
   priority: Priority
   ease: Ease
   enjoyment: Enjoyment

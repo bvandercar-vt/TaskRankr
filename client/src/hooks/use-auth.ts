@@ -1,7 +1,12 @@
+/**
+ * @fileoverview Authentication hook for user session management (ie
+ * authentication state and logout).
+ */
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { authPaths } from '~/shared/constants'
 import type { User } from '~/shared/models/auth'
-import { authPaths } from '~/shared/routes'
 
 async function fetchUser(): Promise<User | null> {
   const response = await fetch(authPaths.user, {

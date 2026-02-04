@@ -1,3 +1,8 @@
+/**
+ * @fileoverview User settings hook. Manages user preferences with optimistic
+ * updates.
+ */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { queryClient } from '@/lib/query-client'

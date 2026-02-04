@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Main application component with routing and provider setup
+ */
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch } from 'wouter'
 

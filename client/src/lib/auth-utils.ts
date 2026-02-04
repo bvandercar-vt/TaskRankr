@@ -1,4 +1,9 @@
-import { authPaths } from '~/shared/routes'
+/**
+ * @fileoverview Authentication utility functions. Handles 401 errors and login
+ * redirects.
+ */
+
+import { authPaths } from '~/shared/constants'
 
 export function isUnauthorizedError(error: Error): boolean {
   return /^401: .*Unauthorized/.test(error.message)

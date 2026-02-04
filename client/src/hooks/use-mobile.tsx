@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Mobile device detection hook based on viewport width.
+ */
+
 import { useEffect, useState } from 'react'
 
 const MOBILE_BREAKPOINT = 768

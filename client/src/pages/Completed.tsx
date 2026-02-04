@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Completed tasks view page.
+ */
+
 import { useMemo } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Link } from 'wouter'
