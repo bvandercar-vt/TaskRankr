@@ -84,7 +84,7 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<ArrowUpDown className="h-5 w-5" />}
                 title="Sort Options"
-                description="Use the sort buttons at the top of the task list to order tasks by date, priority, ease, enjoyment, or time. You can customize which rank fields are visible in Settings."
+                description="Use the sort buttons at the top of the task list to order tasks by date created, priority, ease, enjoyment, or time. You can customize which rank fields are visible in Settings."
                 testId="card-sorting"
               />
               <SortInfo defaultExpanded={false} testIdPrefix="howto" />
