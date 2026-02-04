@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Task display card with status indicators and interactions
+ *
+ * Renders individual task items with priority/ease/time badges, expandable
+ * subtasks, and status indicators (pinned, in-progress). Supports long-press
+ * for status dialog, click to edit, and displays time tracking information.
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'

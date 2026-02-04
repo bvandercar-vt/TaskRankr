@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Toast notification primitives
+ *
+ * Notification system built on Radix UI with swipe-to-dismiss,
+ * action buttons, and destructive variant styling.
+ */
+
 import * as ToastPrimitives from '@radix-ui/react-toast'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'

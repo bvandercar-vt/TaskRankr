@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Dialog component for changing task status and time tracking
+ *
+ * Provides a modal interface to set task status (open, in_progress, pinned,
+ * completed), update time spent on tasks, and access task deletion. Adapts
+ * available actions based on current task status.
+ */
+
 import { useEffect, useState } from 'react'
 import {
   Clock,

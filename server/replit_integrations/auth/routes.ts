@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Auth-specific API routes for user session data.
+ */
+
 import type { Express } from 'express'
 
 import { authPaths } from '~/shared/routes'

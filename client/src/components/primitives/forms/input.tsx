@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Text input component
+ *
+ * Styled input field with focus ring, placeholder support,
+ * and disabled states for form inputs.
+ */
+
 import { forwardRef } from 'react'
 
 import { cn } from '@/lib/utils'

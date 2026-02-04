@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Shared UI components for page loading, error, and empty states
+ *
+ * Provides reusable components for common page states: PageLoading for
+ * loading indicators, PageError for error messages, and EmptyState for
+ * empty content with customizable icon, title, and action.
+ */
+
 import type { ReactNode } from 'react'
 
 export const PageLoading = () => (

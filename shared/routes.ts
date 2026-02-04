@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Authentication route path constants.
+ */
+
 export const authPaths = {
   login: '/api/login',
   logout: '/api/logout',

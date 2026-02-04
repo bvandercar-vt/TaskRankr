@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Form component for creating and editing tasks
+ *
+ * Renders a form with task name, description, and configurable attribute
+ * fields (priority, ease, enjoyment, time). Supports parent task breadcrumbs,
+ * date pickers, and validates required fields based on user settings.
+ */
+
 import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'

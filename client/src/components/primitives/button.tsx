@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Button primitive component based on shadcn/ui.
+ *
+ * Provides a flexible button with multiple variants (default, destructive,
+ * outline, secondary, ghost) and sizes (default, sm, lg, icon). Supports
+ * composition via asChild prop and includes hover/active elevation effects.
+ */
+
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 

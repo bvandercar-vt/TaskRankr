@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Form label component
+ *
+ * Accessible label built on Radix UI with peer-disabled
+ * styling for associated form controls.
+ */
+
 import * as LabelPrimitive from '@radix-ui/react-label'
 import { cva, type VariantProps } from 'class-variance-authority'
 

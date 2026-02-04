@@ -1,3 +1,10 @@
+/**
+ * @fileoverview 404 Not Found error page.
+ *
+ * Displays a user-friendly error message when a requested route
+ * does not exist. Includes a helpful reminder about router configuration.
+ */
+
 import { AlertCircle } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/primitives/card'

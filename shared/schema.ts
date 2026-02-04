@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Drizzle ORM schema definitions and Zod validation types.
+ *
+ * Defines database tables for tasks and user settings with relations.
+ * Exports TypeScript types, Zod schemas, and constants for task attributes
+ * including priority, ease, enjoyment, time levels, and sort options.
+ */
+
 import { relations } from 'drizzle-orm'
 import {
   boolean,

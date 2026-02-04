@@ -1,3 +1,11 @@
+/**
+ * @fileoverview User preferences and settings configuration page.
+ *
+ * Provides controls for task behavior settings (auto-pin, time tracking),
+ * attribute visibility/requirement toggles, and data import/export functionality.
+ * Includes sorting criteria reference information for user guidance.
+ */
+
 import { useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown, Download, LogOut, Upload } from 'lucide-react'
 import { Link } from 'wouter'

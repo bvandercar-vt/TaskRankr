@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Toast notification container
+ *
+ * Renders and manages active toast notifications from
+ * the useToast hook with viewport positioning.
+ */
+
 import {
   Toast,
   ToastClose,

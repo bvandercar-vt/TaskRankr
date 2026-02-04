@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Checkbox input component
+ *
+ * Accessible checkbox built on Radix UI primitives with
+ * consistent styling and focus states.
+ */
+
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 

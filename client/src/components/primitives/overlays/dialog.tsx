@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Modal dialog component
+ *
+ * Accessible dialog overlay built on Radix UI with animated
+ * transitions, close button, and structured content areas.
+ */
+
 'use client'
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
