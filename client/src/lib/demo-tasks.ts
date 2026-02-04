@@ -1,6 +1,5 @@
 /**
  * @fileoverview Demo task data for guest mode.
- * Creates sample tasks to help users learn the app.
  */
 
 import type { TaskResponse } from '~/shared/schema'
