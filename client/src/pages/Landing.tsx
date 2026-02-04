@@ -50,6 +50,9 @@ const Landing = () => {
               Try Offline Mode
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Log in to back up your data and sync across devices.
+          </p>
         </div>
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
