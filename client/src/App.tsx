@@ -21,6 +21,7 @@ import {
 } from '@/lib/migrate-guest-tasks'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
+import HowToUse from '@/pages/HowToUse'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
@@ -32,6 +33,7 @@ const Router = () => (
     <Route path="/" component={Home} />
     <Route path="/completed" component={Completed} />
     <Route path="/settings" component={Settings} />
+    <Route path="/how-to-use" component={HowToUse} />
     <Route component={NotFound} />
   </Switch>
 )

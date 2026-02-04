@@ -4,9 +4,10 @@
  *
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CheckCircle2,
+  HelpCircle,
   LayoutList,
   LogIn,
   LogOut,
@@ -14,6 +15,7 @@ import {
   Plus,
   Search,
   Settings,
+  X,
 } from 'lucide-react'
 import { Link } from 'wouter'
 
@@ -45,6 +47,64 @@ import {
   type TaskResponse,
   type Time,
 } from '~/shared/schema'
+
+const HOW_TO_USE_BANNER_KEY = 'taskrankr-how-to-use-dismissed'
+
+const HowToUseBanner = () => {
+  const [isDismissed, setIsDismissed] = useState(true)
+  const [hasLoaded, setHasLoaded] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const dismissed = localStorage.getItem(HOW_TO_USE_BANNER_KEY) === 'true'
+        setIsDismissed(dismissed)
+      }
+    } catch {
+      setIsDismissed(true)
+    }
+    setHasLoaded(true)
+  }, [])
+
+  const dismiss = () => {
+    try {
+      localStorage.setItem(HOW_TO_USE_BANNER_KEY, 'true')
+    } catch {}
+    setIsDismissed(true)
+  }
+
+  if (!hasLoaded || isDismissed) return null
+
+  return (
+    <div
+      className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 mb-4 flex items-center justify-between gap-3"
+      data-testid="banner-how-to-use"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <HelpCircle className="h-5 w-5 shrink-0 text-primary" />
+        <span className="text-sm text-foreground">
+          New here?{' '}
+          <Link href="/how-to-use">
+            <span
+              className="text-primary underline underline-offset-2 cursor-pointer"
+              data-testid="link-how-to-use-banner"
+            >
+              Learn how to use the app
+            </span>
+          </Link>
+        </span>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={dismiss}
+        data-testid="button-dismiss-how-to-use"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+}
 
 const SortButton = ({
   label,
@@ -293,6 +353,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
+        <HowToUseBanner />
         <div className="flex items-center justify-between mb-4 pr-2">
           {/* Hamburger Menu */}
           <div className="flex items-center gap-2">
@@ -314,6 +375,7 @@ const Home = () => {
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                  data-testid="menu-item-search"
                 >
                   <Search className={cn(IconSizeStyle.small, 'mr-2')} />
                   Search
@@ -334,6 +396,15 @@ const Home = () => {
                   >
                     <Settings className={cn(IconSizeStyle.small, 'mr-2')} />
                     Settings
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/how-to-use">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    data-testid="menu-item-how-to-use"
+                  >
+                    <HelpCircle className={cn(IconSizeStyle.small, 'mr-2')} />
+                    How To Use
                   </DropdownMenuItem>
                 </Link>
                 {isGuestMode && (
@@ -373,6 +444,7 @@ const Home = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onBlur={() => !search && setIsSearchExpanded(false)}
+                  data-testid="input-search"
                 />
               </div>
             )}
