@@ -1,32 +1,16 @@
 import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/default-settings'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
-import type { RankField, SortOption, UserSettings } from '~/shared/schema'
+import type { RankField, UserSettings } from '~/shared/schema'
+
+export type { AppSettings }
+export { DEFAULT_SETTINGS }
 
 export interface AttributeVisibility {
   visible: boolean
   required: boolean
-}
-
-export interface AppSettings extends Omit<UserSettings, 'sortBy'> {
-  sortBy: SortOption
-}
-
-const DEFAULT_SETTINGS: AppSettings = {
-  userId: '',
-  autoPinNewTasks: true,
-  enableInProgressTime: true,
-  alwaysSortPinnedByPriority: true,
-  sortBy: 'priority',
-  priorityVisible: true,
-  priorityRequired: true,
-  easeVisible: true,
-  easeRequired: true,
-  enjoymentVisible: true,
-  enjoymentRequired: true,
-  timeVisible: true,
-  timeRequired: true,
 }
 
 export const useSettings = () => {
