@@ -17,6 +17,7 @@ import {
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/button'
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Calendar } from '@/components/primitives/forms/calendar'
 import {
   Form,
@@ -73,6 +74,10 @@ export const TaskForm = ({
   onEditChild,
 }: TaskFormProps) => {
   const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const [subtaskToDelete, setSubtaskToDelete] = useState<{
+    id: number
+    name: string
+  } | null>(null)
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
   const { data: allTasks } = useTasks()
@@ -518,7 +523,12 @@ export const TaskForm = ({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          onClick={() => deleteTask.mutate(subtask.id)}
+                          onClick={() =>
+                            setSubtaskToDelete({
+                              id: subtask.id,
+                              name: subtask.name,
+                            })
+                          }
                           data-testid={`button-delete-subtask-${subtask.id}`}
                         >
                           <Trash2
@@ -571,6 +581,17 @@ export const TaskForm = ({
           </Button>
         </div>
       </form>
+      <ConfirmDeleteDialog
+        open={!!subtaskToDelete}
+        onOpenChange={(open) => !open && setSubtaskToDelete(null)}
+        taskName={subtaskToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (subtaskToDelete) {
+            deleteTask.mutate(subtaskToDelete.id)
+            setSubtaskToDelete(null)
+          }
+        }}
+      />
     </Form>
   )
 }
