@@ -1,5 +1,10 @@
 import type { SortOption, UserSettings } from '~/shared/schema'
 
+export const IconSizeStyle = {
+  small: 'h-4 w-4',
+  medium: 'h-6 w-6',
+} as const
+
 export interface AppSettings extends Omit<UserSettings, 'sortBy'> {
   sortBy: SortOption
 }

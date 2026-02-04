@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 
-import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/default-settings'
+import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTaskRequest,
