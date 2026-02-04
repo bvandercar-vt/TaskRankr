@@ -78,12 +78,12 @@ The app uses a local-first data model where all changes happen locally first, th
 │   └── src/
 │       ├── components/   # UI components
 │       │   ├── primitives/       # Base UI components (shadcn/ui)
-│       │   │   ├── forms/        # Form controls (input, select, calendar, etc.)
-│       │   │   ├── overlays/     # Dialogs, sheets, tooltips
-│       │   │   ├── Button.tsx, Badge.tsx, Card.tsx, Toggle.tsx
+│       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea)
+│       │   │   ├── overlays/     # AlertDialog, Dialog, Popover, Toast, Toaster, Tooltip
+│       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
-│       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
+│       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
 │       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   ├── SyncProvider.tsx  # Background sync to API
 │       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
@@ -91,10 +91,14 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
-│       │   └── ConfirmDeleteDialog.tsx
+│       │   ├── ConfirmDeleteDialog.tsx
+│       │   └── SortInfo.tsx      # Reusable sort explanation component
 │       ├── hooks/
-│       │   ├── useTasks.ts       # Task CRUD operations
+│       │   ├── useAuth.ts        # Authentication state hook
+│       │   ├── useGuestModeState.ts  # Guest mode localStorage state
+│       │   ├── useMobile.tsx     # Mobile detection hook
 │       │   ├── useSettings.ts    # User settings with optimistic updates
+│       │   ├── useTasks.ts       # Task CRUD operations
 │       │   └── useToast.ts       # Toast notifications
 │       ├── pages/
 │       │   ├── Home.tsx          # Main task list with sorting
@@ -112,20 +116,25 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
-│       └── types/
-│           └── index.ts          # Frontend-specific types
+│       ├── types/
+│       │   └── index.ts          # Frontend-specific types
+│       ├── App.tsx               # Main app with routing and providers
+│       └── main.tsx              # React entry point
 ├── server/
 │   ├── index.ts          # Server entry point
 │   ├── routes.ts         # API route handlers (ts-rest)
 │   ├── storage.ts        # Database access layer
 │   ├── db.ts             # Database connection
 │   ├── static.ts         # Static file serving
+│   ├── vite.ts           # Vite dev server integration
 │   └── replit_integrations/auth/  # Replit Auth (OIDC)
+│       ├── index.ts, replitAuth.ts, routes.ts, storage.ts
 ├── shared/
 │   ├── schema.ts         # Drizzle schema + Zod types + RANK_FIELDS_CRITERIA
 │   ├── contract.ts       # ts-rest API contract
 │   ├── constants.ts      # Auth path constants
-│   └── models/           # Shared model utilities
+│   └── models/
+│       └── auth.ts       # Auth model utilities
 └── migrations/           # Database migrations
 ```
 
