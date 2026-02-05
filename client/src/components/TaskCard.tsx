@@ -82,8 +82,8 @@ const formatDuration = (ms: number) => {
   }
 };
 
-// Calculate current accumulated time for in-progress tasks
-const getCurrentAccumulatedTime = (task: TaskResponse): number => {
+// Calculate current accumulated time for a single task (not including subtasks)
+const getTaskOwnTime = (task: TaskResponse): number => {
   let total = task.inProgressTime;
   if (task.status === "in_progress" && task.inProgressStartedAt) {
     const startedAt =
@@ -92,6 +92,17 @@ const getCurrentAccumulatedTime = (task: TaskResponse): number => {
         : task.inProgressStartedAt;
     const elapsed = Date.now() - startedAt.getTime();
     total += elapsed;
+  }
+  return total;
+};
+
+// Calculate total accumulated time including all subtasks recursively
+const getTotalAccumulatedTime = (task: TaskResponse): number => {
+  let total = getTaskOwnTime(task);
+  if (task.subtasks && task.subtasks.length > 0) {
+    for (const subtask of task.subtasks) {
+      total += getTotalAccumulatedTime(subtask);
+    }
   }
   return total;
 };
@@ -258,9 +269,9 @@ export const TaskCard = ({
                     Completed: {formatCompletedDate(task.completedAt)}
                   </span>
                 )}
-                {settings.enableInProgressTime && task.inProgressTime > 0 && (
+                {settings.enableInProgressTime && getTotalAccumulatedTime(task) > 0 && (
                   <span className="text-[10px] text-muted-foreground">
-                    Time spent: {formatDuration(task.inProgressTime)}
+                    Time spent: {formatDuration(getTotalAccumulatedTime(task))}
                   </span>
                 )}
               </div>
@@ -301,7 +312,7 @@ export const TaskCard = ({
         onOpenChange={setShowConfirm}
         taskName={task.name}
         status={task.status}
-        inProgressTime={getCurrentAccumulatedTime(task)}
+        inProgressTime={getTotalAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
           updateTask.mutate({ id: task.id, inProgressTime: timeMs });

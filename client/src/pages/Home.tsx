@@ -260,26 +260,28 @@ const Home = () => {
 
     // Collect tasks to hoist:
     // - All in_progress tasks (both top-level and subtasks)
-    // - Only pinned subtasks (top-level pinned stay in tree only)
+    // - All pinned tasks (both top-level and subtasks)
+    // Subtasks also remain visible under their parent (with minimal styling)
     const inProgressList: TaskResponse[] = []
-    const pinnedSubtaskList: TaskResponse[] = []
+    const pinnedList: TaskResponse[] = []
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
       if (task.status === 'in_progress') {
         inProgressList.push({ ...task, subtasks: [] } as TaskResponse)
         hoistedIds.add(task.id)
-      } else if (task.status === 'pinned' && task.parentId) {
-        pinnedSubtaskList.push({ ...task, subtasks: [] } as TaskResponse)
+      } else if (task.status === 'pinned') {
+        pinnedList.push({ ...task, subtasks: [] } as TaskResponse)
         hoistedIds.add(task.id)
       }
     })
 
-    // Hoisted order: in_progress first, then pinned subtasks
-    const hoistedList = [...inProgressList, ...pinnedSubtaskList]
+    // Hoisted order: in_progress first, then pinned
+    const hoistedList = [...inProgressList, ...pinnedList]
 
-    // Build full tree - subtasks with pinned/in_progress status stay under parent
-    // Top-level in_progress tasks are excluded from tree (only shown hoisted)
+    // Build full tree
+    // - Subtasks with pinned/in_progress status stay under parent (also shown hoisted)
+    // - Top-level pinned/in_progress are excluded from tree (only shown hoisted)
     const nodes: Record<number, TaskResponse> = {}
     const roots: TaskResponse[] = []
 
