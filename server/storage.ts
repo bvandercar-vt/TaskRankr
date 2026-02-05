@@ -34,6 +34,11 @@ export interface IStorage {
     userId: string,
     newStatus: TaskStatus,
   ): Promise<Task>
+  reorderSubtasks(
+    parentId: number,
+    userId: string,
+    orderedIds: number[],
+  ): Promise<void>
   getSettings(userId: string): Promise<UserSettings>
   updateSettings(
     userId: string,
@@ -234,6 +239,25 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(tasks)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+  }
+
+  async reorderSubtasks(
+    parentId: number,
+    userId: string,
+    orderedIds: number[],
+  ): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await db
+        .update(tasks)
+        .set({ manualOrder: i })
+        .where(
+          and(
+            eq(tasks.id, orderedIds[i]),
+            eq(tasks.userId, userId),
+            eq(tasks.parentId, parentId),
+          ),
+        )
+    }
   }
 
   async getSettings(userId: string): Promise<UserSettings> {

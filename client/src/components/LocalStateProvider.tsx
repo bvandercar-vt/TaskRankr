@@ -34,6 +34,7 @@ export type SyncOperation =
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
   | { type: 'update_settings'; data: Partial<UserSettings> }
+  | { type: 'reorder_subtasks'; parentId: number; orderedIds: number[] }
 
 interface LocalStateContextValue {
   tasks: TaskResponse[]
@@ -45,6 +46,7 @@ interface LocalStateContextValue {
   updateTask: (id: number, updates: UpdateTaskRequest) => TaskResponse
   setTaskStatus: (id: number, status: TaskStatus) => TaskResponse
   deleteTask: (id: number) => void
+  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   updateSettings: (updates: Partial<UserSettings>) => void
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
@@ -292,6 +294,8 @@ export const LocalStateProvider = ({
         inProgressStartedAt: null,
         createdAt: new Date(),
         completedAt: null,
+        subtaskSortMode: data.subtaskSortMode ?? 'inherit',
+        manualOrder: data.manualOrder ?? 0,
         subtasks: [],
       }
 
@@ -403,6 +407,35 @@ export const LocalStateProvider = ({
     [enqueue],
   )
 
+  const reorderSubtasks = useCallback(
+    (parentId: number, orderedIds: number[]) => {
+      setTasks((prev) =>
+        updateTaskInTree(prev, parentId, (parent) => {
+          const reorderedSubtasks = orderedIds
+            .map((id, index) => {
+              const subtask = parent.subtasks.find((s) => s.id === id)
+              return subtask ? { ...subtask, manualOrder: index } : null
+            })
+            .filter((s): s is TaskResponse => s !== null)
+
+          const remainingSubtasks = parent.subtasks
+            .filter((s) => !orderedIds.includes(s.id))
+            .map((s, index) => ({
+              ...s,
+              manualOrder: orderedIds.length + index,
+            }))
+
+          return {
+            ...parent,
+            subtasks: [...reorderedSubtasks, ...remainingSubtasks],
+          }
+        }),
+      )
+      enqueue({ type: 'reorder_subtasks', parentId, orderedIds })
+    },
+    [enqueue],
+  )
+
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
       setSettings((prev) => ({ ...prev, ...updates }))
@@ -478,6 +511,7 @@ export const LocalStateProvider = ({
       updateTask,
       setTaskStatus,
       deleteTask,
+      reorderSubtasks,
       updateSettings,
       clearSyncQueue,
       removeSyncOperation,
@@ -498,6 +532,7 @@ export const LocalStateProvider = ({
       updateTask,
       setTaskStatus,
       deleteTask,
+      reorderSubtasks,
       updateSettings,
       clearSyncQueue,
       removeSyncOperation,

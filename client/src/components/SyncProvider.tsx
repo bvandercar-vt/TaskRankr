@@ -15,7 +15,28 @@ import {
 } from 'react'
 
 import { tsr } from '@/lib/ts-rest'
+import type { Task, TaskResponse } from '~/shared/schema'
 import { useLocalState } from './LocalStateProvider'
+
+const buildTaskTree = (flatTasks: Task[]): TaskResponse[] => {
+  const taskMap = new Map<number, TaskResponse>()
+  const rootTasks: TaskResponse[] = []
+
+  for (const task of flatTasks) {
+    taskMap.set(task.id, { ...task, subtasks: [] })
+  }
+
+  for (const task of flatTasks) {
+    const taskWithSubs = taskMap.get(task.id)!
+    if (task.parentId && taskMap.has(task.parentId)) {
+      taskMap.get(task.parentId)!.subtasks.push(taskWithSubs)
+    } else {
+      rootTasks.push(taskWithSubs)
+    }
+  }
+
+  return rootTasks
+}
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -76,7 +97,7 @@ export const SyncProvider = ({
       ])
 
       if (tasksResult.status === 200) {
-        setTasksFromServer(tasksResult.body)
+        setTasksFromServer(buildTaskTree(tasksResult.body))
       }
       if (settingsResult.status === 200) {
         setSettingsFromServer(settingsResult.body)
@@ -187,6 +208,20 @@ export const SyncProvider = ({
           }
           case 'update_settings': {
             const result = await tsr.settings.update.mutate({ body: op.data })
+            success = result.status === 200
+            break
+          }
+          case 'reorder_subtasks': {
+            const realParentId = resolveId(op.parentId)
+            if (realParentId < 0) {
+              success = true
+              break
+            }
+            const realOrderedIds = op.orderedIds.map((id) => resolveId(id))
+            const result = await tsr.tasks.reorderSubtasks.mutate({
+              params: { id: realParentId },
+              body: { orderedIds: realOrderedIds },
+            })
             success = result.status === 200
             break
           }

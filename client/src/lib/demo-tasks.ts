@@ -35,6 +35,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: new Date(now.getTime() - 120_000),
       createdAt: new Date(now.getTime() - 300_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -52,6 +54,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 250_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -69,6 +73,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 60_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -86,6 +92,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 120_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -103,6 +111,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 180_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -121,6 +131,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 240_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -138,6 +150,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 50_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -155,6 +169,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 45_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -172,6 +188,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 40_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -189,6 +207,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 30_000),
       completedAt: null,
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -207,6 +227,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 100_000),
       completedAt: new Date(now.getTime() - 20_000),
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -224,6 +246,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 300_000),
       completedAt: new Date(now.getTime() - 10_000),
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -241,6 +265,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 400_000),
       completedAt: new Date(now.getTime() - 5000),
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
     {
@@ -258,6 +284,8 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 350_000),
       completedAt: new Date(now.getTime() - 8000),
+      subtaskSortMode: 'inherit',
+      manualOrder: 0,
       subtasks: [],
     },
   ]
