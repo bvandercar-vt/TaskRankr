@@ -33,8 +33,6 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Button } from "@/components/primitives/Button";
 import { Calendar } from "@/components/primitives/forms/Calendar";
 import {
@@ -62,9 +60,7 @@ import {
 import { TagChain } from "@/components/primitives/TagChain";
 import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
 import {
-  useDeleteTask,
   useReorderSubtasks,
-  useSetTaskStatus,
   useTaskParentChain,
   useTasks,
   useUpdateTask,
@@ -79,7 +75,6 @@ import {
   type RankField,
   type SubtaskSortMode,
   type Task,
-  type TaskStatus,
 } from "~/shared/schema";
 
 interface SortableSubtaskItemProps {
@@ -217,6 +212,8 @@ export interface TaskFormProps {
   onCancel: () => void;
   onAddChild?: (parentId: number) => void;
   onEditChild?: (task: Task) => void;
+  onSubtaskStatusChange?: (task: Task) => void;
+  onSubtaskDelete?: (task: { id: number; name: string }) => void;
 }
 
 export const TaskForm = ({
@@ -227,23 +224,17 @@ export const TaskForm = ({
   onCancel,
   onAddChild,
   onEditChild,
+  onSubtaskStatusChange,
+  onSubtaskDelete,
 }: TaskFormProps) => {
   const [subtasksExpanded, setSubtasksExpanded] = useState(false);
-  const [subtaskToDelete, setSubtaskToDelete] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
   );
-  const [statusSubtask, setStatusSubtask] = useState<Task | null>(null);
-  const [statusDeleteSubtask, setStatusDeleteSubtask] = useState<Task | null>(null);
   const parentChain = useTaskParentChain(parentId || undefined);
   const { settings } = useSettings();
   const { data: allTasks } = useTasks();
-  const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
-  const setTaskStatus = useSetTaskStatus();
   const reorderSubtasks = useReorderSubtasks();
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
@@ -694,8 +685,8 @@ export const TaskForm = ({
                                 key={subtask.id}
                                 task={subtask}
                                 onEdit={onEditChild}
-                                onDelete={setSubtaskToDelete}
-                                onLongPress={setStatusSubtask}
+                                onDelete={(task) => onSubtaskDelete?.(task)}
+                                onLongPress={(task) => onSubtaskStatusChange?.(task)}
                                 isManualMode={sortMode === "manual"}
                                 isDragDisabled={isMutating}
                               />
@@ -863,55 +854,6 @@ export const TaskForm = ({
           </Button>
         </div>
       </form>
-      <ConfirmDeleteDialog
-        open={!!subtaskToDelete}
-        onOpenChange={(open) => !open && setSubtaskToDelete(null)}
-        taskName={subtaskToDelete?.name ?? ""}
-        onConfirm={() => {
-          if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id);
-            setSubtaskToDelete(null);
-          }
-        }}
-      />
-
-      <ChangeStatusDialog
-        open={!!statusSubtask}
-        onOpenChange={(open) => !open && setStatusSubtask(null)}
-        taskName={statusSubtask?.name ?? ""}
-        status={statusSubtask?.status ?? "open"}
-        inProgressTime={statusSubtask?.inProgressTime ?? 0}
-        onSetStatus={(status: TaskStatus) => {
-          if (statusSubtask) {
-            setTaskStatus.mutate({ id: statusSubtask.id, status });
-            setStatusSubtask(null);
-          }
-        }}
-        onUpdateTime={(timeMs) => {
-          if (statusSubtask) {
-            updateTask.mutate({ id: statusSubtask.id, inProgressTime: timeMs });
-          }
-        }}
-        onDeleteClick={() => {
-          const task = statusSubtask;
-          setStatusSubtask(null);
-          if (task) {
-            setTimeout(() => setStatusDeleteSubtask(task), 100);
-          }
-        }}
-      />
-
-      <ConfirmDeleteDialog
-        open={!!statusDeleteSubtask}
-        onOpenChange={(open) => !open && setStatusDeleteSubtask(null)}
-        taskName={statusDeleteSubtask?.name ?? ""}
-        onConfirm={() => {
-          if (statusDeleteSubtask) {
-            deleteTask.mutate(statusDeleteSubtask.id);
-            setStatusDeleteSubtask(null);
-          }
-        }}
-      />
     </Form>
   );
 };
