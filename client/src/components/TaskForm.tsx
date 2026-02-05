@@ -113,12 +113,21 @@ const SortableSubtaskItem = ({
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
-  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointerIdRef = useRef<number | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null);
 
-  const startHold = (e: React.MouseEvent | React.TouchEvent) => {
+  const startHold = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
+    pointerIdRef.current = e.pointerId;
     setIsHolding(true);
     holdTimerRef.current = setTimeout(() => {
+      if (pointerIdRef.current !== null && rowRef.current) {
+        try {
+          rowRef.current.releasePointerCapture(pointerIdRef.current);
+        } catch {}
+      }
+      pointerIdRef.current = null;
       setShowStatusDialog(true);
       setIsHolding(false);
     }, 800);
@@ -126,6 +135,8 @@ const SortableSubtaskItem = ({
 
   const cancelHold = () => {
     if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+    pointerIdRef.current = null;
     setIsHolding(false);
   };
 
@@ -147,19 +158,22 @@ const SortableSubtaskItem = ({
   return (
     <>
       <div
-        ref={setNodeRef}
+        ref={(node) => {
+          setNodeRef(node);
+          rowRef.current = node;
+        }}
         style={style}
         className={cn(
-          "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5 select-none",
+          "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5 select-none touch-none",
           isDragging && "opacity-50 bg-secondary/20",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
         )}
         data-testid={`subtask-row-${task.id}`}
-        onMouseDown={startHold}
-        onMouseUp={cancelHold}
-        onMouseLeave={cancelHold}
-        onTouchStart={startHold}
-        onTouchEnd={cancelHold}
+        onPointerDown={startHold}
+        onPointerUp={cancelHold}
+        onPointerLeave={cancelHold}
+        onPointerCancel={cancelHold}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {showDragHandle && (
