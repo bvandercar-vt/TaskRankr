@@ -185,7 +185,7 @@ export type InsertTask = z.infer<typeof insertTaskSchema>
 export type MutateTaskRequest = InsertTask
 export type CreateTaskRequest = InsertTask
 export type UpdateTaskRequest = Partial<InsertTask>
-export type TaskResponse = Task & { subtasks?: TaskResponse[] }
+export type TaskResponse = Task & { subtasks: TaskResponse[] }
 
 // User Settings
 export const userSettings = pgTable('user_settings', {

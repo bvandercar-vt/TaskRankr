@@ -103,11 +103,10 @@ const updateTaskInTree = (
     if (task.id === id) {
       return updater(task)
     }
-    const subtasks = task.subtasks ?? []
-    if (subtasks.length > 0) {
+    if (task.subtasks.length > 0) {
       return {
         ...task,
-        subtasks: updateTaskInTree(subtasks, id, updater),
+        subtasks: updateTaskInTree(task.subtasks, id, updater),
       }
     }
     return task
@@ -122,13 +121,13 @@ const deleteTaskFromTree = (
     .filter((task) => task.id !== id)
     .map((task) => ({
       ...task,
-      subtasks: deleteTaskFromTree(task.subtasks ?? [], id),
+      subtasks: deleteTaskFromTree(task.subtasks, id),
     }))
 }
 
 const getTotalTimeFromTask = (task: TaskResponse): number => {
   let total = task.inProgressTime ?? 0
-  for (const subtask of task.subtasks ?? []) {
+  for (const subtask of task.subtasks) {
     total += getTotalTimeFromTask(subtask)
   }
   return total
@@ -140,7 +139,7 @@ const findTaskInTree = (
 ): TaskResponse | undefined => {
   for (const task of tasks) {
     if (task.id === id) return task
-    const found = findTaskInTree(task.subtasks ?? [], id)
+    const found = findTaskInTree(task.subtasks, id)
     if (found) return found
   }
   return undefined
@@ -156,11 +155,10 @@ const addTaskToTree = (
   }
   return tasks.map((task) => {
     if (task.id === parentId) {
-      return { ...task, subtasks: [...(task.subtasks ?? []), newTask] }
+      return { ...task, subtasks: [...task.subtasks, newTask] }
     }
-    const subtasks = task.subtasks ?? []
-    if (subtasks.length > 0) {
-      return { ...task, subtasks: addTaskToTree(subtasks, newTask, parentId) }
+    if (task.subtasks.length > 0) {
+      return { ...task, subtasks: addTaskToTree(task.subtasks, newTask, parentId) }
     }
     return task
   })
@@ -456,7 +454,7 @@ export const LocalStateProvider = ({
         .filter((task) => !idsToDelete.has(task.id))
         .map((task) => ({
           ...task,
-          subtasks: filterDemoTasks(task.subtasks ?? []),
+          subtasks: filterDemoTasks(task.subtasks),
         }))
     }
     setTasks((prev) => filterDemoTasks(prev))

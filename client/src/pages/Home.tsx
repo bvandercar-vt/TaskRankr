@@ -294,7 +294,7 @@ const Home = () => {
     activeTasks.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
         // Subtasks always go under their parent (even if pinned/in_progress)
-        nodes[task.parentId].subtasks?.push(nodes[task.id])
+        nodes[task.parentId].subtasks.push(nodes[task.id])
       } else if (!task.parentId && !hoistedIds.has(task.id)) {
         // Top-level tasks go to roots unless they're hoisted
         roots.push(nodes[task.id])

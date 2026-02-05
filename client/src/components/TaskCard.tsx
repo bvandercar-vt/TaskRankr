@@ -102,10 +102,8 @@ const getTaskOwnTime = (task: TaskResponse): number => {
 // Calculate total accumulated time including all subtasks recursively
 const getTotalAccumulatedTime = (task: TaskResponse): number => {
   let total = getTaskOwnTime(task)
-  if (task.subtasks && task.subtasks.length > 0) {
-    for (const subtask of task.subtasks) {
-      total += getTotalAccumulatedTime(subtask)
-    }
+  for (const subtask of task.subtasks) {
+    total += getTotalAccumulatedTime(subtask)
   }
   return total
 }
@@ -128,7 +126,7 @@ export const TaskCard = ({
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
 
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0
+  const hasSubtasks = task.subtasks.length > 0
   const isExpanded = checkExpanded(task.id)
   const isInProgress = task.status === 'in_progress'
   const isPinned = task.status === 'pinned'
@@ -306,7 +304,7 @@ export const TaskCard = ({
                 className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]"
                 style={{ marginLeft: `${level * 16}px` }}
               />
-              {task.subtasks?.map((subtask) => (
+              {task.subtasks.map((subtask) => (
                 <TaskCard
                   key={subtask.id}
                   task={subtask}
