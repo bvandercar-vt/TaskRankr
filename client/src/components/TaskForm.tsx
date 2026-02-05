@@ -59,7 +59,6 @@ import {
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
-import { Toggle } from '@/components/primitives/Toggle'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
 import {
   useDeleteTask,
@@ -698,23 +697,51 @@ export const TaskForm = ({
               </button>
               {subtasksExpanded && (
                 <>
-                  <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-secondary/5">
-                    <span className="text-xs text-muted-foreground">
-                      Sort order
-                    </span>
-                    <Toggle
-                      pressed={sortMode === 'manual'}
-                      onPressedChange={handleSortModeToggle}
-                      size="sm"
-                      aria-label="Toggle manual sort"
-                      data-testid="toggle-manual-sort"
-                      disabled={isMutating}
+                  <div className="flex items-center justify-center px-3 py-2 border-b border-white/5 bg-secondary/5">
+                    <div
+                      className={cn(
+                        'inline-flex rounded-md border border-white/10 overflow-hidden',
+                        isMutating && 'opacity-50 pointer-events-none',
+                      )}
+                      role="radiogroup"
+                      aria-label="Subtask sort order"
+                      data-testid="toggle-sort-mode"
                     >
-                      <GripVertical className={IconSizeStyle.HW4} />
-                      <span className="ml-1.5 text-xs">
-                        {sortMode === 'manual' ? 'Manual' : 'Inherit'}
-                      </span>
-                    </Toggle>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={sortMode === 'inherit'}
+                        onClick={() =>
+                          sortMode !== 'inherit' && handleSortModeToggle()
+                        }
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors',
+                          sortMode === 'inherit'
+                            ? 'bg-secondary text-foreground'
+                            : 'bg-transparent text-muted-foreground',
+                        )}
+                        data-testid="toggle-sort-inherit"
+                      >
+                        Inherit
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={sortMode === 'manual'}
+                        onClick={() =>
+                          sortMode !== 'manual' && handleSortModeToggle()
+                        }
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors',
+                          sortMode === 'manual'
+                            ? 'bg-secondary text-foreground'
+                            : 'bg-transparent text-muted-foreground',
+                        )}
+                        data-testid="toggle-sort-manual"
+                      >
+                        Manual
+                      </button>
+                    </div>
                   </div>
                   <DndContext
                     sensors={sensors}
