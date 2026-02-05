@@ -118,6 +118,7 @@ export const TaskCard = ({
   const isExpanded = checkExpanded(task.id);
   const isInProgress = task.status === "in_progress";
   const isPinned = task.status === "pinned";
+  const isNestedWithStatus = level > 0 && (isInProgress || isPinned);
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
@@ -155,11 +156,13 @@ export const TaskCard = ({
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           "relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer",
-          isInProgress
-            ? "border-blue-500/30 bg-blue-500/5"
-            : isPinned
-              ? "border-slate-400/30 bg-slate-500/5"
-              : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
+          isNestedWithStatus
+            ? "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]"
+            : isInProgress
+              ? "border-blue-500/30 bg-blue-500/5"
+              : isPinned
+                ? "border-slate-400/30 bg-slate-500/5"
+                : "border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]",
           isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
         )}
         style={{ marginLeft: `${level * 16}px` }}
