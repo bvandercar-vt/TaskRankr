@@ -96,7 +96,21 @@ export const TaskForm = ({
       return result
     }
     const flatList = flattenTasks(allTasks)
-    return flatList.filter((t) => t.parentId === initialData.id)
+
+    const collectDescendants = (
+      parentId: number,
+      depth: number,
+    ): Array<(typeof allTasks)[number] & { depth: number }> => {
+      const children = flatList.filter((t) => t.parentId === parentId)
+      const result: Array<(typeof allTasks)[number] & { depth: number }> = []
+      for (const child of children) {
+        result.push({ ...child, depth })
+        result.push(...collectDescendants(child.id, depth + 1))
+      }
+      return result
+    }
+
+    return collectDescendants(initialData.id, 0)
   }, [initialData, allTasks])
 
   const getVisibility = useCallback(
@@ -487,9 +501,16 @@ export const TaskForm = ({
                     <div
                       key={subtask.id}
                       className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/5"
+                      style={{ paddingLeft: `${12 + subtask.depth * 16}px` }}
                       data-testid={`subtask-row-${subtask.id}`}
                     >
-                      <span className="text-sm truncate flex-1">
+                      <span
+                        className={cn(
+                          'text-sm truncate flex-1',
+                          subtask.status === 'completed' &&
+                            'line-through text-muted-foreground',
+                        )}
+                      >
                         {subtask.name}
                       </span>
                       <div className="flex items-center gap-1">
