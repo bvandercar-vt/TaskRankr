@@ -83,7 +83,9 @@ const HowToUseBanner = () => {
       data-testid="banner-how-to-use"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <HelpCircle className="h-5 w-5 shrink-0 text-primary" />
+        <HelpCircle
+          className={cn(IconSizeStyle.HW5, 'shrink-0 text-primary')}
+        />
         <span className="text-sm text-foreground">
           New here?{' '}
           <Link href="/how-to-use">
@@ -102,7 +104,7 @@ const HowToUseBanner = () => {
         onClick={dismiss}
         data-testid="button-dismiss-how-to-use"
       >
-        <X className="h-4 w-4" />
+        <X className={IconSizeStyle.HW4} />
       </Button>
     </div>
   )
@@ -367,7 +369,7 @@ const Home = () => {
                   className="h-10 w-10"
                   data-testid="button-menu"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className={IconSizeStyle.HW5} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -379,7 +381,7 @@ const Home = () => {
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                   data-testid="menu-item-search"
                 >
-                  <Search className={cn(IconSizeStyle.small, 'mr-2')} />
+                  <Search className={cn(IconSizeStyle.HW4, 'mr-2')} />
                   Search
                 </DropdownMenuItem>
                 <Link href="/completed">
@@ -387,7 +389,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-completed"
                   >
-                    <CheckCircle2 className={cn(IconSizeStyle.small, 'mr-2')} />
+                    <CheckCircle2 className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
@@ -396,7 +398,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-settings"
                   >
-                    <Settings className={cn(IconSizeStyle.small, 'mr-2')} />
+                    <Settings className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     Settings
                   </DropdownMenuItem>
                 </Link>
@@ -405,7 +407,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-how-to-use"
                   >
-                    <HelpCircle className={cn(IconSizeStyle.small, 'mr-2')} />
+                    <HelpCircle className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     How To Use
                   </DropdownMenuItem>
                 </Link>
@@ -417,7 +419,7 @@ const Home = () => {
                         className="cursor-pointer"
                         data-testid="menu-item-signup"
                       >
-                        <LogIn className={cn(IconSizeStyle.small, 'mr-2')} />
+                        <LogIn className={cn(IconSizeStyle.HW4, 'mr-2')} />
                         Sign Up
                       </DropdownMenuItem>
                     </a>
@@ -426,7 +428,7 @@ const Home = () => {
                       onClick={exitGuestMode}
                       data-testid="menu-item-exit-guest"
                     >
-                      <LogOut className={cn(IconSizeStyle.small, 'mr-2')} />
+                      <LogOut className={cn(IconSizeStyle.HW4, 'mr-2')} />
                       Exit Guest Mode
                     </DropdownMenuItem>
                   </>
@@ -437,7 +439,7 @@ const Home = () => {
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
                 <Search
-                  className={cn(IconSizeStyle.small, 'shrink-0 text-primary')}
+                  className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
                 />
                 <Input
                   placeholder="Search..."
@@ -482,7 +484,7 @@ const Home = () => {
               icon={
                 <Icon
                   icon={search ? Search : LayoutList}
-                  className="w-8 h-8 text-muted-foreground"
+                  className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
                 />
               }
               title={search ? 'No matching tasks found' : 'Your list is empty'}
@@ -529,7 +531,7 @@ const Home = () => {
         className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground z-50 transition-transform active:scale-95 border-0"
         data-testid="button-create-task"
       >
-        <Plus className={IconSizeStyle.medium} />
+        <Plus className={IconSizeStyle.HW6} />
       </Button>
     </div>
   )

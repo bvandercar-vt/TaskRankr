@@ -83,7 +83,7 @@ export const ToastClose = forwardRefHelper(
       toast-close=""
       {...props}
     >
-      <X className={IconSizeStyle.small} />
+      <X className={IconSizeStyle.HW4} />
     </ToastPrimitives.Close>
   ),
   ToastPrimitives.Close,
