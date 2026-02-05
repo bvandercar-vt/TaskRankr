@@ -2,26 +2,26 @@
  * @fileoverview Reusable chain of tags with optional label and separators
  */
 
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight } from "lucide-react";
 
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 
 interface TagChainItem {
-  id: number | string
-  name: string
+  id: number | string;
+  name: string;
 }
 
 interface TagChainProps {
-  items: TagChainItem[]
+  items: TagChainItem[];
   /**
    * Appears before the chain of tags.
    */
-  label?: string
+  label?: string;
   /**
    * @default `${label}s`
    */
-  labelPlural?: string
-  className?: string
+  labelPlural?: string;
+  className?: string;
 }
 
 export const TagChain = ({
@@ -30,19 +30,19 @@ export const TagChain = ({
   labelPlural,
   className,
 }: TagChainProps) => {
-  if (items.length === 0) return null
+  if (items.length === 0) return null;
 
   const displayLabel = label
     ? items.length === 1
       ? label
       : (labelPlural ?? `${label}s`)
-    : null
+    : null;
 
   return (
-    <div className={cn('flex items-center gap-1.5 flex-wrap', className)}>
+    <div className={cn("flex items-center gap-1.5 flex-wrap", className)}>
       {displayLabel && (
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
-          {displayLabel}
+          {displayLabel}:
         </span>
       )}
       {items.map((item, idx) => (
@@ -56,5 +56,5 @@ export const TagChain = ({
         </div>
       ))}
     </div>
-  )
-}
+  );
+};

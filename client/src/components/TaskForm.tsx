@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -11,17 +11,17 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { format } from 'date-fns'
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
   ChevronDown,
@@ -30,12 +30,12 @@ import {
   Pencil,
   Plus,
   Trash2,
-} from 'lucide-react'
-import { useForm } from 'react-hook-form'
+} from "lucide-react";
+import { useForm } from "react-hook-form";
 
-import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
-import { Button } from '@/components/primitives/Button'
-import { Calendar } from '@/components/primitives/forms/Calendar'
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { Button } from "@/components/primitives/Button";
+import { Calendar } from "@/components/primitives/forms/Calendar";
 import {
   Form,
   FormControl,
@@ -43,33 +43,33 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/primitives/forms/Form'
-import { Input } from '@/components/primitives/forms/Input'
+} from "@/components/primitives/forms/Form";
+import { Input } from "@/components/primitives/forms/Input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/primitives/forms/Select'
-import { Textarea } from '@/components/primitives/forms/Textarea'
+} from "@/components/primitives/forms/Select";
+import { Textarea } from "@/components/primitives/forms/Textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/primitives/overlays/Popover'
-import { TagChain } from '@/components/primitives/TagChain'
-import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+} from "@/components/primitives/overlays/Popover";
+import { TagChain } from "@/components/primitives/TagChain";
+import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
 import {
   useDeleteTask,
   useReorderSubtasks,
   useTaskParentChain,
   useTasks,
   useUpdateTask,
-} from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
-import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import { cn } from '@/lib/utils'
+} from "@/hooks/useTasks";
+import { IconSizeStyle } from "@/lib/constants";
+import { getRankFieldStyle } from "@/lib/rank-field-styles";
+import { cn } from "@/lib/utils";
 import {
   insertTaskSchema,
   type MutateTaskRequest,
@@ -77,14 +77,14 @@ import {
   type RankField,
   type SubtaskSortMode,
   type Task,
-} from '~/shared/schema'
+} from "~/shared/schema";
 
 interface SortableSubtaskItemProps {
-  task: Task & { depth: number }
-  onEdit?: (task: Task) => void
-  onDelete: (task: { id: number; name: string }) => void
-  isManualMode: boolean
-  isDragDisabled?: boolean
+  task: Task & { depth: number };
+  onEdit?: (task: Task) => void;
+  onDelete: (task: { id: number; name: string }) => void;
+  isManualMode: boolean;
+  isDragDisabled?: boolean;
 }
 
 const SortableSubtaskItem = ({
@@ -101,24 +101,24 @@ const SortableSubtaskItem = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id, disabled: isDragDisabled })
+  } = useSortable({ id: task.id, disabled: isDragDisabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     paddingLeft: `${12 + task.depth * 16}px`,
-  }
+  };
 
-  const isDirect = task.depth === 0
-  const showDragHandle = isManualMode && isDirect
+  const isDirect = task.depth === 0;
+  const showDragHandle = isManualMode && isDirect;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5',
-        isDragging && 'opacity-50 bg-secondary/20',
+        "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5",
+        isDragging && "opacity-50 bg-secondary/20",
       )}
       data-testid={`subtask-row-${task.id}`}
     >
@@ -141,8 +141,8 @@ const SortableSubtaskItem = ({
         )}
         <span
           className={cn(
-            'text-sm truncate',
-            task.status === 'completed' && 'line-through text-muted-foreground',
+            "text-sm truncate",
+            task.status === "completed" && "line-through text-muted-foreground",
           )}
         >
           {task.name}
@@ -167,21 +167,21 @@ const SortableSubtaskItem = ({
           onClick={() => onDelete({ id: task.id, name: task.name })}
           data-testid={`button-delete-subtask-${task.id}`}
         >
-          <Trash2 className={cn(IconSizeStyle.HW4, 'text-destructive')} />
+          <Trash2 className={cn(IconSizeStyle.HW4, "text-destructive")} />
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskRequest) => void
-  isPending: boolean
-  initialData?: Task
-  parentId?: number | null
-  onCancel: () => void
-  onAddChild?: (parentId: number) => void
-  onEditChild?: (task: Task) => void
+  onSubmit: (data: MutateTaskRequest) => void;
+  isPending: boolean;
+  initialData?: Task;
+  parentId?: number | null;
+  onCancel: () => void;
+  onAddChild?: (parentId: number) => void;
+  onEditChild?: (task: Task) => void;
 }
 
 export const TaskForm = ({
@@ -193,24 +193,24 @@ export const TaskForm = ({
   onAddChild,
   onEditChild,
 }: TaskFormProps) => {
-  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false);
   const [subtaskToDelete, setSubtaskToDelete] = useState<{
-    id: number
-    name: string
-  } | null>(null)
+    id: number;
+    name: string;
+  } | null>(null);
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
-  )
-  const parentChain = useTaskParentChain(parentId || undefined)
-  const { settings } = useSettings()
-  const { data: allTasks } = useTasks()
-  const deleteTask = useDeleteTask()
-  const updateTask = useUpdateTask()
-  const reorderSubtasks = useReorderSubtasks()
+  );
+  const parentChain = useTaskParentChain(parentId || undefined);
+  const { settings } = useSettings();
+  const { data: allTasks } = useTasks();
+  const deleteTask = useDeleteTask();
+  const updateTask = useUpdateTask();
+  const reorderSubtasks = useReorderSubtasks();
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
-    initialData?.subtaskSortMode || 'inherit',
-  )
+    initialData?.subtaskSortMode || "inherit",
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -221,133 +221,133 @@ export const TaskForm = ({
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
-  )
+  );
 
   const subtasks = useMemo(() => {
-    if (!initialData || !allTasks) return []
+    if (!initialData || !allTasks) return [];
     const flattenTasks = (tasks: typeof allTasks): typeof allTasks => {
-      const result: typeof allTasks = []
+      const result: typeof allTasks = [];
       for (const t of tasks) {
-        result.push(t)
+        result.push(t);
         if (t.subtasks.length > 0) {
-          result.push(...flattenTasks(t.subtasks))
+          result.push(...flattenTasks(t.subtasks));
         }
       }
-      return result
-    }
-    const flatList = flattenTasks(allTasks)
+      return result;
+    };
+    const flatList = flattenTasks(allTasks);
 
     const collectDescendants = (
       thisParentId: number,
       depth: number,
       parentSortMode: SubtaskSortMode,
     ): Array<(typeof allTasks)[number] & { depth: number }> => {
-      let children = flatList.filter((t) => t.parentId === thisParentId)
+      let children = flatList.filter((t) => t.parentId === thisParentId);
 
-      if (parentSortMode === 'manual') {
+      if (parentSortMode === "manual") {
         if (depth === 0 && localSubtaskOrder) {
           children = [...children].sort(
             (a, b) =>
               localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
-          )
+          );
         } else {
           children = [...children].sort(
             (a, b) => (a.manualOrder ?? 0) - (b.manualOrder ?? 0),
-          )
+          );
         }
       }
 
-      const result: Array<(typeof allTasks)[number] & { depth: number }> = []
+      const result: Array<(typeof allTasks)[number] & { depth: number }> = [];
       for (const child of children) {
-        result.push({ ...child, depth })
+        result.push({ ...child, depth });
         result.push(
           ...collectDescendants(child.id, depth + 1, child.subtaskSortMode),
-        )
+        );
       }
-      return result
-    }
+      return result;
+    };
 
-    return collectDescendants(initialData.id, 0, sortMode)
-  }, [initialData, allTasks, sortMode, localSubtaskOrder])
+    return collectDescendants(initialData.id, 0, sortMode);
+  }, [initialData, allTasks, sortMode, localSubtaskOrder]);
 
   const directChildIds = useMemo(
     () => subtasks.filter((t) => t.depth === 0).map((t) => t.id),
     [subtasks],
-  )
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+    const { active, over } = event;
 
     if (over && active.id !== over.id && initialData) {
-      const oldIndex = directChildIds.indexOf(active.id as number)
-      const newIndex = directChildIds.indexOf(over.id as number)
+      const oldIndex = directChildIds.indexOf(active.id as number);
+      const newIndex = directChildIds.indexOf(over.id as number);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
-        setLocalSubtaskOrder(newOrder)
+        const newOrder = arrayMove(directChildIds, oldIndex, newIndex);
+        setLocalSubtaskOrder(newOrder);
         reorderSubtasks.mutate({
           parentId: initialData.id,
           orderedIds: newOrder,
-        })
+        });
       }
     }
-  }
+  };
 
   const handleSortModeToggle = () => {
     if (!initialData || updateTask.isPending || reorderSubtasks.isPending)
-      return
+      return;
     const newMode: SubtaskSortMode =
-      sortMode === 'inherit' ? 'manual' : 'inherit'
+      sortMode === "inherit" ? "manual" : "inherit";
 
-    setSortMode(newMode)
+    setSortMode(newMode);
 
-    if (newMode === 'manual' && directChildIds.length > 0) {
+    if (newMode === "manual" && directChildIds.length > 0) {
       reorderSubtasks.mutate({
         parentId: initialData.id,
         orderedIds: directChildIds,
-      })
+      });
     }
 
-    setLocalSubtaskOrder(null)
+    setLocalSubtaskOrder(null);
     updateTask.mutate({
       id: initialData.id,
       subtaskSortMode: newMode,
-    })
-  }
+    });
+  };
 
-  const isMutating = updateTask.isPending || reorderSubtasks.isPending
+  const isMutating = updateTask.isPending || reorderSubtasks.isPending;
 
   const getVisibility = useCallback(
     (attr: RankField) => getIsVisible(attr, settings),
     [settings],
-  )
+  );
 
   const getRequired = useCallback(
     (attr: RankField) =>
       getIsVisible(attr, settings) && getIsRequired(attr, settings),
     [settings],
-  )
+  );
 
   const visibleAttributes = useMemo(
     () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
     [getVisibility],
-  )
+  );
 
-  const baseFormSchema = insertTaskSchema.omit({ userId: true })
+  const baseFormSchema = insertTaskSchema.omit({ userId: true });
 
-  const formSchemaToUse = baseFormSchema
+  const formSchemaToUse = baseFormSchema;
 
   const form = useForm<MutateTaskRequest>({
     resolver: zodResolver(formSchemaToUse),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: initialData
       ? {
           name: initialData.name,
-          description: initialData.description || '',
-          priority: initialData.priority || 'none',
-          ease: initialData.ease || 'none',
-          enjoyment: initialData.enjoyment || 'none',
-          time: initialData.time || 'none',
+          description: initialData.description || "",
+          priority: initialData.priority || "none",
+          ease: initialData.ease || "none",
+          enjoyment: initialData.enjoyment || "none",
+          time: initialData.time || "none",
           parentId: initialData.parentId,
           createdAt: initialData.createdAt
             ? new Date(initialData.createdAt)
@@ -358,17 +358,17 @@ export const TaskForm = ({
           inProgressTime: initialData.inProgressTime || 0,
         }
       : {
-          name: '',
-          description: '',
-          priority: 'none',
-          ease: 'none',
-          enjoyment: 'none',
-          time: 'none',
+          name: "",
+          description: "",
+          priority: "none",
+          ease: "none",
+          enjoyment: "none",
+          time: "none",
           parentId: parentId || null,
           createdAt: new Date(),
           inProgressTime: 0,
         },
-  })
+  });
 
   // Use useEffect to reset form when initialData or parentId changes
   // to ensure "Add Subtask" dialog is clean.
@@ -377,11 +377,11 @@ export const TaskForm = ({
       initialData
         ? {
             name: initialData.name,
-            description: initialData.description || '',
-            priority: initialData.priority || 'none',
-            ease: initialData.ease || 'none',
-            enjoyment: initialData.enjoyment || 'none',
-            time: initialData.time || 'none',
+            description: initialData.description || "",
+            priority: initialData.priority || "none",
+            ease: initialData.ease || "none",
+            enjoyment: initialData.enjoyment || "none",
+            time: initialData.time || "none",
             parentId: initialData.parentId,
             createdAt: initialData.createdAt
               ? new Date(initialData.createdAt)
@@ -392,45 +392,45 @@ export const TaskForm = ({
             inProgressTime: initialData.inProgressTime || 0,
           }
         : {
-            name: '',
-            description: '',
-            priority: 'none',
-            ease: 'none',
-            enjoyment: 'none',
-            time: 'none',
+            name: "",
+            description: "",
+            priority: "none",
+            ease: "none",
+            enjoyment: "none",
+            time: "none",
             parentId: parentId || null,
             createdAt: new Date(),
             inProgressTime: 0,
           },
-    )
-  }, [initialData, parentId, form])
+    );
+  }, [initialData, parentId, form]);
 
   const onSubmitWithNulls = (data: MutateTaskRequest) => {
     const formattedData = {
       ...data,
-      priority: data.priority === 'none' ? null : data.priority,
-      ease: data.ease === 'none' ? null : data.ease,
-      enjoyment: data.enjoyment === 'none' ? null : data.enjoyment,
-      time: data.time === 'none' ? null : data.time,
-    }
-    onSubmit(formattedData)
-  }
+      priority: data.priority === "none" ? null : data.priority,
+      ease: data.ease === "none" ? null : data.ease,
+      enjoyment: data.enjoyment === "none" ? null : data.enjoyment,
+      time: data.time === "none" ? null : data.time,
+    };
+    onSubmit(formattedData);
+  };
 
-  const watchedValues = form.watch()
+  const watchedValues = form.watch();
 
   const requiredAttributesFilled = useMemo(() => {
     for (const attr of visibleAttributes) {
       if (getRequired(attr.name)) {
-        const value = watchedValues[attr.name]
-        if (!value || value === 'none') {
-          return false
+        const value = watchedValues[attr.name];
+        if (!value || value === "none") {
+          return false;
         }
       }
     }
-    return true
-  }, [watchedValues, visibleAttributes, getRequired])
+    return true;
+  }, [watchedValues, visibleAttributes, getRequired]);
 
-  const isValid = form.formState.isValid && requiredAttributesFilled
+  const isValid = form.formState.isValid && requiredAttributesFilled;
 
   return (
     <Form {...form}>
@@ -461,8 +461,8 @@ export const TaskForm = ({
           {visibleAttributes.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {visibleAttributes.map((attr) => {
-                const isRequired = getRequired(attr.name)
-                const showNoneOption = !isRequired
+                const isRequired = getRequired(attr.name);
+                const showNoneOption = !isRequired;
 
                 return (
                   <FormField
@@ -471,7 +471,7 @@ export const TaskForm = ({
                     name={attr.name}
                     render={({ field }) => {
                       const hasError =
-                        isRequired && (!field.value || field.value === 'none')
+                        isRequired && (!field.value || field.value === "none");
                       return (
                         <FormItem>
                           <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -482,18 +482,18 @@ export const TaskForm = ({
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value || 'none'}
+                            value={field.value || "none"}
                           >
                             <FormControl>
                               <SelectTrigger
                                 className={cn(
-                                  'bg-secondary/20 capitalize font-semibold h-10',
+                                  "bg-secondary/20 capitalize font-semibold h-10",
                                   hasError
-                                    ? 'border-destructive/50'
-                                    : 'border-white/5',
-                                  field.value && field.value !== 'none'
+                                    ? "border-destructive/50"
+                                    : "border-white/5",
+                                  field.value && field.value !== "none"
                                     ? getRankFieldStyle(attr.name, field.value)
-                                    : 'text-muted-foreground',
+                                    : "text-muted-foreground",
                                 )}
                               >
                                 <SelectValue placeholder="Select..." />
@@ -509,13 +509,13 @@ export const TaskForm = ({
                                 </SelectItem>
                               )}
                               {attr.levels
-                                .filter((level) => level !== 'none')
+                                .filter((level) => level !== "none")
                                 .map((level) => (
                                   <SelectItem
                                     key={level}
                                     value={level}
                                     className={cn(
-                                      'capitalize font-semibold',
+                                      "capitalize font-semibold",
                                       getRankFieldStyle(attr.name, level),
                                     )}
                                   >
@@ -530,10 +530,10 @@ export const TaskForm = ({
                             </p>
                           )}
                         </FormItem>
-                      )
+                      );
                     }}
                   />
-                )
+                );
               })}
             </div>
           )}
@@ -549,136 +549,14 @@ export const TaskForm = ({
                 <FormControl>
                   <Textarea
                     placeholder="Additional details..."
-                    className="bg-secondary/20 border-white/5 min-h-[120px] resize-none focus-visible:ring-primary/50"
+                    className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
                     {...field}
-                    value={field.value || ''}
+                    value={field.value || ""}
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-
-          <div className="flex flex-col gap-4 py-2 border-t border-white/5 mt-4">
-            <FormField
-              control={form.control}
-              name="createdAt"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between gap-4">
-                  <div>
-                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Date Created
-                    </FormLabel>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0 bg-card border-white/10 z-[300]"
-                      align="end"
-                    >
-                      <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
-                        Select Creation Date
-                      </div>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date)
-                        }}
-                        initialFocus
-                        className="rounded-md border-0"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
-              )}
-            />
-
-            {initialData?.status === 'completed' &&
-              initialData?.completedAt && (
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Date Completed
-                  </div>
-                  <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                    {format(new Date(initialData.completedAt), 'PPP p')}
-                  </div>
-                </div>
-              )}
-
-            {initialData?.status === 'completed' && (
-              <div className="flex items-center justify-between gap-4">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Time Spent
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      (form.watch('inProgressTime') || 0) / 3_600_000,
-                    )}
-                    onChange={(e) => {
-                      const hours = Number.parseInt(e.target.value) || 0
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentMinutes = Math.floor(
-                        (currentMs % 3_600_000) / 60_000,
-                      )
-                      form.setValue(
-                        'inProgressTime',
-                        hours * 3_600_000 + currentMinutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-hours"
-                  />
-                  <span className="text-xs text-muted-foreground">h</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="0"
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      ((form.watch('inProgressTime') || 0) % 3_600_000) /
-                        60_000,
-                    )}
-                    onChange={(e) => {
-                      const minutes = Math.min(
-                        59,
-                        Number.parseInt(e.target.value) || 0,
-                      )
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentHours = Math.floor(currentMs / 3_600_000)
-                      form.setValue(
-                        'inProgressTime',
-                        currentHours * 3_600_000 + minutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-minutes"
-                  />
-                  <span className="text-xs text-muted-foreground">m</span>
-                </div>
-              </div>
-            )}
-          </div>
 
           {initialData && subtasks.length > 0 && (
             <div className="border border-white/10 rounded-lg overflow-hidden">
@@ -694,21 +572,24 @@ export const TaskForm = ({
                 <ChevronDown
                   className={cn(
                     IconSizeStyle.HW4,
-                    'text-muted-foreground transition-transform',
-                    subtasksExpanded && 'rotate-180',
+                    "text-muted-foreground transition-transform",
+                    subtasksExpanded && "rotate-180",
                   )}
                 />
               </button>
               {subtasksExpanded && (
                 <>
                   <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
-                    <span className="text-xs font-medium text-muted-foreground" data-testid="label-sorting-method">
+                    <span
+                      className="text-xs font-medium text-muted-foreground"
+                      data-testid="label-sorting-method"
+                    >
                       Sorting Method
                     </span>
                     <div
                       className={cn(
-                        'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-                        isMutating && 'opacity-50 pointer-events-none',
+                        "inline-flex rounded-md border border-white/10 overflow-hidden self-start",
+                        isMutating && "opacity-50 pointer-events-none",
                       )}
                       role="radiogroup"
                       aria-label="Subtask sort order"
@@ -717,15 +598,15 @@ export const TaskForm = ({
                       <button
                         type="button"
                         role="radio"
-                        aria-checked={sortMode === 'inherit'}
+                        aria-checked={sortMode === "inherit"}
                         onClick={() =>
-                          sortMode !== 'inherit' && handleSortModeToggle()
+                          sortMode !== "inherit" && handleSortModeToggle()
                         }
                         className={cn(
-                          'px-3 py-1.5 text-xs font-medium transition-colors',
-                          sortMode === 'inherit'
-                            ? 'bg-secondary text-foreground'
-                            : 'bg-transparent text-muted-foreground',
+                          "px-3 py-1.5 text-xs font-medium transition-colors",
+                          sortMode === "inherit"
+                            ? "bg-secondary text-foreground"
+                            : "bg-transparent text-muted-foreground",
                         )}
                         data-testid="toggle-sort-inherit"
                       >
@@ -734,25 +615,28 @@ export const TaskForm = ({
                       <button
                         type="button"
                         role="radio"
-                        aria-checked={sortMode === 'manual'}
+                        aria-checked={sortMode === "manual"}
                         onClick={() =>
-                          sortMode !== 'manual' && handleSortModeToggle()
+                          sortMode !== "manual" && handleSortModeToggle()
                         }
                         className={cn(
-                          'px-3 py-1.5 text-xs font-medium transition-colors',
-                          sortMode === 'manual'
-                            ? 'bg-secondary text-foreground'
-                            : 'bg-transparent text-muted-foreground',
+                          "px-3 py-1.5 text-xs font-medium transition-colors",
+                          sortMode === "manual"
+                            ? "bg-secondary text-foreground"
+                            : "bg-transparent text-muted-foreground",
                         )}
                         data-testid="toggle-sort-manual"
                       >
                         Manual
                       </button>
                     </div>
-                    <span className="text-[11px] text-muted-foreground/70 leading-snug" data-testid="text-sort-caption">
-                      {sortMode === 'inherit'
-                        ? 'Subtasks follow the same sort order as the main task list.'
-                        : 'Drag subtasks into your preferred order using the grip handles.'}
+                    <span
+                      className="text-[11px] text-muted-foreground/70 leading-snug"
+                      data-testid="text-sort-caption"
+                    >
+                      {sortMode === "inherit"
+                        ? "Subtasks follow the same sort order as the main task list."
+                        : "Drag subtasks into your preferred order using the grip handles."}
                     </span>
                   </div>
                   <DndContext
@@ -771,7 +655,7 @@ export const TaskForm = ({
                             task={subtask}
                             onEdit={onEditChild}
                             onDelete={setSubtaskToDelete}
-                            isManualMode={sortMode === 'manual'}
+                            isManualMode={sortMode === "manual"}
                             isDragDisabled={isMutating}
                           />
                         ))}
@@ -791,10 +675,132 @@ export const TaskForm = ({
               className="w-full bg-secondary/10 border-white/5 hover:bg-secondary/20 h-10"
               onClick={() => onAddChild(initialData.id)}
             >
-              <Plus className={cn(IconSizeStyle.HW4, 'mr-2')} />
+              <Plus className={cn(IconSizeStyle.HW4, "mr-2")} />
               Add Subtask
             </Button>
           )}
+
+          <div className="flex flex-col gap-4 py-2 border-t border-white/5 mt-4">
+            <FormField
+              control={form.control}
+              name="createdAt"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between gap-4">
+                  <div>
+                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Date Created
+                    </FormLabel>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 bg-card border-white/10 z-[300]"
+                      align="end"
+                    >
+                      <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
+                        Select Creation Date
+                      </div>
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                        }}
+                        initialFocus
+                        className="rounded-md border-0"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+
+            {initialData?.status === "completed" &&
+              initialData?.completedAt && (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Date Completed
+                  </div>
+                  <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                    {format(new Date(initialData.completedAt), "PPP p")}
+                  </div>
+                </div>
+              )}
+
+            {initialData?.status === "completed" && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Time Spent
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    value={Math.floor(
+                      (form.watch("inProgressTime") || 0) / 3_600_000,
+                    )}
+                    onChange={(e) => {
+                      const hours = Number.parseInt(e.target.value) || 0;
+                      const currentMs = form.getValues("inProgressTime") || 0;
+                      const currentMinutes = Math.floor(
+                        (currentMs % 3_600_000) / 60_000,
+                      );
+                      form.setValue(
+                        "inProgressTime",
+                        hours * 3_600_000 + currentMinutes * 60_000,
+                      );
+                    }}
+                    data-testid="input-time-hours"
+                  />
+                  <span className="text-xs text-muted-foreground">h</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="59"
+                    placeholder="0"
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    value={Math.floor(
+                      ((form.watch("inProgressTime") || 0) % 3_600_000) /
+                        60_000,
+                    )}
+                    onChange={(e) => {
+                      const minutes = Math.min(
+                        59,
+                        Number.parseInt(e.target.value) || 0,
+                      );
+                      const currentMs = form.getValues("inProgressTime") || 0;
+                      const currentHours = Math.floor(currentMs / 3_600_000);
+                      form.setValue(
+                        "inProgressTime",
+                        currentHours * 3_600_000 + minutes * 60_000,
+                      );
+                    }}
+                    data-testid="input-time-minutes"
+                  />
+                  <span className="text-xs text-muted-foreground">m</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="pt-4 mt-auto flex gap-3">
@@ -812,23 +818,23 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && (
-              <Loader2 className={cn(IconSizeStyle.HW4, 'mr-2 animate-spin')} />
+              <Loader2 className={cn(IconSizeStyle.HW4, "mr-2 animate-spin")} />
             )}
-            {initialData ? 'Save' : 'Create'}
+            {initialData ? "Save" : "Create"}
           </Button>
         </div>
       </form>
       <ConfirmDeleteDialog
         open={!!subtaskToDelete}
         onOpenChange={(open) => !open && setSubtaskToDelete(null)}
-        taskName={subtaskToDelete?.name ?? ''}
+        taskName={subtaskToDelete?.name ?? ""}
         onConfirm={() => {
           if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id)
-            setSubtaskToDelete(null)
+            deleteTask.mutate(subtaskToDelete.id);
+            setSubtaskToDelete(null);
           }
         }}
       />
     </Form>
-  )
-}
+  );
+};
