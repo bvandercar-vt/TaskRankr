@@ -257,7 +257,7 @@ const Home = () => {
 
     // Filter out completed ROOT tasks (completed subtasks stay under their parent)
     const activeTasks = tasks.filter(
-      (task) => task.status !== 'completed' || task.parentId !== null
+      (task) => task.status !== 'completed' || task.parentId !== null,
     )
 
     // Collect tasks to hoist:

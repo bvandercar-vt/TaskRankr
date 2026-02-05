@@ -23,7 +23,7 @@ const Completed = () => {
 
     // Find root-level completed tasks (no parent)
     const completedRoots = tasks.filter(
-      (task) => task.status === 'completed' && !task.parentId
+      (task) => task.status === 'completed' && !task.parentId,
     )
 
     // Build subtask tree for each completed root

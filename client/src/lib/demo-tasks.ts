@@ -195,7 +195,8 @@ export const createDemoTasks = (nextIdRef: {
       id: getNextId(),
       userId: 'local',
       name: 'Completed subtask',
-      description: 'This subtask has been completed and stays under its parent.',
+      description:
+        'This subtask has been completed and stays under its parent.',
       priority: 'medium',
       ease: 'easy',
       enjoyment: 'high',
@@ -239,7 +240,7 @@ export const createDemoTasks = (nextIdRef: {
       inProgressTime: 1_800_000,
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 400_000),
-      completedAt: new Date(now.getTime() - 5_000),
+      completedAt: new Date(now.getTime() - 5000),
       subtasks: [],
     },
     {
@@ -256,7 +257,7 @@ export const createDemoTasks = (nextIdRef: {
       inProgressTime: 600_000,
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 350_000),
-      completedAt: new Date(now.getTime() - 8_000),
+      completedAt: new Date(now.getTime() - 8000),
       subtasks: [],
     },
   ]

@@ -384,10 +384,14 @@ export const LocalStateProvider = ({
         if (taskToDelete.parentId) {
           const timeToAccumulate = getTotalTimeFromTask(taskToDelete)
           if (timeToAccumulate > 0) {
-            updated = updateTaskInTree(updated, taskToDelete.parentId, (parent) => ({
-              ...parent,
-              inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
-            }))
+            updated = updateTaskInTree(
+              updated,
+              taskToDelete.parentId,
+              (parent) => ({
+                ...parent,
+                inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
+              }),
+            )
           }
         }
 

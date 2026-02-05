@@ -161,7 +161,10 @@ export class DatabaseStorage implements IStorage {
     return task as Task
   }
 
-  private async getTotalTimeForTask(id: number, userId: string): Promise<number> {
+  private async getTotalTimeForTask(
+    id: number,
+    userId: string,
+  ): Promise<number> {
     const task = await this.getTask(id, userId)
     if (!task) return 0
 
@@ -190,8 +193,15 @@ export class DatabaseStorage implements IStorage {
         if (parent) {
           await db
             .update(tasks)
-            .set({ inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate })
-            .where(and(eq(tasks.id, taskToDelete.parentId), eq(tasks.userId, userId)))
+            .set({
+              inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
+            })
+            .where(
+              and(
+                eq(tasks.id, taskToDelete.parentId),
+                eq(tasks.userId, userId),
+              ),
+            )
         }
       }
     }
@@ -209,7 +219,10 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
   }
 
-  private async deleteTaskWithoutTimeAccumulation(id: number, userId: string): Promise<void> {
+  private async deleteTaskWithoutTimeAccumulation(
+    id: number,
+    userId: string,
+  ): Promise<void> {
     const childTasks = await db
       .select()
       .from(tasks)
