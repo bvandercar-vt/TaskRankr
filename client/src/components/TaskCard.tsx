@@ -11,7 +11,7 @@ import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/badge'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { getIsVisible, getSettings } from '@/hooks/use-settings'
+import { getIsVisible, useSettings } from '@/hooks/use-settings'
 import {
   useDeleteTask,
   useSetTaskStatus,
@@ -110,7 +110,7 @@ export const TaskCard = ({
   const setTaskStatus = useSetTaskStatus()
   const deleteTask = useDeleteTask()
   const updateTask = useUpdateTask()
-  const settings = getSettings()
+  const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0

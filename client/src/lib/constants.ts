@@ -12,6 +12,7 @@ export const IconSizeStyle = {
 export const DEFAULT_SETTINGS: UserSettings = {
   userId: '',
   autoPinNewTasks: true,
+  enableInProgressStatus: true,
   enableInProgressTime: true,
   alwaysSortPinnedByPriority: true,
   sortBy: 'priority',
