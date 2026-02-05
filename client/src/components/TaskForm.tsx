@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Button } from "@/components/primitives/Button";
 import { Calendar } from "@/components/primitives/forms/Calendar";
@@ -63,6 +64,7 @@ import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
 import {
   useDeleteTask,
   useReorderSubtasks,
+  useSetTaskStatus,
   useTaskParentChain,
   useTasks,
   useUpdateTask,
@@ -77,6 +79,7 @@ import {
   type RankField,
   type SubtaskSortMode,
   type Task,
+  type TaskStatus,
 } from "~/shared/schema";
 
 interface SortableSubtaskItemProps {
@@ -103,6 +106,35 @@ const SortableSubtaskItem = ({
     isDragging,
   } = useSortable({ id: task.id, disabled: isDragDisabled });
 
+  const setTaskStatus = useSetTaskStatus();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startHold = (e: React.MouseEvent | React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    setIsHolding(true);
+    holdTimerRef.current = setTimeout(() => {
+      setShowStatusDialog(true);
+      setIsHolding(false);
+    }, 800);
+  };
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    setIsHolding(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    };
+  }, []);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -113,64 +145,101 @@ const SortableSubtaskItem = ({
   const showDragHandle = isManualMode && isDirect;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5",
-        isDragging && "opacity-50 bg-secondary/20",
-      )}
-      data-testid={`subtask-row-${task.id}`}
-    >
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        {showDragHandle && (
-          <button
-            type="button"
-            className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-muted-foreground"
-            {...attributes}
-            {...listeners}
-            data-testid={`drag-handle-${task.id}`}
-          >
-            <GripVertical className={IconSizeStyle.HW4} />
-          </button>
+    <>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={cn(
+          "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5 select-none",
+          isDragging && "opacity-50 bg-secondary/20",
+          isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
         )}
-        {task.depth > 0 && (
-          <span className="text-muted-foreground/50 text-xs leading-none">
-            └
-          </span>
-        )}
-        <span
-          className={cn(
-            "text-sm truncate",
-            task.status === "completed" && "line-through text-muted-foreground",
+        data-testid={`subtask-row-${task.id}`}
+        onMouseDown={startHold}
+        onMouseUp={cancelHold}
+        onMouseLeave={cancelHold}
+        onTouchStart={startHold}
+        onTouchEnd={cancelHold}
+      >
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          {showDragHandle && (
+            <button
+              type="button"
+              className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-muted-foreground"
+              {...attributes}
+              {...listeners}
+              data-testid={`drag-handle-${task.id}`}
+            >
+              <GripVertical className={IconSizeStyle.HW4} />
+            </button>
           )}
-        >
-          {task.name}
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        {onEdit && (
+          {task.depth > 0 && (
+            <span className="text-muted-foreground/50 text-xs leading-none">
+              └
+            </span>
+          )}
+          <span
+            className={cn(
+              "text-sm truncate",
+              task.status === "completed" && "line-through text-muted-foreground",
+            )}
+          >
+            {task.name}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(task as Task)}
+              data-testid={`button-edit-subtask-${task.id}`}
+            >
+              <Pencil className={IconSizeStyle.HW4} />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => onEdit(task as Task)}
-            data-testid={`button-edit-subtask-${task.id}`}
+            onClick={() => onDelete({ id: task.id, name: task.name })}
+            data-testid={`button-delete-subtask-${task.id}`}
           >
-            <Pencil className={IconSizeStyle.HW4} />
+            <Trash2 className={cn(IconSizeStyle.HW4, "text-destructive")} />
           </Button>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete({ id: task.id, name: task.name })}
-          data-testid={`button-delete-subtask-${task.id}`}
-        >
-          <Trash2 className={cn(IconSizeStyle.HW4, "text-destructive")} />
-        </Button>
+        </div>
       </div>
-    </div>
+
+      <ChangeStatusDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+        taskName={task.name}
+        status={task.status}
+        inProgressTime={task.inProgressTime ?? 0}
+        onSetStatus={(status: TaskStatus) => {
+          setTaskStatus.mutate({ id: task.id, status });
+          setShowStatusDialog(false);
+        }}
+        onUpdateTime={(timeMs) => {
+          updateTask.mutate({ id: task.id, inProgressTime: timeMs });
+        }}
+        onDeleteClick={() => {
+          setShowStatusDialog(false);
+          setTimeout(() => setShowDeleteConfirm(true), 100);
+        }}
+      />
+
+      <ConfirmDeleteDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        taskName={task.name}
+        onConfirm={() => {
+          deleteTask.mutate(task.id);
+          setShowDeleteConfirm(false);
+        }}
+      />
+    </>
   );
 };
 
