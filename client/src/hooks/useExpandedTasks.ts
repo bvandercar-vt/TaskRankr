@@ -3,7 +3,14 @@
  * Persists state in localStorage so expansion survives parent collapse/expand.
  */
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+
 import { useGuestMode } from '@/components/GuestModeProvider'
 
 const STORAGE_KEY_AUTH = 'taskrankr-auth-expanded'
@@ -15,12 +22,15 @@ interface ExpandedTasksContextValue {
   isExpanded: (taskId: number) => boolean
 }
 
-export const ExpandedTasksContext = createContext<ExpandedTasksContextValue | null>(null)
+export const ExpandedTasksContext =
+  createContext<ExpandedTasksContextValue | null>(null)
 
 export const useExpandedTasks = () => {
   const context = useContext(ExpandedTasksContext)
   if (!context) {
-    throw new Error('useExpandedTasks must be used within ExpandedTasksProvider')
+    throw new Error(
+      'useExpandedTasks must be used within ExpandedTasksProvider',
+    )
   }
   return context
 }
@@ -79,7 +89,7 @@ export const useExpandedTasksState = () => {
 
   const isExpanded = useCallback(
     (taskId: number) => expandedIds.has(taskId),
-    [expandedIds]
+    [expandedIds],
   )
 
   return { expandedIds, toggleExpanded, isExpanded }
