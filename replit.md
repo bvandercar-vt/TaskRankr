@@ -100,6 +100,7 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── Home.tsx          # Main task list with sorting
 │       │   ├── Settings.tsx      # User preferences & attribute visibility
 │       │   ├── Completed.tsx     # Completed tasks view
+│       │   ├── HowToUse.tsx      # Instructional page (tap-to-edit, hold-for-status)
 │       │   ├── Landing.tsx       # Unauthenticated landing page
 │       │   └── NotFound.tsx
 │       ├── lib/
