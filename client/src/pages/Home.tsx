@@ -8,6 +8,8 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   CheckCircle2,
   LayoutList,
+  LogIn,
+  LogOut,
   Menu,
   Plus,
   Search,
@@ -21,16 +23,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdownMenu'
 import { Input } from '@/components/primitives/forms/input'
 import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { useGuestModeState } from '@/hooks/use-guest-mode-state'
 import { getIsVisible, getSettings, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 import {
   type Ease,
   type Enjoyment,
@@ -100,6 +105,8 @@ const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSetting } = useSettings()
+  const { isGuestMode, exitGuestMode, hasDemoData, deleteDemoData } =
+    useGuestModeState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
@@ -322,6 +329,28 @@ const Home = () => {
                     Settings
                   </DropdownMenuItem>
                 </Link>
+                {isGuestMode && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <a href={authPaths.login}>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        data-testid="menu-item-signup"
+                      >
+                        <LogIn className={cn(IconSizeStyle.small, 'mr-2')} />
+                        Sign Up
+                      </DropdownMenuItem>
+                    </a>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={exitGuestMode}
+                      data-testid="menu-item-exit-guest"
+                    >
+                      <LogOut className={cn(IconSizeStyle.small, 'mr-2')} />
+                      Exit Guest Mode
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -395,6 +424,20 @@ const Home = () => {
             />
           ) : (
             displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
+          )}
+
+          {hasDemoData && displayedTasks.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={deleteDemoData}
+                data-testid="button-delete-demo-data"
+              >
+                Delete Demo Data
+              </Button>
+            </div>
           )}
         </div>
       </main>

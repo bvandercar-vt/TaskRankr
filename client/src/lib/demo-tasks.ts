@@ -1,0 +1,160 @@
+/**
+ * @fileoverview Demo task data for guest mode.
+ */
+
+import type { TaskResponse } from '~/shared/schema'
+
+export const createDemoTasks = (nextIdRef: {
+  current: number
+}): TaskResponse[] => {
+  const now = new Date()
+
+  const getNextId = () => {
+    const id = nextIdRef.current--
+    return id
+  }
+
+  const parentWithSubtasksId = getNextId()
+
+  const demoTasks: TaskResponse[] = [
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'High priority demo task',
+      description: 'Example description for a high priority task.',
+      priority: 'high',
+      ease: 'easy',
+      enjoyment: 'medium',
+      time: 'low',
+      parentId: null,
+      status: 'pinned',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 60_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Easy demo task',
+      description: 'Example description for an easy task.',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'high',
+      time: 'low',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 120_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Funnest demo task!',
+      description: 'Example description. This task is very enjoyable!',
+      priority: 'low',
+      ease: 'easy',
+      enjoyment: 'highest',
+      time: 'lowest',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 180_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: parentWithSubtasksId,
+      userId: 'local',
+      name: 'Demo task with subtasks',
+      description:
+        'This task has nested subtasks to show how you can break down complex work.',
+      priority: 'medium',
+      ease: 'medium',
+      enjoyment: 'medium',
+      time: 'high',
+      parentId: null,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 240_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Research options',
+      description: 'Look into different approaches',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'medium',
+      time: 'low',
+      parentId: parentWithSubtasksId,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 50_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Draft initial plan',
+      description: 'Write up the first draft',
+      priority: 'medium',
+      ease: 'medium',
+      enjoyment: 'high',
+      time: 'medium',
+      parentId: parentWithSubtasksId,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 40_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Review and finalize',
+      description: 'Get feedback and make final edits',
+      priority: 'low',
+      ease: 'easy',
+      enjoyment: 'medium',
+      time: 'low',
+      parentId: parentWithSubtasksId,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 30_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Completed demo task',
+      description: 'This task has already been finished.',
+      priority: 'low',
+      ease: 'easiest',
+      enjoyment: 'high',
+      time: 'lowest',
+      parentId: null,
+      status: 'completed',
+      inProgressTime: 45_000,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 300_000),
+      completedAt: new Date(now.getTime() - 10_000),
+      subtasks: [],
+    },
+  ]
+
+  return demoTasks
+}
