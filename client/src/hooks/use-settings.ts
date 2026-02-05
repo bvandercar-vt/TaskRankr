@@ -5,8 +5,6 @@
 
 import { useLocalStateSafe } from '@/components/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
-import { queryClient } from '@/lib/query-client'
-import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
 import type { RankField, UserSettings } from '~/shared/schema'
 
@@ -62,14 +60,3 @@ export const getIsRequired = (
   field: RankField,
   settings: PickByKey<UserSettings, `${string}Required`>,
 ) => settings[getIsRequiredKey(field)]
-
-export const getSettings = (): UserSettings => {
-  const cached = queryClient.getQueryData<{
-    status: number
-    body: UserSettings
-  }>(QueryKeys.getSettings)
-  if (cached?.status === 200) {
-    return cached.body
-  }
-  return DEFAULT_SETTINGS
-}

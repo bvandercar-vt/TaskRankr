@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/primitives/forms/checkbox'
 import { Switch } from '@/components/primitives/forms/switch'
 import { useAuth } from '@/hooks/use-auth'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
-import { useTasks } from '@/hooks/use-tasks'
+import { useSetTaskStatus, useTasks } from '@/hooks/use-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
@@ -37,21 +37,23 @@ const Card = ({
   </div>
 )
 
-const SwitchCard = ({
-  title,
-  description,
-  checked,
-  onCheckedChange,
-  testId,
-}: {
+type SwitchSettingProps = {
   title: string
   description: string
   checked: boolean
   onCheckedChange: (checked: boolean) => void
-  testId: string
-}) => (
-  <Card className="flex items-center justify-between">
-    <div className="flex-1">
+  'data-testid': string
+}
+
+const SwitchSetting = ({
+  title,
+  description,
+  checked,
+  onCheckedChange,
+  'data-testid': testId,
+}: SwitchSettingProps) => (
+  <>
+    <div className="flex-1 mr-2">
       <h3 className="font-semibold text-foreground">{title}</h3>
       <p className="text-sm text-muted-foreground mt-1">{description}</p>
     </div>
@@ -60,6 +62,12 @@ const SwitchCard = ({
       onCheckedChange={onCheckedChange}
       data-testid={testId}
     />
+  </>
+)
+
+const SwitchCard = (props: SwitchSettingProps) => (
+  <Card className="flex items-center justify-between">
+    <SwitchSetting {...props} />
   </Card>
 )
 
@@ -122,6 +130,7 @@ const Settings = () => {
   const { user } = useAuth()
   const { toast } = useToast()
   const { data: tasks } = useTasks()
+  const setTaskStatus = useSetTaskStatus()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isImporting, setIsImporting] = useState(false)
   const [sortInfoExpanded, setSortInfoExpanded] = useState(false)
@@ -185,7 +194,7 @@ const Settings = () => {
             onCheckedChange={(checked) =>
               updateSetting('autoPinNewTasks', checked)
             }
-            testId="switch-auto-pin"
+            data-testid="switch-auto-pin"
           />
           <SwitchCard
             title="Always sort pinned by Priority"
@@ -198,17 +207,49 @@ const Settings = () => {
             onCheckedChange={(checked) =>
               updateSetting('alwaysSortPinnedByPriority', checked)
             }
-            testId="switch-sort-pinned-priority"
+            data-testid="switch-sort-pinned-priority"
           />
-          <SwitchCard
-            title="Enable In Progress Time"
-            description="Track and display time spent working on tasks."
-            checked={settings.enableInProgressTime}
-            onCheckedChange={(checked) =>
-              updateSetting('enableInProgressTime', checked)
-            }
-            testId="switch-enable-time"
-          />
+          <Card>
+            <div className="flex items-center justify-between">
+              <SwitchSetting
+                title='Enable "In Progress" Status'
+                description={
+                  'Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
+                }
+                checked={settings.enableInProgressStatus}
+                onCheckedChange={(checked) => {
+                  updateSetting('enableInProgressStatus', checked)
+                  if (!checked) {
+                    updateSetting('enableInProgressTime', false)
+                    // Demote any in_progress task to pinned
+                    const inProgressTask = tasks?.find(
+                      (t) => t.status === 'in_progress',
+                    )
+                    if (inProgressTask) {
+                      setTaskStatus.mutate({
+                        id: inProgressTask.id,
+                        status: 'pinned',
+                      })
+                    }
+                  }
+                }}
+                data-testid="switch-enable-in-progress"
+              />
+            </div>
+            {settings.enableInProgressStatus && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                <SwitchSetting
+                  title='Enable "In Progress" Time'
+                  description="Track and display time spent In Progress."
+                  checked={settings.enableInProgressTime}
+                  onCheckedChange={(checked) =>
+                    updateSetting('enableInProgressTime', checked)
+                  }
+                  data-testid="switch-enable-time"
+                />
+              </div>
+            )}
+          </Card>
         </div>
 
         <Card className="mt-8">

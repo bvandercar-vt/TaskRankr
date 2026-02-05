@@ -18,6 +18,5 @@ export type ClientInferRequestBody<T extends AppRouteMutation> =
   ClientInferRequest<T>['body']
 
 export const QueryKeys = {
-  getSettings: ['settings'],
   getTasks: ['tasks'],
 } as const satisfies Record<string, QueryKey>

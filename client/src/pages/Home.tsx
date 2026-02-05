@@ -32,7 +32,8 @@ import { Input } from '@/components/primitives/forms/input'
 import { Icon } from '@/components/primitives/lucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { getIsVisible, getSettings, useSettings } from '@/hooks/use-settings'
+import { useGuestModeState } from '@/hooks/use-guest-mode-state'
+import { getIsVisible, useSettings } from '@/hooks/use-settings'
 import { useTasks } from '@/hooks/use-tasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -253,9 +254,8 @@ const Home = () => {
     const pinnedOnly = filteredPinned.filter((t) => t.status === 'pinned')
 
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    const currentSettings = getSettings()
     let sortedPinned: TaskResponse[]
-    if (currentSettings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
+    if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
         const pA = getLevelWeight(a.priority)
@@ -279,7 +279,15 @@ const Home = () => {
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
-  }, [taskTree, pinnedTasks, search, sortBy, sortTasks, filterAndSortTree])
+  }, [
+    taskTree,
+    pinnedTasks,
+    search,
+    sortBy,
+    sortTasks,
+    filterAndSortTree,
+    settings,
+  ])
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
