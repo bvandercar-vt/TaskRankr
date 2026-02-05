@@ -21,7 +21,8 @@ export const createDemoTasks = (nextIdRef: {
       id: getNextId(),
       userId: 'local',
       name: 'In Progress Demo Task (hold to change)',
-      description: 'This task is currently being worked on. Hold to change status.',
+      description:
+        'This task is currently being worked on. Hold to change status.',
       priority: 'high',
       ease: 'medium',
       enjoyment: 'medium',

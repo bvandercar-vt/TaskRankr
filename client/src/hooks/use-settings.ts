@@ -3,14 +3,14 @@
  * updates.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
+import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys } from '@/lib/ts-rest'
 import type { PickByKey } from '@/types'
 import type { RankField, UserSettings } from '~/shared/schema'
 
-export type { AppSettings }
+export type { UserSettings }
 export { DEFAULT_SETTINGS }
 
 export interface AttributeVisibility {
@@ -21,12 +21,12 @@ export interface AttributeVisibility {
 export const useSettings = () => {
   const localState = useLocalStateSafe()
 
-  const settings: AppSettings = localState?.settings ?? DEFAULT_SETTINGS
+  const settings: UserSettings = localState?.settings ?? DEFAULT_SETTINGS
   const isLoading = !localState?.isInitialized
 
-  const updateSetting = <K extends keyof Omit<AppSettings, 'userId'>>(
+  const updateSetting = <K extends keyof Omit<UserSettings, 'userId'>>(
     key: K,
-    value: AppSettings[K],
+    value: UserSettings[K],
   ) => {
     if (!localState) return
     localState.updateSettings({ [key]: value })
@@ -63,10 +63,10 @@ export const getIsRequired = (
   settings: PickByKey<UserSettings, `${string}Required`>,
 ) => settings[getIsRequiredKey(field)]
 
-export const getSettings = (): AppSettings => {
+export const getSettings = (): UserSettings => {
   const cached = queryClient.getQueryData<{
     status: number
-    body: AppSettings
+    body: UserSettings
   }>(QueryKeys.getSettings)
   if (cached?.status === 200) {
     return cached.body

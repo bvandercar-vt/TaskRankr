@@ -14,13 +14,14 @@ import {
   useState,
 } from 'react'
 
-import { type AppSettings, DEFAULT_SETTINGS } from '@/lib/constants'
+import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTaskRequest,
   TaskResponse,
   TaskStatus,
   UpdateTaskRequest,
+  UserSettings,
 } from '~/shared/schema'
 
 export type SyncOperation =
@@ -32,11 +33,11 @@ export type SyncOperation =
   | { type: 'update_task'; id: number; data: UpdateTaskRequest }
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
-  | { type: 'update_settings'; data: Partial<AppSettings> }
+  | { type: 'update_settings'; data: Partial<UserSettings> }
 
 interface LocalStateContextValue {
   tasks: TaskResponse[]
-  settings: AppSettings
+  settings: UserSettings
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
@@ -44,12 +45,12 @@ interface LocalStateContextValue {
   updateTask: (id: number, updates: UpdateTaskRequest) => TaskResponse
   setTaskStatus: (id: number, status: TaskStatus) => TaskResponse
   deleteTask: (id: number) => void
-  updateSettings: (updates: Partial<AppSettings>) => void
+  updateSettings: (updates: Partial<UserSettings>) => void
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: TaskResponse[]) => void
-  setSettingsFromServer: (settings: AppSettings) => void
+  setSettingsFromServer: (settings: UserSettings) => void
   resetToDefaults: () => void
   initDemoData: () => void
   deleteDemoData: () => void
@@ -169,7 +170,7 @@ export const LocalStateProvider = ({
   storageMode,
 }: LocalStateProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
   const [tasks, setTasks] = useState<TaskResponse[]>(DEFAULT_TASKS)
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
@@ -373,7 +374,7 @@ export const LocalStateProvider = ({
   )
 
   const updateSettings = useCallback(
-    (updates: Partial<AppSettings>) => {
+    (updates: Partial<UserSettings>) => {
       setSettings((prev) => ({ ...prev, ...updates }))
       enqueue({ type: 'update_settings', data: updates })
     },
@@ -389,7 +390,7 @@ export const LocalStateProvider = ({
     [storageKeys],
   )
 
-  const setSettingsFromServer = useCallback((serverSettings: AppSettings) => {
+  const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
     setSettings(serverSettings)
   }, [])
 

@@ -188,6 +188,19 @@ const Settings = () => {
             testId="switch-auto-pin"
           />
           <SwitchCard
+            title="Always sort pinned by Priority"
+            description={
+              settings.alwaysSortPinnedByPriority
+                ? 'Pinned tasks are always sorted by priority first, then by your selected sort.'
+                : 'Pinned tasks are sorted using your selected sort only.'
+            }
+            checked={settings.alwaysSortPinnedByPriority}
+            onCheckedChange={(checked) =>
+              updateSetting('alwaysSortPinnedByPriority', checked)
+            }
+            testId="switch-sort-pinned-priority"
+          />
+          <SwitchCard
             title="Enable In Progress Time"
             description="Track and display time spent working on tasks."
             checked={settings.enableInProgressTime}
@@ -195,15 +208,6 @@ const Settings = () => {
               updateSetting('enableInProgressTime', checked)
             }
             testId="switch-enable-time"
-          />
-          <SwitchCard
-            title="Always sort pinned by Priority"
-            description="Pinned tasks are always sorted by priority first, then by your selected sort."
-            checked={settings.alwaysSortPinnedByPriority}
-            onCheckedChange={(checked) =>
-              updateSetting('alwaysSortPinnedByPriority', checked)
-            }
-            testId="switch-sort-pinned-priority"
           />
         </div>
 
