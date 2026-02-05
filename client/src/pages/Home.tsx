@@ -234,9 +234,7 @@ const Home = () => {
     (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
       const result = nodes.reduce((acc: TaskResponse[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
-        const filteredSubtasks = node.subtasks
-          ? filterAndSortTree(node.subtasks, term, sort)
-          : []
+        const filteredSubtasks = filterAndSortTree(node.subtasks, term, sort)
 
         if (matches || filteredSubtasks.length > 0) {
           acc.push({ ...node, subtasks: filteredSubtasks })
@@ -250,49 +248,53 @@ const Home = () => {
   )
 
   // Build tree from flat list, excluding completed tasks
-  // Also extract in-progress and pending tasks to be hoisted to top
+  // Also extract in-progress and pinned tasks to be hoisted to top
+  // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, pinnedTasks } = useMemo(() => {
     if (!tasks) return { taskTree: [], pinnedTasks: [] }
 
-    // Filter out completed tasks
-    const activeTasks = tasks.filter((task) => task.status !== 'completed')
+    // Filter out completed ROOT tasks (completed subtasks stay under their parent)
+    const activeTasks = tasks.filter(
+      (task) => task.status !== 'completed' || task.parentId !== null,
+    )
 
-    // Collect pinned tasks (in_progress first, then pinned) to display at top
-    const pinnedTaskIds = new Set<number>()
+    // Collect tasks to hoist:
+    // - All in_progress tasks (both top-level and subtasks)
+    // - All pinned tasks (both top-level and subtasks)
+    // Subtasks also remain visible under their parent (with minimal styling)
     const inProgressList: TaskResponse[] = []
     const pinnedList: TaskResponse[] = []
+    const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
       if (task.status === 'in_progress') {
-        pinnedTaskIds.add(task.id)
         inProgressList.push({ ...task, subtasks: [] } as TaskResponse)
+        hoistedIds.add(task.id)
       } else if (task.status === 'pinned') {
-        pinnedTaskIds.add(task.id)
         pinnedList.push({ ...task, subtasks: [] } as TaskResponse)
+        hoistedIds.add(task.id)
       }
     })
 
     // Hoisted order: in_progress first, then pinned
     const hoistedList = [...inProgressList, ...pinnedList]
 
+    // Build full tree
+    // - Subtasks with pinned/in_progress status stay under parent (also shown hoisted)
+    // - Top-level pinned/in_progress are excluded from tree (only shown hoisted)
     const nodes: Record<number, TaskResponse> = {}
     const roots: TaskResponse[] = []
 
     activeTasks.forEach((task) => {
-      if (pinnedTaskIds.has(task.id)) return
       nodes[task.id] = { ...task, subtasks: [] } as TaskResponse
     })
 
     activeTasks.forEach((task) => {
-      if (pinnedTaskIds.has(task.id)) return
-
-      // If parent is pinned, treat as root level
       if (task.parentId && nodes[task.parentId]) {
-        nodes[task.parentId].subtasks?.push(nodes[task.id])
-      } else if (!task.parentId || !pinnedTaskIds.has(task.parentId)) {
-        roots.push(nodes[task.id])
-      } else {
-        // Parent is pinned, so this becomes a root
+        // Subtasks always go under their parent (even if pinned/in_progress)
+        nodes[task.parentId].subtasks.push(nodes[task.id])
+      } else if (!task.parentId && !hoistedIds.has(task.id)) {
+        // Top-level tasks go to roots unless they're hoisted
         roots.push(nodes[task.id])
       }
     })
