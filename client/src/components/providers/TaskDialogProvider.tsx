@@ -6,7 +6,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import {
   Dialog,
@@ -15,8 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { useCreateTask, useDeleteTask, useSetTaskStatus, useUpdateTask } from '@/hooks/useTasks'
-import type { MutateTaskRequest, Task, TaskStatus } from '~/shared/schema'
+import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
+import type { MutateTaskRequest, Task } from '~/shared/schema'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 
 interface TaskDialogContextType {
@@ -39,7 +38,7 @@ export const useTaskDialog = () => {
 interface DialogProps
   extends Pick<
     TaskFormProps,
-    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskStatusChange' | 'onSubtaskDelete'
+    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -60,7 +59,6 @@ const DesktopDialog = ({
   onClose,
   onAddChild,
   onEditChild,
-  onSubtaskStatusChange,
   onSubtaskDelete,
 }: DialogProps) => (
   <div className="hidden sm:block">
@@ -95,7 +93,6 @@ const DesktopDialog = ({
               onCancel={onClose}
               onAddChild={onAddChild}
               onEditChild={onEditChild}
-              onSubtaskStatusChange={onSubtaskStatusChange}
               onSubtaskDelete={onSubtaskDelete}
             />
           </div>
@@ -114,7 +111,6 @@ const MobileDialog = ({
   onClose,
   onAddChild,
   onEditChild,
-  onSubtaskStatusChange,
   onSubtaskDelete,
 }: Omit<DialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
@@ -135,7 +131,6 @@ const MobileDialog = ({
             onCancel={onClose}
             onAddChild={onAddChild}
             onEditChild={onEditChild}
-            onSubtaskStatusChange={onSubtaskStatusChange}
             onSubtaskDelete={onSubtaskDelete}
           />
         </div>
@@ -154,14 +149,11 @@ export const TaskDialogProvider = ({
   const [parentId, setParentId] = useState<number | undefined>(undefined)
   const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
 
-  const [statusSubtask, setStatusSubtask] = useState<Task | null>(null)
-  const [statusDeleteSubtask, setStatusDeleteSubtask] = useState<Task | null>(null)
   const [subtaskToDelete, setSubtaskToDelete] = useState<{ id: number; name: string } | null>(null)
 
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
-  const setTaskStatus = useSetTaskStatus()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -248,7 +240,6 @@ export const TaskDialogProvider = ({
         onClose={closeDialog}
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
-        onSubtaskStatusChange={setStatusSubtask}
         onSubtaskDelete={setSubtaskToDelete}
       />
 
@@ -261,7 +252,6 @@ export const TaskDialogProvider = ({
         onClose={closeDialog}
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
-        onSubtaskStatusChange={setStatusSubtask}
         onSubtaskDelete={setSubtaskToDelete}
       />
 
@@ -273,44 +263,6 @@ export const TaskDialogProvider = ({
           if (subtaskToDelete) {
             deleteTask.mutate(subtaskToDelete.id)
             setSubtaskToDelete(null)
-          }
-        }}
-      />
-
-      <ChangeStatusDialog
-        open={!!statusSubtask}
-        onOpenChange={(open) => !open && setStatusSubtask(null)}
-        taskName={statusSubtask?.name ?? ''}
-        status={statusSubtask?.status ?? 'open'}
-        inProgressTime={statusSubtask?.inProgressTime ?? 0}
-        onSetStatus={(status: TaskStatus) => {
-          if (statusSubtask) {
-            setTaskStatus.mutate({ id: statusSubtask.id, status })
-            setStatusSubtask(null)
-          }
-        }}
-        onUpdateTime={(timeMs) => {
-          if (statusSubtask) {
-            updateTask.mutate({ id: statusSubtask.id, inProgressTime: timeMs })
-          }
-        }}
-        onDeleteClick={() => {
-          const task = statusSubtask
-          setStatusSubtask(null)
-          if (task) {
-            setTimeout(() => setStatusDeleteSubtask(task), 100)
-          }
-        }}
-      />
-
-      <ConfirmDeleteDialog
-        open={!!statusDeleteSubtask}
-        onOpenChange={(open) => !open && setStatusDeleteSubtask(null)}
-        taskName={statusDeleteSubtask?.name ?? ''}
-        onConfirm={() => {
-          if (statusDeleteSubtask) {
-            deleteTask.mutate(statusDeleteSubtask.id)
-            setStatusDeleteSubtask(null)
           }
         }}
       />

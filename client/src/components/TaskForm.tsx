@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
   Calendar as CalendarIcon,
+  Check,
   ChevronDown,
   GripVertical,
   Loader2,
@@ -61,6 +62,7 @@ import { TagChain } from "@/components/primitives/TagChain";
 import { getIsRequired, getIsVisible, useSettings } from "@/hooks/useSettings";
 import {
   useReorderSubtasks,
+  useSetTaskStatus,
   useTaskParentChain,
   useTasks,
   useUpdateTask,
@@ -81,7 +83,7 @@ interface SortableSubtaskItemProps {
   task: Task & { depth: number };
   onEdit?: (task: Task) => void;
   onDelete: (task: { id: number; name: string }) => void;
-  onLongPress: (task: Task) => void;
+  onToggleComplete: (task: Task) => void;
   isManualMode: boolean;
   isDragDisabled?: boolean;
 }
@@ -90,7 +92,7 @@ const SortableSubtaskItem = ({
   task,
   onEdit,
   onDelete,
-  onLongPress,
+  onToggleComplete,
   isManualMode,
   isDragDisabled,
 }: SortableSubtaskItemProps) => {
@@ -103,30 +105,6 @@ const SortableSubtaskItem = ({
     isDragging,
   } = useSortable({ id: task.id, disabled: isDragDisabled });
 
-  const [isHolding, setIsHolding] = useState(false);
-  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const startHold = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button")) return;
-    setIsHolding(true);
-    holdTimerRef.current = setTimeout(() => {
-      setIsHolding(false);
-      onLongPress(task as Task);
-    }, 800);
-  };
-
-  const cancelHold = () => {
-    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    holdTimerRef.current = null;
-    setIsHolding(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
-    };
-  }, []);
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -135,22 +113,17 @@ const SortableSubtaskItem = ({
 
   const isDirect = task.depth === 0;
   const showDragHandle = isManualMode && isDirect;
+  const isCompleted = task.status === "completed";
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5 select-none",
+        "flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none",
         isDragging && "opacity-50 bg-secondary/20",
-        isHolding && "bg-white/[0.05] scale-[0.99] transition-transform",
       )}
       data-testid={`subtask-row-${task.id}`}
-      onPointerDown={startHold}
-      onPointerUp={cancelHold}
-      onPointerLeave={cancelHold}
-      onPointerCancel={cancelHold}
-      onContextMenu={(e) => e.preventDefault()}
     >
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
         {showDragHandle && (
@@ -169,10 +142,23 @@ const SortableSubtaskItem = ({
             └
           </span>
         )}
+        <button
+          type="button"
+          onClick={() => onToggleComplete(task as Task)}
+          className={cn(
+            "shrink-0 h-4 w-4 rounded-sm border transition-colors",
+            isCompleted
+              ? "bg-emerald-600 border-emerald-600 text-white"
+              : "border-muted-foreground/40 hover:border-muted-foreground",
+          )}
+          data-testid={`checkbox-complete-subtask-${task.id}`}
+        >
+          {isCompleted && <Check className="h-3 w-3 mx-auto" />}
+        </button>
         <span
           className={cn(
             "text-sm truncate",
-            task.status === "completed" && "line-through text-muted-foreground",
+            isCompleted && "line-through text-muted-foreground",
           )}
         >
           {task.name}
@@ -212,7 +198,6 @@ export interface TaskFormProps {
   onCancel: () => void;
   onAddChild?: (parentId: number) => void;
   onEditChild?: (task: Task) => void;
-  onSubtaskStatusChange?: (task: Task) => void;
   onSubtaskDelete?: (task: { id: number; name: string }) => void;
 }
 
@@ -224,7 +209,6 @@ export const TaskForm = ({
   onCancel,
   onAddChild,
   onEditChild,
-  onSubtaskStatusChange,
   onSubtaskDelete,
 }: TaskFormProps) => {
   const [subtasksExpanded, setSubtasksExpanded] = useState(false);
@@ -235,6 +219,7 @@ export const TaskForm = ({
   const { settings } = useSettings();
   const { data: allTasks } = useTasks();
   const updateTask = useUpdateTask();
+  const setTaskStatus = useSetTaskStatus();
   const reorderSubtasks = useReorderSubtasks();
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
@@ -686,7 +671,10 @@ export const TaskForm = ({
                                 task={subtask}
                                 onEdit={onEditChild}
                                 onDelete={(task) => onSubtaskDelete?.(task)}
-                                onLongPress={(task) => onSubtaskStatusChange?.(task)}
+                                onToggleComplete={(task) => {
+                                  const newStatus = task.status === "completed" ? "open" : "completed";
+                                  setTaskStatus.mutate({ id: task.id, status: newStatus });
+                                }}
                                 isManualMode={sortMode === "manual"}
                                 isDragDisabled={isMutating}
                               />
