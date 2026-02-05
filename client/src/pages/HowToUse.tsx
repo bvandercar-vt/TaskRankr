@@ -6,7 +6,9 @@ import {
   ArrowLeft,
   ArrowUpDown,
   CheckCircle2,
+  GripVertical,
   Hand,
+  Layers,
   MousePointer2,
   Pin,
   PlayCircle,
@@ -96,6 +98,26 @@ const HowToUse = () => {
                   </>
                 }
                 testId="card-sorting"
+              />
+            </div>
+          </section>
+
+          <section data-testid="section-subtasks">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Subtasks
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Layers className={IconSizeStyle.HW5} />}
+                title="Nested Tasks"
+                description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
+                testId="card-nested-tasks"
+              />
+              <InstructionCard
+                icon={<GripVertical className={IconSizeStyle.HW5} />}
+                title="Manual Ordering"
+                description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
+                testId="card-manual-ordering"
               />
             </div>
           </section>

@@ -229,18 +229,34 @@ const Home = () => {
     [],
   )
 
-  // Recursive function to filter task tree
+  // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
-    (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
+    (
+      nodes: TaskResponse[],
+      term: string,
+      sort: SortOption,
+      parentSortMode?: 'inherit' | 'manual',
+    ): TaskResponse[] => {
       const result = nodes.reduce((acc: TaskResponse[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
-        const filteredSubtasks = filterAndSortTree(node.subtasks, term, sort)
+        const filteredSubtasks = filterAndSortTree(
+          node.subtasks,
+          term,
+          sort,
+          node.subtaskSortMode,
+        )
 
         if (matches || filteredSubtasks.length > 0) {
           acc.push({ ...node, subtasks: filteredSubtasks })
         }
         return acc
       }, [])
+
+      if (parentSortMode === 'manual') {
+        return [...result].sort(
+          (a, b) => (a.manualOrder ?? 0) - (b.manualOrder ?? 0),
+        )
+      }
 
       return sortTasks(result, sort)
     },

@@ -137,3 +137,23 @@ export const useDeleteTask = () => {
     },
   })
 }
+
+export const useReorderSubtasks = () => {
+  const localState = useLocalStateSafe()
+
+  return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
+    mutationFn: async ({
+      parentId,
+      orderedIds,
+    }: {
+      parentId: number
+      orderedIds: number[]
+    }) => {
+      if (!localState) {
+        throw new Error('Local state not initialized')
+      }
+      localState.reorderSubtasks(parentId, orderedIds)
+    },
+  })
+}

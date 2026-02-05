@@ -154,6 +154,7 @@ Key endpoints:
 - `POST /api/tasks` - Create task
 - `PUT /api/tasks/:id` - Update task
 - `PUT /api/tasks/:id/status` - Set task status (handles time tracking and auto-demotion)
+- `PUT /api/tasks/:id/reorder` - Persist manual subtask order
 - `DELETE /api/tasks/:id` - Delete task
 - `GET /api/settings` - Get user settings
 - `PUT /api/settings` - Update user settings
@@ -167,10 +168,19 @@ Tasks have:
 - `time` (enum: none/lowest/low/medium/high/highest)
 - `parentId` (nullable, for nested task hierarchy)
 - `status` (enum: open/in_progress/pinned/completed)
+- `subtaskSortMode` (enum: inherit/manual) - how direct children are sorted
+- `manualOrder` (integer) - 0-indexed position when parent uses manual sort mode
 - `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
 - `inProgressStartedAt` (timestamp) - when the current in-progress session started
 - `createdAt`, `completedAt` (timestamps)
 - `userId` (string) - owner of the task
+
+### Subtask Ordering
+Subtasks can be sorted two ways via `subtaskSortMode`:
+- **inherit** (default): Subtasks follow the same sort order as the global sortBy setting
+- **manual**: Subtasks are ordered by `manualOrder` field, allowing drag-and-drop reordering
+
+When switching to manual mode, the current order is persisted via `PUT /api/tasks/:id/reorder`.
 
 ### User Settings Model
 Per-user settings stored in `user_settings` table:
