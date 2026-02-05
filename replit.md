@@ -87,6 +87,7 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   ├── SyncProvider.tsx  # Background sync to API
 │       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
+│       │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
@@ -95,6 +96,7 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   └── SortInfo.tsx      # Reusable sort explanation component
 │       ├── hooks/
 │       │   ├── useAuth.ts        # Authentication state hook
+│       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
 │       │   ├── useGuestModeState.ts  # Guest mode localStorage state
 │       │   ├── useMobile.tsx     # Mobile detection hook
 │       │   ├── useSettings.ts    # User settings with optimistic updates

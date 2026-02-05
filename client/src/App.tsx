@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch, useLocation } from 'wouter'
 
+import { ExpandedTasksProvider } from '@/components/ExpandedTasksProvider'
 import { GuestModeProvider, useGuestMode } from '@/components/GuestModeProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
 import { Button } from '@/components/primitives/Button'
@@ -144,10 +145,12 @@ const AuthenticatedApp = () => {
   return (
     <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
       <SyncProvider isAuthenticated={shouldSync}>
-        <TaskDialogProvider>
-          <StatusBanner />
-          <Router />
-        </TaskDialogProvider>
+        <ExpandedTasksProvider>
+          <TaskDialogProvider>
+            <StatusBanner />
+            <Router />
+          </TaskDialogProvider>
+        </ExpandedTasksProvider>
       </SyncProvider>
     </LocalStateProvider>
   )
