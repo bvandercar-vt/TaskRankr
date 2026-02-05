@@ -11,6 +11,7 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 - Icon helper: Use `Icon` component from `lucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
+- Test IDs: Use `data-testid` as the prop name, not `testId`
 
 ## System Architecture
 
@@ -162,11 +163,17 @@ Tasks have:
 ### User Settings Model
 Per-user settings stored in `user_settings` table:
 - `autoPinNewTasks` - Auto-pin newly created tasks
-- `enableInProgressTime` - Track time spent on in-progress tasks
+- `enableInProgressStatus` - Allow tasks to be marked "In Progress" (when disabled, demotes any in_progress task to pinned)
+- `enableInProgressTime` - Track time spent on in-progress tasks (only visible when enableInProgressStatus is true)
 - `alwaysSortPinnedByPriority` - Sort pinned tasks by priority first
 - `sortBy` - Current sort preference (date/priority/ease/enjoyment/time)
 - `{attribute}Visible` - Whether each attribute column is shown
 - `{attribute}Required` - Whether each attribute must be set on task creation
+
+### Settings Hook Pattern
+Always use `useSettings()` hook for reading/updating settings in React components:
+- **`useSettings()`** - Reactive hook from LocalStateProvider. Works for both guest and authenticated modes. Re-renders on changes.
+- **`getIsVisible(field, settings)`** / **`getIsRequired(field, settings)`** - Helper functions for rank field visibility/required checks.
 
 ### Task Status System
 - **open**: Default state for new tasks
