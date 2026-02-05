@@ -175,7 +175,7 @@ export const TaskCard = ({
               e.stopPropagation()
               setIsExpanded(!isExpanded)
             }}
-            className="group/expand w-5 flex items-center justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 cursor-pointer"
+            className="group/expand w-5 flex items-start justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 pt-[11px] cursor-pointer"
             type="button"
             data-testid={`button-expand-${task.id}`}
           >
