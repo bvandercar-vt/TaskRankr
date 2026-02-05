@@ -31,14 +31,15 @@ import { Icon } from "./primitives/LucideIcon";
 interface TaskBadgeProps {
   value: string;
   styleClass: string;
+  muted?: boolean;
 }
 
-const TaskBadge = ({ value, styleClass }: TaskBadgeProps) => (
+const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
   <Badge
     variant="outline"
     className={cn(
       "px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0",
-      styleClass,
+      muted ? "text-muted-foreground/50 bg-transparent border-muted/30" : styleClass,
     )}
     data-testid={`badge-${value}`}
   >
@@ -129,7 +130,9 @@ export const TaskCard = ({
   const isExpanded = checkExpanded(task.id);
   const isInProgress = task.status === "in_progress";
   const isPinned = task.status === "pinned";
+  const isCompleted = task.status === "completed";
   const isNestedWithStatus = level > 0 && (isInProgress || isPinned);
+  const isNestedCompleted = level > 0 && isCompleted;
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
@@ -210,7 +213,14 @@ export const TaskCard = ({
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-            <h3 className="font-semibold truncate text-base text-foreground">
+            <h3
+              className={cn(
+                "font-semibold truncate text-base",
+                isNestedCompleted
+                  ? "text-muted-foreground line-through"
+                  : "text-foreground"
+              )}
+            >
               {task.name}
             </h3>
             {isInProgress && (
@@ -258,6 +268,7 @@ export const TaskCard = ({
                         ? "opacity-0"
                         : getRankFieldStyle(field, value)
                     }
+                    muted={isNestedCompleted}
                   />
                 );
               })}

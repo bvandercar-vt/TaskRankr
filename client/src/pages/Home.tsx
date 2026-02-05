@@ -255,8 +255,10 @@ const Home = () => {
   const { taskTree, pinnedTasks } = useMemo(() => {
     if (!tasks) return { taskTree: [], pinnedTasks: [] }
 
-    // Filter out completed tasks
-    const activeTasks = tasks.filter((task) => task.status !== 'completed')
+    // Filter out completed ROOT tasks (completed subtasks stay under their parent)
+    const activeTasks = tasks.filter(
+      (task) => task.status !== 'completed' || task.parentId !== null
+    )
 
     // Collect tasks to hoist:
     // - All in_progress tasks (both top-level and subtasks)
