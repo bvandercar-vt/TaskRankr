@@ -208,7 +208,9 @@ export const TaskForm = ({
   const updateTask = useUpdateTask()
   const reorderSubtasks = useReorderSubtasks()
 
-  const sortMode: SubtaskSortMode = initialData?.subtaskSortMode || 'inherit'
+  const [sortMode, setSortMode] = useState<SubtaskSortMode>(
+    initialData?.subtaskSortMode || 'inherit',
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -296,6 +298,8 @@ export const TaskForm = ({
       return
     const newMode: SubtaskSortMode =
       sortMode === 'inherit' ? 'manual' : 'inherit'
+
+    setSortMode(newMode)
 
     if (newMode === 'manual' && directChildIds.length > 0) {
       reorderSubtasks.mutate({
