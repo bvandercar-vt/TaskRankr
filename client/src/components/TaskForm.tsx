@@ -701,10 +701,13 @@ export const TaskForm = ({
               </button>
               {subtasksExpanded && (
                 <>
-                  <div className="flex items-center justify-center px-3 py-2 border-b border-white/5 bg-secondary/5">
+                  <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
+                    <span className="text-xs font-medium text-muted-foreground" data-testid="label-sorting-method">
+                      Sorting Method
+                    </span>
                     <div
                       className={cn(
-                        'inline-flex rounded-md border border-white/10 overflow-hidden',
+                        'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
                         isMutating && 'opacity-50 pointer-events-none',
                       )}
                       role="radiogroup"
@@ -746,6 +749,11 @@ export const TaskForm = ({
                         Manual
                       </button>
                     </div>
+                    <span className="text-[11px] text-muted-foreground/70 leading-snug" data-testid="text-sort-caption">
+                      {sortMode === 'inherit'
+                        ? 'Subtasks follow the same sort order as the main task list.'
+                        : 'Drag subtasks into your preferred order using the grip handles.'}
+                    </span>
                   </div>
                   <DndContext
                     sensors={sensors}
