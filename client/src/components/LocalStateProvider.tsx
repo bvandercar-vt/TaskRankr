@@ -84,7 +84,7 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
           inProgressStartedAt: t.inProgressStartedAt
             ? new Date(t.inProgressStartedAt)
             : null,
-          subtasks: t.subtasks ? reviveDates(t.subtasks) : [],
+          subtasks: reviveDates(t.subtasks),
         }))
       return reviveDates(parsed) as T
     }
@@ -158,7 +158,10 @@ const addTaskToTree = (
       return { ...task, subtasks: [...task.subtasks, newTask] }
     }
     if (task.subtasks.length > 0) {
-      return { ...task, subtasks: addTaskToTree(task.subtasks, newTask, parentId) }
+      return {
+        ...task,
+        subtasks: addTaskToTree(task.subtasks, newTask, parentId),
+      }
     }
     return task
   })

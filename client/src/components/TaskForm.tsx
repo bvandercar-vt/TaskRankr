@@ -89,7 +89,7 @@ export const TaskForm = ({
       const result: typeof allTasks = []
       for (const t of tasks) {
         result.push(t)
-        if (t.subtasks && t.subtasks.length > 0) {
+        if (t.subtasks.length > 0) {
           result.push(...flattenTasks(t.subtasks))
         }
       }

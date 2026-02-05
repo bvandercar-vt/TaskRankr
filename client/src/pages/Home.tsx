@@ -234,9 +234,7 @@ const Home = () => {
     (nodes: TaskResponse[], term: string, sort: SortOption): TaskResponse[] => {
       const result = nodes.reduce((acc: TaskResponse[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
-        const filteredSubtasks = node.subtasks
-          ? filterAndSortTree(node.subtasks, term, sort)
-          : []
+        const filteredSubtasks = filterAndSortTree(node.subtasks, term, sort)
 
         if (matches || filteredSubtasks.length > 0) {
           acc.push({ ...node, subtasks: filteredSubtasks })
