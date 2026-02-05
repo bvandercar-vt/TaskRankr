@@ -161,14 +161,61 @@ export class DatabaseStorage implements IStorage {
     return task as Task
   }
 
+  private async getTotalTimeForTask(id: number, userId: string): Promise<number> {
+    const task = await this.getTask(id, userId)
+    if (!task) return 0
+
+    let total = task.inProgressTime ?? 0
+
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+
+    for (const child of childTasks) {
+      total += await this.getTotalTimeForTask(child.id, userId)
+    }
+
+    return total
+  }
+
   async deleteTask(id: number, userId: string): Promise<void> {
-    // Delete all subtasks first (recursive)
+    const taskToDelete = await this.getTask(id, userId)
+    if (!taskToDelete) return
+
+    if (taskToDelete.parentId) {
+      const timeToAccumulate = await this.getTotalTimeForTask(id, userId)
+      if (timeToAccumulate > 0) {
+        const parent = await this.getTask(taskToDelete.parentId, userId)
+        if (parent) {
+          await db
+            .update(tasks)
+            .set({ inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate })
+            .where(and(eq(tasks.id, taskToDelete.parentId), eq(tasks.userId, userId)))
+        }
+      }
+    }
+
     const childTasks = await db
       .select()
       .from(tasks)
       .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
     for (const child of childTasks) {
-      await this.deleteTask(child.id, userId)
+      await this.deleteTaskWithoutTimeAccumulation(child.id, userId)
+    }
+
+    await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+  }
+
+  private async deleteTaskWithoutTimeAccumulation(id: number, userId: string): Promise<void> {
+    const childTasks = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+    for (const child of childTasks) {
+      await this.deleteTaskWithoutTimeAccumulation(child.id, userId)
     }
 
     await db
