@@ -188,28 +188,26 @@ export const TaskCard = ({
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        {hasSubtasks ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleExpanded(task.id);
-            }}
-            className="group/expand w-5 flex items-start justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 pt-[11px] cursor-pointer"
-            type="button"
-            data-testid={`button-expand-${task.id}`}
-          >
-            <span className="p-0.5 rounded-full group-hover/expand:bg-white/10 transition-colors">
+        <div className="w-5 flex justify-center shrink-0">
+          {hasSubtasks ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleExpanded(task.id);
+              }}
+              className="group/expand p-0.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              type="button"
+              data-testid={`button-expand-${task.id}`}
+            >
               <Icon
                 icon={isExpanded ? ChevronDown : ChevronRight}
                 className="w-3.5 h-3.5 text-muted-foreground"
               />
-            </span>
-          </button>
-        ) : (
-          <div className="w-5 flex justify-center shrink-0">
+            </button>
+          ) : (
             <div className="w-3.5" />
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
