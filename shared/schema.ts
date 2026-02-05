@@ -36,6 +36,8 @@ export const tasks = pgTable('tasks', {
   inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
+  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
+  manualOrder: integer('manual_order').default(0).notNull(), // Position within parent when manual ordering
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -58,6 +60,11 @@ export const TASK_STATUSES = [
 ] as const
 export type TaskStatus = (typeof TASK_STATUSES)[number]
 export const taskStatusEnum = z.enum(TASK_STATUSES)
+
+// Subtask sort mode constants
+export const SUBTASK_SORT_MODES = ['inherit', 'manual'] as const
+export type SubtaskSortMode = (typeof SUBTASK_SORT_MODES)[number]
+export const subtaskSortModeEnum = z.enum(SUBTASK_SORT_MODES)
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
@@ -158,6 +165,7 @@ const taskSchemaCommon = {
   ease: easeEnum.nullable(),
   enjoyment: enjoymentEnum.nullable(),
   time: timeEnum.nullable(),
+  subtaskSortMode: subtaskSortModeEnum,
 } as const
 
 export const taskSchema = createSelectSchema(tasks).extend(taskSchemaCommon)
@@ -172,6 +180,8 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   ease: taskSchemaCommon.ease.optional(),
   enjoyment: taskSchemaCommon.enjoyment.optional(),
   time: taskSchemaCommon.time.optional(),
+  subtaskSortMode: taskSchemaCommon.subtaskSortMode.optional(),
+  manualOrder: z.number().optional(),
   createdAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional().nullable(),
   inProgressStartedAt: z.coerce.date().optional().nullable(),
