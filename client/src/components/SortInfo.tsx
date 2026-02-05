@@ -86,7 +86,7 @@ export const SortInfo = ({
         <h3 className="font-semibold text-foreground">Sort Info</h3>
         <ChevronDown
           className={cn(
-            IconSizeStyle.small,
+            IconSizeStyle.HW4,
             'text-muted-foreground transition-transform',
             isExpanded && 'rotate-180',
           )}

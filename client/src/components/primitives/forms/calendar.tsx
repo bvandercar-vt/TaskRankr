@@ -15,7 +15,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 const GetIconRenderer =
   (Icon: LucideIcon) =>
   ({ className, ...props }: React.ComponentProps<LucideIcon>) => (
-    <Icon className={cn(IconSizeStyle.small, className)} {...props} />
+    <Icon className={cn(IconSizeStyle.HW4, className)} {...props} />
   )
 
 export const Calendar = ({

@@ -10,6 +10,7 @@ import { EmptyState, PageError, PageLoading } from '@/components/page-states'
 import { Button } from '@/components/primitives/button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/use-tasks'
+import { IconSizeStyle } from '@/lib/constants'
 import { RANK_FIELDS_CRITERIA, type TaskResponse } from '~/shared/schema'
 
 const Completed = () => {
@@ -61,7 +62,7 @@ const Completed = () => {
               className="h-10 w-10"
               data-testid="button-back-home"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className={IconSizeStyle.HW5} />
             </Button>
           </Link>
           <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>

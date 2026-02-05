@@ -5,8 +5,10 @@
 import type { UserSettings } from '~/shared/schema'
 
 export const IconSizeStyle = {
-  small: 'h-4 w-4',
-  medium: 'h-6 w-6',
+  HW4: 'h-4 w-4',
+  HW5: 'h-5 w-5',
+  HW6: 'h-6 w-6',
+  HW8: 'h-8 w-8',
 } as const
 
 export const DEFAULT_SETTINGS: UserSettings = {

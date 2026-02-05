@@ -51,7 +51,7 @@ const StatusButton = ({
     className={cn('w-full h-11 text-base font-semibold gap-2', colorClass)}
     data-testid={testId}
   >
-    <Icon className={IconSizeStyle.small} />
+    <Icon className={IconSizeStyle.HW4} />
     {label}
   </Button>
 )
@@ -118,7 +118,7 @@ export const ChangeStatusDialog = ({
           onClick={() => onOpenChange(false)}
           data-testid="button-close-status-dialog"
         >
-          <X className={IconSizeStyle.small} />
+          <X className={IconSizeStyle.HW4} />
         </Button>
         <AlertDialogHeader>
           <AlertDialogTitle>

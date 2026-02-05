@@ -120,7 +120,7 @@ const Settings = () => {
         <div className="flex items-center gap-3 mb-8">
           <Link href="/">
             <Button variant="ghost" size="icon" data-testid="button-back">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className={IconSizeStyle.HW5} />
             </Button>
           </Link>
           <h1 className="text-2xl font-bold" data-testid="heading-settings">
@@ -272,7 +272,7 @@ const Settings = () => {
               disabled={hasNoTasks}
               data-testid="button-export"
             >
-              <Download className={IconSizeStyle.small} />
+              <Download className={IconSizeStyle.HW4} />
               Export Tasks
             </Button>
             <Button
@@ -282,7 +282,7 @@ const Settings = () => {
               disabled={isImporting}
               data-testid="button-import"
             >
-              <Upload className={IconSizeStyle.small} />
+              <Upload className={IconSizeStyle.HW4} />
               {isImporting ? 'Importing...' : 'Import Tasks'}
             </Button>
             <input
@@ -320,7 +320,7 @@ const Settings = () => {
               className="gap-2"
               data-testid="button-logout"
             >
-              <LogOut className={IconSizeStyle.small} />
+              <LogOut className={IconSizeStyle.HW4} />
               Log Out
             </Button>
           </a>
