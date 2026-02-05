@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: is fine
 /**
  * @fileoverview Shared UI components for page loading, error, and empty states.
  */

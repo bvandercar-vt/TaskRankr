@@ -63,7 +63,7 @@ const SORT_INFO_CONFIG: {
   },
 ]
 
-type SortInfoProps = {
+interface SortInfoProps {
   defaultExpanded?: boolean
   testIdPrefix?: string
 }

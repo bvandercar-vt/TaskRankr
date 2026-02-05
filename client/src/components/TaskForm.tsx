@@ -2,19 +2,22 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import {
   Calendar as CalendarIcon,
-  ChevronRight,
+  ChevronDown,
   Loader2,
+  Pencil,
   Plus,
+  Trash2,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import { Button } from '@/components/primitives/button'
-import { Calendar } from '@/components/primitives/forms/calendar'
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
+import { Button } from '@/components/primitives/Button'
+import { Calendar } from '@/components/primitives/forms/Calendar'
 import {
   Form,
   FormControl,
@@ -22,23 +25,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/primitives/forms/form'
-import { Input } from '@/components/primitives/forms/input'
+} from '@/components/primitives/forms/Form'
+import { Input } from '@/components/primitives/forms/Input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/primitives/forms/select'
-import { Textarea } from '@/components/primitives/forms/textarea'
+} from '@/components/primitives/forms/Select'
+import { Textarea } from '@/components/primitives/forms/Textarea'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/primitives/overlays/popover'
-import { getIsRequired, getIsVisible, useSettings } from '@/hooks/use-settings'
-import { useTaskParentChain } from '@/hooks/use-tasks'
+} from '@/components/primitives/overlays/Popover'
+import { TagChain } from '@/components/primitives/TagChain'
+import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useDeleteTask, useTaskParentChain, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
@@ -57,6 +61,7 @@ export interface TaskFormProps {
   parentId?: number | null
   onCancel: () => void
   onAddChild?: (parentId: number) => void
+  onEditChild?: (task: Task) => void
 }
 
 export const TaskForm = ({
@@ -66,9 +71,33 @@ export const TaskForm = ({
   parentId,
   onCancel,
   onAddChild,
+  onEditChild,
 }: TaskFormProps) => {
+  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
+  const [subtaskToDelete, setSubtaskToDelete] = useState<{
+    id: number
+    name: string
+  } | null>(null)
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
+  const { data: allTasks } = useTasks()
+  const deleteTask = useDeleteTask()
+
+  const subtasks = useMemo(() => {
+    if (!initialData || !allTasks) return []
+    const flattenTasks = (tasks: typeof allTasks): typeof allTasks => {
+      const result: typeof allTasks = []
+      for (const t of tasks) {
+        result.push(t)
+        if (t.subtasks && t.subtasks.length > 0) {
+          result.push(...flattenTasks(t.subtasks))
+        }
+      }
+      return result
+    }
+    const flatList = flattenTasks(allTasks)
+    return flatList.filter((t) => t.parentId === initialData.id)
+  }, [initialData, allTasks])
 
   const getVisibility = useCallback(
     (attr: RankField) => getIsVisible(attr, settings),
@@ -192,20 +221,7 @@ export const TaskForm = ({
         className="flex flex-col h-full space-y-6"
       >
         <div className="flex-1 space-y-6">
-          {parentChain.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap px-1 mb-2">
-              {parentChain.map((p, idx) => (
-                <div key={p.id} className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-secondary/10 px-2 py-0.5 rounded border border-white/5">
-                    {p.name}
-                  </span>
-                  {idx < parentChain.length - 1 && (
-                    <ChevronRight className="w-3 h-3 text-muted-foreground/30" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
             name="name"
@@ -446,6 +462,75 @@ export const TaskForm = ({
             )}
           </div>
 
+          {initialData && subtasks.length > 0 && (
+            <div className="border border-white/10 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setSubtasksExpanded(!subtasksExpanded)}
+                className="w-full flex items-center justify-between gap-2 p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
+                data-testid="button-toggle-subtasks"
+              >
+                <span className="text-sm font-medium">
+                  Subtasks ({subtasks.length})
+                </span>
+                <ChevronDown
+                  className={cn(
+                    IconSizeStyle.HW4,
+                    'text-muted-foreground transition-transform',
+                    subtasksExpanded && 'rotate-180',
+                  )}
+                />
+              </button>
+              {subtasksExpanded && (
+                <div className="divide-y divide-white/5">
+                  {subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/5"
+                      data-testid={`subtask-row-${subtask.id}`}
+                    >
+                      <span className="text-sm truncate flex-1">
+                        {subtask.name}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {onEditChild && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEditChild(subtask as Task)}
+                            data-testid={`button-edit-subtask-${subtask.id}`}
+                          >
+                            <Pencil className={IconSizeStyle.HW4} />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            setSubtaskToDelete({
+                              id: subtask.id,
+                              name: subtask.name,
+                            })
+                          }
+                          data-testid={`button-delete-subtask-${subtask.id}`}
+                        >
+                          <Trash2
+                            className={cn(
+                              IconSizeStyle.HW4,
+                              'text-destructive',
+                            )}
+                          />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {initialData && onAddChild && (
             <Button
               type="button"
@@ -481,6 +566,17 @@ export const TaskForm = ({
           </Button>
         </div>
       </form>
+      <ConfirmDeleteDialog
+        open={!!subtaskToDelete}
+        onOpenChange={(open) => !open && setSubtaskToDelete(null)}
+        taskName={subtaskToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (subtaskToDelete) {
+            deleteTask.mutate(subtaskToDelete.id)
+            setSubtaskToDelete(null)
+          }
+        }}
+      />
     </Form>
   )
 }
