@@ -500,19 +500,26 @@ export const TaskForm = ({
                   {subtasks.map((subtask) => (
                     <div
                       key={subtask.id}
-                      className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/5"
+                      className="flex items-center justify-between gap-2 px-3 py-1 bg-secondary/5"
                       style={{ paddingLeft: `${12 + subtask.depth * 16}px` }}
                       data-testid={`subtask-row-${subtask.id}`}
                     >
-                      <span
-                        className={cn(
-                          'text-sm truncate flex-1',
-                          subtask.status === 'completed' &&
-                            'line-through text-muted-foreground',
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        {subtask.depth > 0 && (
+                          <span className="text-muted-foreground/50 text-xs leading-none">
+                            └
+                          </span>
                         )}
-                      >
-                        {subtask.name}
-                      </span>
+                        <span
+                          className={cn(
+                            'text-sm truncate',
+                            subtask.status === 'completed' &&
+                              'line-through text-muted-foreground',
+                          )}
+                        >
+                          {subtask.name}
+                        </span>
+                      </div>
                       <div className="flex items-center gap-1">
                         {onEditChild && (
                           <Button
