@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/primitives/forms/Input";
 import { Icon } from "@/components/primitives/LucideIcon";
 import { TaskCard } from "@/components/TaskCard";
-import { useTaskDialog } from "@/components/TaskDialogProvider";
+import { useTaskDialog } from "@/components/providers/TaskDialogProvider";
 import { useGuestModeState } from "@/hooks/useGuestModeState";
 import { getIsVisible, useSettings } from "@/hooks/useSettings";
 import { useTasks } from "@/hooks/useTasks";

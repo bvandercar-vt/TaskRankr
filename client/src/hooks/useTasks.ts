@@ -5,7 +5,7 @@
 
 import { useMutation } from '@tanstack/react-query'
 
-import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import type { ClientInferRequestBody } from '@/lib/ts-rest'
 import type { contract } from '~/shared/contract'
 import type { TaskStatus, UpdateTaskRequest } from '~/shared/schema'

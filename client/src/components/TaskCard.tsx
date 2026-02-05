@@ -10,7 +10,7 @@ import { ChevronDown, ChevronRight, Pin } from "lucide-react";
 import { ChangeStatusDialog } from "@/components/ChangeStatusDialog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Badge } from "@/components/primitives/Badge";
-import { useTaskDialog } from "@/components/TaskDialogProvider";
+import { useTaskDialog } from "@/components/providers/TaskDialogProvider";
 import { useExpandedTasks } from "@/hooks/useExpandedTasks";
 import { getIsVisible, useSettings } from "@/hooks/useSettings";
 import {

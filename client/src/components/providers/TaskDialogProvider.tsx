@@ -15,7 +15,7 @@ import {
 } from '@/components/primitives/overlays/Dialog'
 import { useCreateTask, useUpdateTask } from '@/hooks/useTasks'
 import type { MutateTaskRequest, Task } from '~/shared/schema'
-import { TaskForm, type TaskFormProps } from './TaskForm'
+import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
