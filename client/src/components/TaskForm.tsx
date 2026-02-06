@@ -265,9 +265,13 @@ export const TaskForm = ({
               localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
           )
         } else {
-          children = [...children].sort(
-            (a, b) => (a.manualOrder ?? 0) - (b.manualOrder ?? 0),
-          )
+          const parentTask = flatList.find((t) => t.id === thisParentId)
+          const order = parentTask?.subtaskOrder ?? []
+          children = [...children].sort((a, b) => {
+            const indexA = order.indexOf(a.id)
+            const indexB = order.indexOf(b.id)
+            return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+          })
         }
       }
 
@@ -420,7 +424,7 @@ export const TaskForm = ({
   }, [initialData, parentId, form])
 
   const onSubmitWithNulls = (data: MutateTaskRequest) => {
-    const { subtaskSortMode: _ssm, manualOrder: _mo, ...rest } = data
+    const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
     const formattedData = {
       ...rest,
       priority: data.priority === 'none' ? null : data.priority,

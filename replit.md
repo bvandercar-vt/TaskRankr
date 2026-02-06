@@ -170,7 +170,7 @@ Tasks have:
 - `parentId` (nullable, for nested task hierarchy)
 - `status` (enum: open/in_progress/pinned/completed)
 - `subtaskSortMode` (enum: inherit/manual) - how direct children are sorted
-- `manualOrder` (integer) - 0-indexed position when parent uses manual sort mode
+- `subtaskOrder` (integer[]) - ordered array of subtask IDs when using manual sort mode
 - `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
 - `inProgressStartedAt` (timestamp) - when the current in-progress session started
 - `createdAt`, `completedAt` (timestamps)
@@ -179,7 +179,7 @@ Tasks have:
 ### Subtask Ordering
 Subtasks can be sorted two ways via `subtaskSortMode`:
 - **inherit** (default): Subtasks follow the same sort order as the global sortBy setting
-- **manual**: Subtasks are ordered by `manualOrder` field, allowing drag-and-drop reordering
+- **manual**: Subtasks are ordered by the parent's `subtaskOrder` array, allowing drag-and-drop reordering
 
 When switching to manual mode, the current order is persisted via `PUT /api/tasks/:id/reorder`.
 

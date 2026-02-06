@@ -192,22 +192,27 @@ export class DatabaseStorage implements IStorage {
     if (!taskToDelete) return
 
     if (taskToDelete.parentId) {
-      const timeToAccumulate = await this.getTotalTimeForTask(id, userId)
-      if (timeToAccumulate > 0) {
-        const parent = await this.getTask(taskToDelete.parentId, userId)
-        if (parent) {
-          await db
-            .update(tasks)
-            .set({
-              inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
-            })
-            .where(
-              and(
-                eq(tasks.id, taskToDelete.parentId),
-                eq(tasks.userId, userId),
-              ),
-            )
+      const parent = await this.getTask(taskToDelete.parentId, userId)
+      if (parent) {
+        const timeToAccumulate = await this.getTotalTimeForTask(id, userId)
+        const updates: Partial<InsertTask> = {
+          subtaskOrder: (parent.subtaskOrder ?? []).filter(
+            (sid: number) => sid !== id,
+          ),
         }
+        if (timeToAccumulate > 0) {
+          updates.inProgressTime =
+            (parent.inProgressTime ?? 0) + timeToAccumulate
+        }
+        await db
+          .update(tasks)
+          .set(updates)
+          .where(
+            and(
+              eq(tasks.id, taskToDelete.parentId),
+              eq(tasks.userId, userId),
+            ),
+          )
       }
     }
 
@@ -246,18 +251,10 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     orderedIds: number[],
   ): Promise<void> {
-    for (let i = 0; i < orderedIds.length; i++) {
-      await db
-        .update(tasks)
-        .set({ manualOrder: i })
-        .where(
-          and(
-            eq(tasks.id, orderedIds[i]),
-            eq(tasks.userId, userId),
-            eq(tasks.parentId, parentId),
-          ),
-        )
-    }
+    await db
+      .update(tasks)
+      .set({ subtaskOrder: orderedIds })
+      .where(and(eq(tasks.id, parentId), eq(tasks.userId, userId)))
   }
 
   async getSettings(userId: string): Promise<UserSettings> {

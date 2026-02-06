@@ -258,9 +258,21 @@ export const LocalStateProvider = ({
   }, [])
 
   const replaceTaskId = useCallback((tempId: number, realId: number) => {
-    setTasks((prev) =>
-      updateTaskInTree(prev, tempId, (task) => ({ ...task, id: realId })),
-    )
+    setTasks((prev) => {
+      let updated = updateTaskInTree(prev, tempId, (task) => ({
+        ...task,
+        id: realId,
+      }))
+      const replaceInOrder = (tasks: TaskResponse[]): TaskResponse[] =>
+        tasks.map((t) => ({
+          ...t,
+          subtaskOrder: t.subtaskOrder.map((id) =>
+            id === tempId ? realId : id,
+          ),
+          subtasks: replaceInOrder(t.subtasks),
+        }))
+      return replaceInOrder(updated)
+    })
     setSyncQueue((prev) =>
       prev.map((op) => {
         if ('id' in op && op.id === tempId) {
@@ -295,11 +307,25 @@ export const LocalStateProvider = ({
         createdAt: new Date(),
         completedAt: null,
         subtaskSortMode: data.subtaskSortMode ?? 'inherit',
-        manualOrder: data.manualOrder ?? 0,
+        subtaskOrder: data.subtaskOrder ?? [],
         subtasks: [],
       }
 
-      setTasks((prev) => addTaskToTree(prev, newTask, data.parentId ?? null))
+      setTasks((prev) => {
+        let updated = addTaskToTree(prev, newTask, data.parentId ?? null)
+        if (data.parentId) {
+          updated = updateTaskInTree(updated, data.parentId, (parent) => {
+            if (parent.subtaskSortMode === 'manual') {
+              return {
+                ...parent,
+                subtaskOrder: [...parent.subtaskOrder, tempId],
+              }
+            }
+            return parent
+          })
+        }
+        return updated
+      })
       enqueue({ type: 'create_task', tempId, data })
 
       return newTask
@@ -388,16 +414,20 @@ export const LocalStateProvider = ({
 
         if (taskToDelete.parentId) {
           const timeToAccumulate = getTotalTimeFromTask(taskToDelete)
-          if (timeToAccumulate > 0) {
-            updated = updateTaskInTree(
-              updated,
-              taskToDelete.parentId,
-              (parent) => ({
-                ...parent,
-                inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
-              }),
-            )
-          }
+          updated = updateTaskInTree(
+            updated,
+            taskToDelete.parentId,
+            (parent) => ({
+              ...parent,
+              ...(timeToAccumulate > 0
+                ? {
+                    inProgressTime:
+                      (parent.inProgressTime ?? 0) + timeToAccumulate,
+                  }
+                : {}),
+              subtaskOrder: parent.subtaskOrder.filter((sid) => sid !== id),
+            }),
+          )
         }
 
         return deleteTaskFromTree(updated, id)
@@ -410,26 +440,10 @@ export const LocalStateProvider = ({
   const reorderSubtasks = useCallback(
     (parentId: number, orderedIds: number[]) => {
       setTasks((prev) =>
-        updateTaskInTree(prev, parentId, (parent) => {
-          const reorderedSubtasks = orderedIds
-            .map((id, index) => {
-              const subtask = parent.subtasks.find((s) => s.id === id)
-              return subtask ? { ...subtask, manualOrder: index } : null
-            })
-            .filter((s): s is TaskResponse => s !== null)
-
-          const remainingSubtasks = parent.subtasks
-            .filter((s) => !orderedIds.includes(s.id))
-            .map((s, index) => ({
-              ...s,
-              manualOrder: orderedIds.length + index,
-            }))
-
-          return {
-            ...parent,
-            subtasks: [...reorderedSubtasks, ...remainingSubtasks],
-          }
-        }),
+        updateTaskInTree(prev, parentId, (parent) => ({
+          ...parent,
+          subtaskOrder: orderedIds,
+        })),
       )
       enqueue({ type: 'reorder_subtasks', parentId, orderedIds })
     },

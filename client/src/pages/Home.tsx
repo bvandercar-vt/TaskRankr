@@ -236,6 +236,7 @@ const Home = () => {
       term: string,
       sort: SortOption,
       parentSortMode?: 'inherit' | 'manual',
+      parentSubtaskOrder?: number[],
     ): TaskResponse[] => {
       const result = nodes.reduce((acc: TaskResponse[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
@@ -244,6 +245,7 @@ const Home = () => {
           term,
           sort,
           node.subtaskSortMode,
+          node.subtaskOrder,
         )
 
         if (matches || filteredSubtasks.length > 0) {
@@ -252,10 +254,12 @@ const Home = () => {
         return acc
       }, [])
 
-      if (parentSortMode === 'manual') {
-        return [...result].sort(
-          (a, b) => (a.manualOrder ?? 0) - (b.manualOrder ?? 0),
-        )
+      if (parentSortMode === 'manual' && parentSubtaskOrder) {
+        return [...result].sort((a, b) => {
+          const indexA = parentSubtaskOrder.indexOf(a.id)
+          const indexB = parentSubtaskOrder.indexOf(b.id)
+          return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+        })
       }
 
       return sortTasks(result, sort)
