@@ -616,40 +616,50 @@ export const TaskForm = ({
                           aria-label="Subtask sort order"
                           data-testid="toggle-sort-mode"
                         >
-                          <button
-                            type="button"
-                            role="radio"
-                            aria-checked={sortMode === 'inherit'}
-                            onClick={() =>
-                              sortMode !== 'inherit' && handleSortModeToggle()
-                            }
+                          <label
                             className={cn(
-                              'px-3 py-1.5 text-xs font-medium transition-colors',
+                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                               sortMode === 'inherit'
                                 ? 'bg-secondary text-foreground'
                                 : 'bg-transparent text-muted-foreground',
                             )}
                             data-testid="toggle-sort-inherit"
                           >
+                            <input
+                              type="radio"
+                              name="subtask-sort-mode"
+                              value="inherit"
+                              checked={sortMode === 'inherit'}
+                              onChange={() =>
+                                sortMode !== 'inherit' &&
+                                handleSortModeToggle()
+                              }
+                              className="sr-only"
+                            />
                             Inherit
-                          </button>
-                          <button
-                            type="button"
-                            role="radio"
-                            aria-checked={sortMode === 'manual'}
-                            onClick={() =>
-                              sortMode !== 'manual' && handleSortModeToggle()
-                            }
+                          </label>
+                          <label
                             className={cn(
-                              'px-3 py-1.5 text-xs font-medium transition-colors',
+                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                               sortMode === 'manual'
                                 ? 'bg-secondary text-foreground'
                                 : 'bg-transparent text-muted-foreground',
                             )}
                             data-testid="toggle-sort-manual"
                           >
+                            <input
+                              type="radio"
+                              name="subtask-sort-mode"
+                              value="manual"
+                              checked={sortMode === 'manual'}
+                              onChange={() =>
+                                sortMode !== 'manual' &&
+                                handleSortModeToggle()
+                              }
+                              className="sr-only"
+                            />
                             Manual
-                          </button>
+                          </label>
                         </div>
                         <span
                           className="text-[11px] text-muted-foreground/70 leading-snug"
