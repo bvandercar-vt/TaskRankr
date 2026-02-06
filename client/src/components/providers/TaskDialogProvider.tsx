@@ -14,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
+import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
 import type { MutateTaskRequest, Task } from '~/shared/schema'
-import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -149,7 +149,10 @@ export const TaskDialogProvider = ({
   const [parentId, setParentId] = useState<number | undefined>(undefined)
   const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
 
-  const [subtaskToDelete, setSubtaskToDelete] = useState<{ id: number; name: string } | null>(null)
+  const [subtaskToDelete, setSubtaskToDelete] = useState<{
+    id: number
+    name: string
+  } | null>(null)
 
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()

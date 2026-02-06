@@ -27,9 +27,10 @@ const buildTaskTree = (flatTasks: Task[]): TaskResponse[] => {
   }
 
   for (const task of flatTasks) {
-    const taskWithSubs = taskMap.get(task.id)!
+    const taskWithSubs = taskMap.get(task.id)
+    if (!taskWithSubs) continue
     if (task.parentId && taskMap.has(task.parentId)) {
-      taskMap.get(task.parentId)!.subtasks.push(taskWithSubs)
+      taskMap.get(task.parentId)?.subtasks.push(taskWithSubs)
     } else {
       rootTasks.push(taskWithSubs)
     }

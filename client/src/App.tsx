@@ -10,7 +10,10 @@ import { Button } from '@/components/primitives/Button'
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
 import { ExpandedTasksProvider } from '@/components/providers/ExpandedTasksProvider'
-import { GuestModeProvider, useGuestMode } from '@/components/providers/GuestModeProvider'
+import {
+  GuestModeProvider,
+  useGuestMode,
+} from '@/components/providers/GuestModeProvider'
 import { LocalStateProvider } from '@/components/providers/LocalStateProvider'
 import { SyncProvider, useSyncSafe } from '@/components/providers/SyncProvider'
 import { TaskDialogProvider } from '@/components/providers/TaskDialogProvider'
