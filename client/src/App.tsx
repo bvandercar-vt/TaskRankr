@@ -6,15 +6,16 @@ import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch, useLocation } from 'wouter'
 
+import { ExpandedTasksProvider } from '@/components/ExpandedTasksProvider'
 import { GuestModeProvider, useGuestMode } from '@/components/GuestModeProvider'
 import { LocalStateProvider } from '@/components/LocalStateProvider'
-import { Button } from '@/components/primitives/button'
-import { Toaster } from '@/components/primitives/overlays/toaster'
-import { TooltipProvider } from '@/components/primitives/overlays/tooltip'
+import { Button } from '@/components/primitives/Button'
+import { Toaster } from '@/components/primitives/overlays/Toaster'
+import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
 import { SyncProvider, useSyncSafe } from '@/components/SyncProvider'
 import { TaskDialogProvider } from '@/components/TaskDialogProvider'
-import { useAuth } from '@/hooks/use-auth'
-import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import {
   clearGuestStorage,
   migrateGuestTasksToAuth,
@@ -144,10 +145,12 @@ const AuthenticatedApp = () => {
   return (
     <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
       <SyncProvider isAuthenticated={shouldSync}>
-        <TaskDialogProvider>
-          <StatusBanner />
-          <Router />
-        </TaskDialogProvider>
+        <ExpandedTasksProvider>
+          <TaskDialogProvider>
+            <StatusBanner />
+            <Router />
+          </TaskDialogProvider>
+        </ExpandedTasksProvider>
       </SyncProvider>
     </LocalStateProvider>
   )

@@ -7,8 +7,8 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 ## User Preferences
 
 - Preferred communication style: Simple, everyday language.
-- File naming: kebab-case for utility/helper files (e.g., `page-states.tsx`), camelCase for component primitives (e.g., `dropdownMenu.tsx`, `alertDialog.tsx`)
-- Icon helper: Use `Icon` component from `lucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
+- File naming: kebab-case for utility/helper files (e.g., `auth-utils.ts`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useSettings.ts`, `useTasks.ts`)
+- Icon helper: Use `Icon` component from `LucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
@@ -78,24 +78,30 @@ The app uses a local-first data model where all changes happen locally first, th
 │   └── src/
 │       ├── components/   # UI components
 │       │   ├── primitives/       # Base UI components (shadcn/ui)
-│       │   │   ├── forms/        # Form controls (input, select, calendar, etc.)
-│       │   │   ├── overlays/     # Dialogs, sheets, tooltips
-│       │   │   ├── button.tsx, badge.tsx, card.tsx, toggle.tsx
-│       │   │   ├── dropdownMenu.tsx
-│       │   │   └── lucideIcon.tsx  # Dynamic icon helper
-│       │   ├── page-states.tsx   # Shared PageLoading, PageError, EmptyState
+│       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea)
+│       │   │   ├── overlays/     # AlertDialog, Dialog, Popover, Toast, Toaster, Tooltip
+│       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
+│       │   │   ├── DropdownMenu.tsx, TagChain.tsx
+│       │   │   └── LucideIcon.tsx  # Dynamic icon helper
+│       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
 │       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   ├── SyncProvider.tsx  # Background sync to API
 │       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
+│       │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
-│       │   └── ConfirmDeleteDialog.tsx
+│       │   ├── ConfirmDeleteDialog.tsx
+│       │   └── SortInfo.tsx      # Reusable sort explanation component
 │       ├── hooks/
-│       │   ├── use-tasks.ts      # Task CRUD operations
-│       │   ├── use-settings.ts   # User settings with optimistic updates
-│       │   └── use-toast.ts      # Toast notifications
+│       │   ├── useAuth.ts        # Authentication state hook
+│       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
+│       │   ├── useGuestModeState.ts  # Guest mode localStorage state
+│       │   ├── useMobile.tsx     # Mobile detection hook
+│       │   ├── useSettings.ts    # User settings with optimistic updates
+│       │   ├── useTasks.ts       # Task CRUD operations
+│       │   └── useToast.ts       # Toast notifications
 │       ├── pages/
 │       │   ├── Home.tsx          # Main task list with sorting
 │       │   ├── Settings.tsx      # User preferences & attribute visibility
@@ -112,20 +118,25 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
-│       └── types/
-│           └── index.ts          # Frontend-specific types
+│       ├── types/
+│       │   └── index.ts          # Frontend-specific types
+│       ├── App.tsx               # Main app with routing and providers
+│       └── main.tsx              # React entry point
 ├── server/
 │   ├── index.ts          # Server entry point
 │   ├── routes.ts         # API route handlers (ts-rest)
 │   ├── storage.ts        # Database access layer
 │   ├── db.ts             # Database connection
 │   ├── static.ts         # Static file serving
+│   ├── vite.ts           # Vite dev server integration
 │   └── replit_integrations/auth/  # Replit Auth (OIDC)
+│       ├── index.ts, replitAuth.ts, routes.ts, storage.ts
 ├── shared/
 │   ├── schema.ts         # Drizzle schema + Zod types + RANK_FIELDS_CRITERIA
 │   ├── contract.ts       # ts-rest API contract
 │   ├── constants.ts      # Auth path constants
-│   └── models/           # Shared model utilities
+│   └── models/
+│       └── auth.ts       # Auth model utilities
 └── migrations/           # Database migrations
 ```
 
