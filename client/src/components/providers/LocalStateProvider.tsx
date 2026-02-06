@@ -409,10 +409,8 @@ export const LocalStateProvider = ({
 
   const reorderSubtasks = useCallback(
     (parentId: number, orderedIds: number[]) => {
-      console.log('[DEBUG reorderSubtasks] parentId:', parentId, 'orderedIds:', orderedIds)
       setTasks((prev) =>
         updateTaskInTree(prev, parentId, (parent) => {
-          console.log('[DEBUG reorderSubtasks] found parent:', parent.id, 'existing subtasks:', parent.subtasks.map(s => ({ id: s.id, name: s.name, manualOrder: s.manualOrder })))
           const reorderedSubtasks = orderedIds
             .map((id, index) => {
               const subtask = parent.subtasks.find((s) => s.id === id)
@@ -427,7 +425,6 @@ export const LocalStateProvider = ({
               manualOrder: orderedIds.length + index,
             }))
 
-          console.log('[DEBUG reorderSubtasks] result:', [...reorderedSubtasks, ...remainingSubtasks].map(s => ({ id: s.id, name: s.name, manualOrder: s.manualOrder })))
           return {
             ...parent,
             subtasks: [...reorderedSubtasks, ...remainingSubtasks],
