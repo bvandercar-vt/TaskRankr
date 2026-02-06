@@ -259,12 +259,12 @@ export const LocalStateProvider = ({
 
   const replaceTaskId = useCallback((tempId: number, realId: number) => {
     setTasks((prev) => {
-      let updated = updateTaskInTree(prev, tempId, (task) => ({
+      const updated = updateTaskInTree(prev, tempId, (task) => ({
         ...task,
         id: realId,
       }))
-      const replaceInOrder = (tasks: TaskResponse[]): TaskResponse[] =>
-        tasks.map((t) => ({
+      const replaceInOrder = (theseTasks: TaskResponse[]): TaskResponse[] =>
+        theseTasks.map((t) => ({
           ...t,
           subtaskOrder: t.subtaskOrder.map((id) =>
             id === tempId ? realId : id,

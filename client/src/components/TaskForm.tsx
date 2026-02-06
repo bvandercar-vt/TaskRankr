@@ -270,7 +270,10 @@ export const TaskForm = ({
           children = [...children].sort((a, b) => {
             const indexA = order.indexOf(a.id)
             const indexB = order.indexOf(b.id)
-            return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+            return (
+              (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
+              (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
+            )
           })
         }
       }
@@ -631,8 +634,7 @@ export const TaskForm = ({
                               value="inherit"
                               checked={sortMode === 'inherit'}
                               onChange={() =>
-                                sortMode !== 'inherit' &&
-                                handleSortModeToggle()
+                                sortMode !== 'inherit' && handleSortModeToggle()
                               }
                               className="sr-only"
                             />
@@ -653,8 +655,7 @@ export const TaskForm = ({
                               value="manual"
                               checked={sortMode === 'manual'}
                               onChange={() =>
-                                sortMode !== 'manual' &&
-                                handleSortModeToggle()
+                                sortMode !== 'manual' && handleSortModeToggle()
                               }
                               className="sr-only"
                             />

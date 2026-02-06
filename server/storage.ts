@@ -208,10 +208,7 @@ export class DatabaseStorage implements IStorage {
           .update(tasks)
           .set(updates)
           .where(
-            and(
-              eq(tasks.id, taskToDelete.parentId),
-              eq(tasks.userId, userId),
-            ),
+            and(eq(tasks.id, taskToDelete.parentId), eq(tasks.userId, userId)),
           )
       }
     }

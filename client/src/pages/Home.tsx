@@ -258,7 +258,10 @@ const Home = () => {
         return [...result].sort((a, b) => {
           const indexA = parentSubtaskOrder.indexOf(a.id)
           const indexB = parentSubtaskOrder.indexOf(b.id)
-          return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB)
+          return (
+            (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
+            (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
+          )
         })
       }
 

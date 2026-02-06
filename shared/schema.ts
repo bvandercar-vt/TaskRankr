@@ -5,7 +5,7 @@
  * priority, etc.).
  */
 
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   integer,
@@ -15,7 +15,6 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -38,7 +37,10 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
-  subtaskOrder: integer('subtask_order').array().default(sql`'{}'::integer[]`).notNull(),
+  subtaskOrder: integer('subtask_order')
+    .array()
+    .default(sql`'{}'::integer[]`)
+    .notNull(),
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
