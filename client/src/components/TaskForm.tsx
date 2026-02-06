@@ -291,13 +291,16 @@ export const TaskForm = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    console.log('[DEBUG handleDragEnd] active:', active.id, 'over:', over?.id, 'initialData:', initialData?.id);
 
     if (over && active.id !== over.id && initialData) {
       const oldIndex = directChildIds.indexOf(active.id as number);
       const newIndex = directChildIds.indexOf(over.id as number);
+      console.log('[DEBUG handleDragEnd] oldIndex:', oldIndex, 'newIndex:', newIndex);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const newOrder = arrayMove(directChildIds, oldIndex, newIndex);
+        console.log('[DEBUG handleDragEnd] newOrder:', newOrder);
         setLocalSubtaskOrder(newOrder);
         reorderSubtasks.mutate({
           parentId: initialData.id,
