@@ -9,14 +9,15 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
-import { Badge } from '@/components/primitives/badge'
+import { Badge } from '@/components/primitives/Badge'
 import { useTaskDialog } from '@/components/TaskDialogProvider'
-import { getIsVisible, useSettings } from '@/hooks/use-settings'
+import { useExpandedTasks } from '@/hooks/useExpandedTasks'
+import { getIsVisible, useSettings } from '@/hooks/useSettings'
 import {
   useDeleteTask,
   useSetTaskStatus,
   useUpdateTask,
-} from '@/hooks/use-tasks'
+} from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
@@ -25,7 +26,7 @@ import {
   type TaskResponse,
   type TaskStatus,
 } from '~/shared/schema'
-import { Icon } from './primitives/lucideIcon'
+import { Icon } from './primitives/LucideIcon'
 
 interface TaskBadgeProps {
   value: string
@@ -101,7 +102,6 @@ export const TaskCard = ({
   showRestore = false,
   showCompletedDate = false,
 }: TaskCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isHolding, setIsHolding] = useState(false)
@@ -112,8 +112,10 @@ export const TaskCard = ({
   const updateTask = useUpdateTask()
   const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
+  const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0
+  const isExpanded = checkExpanded(task.id)
   const isInProgress = task.status === 'in_progress'
   const isPinned = task.status === 'pinned'
 
@@ -173,7 +175,7 @@ export const TaskCard = ({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setIsExpanded(!isExpanded)
+              toggleExpanded(task.id)
             }}
             className="group/expand w-5 flex items-start justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 pt-[11px] cursor-pointer"
             type="button"
