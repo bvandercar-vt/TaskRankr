@@ -89,14 +89,28 @@ export const TaskForm = ({
       const result: typeof allTasks = []
       for (const t of tasks) {
         result.push(t)
-        if (t.subtasks && t.subtasks.length > 0) {
+        if (t.subtasks.length > 0) {
           result.push(...flattenTasks(t.subtasks))
         }
       }
       return result
     }
     const flatList = flattenTasks(allTasks)
-    return flatList.filter((t) => t.parentId === initialData.id)
+
+    const collectDescendants = (
+      thisParentId: number,
+      depth: number,
+    ): Array<(typeof allTasks)[number] & { depth: number }> => {
+      const children = flatList.filter((t) => t.parentId === thisParentId)
+      const result: Array<(typeof allTasks)[number] & { depth: number }> = []
+      for (const child of children) {
+        result.push({ ...child, depth })
+        result.push(...collectDescendants(child.id, depth + 1))
+      }
+      return result
+    }
+
+    return collectDescendants(initialData.id, 0)
   }, [initialData, allTasks])
 
   const getVisibility = useCallback(
@@ -486,12 +500,26 @@ export const TaskForm = ({
                   {subtasks.map((subtask) => (
                     <div
                       key={subtask.id}
-                      className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary/5"
+                      className="flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5"
+                      style={{ paddingLeft: `${12 + subtask.depth * 16}px` }}
                       data-testid={`subtask-row-${subtask.id}`}
                     >
-                      <span className="text-sm truncate flex-1">
-                        {subtask.name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        {subtask.depth > 0 && (
+                          <span className="text-muted-foreground/50 text-xs leading-none">
+                            └
+                          </span>
+                        )}
+                        <span
+                          className={cn(
+                            'text-sm truncate',
+                            subtask.status === 'completed' &&
+                              'line-through text-muted-foreground',
+                          )}
+                        >
+                          {subtask.name}
+                        </span>
+                      </div>
                       <div className="flex items-center gap-1">
                         {onEditChild && (
                           <Button

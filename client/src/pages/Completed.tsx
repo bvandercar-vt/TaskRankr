@@ -16,27 +16,29 @@ import { RANK_FIELDS_CRITERIA, type TaskResponse } from '~/shared/schema'
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
 
-  // Build tree from flat list for completed tasks only, sorted by completion date
+  // Build tree for completed ROOT tasks only (with all their subtasks)
+  // Completed subtasks stay under their parent in the Home page
   const completedTasks = useMemo(() => {
     if (!tasks) return []
 
-    // Filter to completed tasks first
-    const completedOnly = tasks.filter((task) => task.status === 'completed')
+    // Find root-level completed tasks (no parent)
+    const completedRoots = tasks.filter(
+      (task) => task.status === 'completed' && !task.parentId,
+    )
 
-    const nodes: Record<number, TaskResponse> = {}
-    const roots: TaskResponse[] = []
+    // Build subtask tree for each completed root
+    const buildSubtaskTree = (parentId: number): TaskResponse[] => {
+      const children = tasks.filter((t) => t.parentId === parentId)
+      return children.map((child) => ({
+        ...child,
+        subtasks: buildSubtaskTree(child.id),
+      })) as TaskResponse[]
+    }
 
-    completedOnly.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse
-    })
-
-    completedOnly.forEach((task) => {
-      if (task.parentId && nodes[task.parentId]) {
-        nodes[task.parentId].subtasks?.push(nodes[task.id])
-      } else {
-        roots.push(nodes[task.id])
-      }
-    })
+    const roots = completedRoots.map((task) => ({
+      ...task,
+      subtasks: buildSubtaskTree(task.id),
+    })) as TaskResponse[]
 
     // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {
