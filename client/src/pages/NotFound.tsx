@@ -4,7 +4,7 @@
 
 import { AlertCircle } from 'lucide-react'
 
-import { Card, CardContent } from '@/components/primitives/card'
+import { Card, CardContent } from '@/components/primitives/Card'
 
 export default function NotFound() {
   return (

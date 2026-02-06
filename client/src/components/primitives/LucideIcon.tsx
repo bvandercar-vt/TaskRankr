@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: is fine
 /**
  * @fileoverview Wrapper component for Lucide React icons.
  *

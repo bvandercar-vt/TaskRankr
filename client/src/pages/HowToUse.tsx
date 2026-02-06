@@ -13,8 +13,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { Button } from '@/components/primitives/button'
-import { Card, CardContent } from '@/components/primitives/card'
+import { Button } from '@/components/primitives/Button'
+import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSizeStyle } from '@/lib/constants'
 

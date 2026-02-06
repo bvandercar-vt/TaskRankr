@@ -6,7 +6,7 @@
 import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
-import { buttonVariants } from '@/components/primitives/button'
+import { buttonVariants } from '@/components/primitives/Button'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 

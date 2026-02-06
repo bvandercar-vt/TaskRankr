@@ -6,10 +6,10 @@ import { useMemo } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { EmptyState, PageError, PageLoading } from '@/components/page-states'
-import { Button } from '@/components/primitives/button'
+import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
+import { Button } from '@/components/primitives/Button'
 import { TaskCard } from '@/components/TaskCard'
-import { useTasks } from '@/hooks/use-tasks'
+import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { RANK_FIELDS_CRITERIA, type TaskResponse } from '~/shared/schema'
 

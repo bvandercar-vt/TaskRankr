@@ -15,6 +15,7 @@ export const createDemoTasks = (nextIdRef: {
   }
 
   const parentWithSubtasksId = getNextId()
+  const researchSubtaskId = getNextId()
 
   const demoTasks: TaskResponse[] = [
     {
@@ -122,7 +123,7 @@ export const createDemoTasks = (nextIdRef: {
       subtasks: [],
     },
     {
-      id: getNextId(),
+      id: researchSubtaskId,
       userId: 'local',
       name: 'Research options',
       description: 'Look into different approaches',
@@ -135,6 +136,23 @@ export const createDemoTasks = (nextIdRef: {
       inProgressTime: 0,
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 50_000),
+      completedAt: null,
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Compare pricing tiers',
+      description: 'A sub-subtask showing 3 levels of nesting',
+      priority: 'low',
+      ease: 'easiest',
+      enjoyment: 'medium',
+      time: 'lowest',
+      parentId: researchSubtaskId,
+      status: 'open',
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 45_000),
       completedAt: null,
       subtasks: [],
     },

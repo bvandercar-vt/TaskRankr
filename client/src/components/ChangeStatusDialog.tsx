@@ -14,8 +14,8 @@ import {
   X,
 } from 'lucide-react'
 
-import { Button } from '@/components/primitives/button'
-import { Input } from '@/components/primitives/forms/input'
+import { Button } from '@/components/primitives/Button'
+import { Input } from '@/components/primitives/forms/Input'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,8 +24,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/primitives/overlays/alertDialog'
-import { useSettings } from '@/hooks/use-settings'
+} from '@/components/primitives/overlays/AlertDialog'
+import { useSettings } from '@/hooks/useSettings'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
 import type { TaskStatus } from '~/shared/schema'

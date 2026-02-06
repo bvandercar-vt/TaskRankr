@@ -5,7 +5,8 @@
 
 import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
-import { Button } from '@/components/primitives/button'
+import { useGuestMode } from '@/components/GuestModeProvider'
+import { Button } from '@/components/primitives/Button'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'

@@ -10,8 +10,8 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from '@/components/primitives/overlays/toast'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/primitives/overlays/Toast'
+import { useToast } from '@/hooks/useToast'
 
 export const Toaster = () => {
   const { toasts } = useToast()
