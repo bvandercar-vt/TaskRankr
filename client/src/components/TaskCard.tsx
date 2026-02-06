@@ -31,14 +31,17 @@ import { Icon } from './primitives/LucideIcon'
 interface TaskBadgeProps {
   value: string
   styleClass: string
+  muted?: boolean
 }
 
-const TaskBadge = ({ value, styleClass }: TaskBadgeProps) => (
+const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
   <Badge
     variant="outline"
     className={cn(
       'px-1 py-0 border text-[8px] font-bold uppercase w-16 justify-center shrink-0',
-      styleClass,
+      muted
+        ? 'text-muted-foreground/50 bg-transparent border-muted/30'
+        : styleClass,
     )}
     data-testid={`badge-${value}`}
   >
@@ -82,8 +85,8 @@ const formatDuration = (ms: number) => {
   }
 }
 
-// Calculate current accumulated time for in-progress tasks
-const getCurrentAccumulatedTime = (task: TaskResponse): number => {
+// Calculate current accumulated time for a single task (not including subtasks)
+const getTaskOwnTime = (task: TaskResponse): number => {
   let total = task.inProgressTime
   if (task.status === 'in_progress' && task.inProgressStartedAt) {
     const startedAt =
@@ -92,6 +95,15 @@ const getCurrentAccumulatedTime = (task: TaskResponse): number => {
         : task.inProgressStartedAt
     const elapsed = Date.now() - startedAt.getTime()
     total += elapsed
+  }
+  return total
+}
+
+// Calculate total accumulated time including all subtasks recursively
+const getTotalAccumulatedTime = (task: TaskResponse): number => {
+  let total = getTaskOwnTime(task)
+  for (const subtask of task.subtasks) {
+    total += getTotalAccumulatedTime(subtask)
   }
   return total
 }
@@ -114,10 +126,13 @@ export const TaskCard = ({
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
 
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0
+  const hasSubtasks = task.subtasks.length > 0
   const isExpanded = checkExpanded(task.id)
   const isInProgress = task.status === 'in_progress'
   const isPinned = task.status === 'pinned'
+  const isCompleted = task.status === 'completed'
+  const isNestedWithStatus = level > 0 && (isInProgress || isPinned)
+  const isNestedCompleted = level > 0 && isCompleted
 
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
@@ -155,11 +170,13 @@ export const TaskCard = ({
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           'relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer',
-          isInProgress
-            ? 'border-blue-500/30 bg-blue-500/5'
-            : isPinned
-              ? 'border-slate-400/30 bg-slate-500/5'
-              : 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]',
+          isNestedWithStatus
+            ? 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]'
+            : isInProgress
+              ? 'border-blue-500/30 bg-blue-500/5'
+              : isPinned
+                ? 'border-slate-400/30 bg-slate-500/5'
+                : 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]',
           isHolding && 'bg-white/[0.05] scale-[0.99] transition-transform',
         )}
         style={{ marginLeft: `${level * 16}px` }}
@@ -171,32 +188,37 @@ export const TaskCard = ({
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        {hasSubtasks ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              toggleExpanded(task.id)
-            }}
-            className="group/expand w-5 flex items-start justify-center shrink-0 self-stretch -my-2 -ml-2 pl-2 pt-[11px] cursor-pointer"
-            type="button"
-            data-testid={`button-expand-${task.id}`}
-          >
-            <span className="p-0.5 rounded-full group-hover/expand:bg-white/10 transition-colors">
+        <div className="w-5 flex justify-center shrink-0">
+          {hasSubtasks ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleExpanded(task.id)
+              }}
+              className="group/expand p-0.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              type="button"
+              data-testid={`button-expand-${task.id}`}
+            >
               <Icon
                 icon={isExpanded ? ChevronDown : ChevronRight}
                 className="w-3.5 h-3.5 text-muted-foreground"
               />
-            </span>
-          </button>
-        ) : (
-          <div className="w-5 flex justify-center shrink-0">
+            </button>
+          ) : (
             <div className="w-3.5" />
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-            <h3 className="font-semibold truncate text-base text-foreground">
+            <h3
+              className={cn(
+                'font-semibold truncate text-base',
+                isNestedCompleted
+                  ? 'text-muted-foreground line-through'
+                  : 'text-foreground',
+              )}
+            >
               {task.name}
             </h3>
             {isInProgress && (
@@ -244,6 +266,7 @@ export const TaskCard = ({
                         ? 'opacity-0'
                         : getRankFieldStyle(field, value)
                     }
+                    muted={isNestedCompleted}
                   />
                 )
               })}
@@ -255,11 +278,13 @@ export const TaskCard = ({
                     Completed: {formatCompletedDate(task.completedAt)}
                   </span>
                 )}
-                {settings.enableInProgressTime && task.inProgressTime > 0 && (
-                  <span className="text-[10px] text-muted-foreground">
-                    Time spent: {formatDuration(task.inProgressTime)}
-                  </span>
-                )}
+                {settings.enableInProgressTime &&
+                  getTotalAccumulatedTime(task) > 0 && (
+                    <span className="text-[10px] text-muted-foreground">
+                      Time spent:{' '}
+                      {formatDuration(getTotalAccumulatedTime(task))}
+                    </span>
+                  )}
               </div>
             )}
           </div>
@@ -279,7 +304,7 @@ export const TaskCard = ({
                 className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]"
                 style={{ marginLeft: `${level * 16}px` }}
               />
-              {task.subtasks?.map((subtask) => (
+              {task.subtasks.map((subtask) => (
                 <TaskCard
                   key={subtask.id}
                   task={subtask}
@@ -298,7 +323,7 @@ export const TaskCard = ({
         onOpenChange={setShowConfirm}
         taskName={task.name}
         status={task.status}
-        inProgressTime={getCurrentAccumulatedTime(task)}
+        inProgressTime={getTotalAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
           updateTask.mutate({ id: task.id, inProgressTime: timeMs })

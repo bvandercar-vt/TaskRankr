@@ -84,7 +84,7 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
           inProgressStartedAt: t.inProgressStartedAt
             ? new Date(t.inProgressStartedAt)
             : null,
-          subtasks: t.subtasks ? reviveDates(t.subtasks) : [],
+          subtasks: reviveDates(t.subtasks),
         }))
       return reviveDates(parsed) as T
     }
@@ -103,11 +103,10 @@ const updateTaskInTree = (
     if (task.id === id) {
       return updater(task)
     }
-    const subtasks = task.subtasks ?? []
-    if (subtasks.length > 0) {
+    if (task.subtasks.length > 0) {
       return {
         ...task,
-        subtasks: updateTaskInTree(subtasks, id, updater),
+        subtasks: updateTaskInTree(task.subtasks, id, updater),
       }
     }
     return task
@@ -122,8 +121,16 @@ const deleteTaskFromTree = (
     .filter((task) => task.id !== id)
     .map((task) => ({
       ...task,
-      subtasks: deleteTaskFromTree(task.subtasks ?? [], id),
+      subtasks: deleteTaskFromTree(task.subtasks, id),
     }))
+}
+
+const getTotalTimeFromTask = (task: TaskResponse): number => {
+  let total = task.inProgressTime ?? 0
+  for (const subtask of task.subtasks) {
+    total += getTotalTimeFromTask(subtask)
+  }
+  return total
 }
 
 const findTaskInTree = (
@@ -132,7 +139,7 @@ const findTaskInTree = (
 ): TaskResponse | undefined => {
   for (const task of tasks) {
     if (task.id === id) return task
-    const found = findTaskInTree(task.subtasks ?? [], id)
+    const found = findTaskInTree(task.subtasks, id)
     if (found) return found
   }
   return undefined
@@ -148,11 +155,13 @@ const addTaskToTree = (
   }
   return tasks.map((task) => {
     if (task.id === parentId) {
-      return { ...task, subtasks: [...(task.subtasks ?? []), newTask] }
+      return { ...task, subtasks: [...task.subtasks, newTask] }
     }
-    const subtasks = task.subtasks ?? []
-    if (subtasks.length > 0) {
-      return { ...task, subtasks: addTaskToTree(subtasks, newTask, parentId) }
+    if (task.subtasks.length > 0) {
+      return {
+        ...task,
+        subtasks: addTaskToTree(task.subtasks, newTask, parentId),
+      }
     }
     return task
   })
@@ -367,7 +376,28 @@ export const LocalStateProvider = ({
 
   const deleteTask = useCallback(
     (id: number) => {
-      setTasks((prev) => deleteTaskFromTree(prev, id))
+      setTasks((prev) => {
+        const taskToDelete = findTaskInTree(prev, id)
+        if (!taskToDelete) return prev
+
+        let updated = prev
+
+        if (taskToDelete.parentId) {
+          const timeToAccumulate = getTotalTimeFromTask(taskToDelete)
+          if (timeToAccumulate > 0) {
+            updated = updateTaskInTree(
+              updated,
+              taskToDelete.parentId,
+              (parent) => ({
+                ...parent,
+                inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
+              }),
+            )
+          }
+        }
+
+        return deleteTaskFromTree(updated, id)
+      })
       enqueue({ type: 'delete_task', id })
     },
     [enqueue],
@@ -427,7 +457,7 @@ export const LocalStateProvider = ({
         .filter((task) => !idsToDelete.has(task.id))
         .map((task) => ({
           ...task,
-          subtasks: filterDemoTasks(task.subtasks ?? []),
+          subtasks: filterDemoTasks(task.subtasks),
         }))
     }
     setTasks((prev) => filterDemoTasks(prev))

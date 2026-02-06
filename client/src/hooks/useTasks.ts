@@ -61,10 +61,8 @@ export const useTask = (id: number) => {
     if (!taskList) return undefined
     for (const task of taskList) {
       if (task.id === targetId) return task
-      if (task.subtasks) {
-        const found = findTask(task.subtasks, targetId)
-        if (found) return found
-      }
+      const found = findTask(task.subtasks, targetId)
+      if (found) return found
     }
     return undefined
   }

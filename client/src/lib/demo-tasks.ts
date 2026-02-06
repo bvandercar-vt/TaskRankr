@@ -16,6 +16,7 @@ export const createDemoTasks = (nextIdRef: {
 
   const parentWithSubtasksId = getNextId()
   const researchSubtaskId = getNextId()
+  const completedWithSubtaskId = getNextId()
 
   const demoTasks: TaskResponse[] = [
     {
@@ -193,6 +194,24 @@ export const createDemoTasks = (nextIdRef: {
     {
       id: getNextId(),
       userId: 'local',
+      name: 'Completed subtask',
+      description:
+        'This subtask has been completed and stays under its parent.',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'high',
+      time: 'low',
+      parentId: parentWithSubtasksId,
+      status: 'completed',
+      inProgressTime: 300_000,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 100_000),
+      completedAt: new Date(now.getTime() - 20_000),
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
       name: 'Completed demo task',
       description: 'This task has already been finished.',
       priority: 'medium',
@@ -205,6 +224,40 @@ export const createDemoTasks = (nextIdRef: {
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 300_000),
       completedAt: new Date(now.getTime() - 10_000),
+      subtasks: [],
+    },
+    {
+      id: completedWithSubtaskId,
+      userId: 'local',
+      name: 'Completed task with subtask',
+      description: 'A completed root task that has a completed subtask.',
+      priority: 'high',
+      ease: 'medium',
+      enjoyment: 'medium',
+      time: 'medium',
+      parentId: null,
+      status: 'completed',
+      inProgressTime: 1_800_000,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 400_000),
+      completedAt: new Date(now.getTime() - 5000),
+      subtasks: [],
+    },
+    {
+      id: getNextId(),
+      userId: 'local',
+      name: 'Completed child task',
+      description: 'A subtask that was completed along with its parent.',
+      priority: 'medium',
+      ease: 'easy',
+      enjoyment: 'high',
+      time: 'low',
+      parentId: completedWithSubtaskId,
+      status: 'completed',
+      inProgressTime: 600_000,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 350_000),
+      completedAt: new Date(now.getTime() - 8000),
       subtasks: [],
     },
   ]
