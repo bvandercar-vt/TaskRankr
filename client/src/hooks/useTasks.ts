@@ -4,12 +4,9 @@
  */
 
 import { useMutation } from '@tanstack/react-query'
-import type { SimplifyDeep } from 'type-fest'
 
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
-import type { ClientInferRequestBody } from '@/lib/ts-rest'
-import type { contract } from '~/shared/contract'
-import type { TaskStatus, UpdateTask } from '~/shared/schema'
+import type { CreateTask, TaskStatus, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
@@ -80,11 +77,7 @@ export const useCreateTask = () => {
 
   return useMutation({
     // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async (
-      data: SimplifyDeep<
-        Omit<ClientInferRequestBody<typeof contract.tasks.create>, 'userId'>
-      >,
-    ) => {
+    mutationFn: async (data: Omit<CreateTask, 'userId'>) => {
       if (!localState) {
         throw new Error('Local state not initialized')
       }

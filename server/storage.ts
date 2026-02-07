@@ -19,7 +19,7 @@ import {
 } from '~/shared/schema'
 import { db } from './db'
 
-type UpdateTaskArg = Omit<UpdateTask, 'id' | 'userId'>
+type UpdateTaskArg = Omit<UpdateTask, 'id'>
 
 export interface IStorage {
   getTasks(userId: string): Promise<Task[]>
