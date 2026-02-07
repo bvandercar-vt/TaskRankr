@@ -72,7 +72,7 @@ import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
-  type MutateTaskRequest,
+  type MutateTask,
   RANK_FIELDS_CRITERIA,
   type RankField,
   type SubtaskSortMode,
@@ -191,7 +191,7 @@ const SortableSubtaskItem = ({
 }
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskRequest) => void
+  onSubmit: (data: MutateTask) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -252,11 +252,11 @@ export const TaskForm = ({
     const flatList = flattenTasks(allTasks)
 
     const collectDescendants = (
-      thisParentId: number,
+      parentId_: number,
       depth: number,
       parentSortMode: SubtaskSortMode,
     ): Array<(typeof allTasks)[number] & { depth: number }> => {
-      let children = flatList.filter((t) => t.parentId === thisParentId)
+      let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === 'manual') {
         if (depth === 0 && localSubtaskOrder) {
@@ -265,7 +265,7 @@ export const TaskForm = ({
               localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
           )
         } else {
-          const parentTask = flatList.find((t) => t.id === thisParentId)
+          const parentTask = flatList.find((t) => t.id === parentId_)
           const order = parentTask?.subtaskOrder ?? []
           children = [...children].sort((a, b) => {
             const indexA = order.indexOf(a.id)
@@ -358,7 +358,7 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
-  const form = useForm<MutateTaskRequest>({
+  const form = useForm<MutateTask>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
     defaultValues: initialData
@@ -426,7 +426,7 @@ export const TaskForm = ({
     )
   }, [initialData, parentId, form])
 
-  const onSubmitWithNulls = (data: MutateTaskRequest) => {
+  const onSubmitWithNulls = (data: MutateTask) => {
     const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
     const formattedData = {
       ...rest,

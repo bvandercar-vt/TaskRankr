@@ -15,44 +15,15 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from 'drizzle-zod'
 import { z } from 'zod'
 
 // Re-export auth models
 export * from './models/auth'
-
-export const tasks = pgTable('tasks', {
-  id: serial('id').primaryKey(),
-  userId: varchar('user_id').notNull(), // Owner of the task
-  name: text('name').notNull(),
-  description: text('description'),
-  priority: text('priority'),
-  ease: text('ease'),
-  enjoyment: text('enjoyment'),
-  time: text('time'),
-  parentId: integer('parent_id'),
-  status: text('status').default('open').notNull(), // open, in_progress, pinned, completed
-  inProgressTime: integer('in_progress_time').default(0).notNull(), // Cumulative time in milliseconds
-  inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  completedAt: timestamp('completed_at'),
-  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
-  subtaskOrder: integer('subtask_order')
-    .array()
-    .default(sql`'{}'::integer[]`)
-    .notNull(),
-})
-
-export const tasksRelations = relations(tasks, ({ one, many }) => ({
-  parent: one(tasks, {
-    fields: [tasks.parentId],
-    references: [tasks.id],
-    relationName: 'subtasks',
-  }),
-  subtasks: many(tasks, {
-    relationName: 'subtasks',
-  }),
-}))
 
 // Status constants and types
 export const TASK_STATUSES = [
@@ -162,43 +133,79 @@ export const easeEnum = z.enum(EASE_LEVELS)
 export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS)
 export const timeEnum = z.enum(TIME_LEVELS)
 
+export const tasks = pgTable('tasks', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id').notNull(), // Owner of the task
+  name: text('name').notNull(),
+  status: text('status').default('open').notNull(), // open, in_progress, pinned, completed
+  description: text('description'),
+  priority: text('priority'),
+  ease: text('ease'),
+  enjoyment: text('enjoyment'),
+  time: text('time'),
+  inProgressTime: integer('in_progress_time').default(0).notNull(), // Cumulative time in milliseconds
+  inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+  parentId: integer('parent_id'),
+  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
+  subtaskOrder: integer('subtask_order')
+    .array()
+    .default(sql`'{}'::integer[]`)
+    .notNull(),
+})
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  parent: one(tasks, {
+    fields: [tasks.parentId],
+    references: [tasks.id],
+    relationName: 'subtasks',
+  }),
+  subtasks: many(tasks, {
+    relationName: 'subtasks',
+  }),
+}))
+
 const taskSchemaCommon = {
+  userId: z.string().min(1, 'User ID is required'),
+  name: z.string().min(1, 'Name is required'),
   status: taskStatusEnum,
   priority: priorityEnum.nullable(),
   ease: easeEnum.nullable(),
   enjoyment: enjoymentEnum.nullable(),
   time: timeEnum.nullable(),
-  subtaskSortMode: subtaskSortModeEnum,
+  subtaskSortMode: subtaskSortModeEnum.default('inherit'),
+  subtaskOrder: z.array(z.number()).default([]),
+  createdAt: z.coerce.date(),
+  completedAt: z.coerce.date().nullish(),
+  inProgressStartedAt: z.coerce.date().nullish(),
 } as const
 
 export const taskSchema = createSelectSchema(tasks).extend(taskSchemaCommon)
 
 export type Task = z.infer<typeof taskSchema>
 
-export const insertTaskSchema = createInsertSchema(tasks, {
-  name: z.string().min(1, 'Name is required'),
-  userId: z.string().min(1, 'User ID is required'),
-  status: taskSchemaCommon.status.optional(),
-  priority: taskSchemaCommon.priority.optional(),
-  ease: taskSchemaCommon.ease.optional(),
-  enjoyment: taskSchemaCommon.enjoyment.optional(),
-  time: taskSchemaCommon.time.optional(),
-  subtaskSortMode: taskSchemaCommon.subtaskSortMode.optional(),
-  subtaskOrder: z.array(z.number()).optional(),
-  createdAt: z.coerce.date().optional(),
-  completedAt: z.coerce.date().optional().nullable(),
-  inProgressStartedAt: z.coerce.date().optional().nullable(),
-}).omit({
-  id: true,
-})
+export type TaskResponse = Task & { subtasks: TaskResponse[] }
+
+export const insertTaskSchema = createInsertSchema(tasks, taskSchemaCommon)
+  .partial()
+  .omit({ id: true })
+  .required({
+    name: true,
+    userId: true,
+  })
 
 export type InsertTask = z.infer<typeof insertTaskSchema>
+export type CreateTask = InsertTask
 
-// Request/Response types
-export type MutateTaskRequest = InsertTask
-export type CreateTaskRequest = InsertTask
-export type UpdateTaskRequest = Partial<InsertTask>
-export type TaskResponse = Task & { subtasks: TaskResponse[] }
+export const updateTaskSchema = createUpdateSchema(tasks, taskSchemaCommon)
+  .partial()
+  .required({ id: true })
+  .omit({ userId: true })
+
+export type UpdateTask = z.infer<typeof updateTaskSchema>
+
+export type MutateTask = CreateTask | UpdateTask
 
 // User Settings
 export const userSettings = pgTable('user_settings', {

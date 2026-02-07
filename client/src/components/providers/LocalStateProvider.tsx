@@ -17,20 +17,23 @@ import {
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
-  CreateTaskRequest,
+  CreateTask,
   TaskResponse,
   TaskStatus,
-  UpdateTaskRequest,
+  UpdateTask,
   UserSettings,
 } from '~/shared/schema'
+
+type CreateTaskArg = Omit<CreateTask, 'userId'>
+type UpdateTaskArg = Omit<UpdateTask, 'id'>
 
 export type SyncOperation =
   | {
       type: 'create_task'
       tempId: number
-      data: Omit<CreateTaskRequest, 'userId'>
+      data: CreateTaskArg
     }
-  | { type: 'update_task'; id: number; data: UpdateTaskRequest }
+  | { type: 'update_task'; id: number; data: UpdateTaskArg }
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
   | { type: 'update_settings'; data: Partial<UserSettings> }
@@ -42,8 +45,8 @@ interface LocalStateContextValue {
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
-  createTask: (data: Omit<CreateTaskRequest, 'userId'>) => TaskResponse
-  updateTask: (id: number, updates: UpdateTaskRequest) => TaskResponse
+  createTask: (data: CreateTaskArg) => TaskResponse
+  updateTask: (id: number, updates: UpdateTaskArg) => TaskResponse
   setTaskStatus: (id: number, status: TaskStatus) => TaskResponse
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
@@ -100,8 +103,8 @@ const updateTaskInTree = (
   tasks: TaskResponse[],
   id: number,
   updater: (task: TaskResponse) => TaskResponse,
-): TaskResponse[] => {
-  return tasks.map((task) => {
+): TaskResponse[] =>
+  tasks.map((task) => {
     if (task.id === id) {
       return updater(task)
     }
@@ -113,22 +116,20 @@ const updateTaskInTree = (
     }
     return task
   })
-}
 
 const deleteTaskFromTree = (
   tasks: TaskResponse[],
   id: number,
-): TaskResponse[] => {
-  return tasks
+): TaskResponse[] =>
+  tasks
     .filter((task) => task.id !== id)
     .map((task) => ({
       ...task,
       subtasks: deleteTaskFromTree(task.subtasks, id),
     }))
-}
 
 const getTotalTimeFromTask = (task: TaskResponse): number => {
-  let total = task.inProgressTime ?? 0
+  let total = task.inProgressTime
   for (const subtask of task.subtasks) {
     total += getTotalTimeFromTask(subtask)
   }
@@ -284,7 +285,7 @@ export const LocalStateProvider = ({
   }, [])
 
   const createTask = useCallback(
-    (data: Omit<CreateTaskRequest, 'userId'>): TaskResponse => {
+    (data: CreateTaskArg): TaskResponse => {
       const tempId = nextIdRef.current--
       localStorage.setItem(
         storageKeys.nextId,
@@ -334,7 +335,7 @@ export const LocalStateProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskRequest): TaskResponse => {
+    (id: number, updates: UpdateTaskArg): TaskResponse => {
       let updatedTask: TaskResponse | undefined
       setTasks((prev) =>
         updateTaskInTree(prev, id, (task) => {
