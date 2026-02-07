@@ -5,7 +5,7 @@
 
 import { omit } from 'es-toolkit'
 
-import type { TaskResponse } from '~/shared/schema'
+import type { TaskWithSubtasks } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
   tasks: 'taskrankr-guest-tasks',
@@ -23,7 +23,7 @@ const AUTH_STORAGE_KEYS = {
 
 export interface MigrationResult {
   migratedCount: number
-  tasks: TaskResponse[]
+  tasks: TaskWithSubtasks[]
 }
 
 export const getGuestTasksToMigrate = (): MigrationResult => {
@@ -35,7 +35,7 @@ export const getGuestTasksToMigrate = (): MigrationResult => {
       return { migratedCount: 0, tasks: [] }
     }
 
-    const guestTasks: TaskResponse[] = JSON.parse(guestTasksRaw)
+    const guestTasks: TaskWithSubtasks[] = JSON.parse(guestTasksRaw)
     const demoIds: number[] = demoIdsRaw ? JSON.parse(demoIdsRaw) : []
     const demoIdSet = new Set(demoIds)
 
@@ -61,7 +61,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 
   try {
     const existingAuthTasksRaw = localStorage.getItem(AUTH_STORAGE_KEYS.tasks)
-    const existingAuthTasks: TaskResponse[] = existingAuthTasksRaw
+    const existingAuthTasks: TaskWithSubtasks[] = existingAuthTasksRaw
       ? JSON.parse(existingAuthTasksRaw)
       : []
 
@@ -76,11 +76,11 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     let nextId = existingNextIdRaw ? JSON.parse(existingNextIdRaw) : -1
 
     const idMapping = new Map<number, number>()
-    const migratedTasks: TaskResponse[] = []
+    const migratedTasks: TaskWithSubtasks[] = []
     const newSyncOps: Array<{
       type: 'create_task'
       tempId: number
-      data: Omit<TaskResponse, 'id' | 'userId' | 'subtasks'>
+      data: Omit<TaskWithSubtasks, 'id' | 'userId' | 'subtasks'>
     }> = []
 
     for (const task of userCreatedTasks) {
@@ -89,7 +89,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       const newId = nextId--
       idMapping.set(task.id, newId)
 
-      const migratedTask: TaskResponse = {
+      const migratedTask: TaskWithSubtasks = {
         ...task,
         id: newId,
         userId: 'local',
@@ -112,7 +112,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 
       idMapping.set(task.id, newId)
 
-      const migratedTask: TaskResponse = {
+      const migratedTask: TaskWithSubtasks = {
         ...task,
         id: newId,
         parentId: newParentId,

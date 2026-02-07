@@ -77,6 +77,7 @@ import {
   type RankField,
   type SubtaskSortMode,
   type Task,
+  type TaskWithSubtasks,
 } from '~/shared/schema'
 
 interface SortableSubtaskItemProps {
@@ -239,8 +240,8 @@ export const TaskForm = ({
 
   const subtasks = useMemo(() => {
     if (!initialData || !allTasks) return []
-    const flattenTasks = (tasks: typeof allTasks): typeof allTasks => {
-      const result: typeof allTasks = []
+    const flattenTasks = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] => {
+      const result: TaskWithSubtasks[] = []
       for (const t of tasks) {
         result.push(t)
         if (t.subtasks.length > 0) {
@@ -255,7 +256,7 @@ export const TaskForm = ({
       parentId_: number,
       depth: number,
       parentSortMode: SubtaskSortMode,
-    ): Array<(typeof allTasks)[number] & { depth: number }> => {
+    ): (TaskWithSubtasks & { depth: number })[] => {
       let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === 'manual') {
@@ -278,7 +279,7 @@ export const TaskForm = ({
         }
       }
 
-      const result: Array<(typeof allTasks)[number] & { depth: number }> = []
+      const result: Array<TaskWithSubtasks & { depth: number }> = []
       for (const child of children) {
         result.push({ ...child, depth })
         result.push(

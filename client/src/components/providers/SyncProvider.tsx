@@ -15,12 +15,12 @@ import {
 } from 'react'
 
 import { tsr } from '@/lib/ts-rest'
-import type { Task, TaskResponse } from '~/shared/schema'
+import type { Task, TaskWithSubtasks } from '~/shared/schema'
 import { useLocalState } from './LocalStateProvider'
 
-const buildTaskTree = (flatTasks: Task[]): TaskResponse[] => {
-  const taskMap = new Map<number, TaskResponse>()
-  const rootTasks: TaskResponse[] = []
+const buildTaskTree = (flatTasks: Task[]): TaskWithSubtasks[] => {
+  const taskMap = new Map<number, TaskWithSubtasks>()
+  const rootTasks: TaskWithSubtasks[] = []
 
   for (const task of flatTasks) {
     taskMap.set(task.id, { ...task, subtasks: [] })

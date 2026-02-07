@@ -6,7 +6,12 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
-import type { CreateTask, TaskStatus, UpdateTask } from '~/shared/schema'
+import type {
+  CreateTask,
+  TaskStatus,
+  TaskWithSubtasks,
+  UpdateTask,
+} from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
@@ -53,10 +58,9 @@ export const useTask = (id: number) => {
   const { data: tasks, isLoading } = useTasks()
 
   const findTask = (
-    taskList: typeof tasks,
+    taskList: TaskWithSubtasks[],
     targetId: number,
-  ): NonNullable<typeof tasks>[number] | undefined => {
-    if (!taskList) return undefined
+  ): TaskWithSubtasks | undefined => {
     for (const task of taskList) {
       if (task.id === targetId) return task
       const found = findTask(task.subtasks, targetId)

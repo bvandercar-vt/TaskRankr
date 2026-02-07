@@ -18,8 +18,8 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import type {
   CreateTask,
-  TaskResponse,
   TaskStatus,
+  TaskWithSubtasks,
   UpdateTask,
   UserSettings,
 } from '~/shared/schema'
@@ -40,21 +40,21 @@ export type SyncOperation =
   | { type: 'reorder_subtasks'; parentId: number; orderedIds: number[] }
 
 interface LocalStateContextValue {
-  tasks: TaskResponse[]
+  tasks: TaskWithSubtasks[]
   settings: UserSettings
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
-  createTask: (data: CreateTaskArg) => TaskResponse
-  updateTask: (id: number, updates: UpdateTaskArg) => TaskResponse
-  setTaskStatus: (id: number, status: TaskStatus) => TaskResponse
+  createTask: (data: CreateTaskArg) => TaskWithSubtasks
+  updateTask: (id: number, updates: UpdateTaskArg) => TaskWithSubtasks
+  setTaskStatus: (id: number, status: TaskStatus) => TaskWithSubtasks
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   updateSettings: (updates: Partial<UserSettings>) => void
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
-  setTasksFromServer: (tasks: TaskResponse[]) => void
+  setTasksFromServer: (tasks: TaskWithSubtasks[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
   resetToDefaults: () => void
   initDemoData: () => void
@@ -73,7 +73,7 @@ const getStorageKeys = (mode: StorageMode) => ({
   demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
 })
 
-const DEFAULT_TASKS: TaskResponse[] = []
+const DEFAULT_TASKS: TaskWithSubtasks[] = []
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -81,7 +81,7 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
     if (!stored) return fallback
     const parsed = JSON.parse(stored)
     if (key.endsWith('-tasks')) {
-      const reviveDates = (tasks: TaskResponse[]): TaskResponse[] =>
+      const reviveDates = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] =>
         tasks.map((t) => ({
           ...t,
           createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
@@ -100,10 +100,10 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
 }
 
 const updateTaskInTree = (
-  tasks: TaskResponse[],
+  tasks: TaskWithSubtasks[],
   id: number,
-  updater: (task: TaskResponse) => TaskResponse,
-): TaskResponse[] =>
+  updater: (task: TaskWithSubtasks) => TaskWithSubtasks,
+): TaskWithSubtasks[] =>
   tasks.map((task) => {
     if (task.id === id) {
       return updater(task)
@@ -118,9 +118,9 @@ const updateTaskInTree = (
   })
 
 const deleteTaskFromTree = (
-  tasks: TaskResponse[],
+  tasks: TaskWithSubtasks[],
   id: number,
-): TaskResponse[] =>
+): TaskWithSubtasks[] =>
   tasks
     .filter((task) => task.id !== id)
     .map((task) => ({
@@ -128,7 +128,7 @@ const deleteTaskFromTree = (
       subtasks: deleteTaskFromTree(task.subtasks, id),
     }))
 
-const getTotalTimeFromTask = (task: TaskResponse): number => {
+const getTotalTimeFromTask = (task: TaskWithSubtasks): number => {
   let total = task.inProgressTime
   for (const subtask of task.subtasks) {
     total += getTotalTimeFromTask(subtask)
@@ -137,9 +137,9 @@ const getTotalTimeFromTask = (task: TaskResponse): number => {
 }
 
 const findTaskInTree = (
-  tasks: TaskResponse[],
+  tasks: TaskWithSubtasks[],
   id: number,
-): TaskResponse | undefined => {
+): TaskWithSubtasks | undefined => {
   for (const task of tasks) {
     if (task.id === id) return task
     const found = findTaskInTree(task.subtasks, id)
@@ -149,10 +149,10 @@ const findTaskInTree = (
 }
 
 const addTaskToTree = (
-  tasks: TaskResponse[],
-  newTask: TaskResponse,
+  tasks: TaskWithSubtasks[],
+  newTask: TaskWithSubtasks,
   parentId: number | null,
-): TaskResponse[] => {
+): TaskWithSubtasks[] => {
   if (!parentId) {
     return [...tasks, newTask]
   }
@@ -183,7 +183,7 @@ export const LocalStateProvider = ({
 }: LocalStateProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
-  const [tasks, setTasks] = useState<TaskResponse[]>(DEFAULT_TASKS)
+  const [tasks, setTasks] = useState<TaskWithSubtasks[]>(DEFAULT_TASKS)
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
@@ -264,7 +264,7 @@ export const LocalStateProvider = ({
         ...task,
         id: realId,
       }))
-      const replaceInOrder = (tasks_: TaskResponse[]): TaskResponse[] =>
+      const replaceInOrder = (tasks_: TaskWithSubtasks[]): TaskWithSubtasks[] =>
         tasks_.map((t) => ({
           ...t,
           subtaskOrder: t.subtaskOrder.map((id) =>
@@ -285,14 +285,14 @@ export const LocalStateProvider = ({
   }, [])
 
   const createTask = useCallback(
-    (data: CreateTaskArg): TaskResponse => {
+    (data: CreateTaskArg): TaskWithSubtasks => {
       const tempId = nextIdRef.current--
       localStorage.setItem(
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
 
-      const newTask: TaskResponse = {
+      const newTask: TaskWithSubtasks = {
         id: tempId,
         userId: 'local',
         name: data.name,
@@ -335,8 +335,8 @@ export const LocalStateProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskArg): TaskResponse => {
-      let updatedTask: TaskResponse | undefined
+    (id: number, updates: UpdateTaskArg): TaskWithSubtasks => {
+      let updatedTask: TaskWithSubtasks | undefined
       setTasks((prev) =>
         updateTaskInTree(prev, id, (task) => {
           updatedTask = { ...task, ...updates }
@@ -351,8 +351,8 @@ export const LocalStateProvider = ({
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): TaskResponse => {
-      let updatedTask: TaskResponse | undefined
+    (id: number, status: TaskStatus): TaskWithSubtasks => {
+      let updatedTask: TaskWithSubtasks | undefined
       setTasks((prev) => {
         let newTasks = prev
 
@@ -460,7 +460,7 @@ export const LocalStateProvider = ({
   )
 
   const setTasksFromServer = useCallback(
-    (serverTasks: TaskResponse[]) => {
+    (serverTasks: TaskWithSubtasks[]) => {
       setTasks(serverTasks)
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
@@ -500,7 +500,9 @@ export const LocalStateProvider = ({
 
   const deleteDemoData = useCallback(() => {
     const idsToDelete = new Set(demoTaskIds)
-    const filterDemoTasks = (taskList: TaskResponse[]): TaskResponse[] => {
+    const filterDemoTasks = (
+      taskList: TaskWithSubtasks[],
+    ): TaskWithSubtasks[] => {
       return taskList
         .filter((task) => !idsToDelete.has(task.id))
         .map((task) => ({

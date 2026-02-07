@@ -185,7 +185,7 @@ export const taskSchema = createSelectSchema(tasks).extend(taskSchemaCommon)
 
 export type Task = z.infer<typeof taskSchema>
 
-export type TaskResponse = Task & { subtasks: TaskResponse[] }
+export type TaskWithSubtasks = Task & { subtasks: TaskWithSubtasks[] }
 
 export const insertTaskSchema = createInsertSchema(tasks, taskSchemaCommon)
   .partial()

@@ -45,7 +45,7 @@ import {
   RANK_FIELDS_CRITERIA,
   type SortOption,
   type SubtaskSortMode,
-  type TaskResponse,
+  type TaskWithSubtasks,
   type Time,
 } from '~/shared/schema'
 
@@ -180,7 +180,7 @@ const Home = () => {
 
   // Sort function for tasks
   const sortTasks = useCallback(
-    (theseTasks: TaskResponse[], sort: SortOption): TaskResponse[] => {
+    (theseTasks: TaskWithSubtasks[], sort: SortOption): TaskWithSubtasks[] => {
       const sorted = [...theseTasks]
       if (sort === 'date') {
         sorted.sort((a, b) => {
@@ -233,13 +233,13 @@ const Home = () => {
   // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
     (
-      nodes: TaskResponse[],
+      nodes: TaskWithSubtasks[],
       term: string,
       sort: SortOption,
       parentSortMode?: SubtaskSortMode,
       parentSubtaskOrder?: number[],
-    ): TaskResponse[] => {
-      const result = nodes.reduce((acc: TaskResponse[], node) => {
+    ): TaskWithSubtasks[] => {
+      const result = nodes.reduce((acc: TaskWithSubtasks[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
         const filteredSubtasks = filterAndSortTree(
           node.subtasks,
@@ -286,16 +286,16 @@ const Home = () => {
     // - All in_progress tasks (both top-level and subtasks)
     // - All pinned tasks (both top-level and subtasks)
     // Subtasks also remain visible under their parent (with minimal styling)
-    const inProgressList: TaskResponse[] = []
-    const pinnedList: TaskResponse[] = []
+    const inProgressList: TaskWithSubtasks[] = []
+    const pinnedList: TaskWithSubtasks[] = []
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
       if (task.status === 'in_progress') {
-        inProgressList.push({ ...task, subtasks: [] } as TaskResponse)
+        inProgressList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
         hoistedIds.add(task.id)
       } else if (task.status === 'pinned') {
-        pinnedList.push({ ...task, subtasks: [] } as TaskResponse)
+        pinnedList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
         hoistedIds.add(task.id)
       }
     })
@@ -306,11 +306,11 @@ const Home = () => {
     // Build full tree
     // - Subtasks with pinned/in_progress status stay under parent (also shown hoisted)
     // - Top-level pinned/in_progress are excluded from tree (only shown hoisted)
-    const nodes: Record<number, TaskResponse> = {}
-    const roots: TaskResponse[] = []
+    const nodes: Record<number, TaskWithSubtasks> = {}
+    const roots: TaskWithSubtasks[] = []
 
     activeTasks.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] } as TaskResponse
+      nodes[task.id] = { ...task, subtasks: [] } as TaskWithSubtasks
     })
 
     activeTasks.forEach((task) => {
@@ -342,7 +342,7 @@ const Home = () => {
     const pinnedOnly = filteredPinned.filter((t) => t.status === 'pinned')
 
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    let sortedPinned: TaskResponse[]
+    let sortedPinned: TaskWithSubtasks[]
     if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
