@@ -264,8 +264,8 @@ export const LocalStateProvider = ({
         ...task,
         id: realId,
       }))
-      const replaceInOrder = (theseTasks: TaskResponse[]): TaskResponse[] =>
-        theseTasks.map((t) => ({
+      const replaceInOrder = (tasks_: TaskResponse[]): TaskResponse[] =>
+        tasks_.map((t) => ({
           ...t,
           subtaskOrder: t.subtaskOrder.map((id) =>
             id === tempId ? realId : id,
