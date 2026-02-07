@@ -44,6 +44,7 @@ import {
   type Priority,
   RANK_FIELDS_CRITERIA,
   type SortOption,
+  type SubtaskSortMode,
   type TaskResponse,
   type Time,
 } from '~/shared/schema'
@@ -235,7 +236,7 @@ const Home = () => {
       nodes: TaskResponse[],
       term: string,
       sort: SortOption,
-      parentSortMode?: 'inherit' | 'manual',
+      parentSortMode?: SubtaskSortMode,
       parentSubtaskOrder?: number[],
     ): TaskResponse[] => {
       const result = nodes.reduce((acc: TaskResponse[], node) => {
