@@ -48,14 +48,14 @@ import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
-  type MutateTaskRequest,
+  type MutateTask,
   RANK_FIELDS_CRITERIA,
   type RankField,
   type Task,
 } from '~/shared/schema'
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskRequest) => void
+  onSubmit: (data: MutateTask) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -133,7 +133,7 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
-  const form = useForm<MutateTaskRequest>({
+  const form = useForm<MutateTask>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
     defaultValues: initialData
@@ -201,7 +201,7 @@ export const TaskForm = ({
     )
   }, [initialData, parentId, form])
 
-  const onSubmitWithNulls = (data: MutateTaskRequest) => {
+  const onSubmitWithNulls = (data: MutateTask) => {
     const formattedData = {
       ...data,
       priority: data.priority === 'none' ? null : data.priority,

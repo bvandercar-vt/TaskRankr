@@ -42,7 +42,7 @@ export const TagChain = ({
     <div className={cn('flex items-center gap-1.5 flex-wrap', className)}>
       {displayLabel && (
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
-          {displayLabel}
+          {displayLabel}:
         </span>
       )}
       {items.map((item, idx) => (

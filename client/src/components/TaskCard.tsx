@@ -10,7 +10,7 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/Badge'
-import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { getIsVisible, useSettings } from '@/hooks/useSettings'
 import {
@@ -169,7 +169,7 @@ export const TaskCard = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          'relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer',
+          'relative flex items-center gap-2 pr-2 pl-1 py-1 rounded-lg border transition-all duration-200 select-none cursor-pointer',
           isNestedWithStatus
             ? 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]'
             : isInProgress

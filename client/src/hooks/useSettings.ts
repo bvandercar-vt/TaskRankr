@@ -3,7 +3,7 @@
  * updates.
  */
 
-import { useLocalStateSafe } from '@/components/LocalStateProvider'
+import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import type { PickByKey } from '@/types'
 import type { RankField, UserSettings } from '~/shared/schema'
