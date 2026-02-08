@@ -386,7 +386,7 @@ const Settings = () => {
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-2"
+                className="gap-2 text-red-400/70 border-red-400/30"
                 data-testid="button-clear-local-storage"
               >
                 <Trash2 className={IconSizeStyle.HW4} />
