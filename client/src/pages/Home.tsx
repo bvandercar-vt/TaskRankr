@@ -171,6 +171,57 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
   time: SortDirection.ASC,
 }
 
+const sortTasks = (
+  theseTasks: TaskWithSubtasks[],
+  sort: SortOption,
+): TaskWithSubtasks[] => {
+  const sorted = [...theseTasks]
+  if (sort === SortOption.DATE) {
+    sorted.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
+      return dateB - dateA
+    })
+  } else {
+    sorted.sort((a, b) => {
+      const direction: SortDirection = SORT_DIRECTIONS[sort]
+      const valA = getLevelWeight(a[sort])
+      const valB = getLevelWeight(b[sort])
+
+      if (valA !== valB) {
+        return direction === SortDirection.DESC ? valB - valA : valA - valB
+      }
+
+      const pA = getLevelWeight(a.priority)
+      const pB = getLevelWeight(b.priority)
+      const eA = getLevelWeight(a.ease)
+      const eB = getLevelWeight(b.ease)
+      const jA = getLevelWeight(a.enjoyment)
+      const jB = getLevelWeight(b.enjoyment)
+
+      if (sort === SortOption.PRIORITY) {
+        if (eA !== eB) return eA - eB
+        return jB - jA
+      }
+      if (sort === SortOption.EASE) {
+        if (pA !== pB) return pB - pA
+        return jB - jA
+      }
+      if (sort === SortOption.ENJOYMENT) {
+        if (pA !== pB) return pB - pA
+        return eA - eB
+      }
+      if (sort === SortOption.TIME) {
+        if (pA !== pB) return pB - pA
+        if (eA !== eB) return eA - eB
+        return pB - pA
+      }
+      return 0
+    })
+  }
+  return sorted
+}
+
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
@@ -182,58 +233,6 @@ const Home = () => {
 
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
-
-  // Sort function for tasks
-  const sortTasks = useCallback(
-    (theseTasks: TaskWithSubtasks[], sort: SortOption): TaskWithSubtasks[] => {
-      const sorted = [...theseTasks]
-      if (sort === SortOption.DATE) {
-        sorted.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime()
-          const dateB = new Date(b.createdAt).getTime()
-          return dateB - dateA
-        })
-      } else {
-        sorted.sort((a, b) => {
-          const direction: SortDirection = SORT_DIRECTIONS[sort]
-          const valA = getLevelWeight(a[sort])
-          const valB = getLevelWeight(b[sort])
-
-          if (valA !== valB) {
-            return direction === SortDirection.DESC ? valB - valA : valA - valB
-          }
-
-          const pA = getLevelWeight(a.priority)
-          const pB = getLevelWeight(b.priority)
-          const eA = getLevelWeight(a.ease)
-          const eB = getLevelWeight(b.ease)
-          const jA = getLevelWeight(a.enjoyment)
-          const jB = getLevelWeight(b.enjoyment)
-
-          if (sort === SortOption.PRIORITY) {
-            if (eA !== eB) return eA - eB
-            return jB - jA
-          }
-          if (sort === SortOption.EASE) {
-            if (pA !== pB) return pB - pA
-            return jB - jA
-          }
-          if (sort === SortOption.ENJOYMENT) {
-            if (pA !== pB) return pB - pA
-            return eA - eB
-          }
-          if (sort === SortOption.TIME) {
-            if (pA !== pB) return pB - pA
-            if (eA !== eB) return eA - eB
-            return pB - pA
-          }
-          return 0
-        })
-      }
-      return sorted
-    },
-    [],
-  )
 
   // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
@@ -266,7 +265,7 @@ const Home = () => {
 
       return sortTasks(result, sort)
     },
-    [sortTasks],
+    [],
   )
 
   // Build tree from flat list, excluding completed tasks
@@ -372,7 +371,6 @@ const Home = () => {
     pinnedTasks,
     search,
     sortBy,
-    sortTasks,
     filterAndSortTree,
     settings,
   ])
