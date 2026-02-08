@@ -13,11 +13,9 @@ import {
   PlayCircle,
   Settings,
 } from 'lucide-react'
-
 import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
-import { Button } from '@/components/primitives/Button'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSizeStyle, Routes } from '@/lib/constants'

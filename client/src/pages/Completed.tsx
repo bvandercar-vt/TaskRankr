@@ -104,7 +104,9 @@ const Completed = () => {
                 />
               </div>
             ) : (
-              <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Completed Tasks
+              </h1>
             )}
           </div>
         </div>
@@ -133,12 +135,18 @@ const Completed = () => {
             <EmptyState
               icon={
                 search ? (
-                  <Search className={cn(IconSizeStyle.HW8, 'text-muted-foreground')} />
+                  <Search
+                    className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
+                  />
                 ) : (
-                  <CheckCircle2 className={cn(IconSizeStyle.HW8, 'text-muted-foreground')} />
+                  <CheckCircle2
+                    className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
+                  />
                 )
               }
-              title={search ? 'No matching tasks found' : 'No completed tasks yet'}
+              title={
+                search ? 'No matching tasks found' : 'No completed tasks yet'
+              }
               description={
                 search
                   ? 'Try adjusting your search terms.'
