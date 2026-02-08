@@ -2,6 +2,7 @@ import {
   Ease,
   Enjoyment,
   Priority,
+  type RankField,
   SortOption,
   type TaskWithSubtasks,
   Time,
@@ -58,13 +59,27 @@ export const SORT_LABELS: Record<SortOption, string> = {
   time: 'Time',
 }
 
+const RANK_FIELD_ENUMS: Record<RankField, Record<string, string>> = {
+  priority: Priority,
+  ease: Ease,
+  enjoyment: Enjoyment,
+  time: Time,
+}
+
 export const SORT_BEST_VALUES: Record<SortOption, string> = {
   date: 'newest',
-  priority: Priority.HIGHEST,
-  ease: Ease.EASIEST,
-  enjoyment: Enjoyment.HIGHEST,
-  time: Time.LOWEST,
-}
+  ...Object.fromEntries(
+    (Object.keys(RANK_FIELD_ENUMS) as RankField[]).map((field) => {
+      const values = Object.values(RANK_FIELD_ENUMS[field])
+      return [
+        field,
+        SORT_DIRECTIONS[field] === SortDirection.DESC
+          ? values.at(-1)!
+          : values.at(0)!,
+      ]
+    }),
+  ),
+} as Record<SortOption, string>
 
 export const SORT_CHAINS: Record<SortOption, SortOption[]> = {
   date: [SortOption.DATE],
