@@ -31,8 +31,10 @@ export const CollapsibleCard = ({
     <div
       className={cn(
         !noCard && 'p-4 bg-card rounded-lg border border-white/10',
+        !open && 'cursor-pointer',
         className,
       )}
+      onClick={!open ? () => setOpen(true) : undefined}
     >
       <button
         type="button"
@@ -40,7 +42,12 @@ export const CollapsibleCard = ({
           'flex items-center justify-between w-full text-left',
           triggerClassName,
         )}
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          if (open) {
+            e.stopPropagation()
+            setOpen(false)
+          }
+        }}
         data-testid={testId}
       >
         {typeof title === 'string' ? (
