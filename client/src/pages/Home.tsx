@@ -20,7 +20,7 @@ import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import {
-  RANK_FIELDS_COLUMMS,
+  RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
   sortTasks,
 } from '@/lib/sort-tasks'
@@ -232,7 +232,7 @@ const Home = () => {
               current={sortBy}
               onSelect={setSortBy}
             />
-            {RANK_FIELDS_COLUMMS.map((field) =>
+            {RANK_FIELDS_COLUMNS.map((field) =>
               settings.fieldConfig[field.name].visible ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}

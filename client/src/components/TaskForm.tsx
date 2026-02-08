@@ -33,7 +33,7 @@ import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { RANK_FIELDS_COLUMMS } from '@/lib/sort-tasks'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
@@ -120,7 +120,7 @@ export const TaskForm = ({
   const rankFieldConfig = useMemo(
     () =>
       new Map(
-        RANK_FIELDS_COLUMMS.map(({ name }) => {
+        RANK_FIELDS_COLUMNS.map(({ name }) => {
           const { visible, required: rawRequired } = settings.fieldConfig[name]
           const required = visible && rawRequired
           return [name, { visible, required }]
@@ -131,7 +131,7 @@ export const TaskForm = ({
 
   const visibleRankFields = useMemo(
     () =>
-      RANK_FIELDS_COLUMMS.filter(
+      RANK_FIELDS_COLUMNS.filter(
         (attr) => rankFieldConfig.get(attr.name)?.visible,
       ),
     [rankFieldConfig],
@@ -143,7 +143,7 @@ export const TaskForm = ({
         .omit({ userId: true })
         .required(
           Object.fromEntries(
-            RANK_FIELDS_COLUMMS.map(({ name }) => [
+            RANK_FIELDS_COLUMNS.map(({ name }) => [
               name,
               Boolean(rankFieldConfig.get(name)?.required),
             ]).filter(([, isReq]) => isReq),

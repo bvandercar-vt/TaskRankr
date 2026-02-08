@@ -29,7 +29,7 @@ import { useSetTaskStatus, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
 import { IconSizeStyle, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
-import { RANK_FIELDS_COLUMMS } from '@/lib/sort-tasks'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
@@ -268,7 +268,7 @@ const Settings = () => {
               </tr>
             </thead>
             <tbody>
-              {RANK_FIELDS_COLUMMS.map(({ name, label }) => {
+              {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
                 const { visible, required } = settings.fieldConfig[name]
 
                 return (

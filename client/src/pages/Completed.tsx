@@ -12,7 +12,7 @@ import { Button } from '@/components/primitives/Button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle, Routes } from '@/lib/constants'
-import { RANK_FIELDS_COLUMMS } from '@/lib/sort-tasks'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Completed = () => {
@@ -79,7 +79,7 @@ const Completed = () => {
             <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
               <div className="flex-1 hidden md:block" />
               <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-                {RANK_FIELDS_COLUMMS.map((field) => (
+                {RANK_FIELDS_COLUMNS.map((field) => (
                   <span
                     key={`${field.name}-col-header`}
                     className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
