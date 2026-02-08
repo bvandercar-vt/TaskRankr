@@ -174,14 +174,14 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
-  const { settings, updateSetting } = useSettings()
+  const { settings, updateSettings } = useSettings()
   const { isGuestMode, exitGuestMode, hasDemoData, deleteDemoData } =
     useGuestModeState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
   const sortBy = settings.sortBy
-  const setSortBy = (value: SortOption) => updateSetting('sortBy', value)
+  const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
 
   // Sort function for tasks
   const sortTasks = useCallback(
