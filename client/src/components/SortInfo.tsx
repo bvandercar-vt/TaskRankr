@@ -4,68 +4,21 @@
 
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import { cn } from '@/lib/utils'
 import {
-  Ease,
-  Enjoyment,
-  Priority,
-  type RankFieldValueMap,
-  SortOption,
-  Time,
-} from '~/shared/schema'
+  SORT_BEST_VALUES,
+  SORT_CHAINS,
+  SORT_LABELS,
+} from '@/lib/sort-tasks'
+import { cn } from '@/lib/utils'
+import { type RankFieldValueMap, SortOption } from '~/shared/schema'
 
-const SORT_INFO_ATTR_LABELS = {
-  priority: 'Priority',
-  ease: 'Ease',
-  enjoyment: 'Enjoyment',
-  time: 'Time',
-  date: 'Date Created',
-} as const satisfies Record<SortOption, string>
-
-const SORT_INFO_CONFIG: {
-  name: string
-  criteria: {
-    attr: SortOption
-    value: string
-  }[]
-}[] = [
-  {
-    name: SORT_INFO_ATTR_LABELS.priority,
-    criteria: [
-      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
-      { attr: SortOption.EASE, value: Ease.EASIEST },
-      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
-    ],
-  },
-  {
-    name: SORT_INFO_ATTR_LABELS.ease,
-    criteria: [
-      { attr: SortOption.EASE, value: Ease.EASIEST },
-      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
-      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
-    ],
-  },
-  {
-    name: SORT_INFO_ATTR_LABELS.enjoyment,
-    criteria: [
-      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
-      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
-      { attr: SortOption.EASE, value: Ease.EASIEST },
-    ],
-  },
-  {
-    name: SORT_INFO_ATTR_LABELS.time,
-    criteria: [
-      { attr: SortOption.TIME, value: Time.LOWEST },
-      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
-      { attr: SortOption.EASE, value: Ease.EASIEST },
-    ],
-  },
-  {
-    name: SORT_INFO_ATTR_LABELS.date,
-    criteria: [{ attr: SortOption.DATE, value: 'newest' }],
-  },
-]
+const SORT_INFO_CONFIG = Object.values(SortOption).map((key) => ({
+  name: SORT_LABELS[key],
+  criteria: SORT_CHAINS[key].map((field) => ({
+    attr: field,
+    value: SORT_BEST_VALUES[field],
+  })),
+}))
 
 interface SortInfoProps {
   defaultExpanded?: boolean
@@ -112,7 +65,7 @@ export const SortInfo = ({ defaultExpanded = false }: SortInfoProps) => (
                   key={`${c.attr} ${c.value}`}
                   className="text-muted-foreground"
                 >
-                  {SORT_INFO_ATTR_LABELS[c.attr]} (
+                  {SORT_LABELS[c.attr]} (
                   {style ? (
                     <span className={cn('font-medium', style)}>{c.value}</span>
                   ) : (
