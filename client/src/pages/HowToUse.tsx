@@ -13,13 +13,13 @@ import {
   Pin,
   PlayCircle,
   Settings,
-} from 'lucide-react'
-import { Link } from 'wouter'
+} from "lucide-react";
+import { Link } from "wouter";
 
-import { Button } from '@/components/primitives/Button'
-import { Card, CardContent } from '@/components/primitives/Card'
-import { SortInfo } from '@/components/SortInfo'
-import { IconSizeStyle } from '@/lib/constants'
+import { Button } from "@/components/primitives/Button";
+import { Card, CardContent } from "@/components/primitives/Card";
+import { SortInfo } from "@/components/SortInfo";
+import { IconSizeStyle } from "@/lib/constants";
 
 const InstructionCard = ({
   icon,
@@ -27,10 +27,10 @@ const InstructionCard = ({
   description,
   testId,
 }: {
-  icon: React.ReactNode
-  title: React.ReactNode
-  description: React.ReactNode
-  testId: string
+  icon: React.ReactNode;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  testId: string;
 }) => (
   <Card className="bg-card/50 border-white/10" data-testid={testId}>
     <CardContent className="p-4 flex items-start gap-4">
@@ -43,7 +43,7 @@ const InstructionCard = ({
       </div>
     </CardContent>
   </Card>
-)
+);
 
 const HowToUse = () => {
   return (
@@ -131,19 +131,19 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<Pin className={IconSizeStyle.HW5} />}
                 title="Pinned"
-                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
+                description="Pin important tasks to keep them at the top of your list."
                 testId="card-pinned"
               />
               <InstructionCard
                 icon={<PlayCircle className={IconSizeStyle.HW5} />}
                 title="In Progress (if setting enabled)"
-                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
+                description="Pins to the top of your list, while also accumulating time spent in progress."
                 testId="card-in-progress"
               />
               <InstructionCard
                 icon={<CheckCircle2 className={IconSizeStyle.HW5} />}
                 title="Completed"
-                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
+                description="Completed tasks are moved to a separate list you can access from the menu."
                 testId="card-completed"
               />
             </div>
@@ -159,13 +159,13 @@ const HowToUse = () => {
                 title="Customize Your Experience"
                 description={
                   <>
-                    Visit the{' '}
+                    Visit the{" "}
                     <Link
                       href="/settings"
                       className="text-primary underline underline-offset-2"
                     >
                       Settings page
-                    </Link>{' '}
+                    </Link>{" "}
                     to configure which rank fields are visible or required,
                     toggle features like auto-pinning new tasks, In Progress
                     status, time tracking, and more.
@@ -178,7 +178,7 @@ const HowToUse = () => {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default HowToUse
+export default HowToUse;
