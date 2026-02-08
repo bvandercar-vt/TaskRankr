@@ -688,7 +688,7 @@ export const TaskForm = ({
             </div>
           )}
 
-          <div className="flex flex-col gap-4 py-2 border-t border-white/5 mt-4">
+          <div className="flex flex-col gap-4 py-2 mt-4">
             <FormField
               control={form.control}
               name="createdAt"
