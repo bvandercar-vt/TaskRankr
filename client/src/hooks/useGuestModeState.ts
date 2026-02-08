@@ -2,8 +2,8 @@
  * @fileoverview Hook to access common guest mode state and actions.
  */
 
-import { useGuestMode } from '@/components/GuestModeProvider'
-import { useLocalState } from '@/components/LocalStateProvider'
+import { useGuestMode } from '@/components/providers/GuestModeProvider'
+import { useLocalState } from '@/components/providers/LocalStateProvider'
 
 export const useGuestModeState = () => {
   const guest = useGuestMode()

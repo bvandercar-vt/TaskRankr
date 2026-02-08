@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react'
 
-import { useGuestMode } from '@/components/GuestModeProvider'
+import { useGuestMode } from '@/components/providers/GuestModeProvider'
 
 const STORAGE_KEY_AUTH = 'taskrankr-auth-expanded'
 const STORAGE_KEY_GUEST = 'taskrankr-guest-expanded'

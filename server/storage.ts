@@ -13,21 +13,19 @@ import {
   type Task,
   type TaskStatus,
   tasks,
-  type UpdateTaskRequest,
+  type UpdateTask,
   type UserSettings,
   userSettings,
 } from '~/shared/schema'
 import { db } from './db'
 
+type UpdateTaskArg = Omit<UpdateTask, 'id'>
+
 export interface IStorage {
   getTasks(userId: string): Promise<Task[]>
   getTask(id: number, userId: string): Promise<Task | undefined>
   createTask(task: InsertTask): Promise<Task>
-  updateTask(
-    id: number,
-    userId: string,
-    updates: UpdateTaskRequest,
-  ): Promise<Task>
+  updateTask(id: number, userId: string, updates: UpdateTaskArg): Promise<Task>
   deleteTask(id: number, userId: string): Promise<void>
   setTaskStatus(
     id: number,
@@ -150,7 +148,7 @@ export class DatabaseStorage implements IStorage {
   async updateTask(
     id: number,
     userId: string,
-    updates: UpdateTaskRequest,
+    updates: UpdateTaskArg,
   ): Promise<Task> {
     const [task] = await db
       .update(tasks)
@@ -168,7 +166,7 @@ export class DatabaseStorage implements IStorage {
     const task = await this.getTask(id, userId)
     if (!task) return 0
 
-    let total = task.inProgressTime ?? 0
+    let total = task.inProgressTime
 
     const childTasks = await db
       .select()

@@ -4,9 +4,15 @@
 
 import { forwardRef } from 'react'
 import { type ClassValue, clsx } from 'clsx'
+import { without as withoutEsToolkit } from 'es-toolkit'
 import { twMerge } from 'tailwind-merge'
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
+
+export const without = <const T, const V extends readonly T[]>(
+  array: readonly T[],
+  ...values: V
+) => withoutEsToolkit(array, ...values) as Exclude<T, V[number]>[]
 
 export const hoursMinutesToMs = (hours: number, minutes: number): number =>
   (hours * 3600 + minutes * 60) * 1000
