@@ -7,8 +7,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { LayoutList, Plus, Search } from 'lucide-react'
 
-import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
+import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { Icon } from '@/components/primitives/LucideIcon'

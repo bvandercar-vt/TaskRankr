@@ -34,14 +34,12 @@ import { authPaths } from '~/shared/constants'
 interface DropdownMenuHeaderProps {
   search: string
   onSearchChange: (value: string) => void
-  searchTestId?: string
   children?: React.ReactNode
 }
 
 export const DropdownMenuHeader = ({
   search,
   onSearchChange,
-  searchTestId = 'input-search',
   children,
 }: DropdownMenuHeaderProps) => {
   const { isGuestMode, exitGuestMode } = useGuestModeState()
@@ -137,9 +135,7 @@ export const DropdownMenuHeader = ({
 
       {isSearchExpanded && (
         <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
-          <Search
-            className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
-          />
+          <Search className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')} />
           <Input
             placeholder="Search..."
             className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
@@ -147,7 +143,7 @@ export const DropdownMenuHeader = ({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             onBlur={() => !search && setIsSearchExpanded(false)}
-            data-testid={searchTestId}
+            data-testid="search-input"
           />
         </div>
       )}

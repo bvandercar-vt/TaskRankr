@@ -5,8 +5,8 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, Search } from 'lucide-react'
 
-import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
+import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
@@ -79,11 +79,7 @@ const Completed = () => {
           Completed Tasks
         </h1>
 
-        <DropdownMenuHeader
-          search={search}
-          onSearchChange={setSearch}
-          searchTestId="input-search-completed"
-        >
+        <DropdownMenuHeader search={search} onSearchChange={setSearch}>
           {displayedTasks.length > 0 && (
             <div className="flex items-center gap-1 shrink-0 justify-end">
               {RANK_FIELDS_COLUMNS.map((field) => (
