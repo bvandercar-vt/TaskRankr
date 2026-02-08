@@ -35,7 +35,6 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import { Button } from '@/components/primitives/Button'
 import { Calendar } from '@/components/primitives/forms/Calendar'
@@ -357,15 +356,20 @@ export const TaskForm = ({
     [getVisibility],
   )
 
-  const formSchema = useMemo(() => {
-    const base = insertTaskSchema.omit({ userId: true })
-    const required = Object.fromEntries(
-      RANK_FIELDS_CRITERIA.filter(({ name }) => getRequired(name)).map(
-        ({ name }) => [name, z.string().min(1)],
-      ),
-    )
-    return Object.keys(required).length ? base.extend(required) : base
-  }, [getRequired])
+  const formSchema = useMemo(
+    () =>
+      insertTaskSchema
+        .omit({ userId: true })
+        .required(
+          Object.fromEntries(
+            RANK_FIELDS_CRITERIA.map(({ name }) => [
+              name,
+              getRequired(name),
+            ]).filter(([, isReq]) => isReq),
+          ) satisfies Record<RankField, boolean>,
+        ),
+    [getRequired],
+  )
 
   const getFormDefaults = useCallback(
     (data: Task | undefined): MutateTaskContent =>
@@ -410,7 +414,7 @@ export const TaskForm = ({
 
   useEffect(() => {
     form.trigger()
-  }, [formSchema, form])
+  }, [form])
 
   const isValid = form.formState.isValid
 
