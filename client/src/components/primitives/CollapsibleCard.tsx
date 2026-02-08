@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
-import { Card } from '@/components/primitives/Card'
 import { cn } from '@/lib/utils'
 import { IconSizeStyle } from '@/lib/constants'
 
@@ -26,10 +25,14 @@ export const CollapsibleCard = ({
   'data-testid': testId,
 }: CollapsibleCardProps) => {
   const [open, setOpen] = useState(defaultOpen)
-  const Wrapper = noCard ? 'div' : Card
 
   return (
-    <Wrapper className={className}>
+    <div
+      className={cn(
+        !noCard && 'p-4 bg-card rounded-lg border border-white/10',
+        className,
+      )}
+    >
       <button
         type="button"
         className={cn(
@@ -55,6 +58,6 @@ export const CollapsibleCard = ({
       {open && (
         <div className={cn('mt-4', contentClassName)}>{children}</div>
       )}
-    </Wrapper>
+    </div>
   )
 }
