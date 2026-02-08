@@ -419,6 +419,8 @@ export const TaskForm = ({
     form.trigger()
   }, [getRequired, form])
 
+  const NONE_VALUE = 'none'
+
   return (
     <Form {...form}>
       <form
@@ -470,9 +472,9 @@ export const TaskForm = ({
                           </FormLabel>
                           <Select
                             onValueChange={(v) =>
-                              field.onChange(v === 'none' ? null : v)
+                              field.onChange(v === NONE_VALUE ? null : v)
                             }
-                            value={field.value ?? 'none'}
+                            value={field.value ?? NONE_VALUE}
                           >
                             <FormControl>
                               <SelectTrigger
@@ -494,7 +496,7 @@ export const TaskForm = ({
                             <SelectContent className="bg-card border-white/10 z-[200]">
                               {showNoneOption && (
                                 <SelectItem
-                                  value="none"
+                                  value={NONE_VALUE}
                                   className="text-muted-foreground italic"
                                 >
                                   None
