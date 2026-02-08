@@ -35,7 +35,7 @@ import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { getIsVisible, useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/routes'
 import {
@@ -90,7 +90,7 @@ const HowToUseBanner = () => {
         />
         <span className="text-sm text-foreground">
           New here?{' '}
-          <Link href="/how-to-use">
+          <Link href={Routes.HOW_TO_USE}>
             <span
               className="text-primary underline underline-offset-2 cursor-pointer"
               data-testid="link-how-to-use-banner"
@@ -411,7 +411,7 @@ const Home = () => {
                   <Search className={cn(IconSizeStyle.HW4, 'mr-2')} />
                   Search
                 </DropdownMenuItem>
-                <Link href="/completed">
+                <Link href={Routes.COMPLETED}>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     data-testid="menu-item-completed"
@@ -420,7 +420,7 @@ const Home = () => {
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/settings">
+                <Link href={Routes.SETTINGS}>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     data-testid="menu-item-settings"
@@ -429,7 +429,7 @@ const Home = () => {
                     Settings
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/how-to-use">
+                <Link href={Routes.HOW_TO_USE}>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     data-testid="menu-item-how-to-use"
@@ -537,11 +537,11 @@ const Home = () => {
           )}
 
           {hasDemoData && displayedTasks.length > 0 && (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-12 pt-6 flex justify-center">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive bg-destructive/10 hover:text-destructive hover:bg-destructive/15"
                 onClick={deleteDemoData}
                 data-testid="button-delete-demo-data"
               >

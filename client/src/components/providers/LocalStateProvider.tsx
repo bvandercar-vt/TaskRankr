@@ -68,7 +68,10 @@ interface LocalStateContextValue {
 
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 
-type StorageMode = 'auth' | 'guest'
+export enum StorageMode {
+  AUTH = 'auth',
+  GUEST = 'guest',
+}
 
 const getStorageKeys = (mode: StorageMode) => ({
   tasks: `taskrankr-${mode}-tasks`,
@@ -213,7 +216,7 @@ export const LocalStateProvider = ({
     setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
 
-    if (storageMode === 'guest' && loadedTasks.length === 0) {
+    if (storageMode === StorageMode.GUEST && loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
       localStorage.setItem(
         storageKeys.nextId,

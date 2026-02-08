@@ -27,3 +27,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
   timeVisible: true,
   timeRequired: true,
 }
+
+export const Routes = {
+  HOME: '/',
+  SETTINGS: '/settings',
+  HOW_TO_USE: '/how-to-use',
+  COMPLETED: '/completed',
+} as const

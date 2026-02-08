@@ -9,12 +9,13 @@ import { Link } from 'wouter'
 import { Button } from '@/components/primitives/Button'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { Switch } from '@/components/primitives/forms/Switch'
+import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
 import { useSetTaskStatus, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
@@ -71,6 +72,7 @@ const Settings = () => {
   const { settings, updateSetting, updateVisibility, updateRequired } =
     useSettings()
   const { user } = useAuth()
+  const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
   const { data: tasks } = useTasks()
   const setTaskStatus = useSetTaskStatus()
@@ -118,7 +120,7 @@ const Settings = () => {
     <div className="min-h-screen bg-background text-foreground">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/">
+          <Link href={Routes.HOME}>
             <Button variant="ghost" size="icon" data-testid="button-back">
               <ArrowLeft className={IconSizeStyle.HW5} />
             </Button>
@@ -297,32 +299,34 @@ const Settings = () => {
           </p>
         </Card>
 
-        <Card className="mt-4 flex items-center justify-between">
-          <div>
-            <p
-              className="font-semibold text-foreground"
-              data-testid="text-user-name"
-            >
-              {user?.firstName} {user?.lastName}
-            </p>
-            <p
-              className="text-sm text-muted-foreground"
-              data-testid="text-user-email"
-            >
-              {user?.email}
-            </p>
-          </div>
-          <a href={authPaths.logout}>
-            <Button
-              variant="outline"
-              className="gap-2"
-              data-testid="button-logout"
-            >
-              <LogOut className={IconSizeStyle.HW4} />
-              Log Out
-            </Button>
-          </a>
-        </Card>
+        {!isGuestMode && (
+          <Card className="mt-4 flex items-center justify-between">
+            <div>
+              <p
+                className="font-semibold text-foreground"
+                data-testid="text-user-name"
+              >
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="text-user-email"
+              >
+                {user?.email}
+              </p>
+            </div>
+            <a href={authPaths.logout}>
+              <Button
+                variant="outline"
+                className="gap-2"
+                data-testid="button-logout"
+              >
+                <LogOut className={IconSizeStyle.HW4} />
+                Log Out
+              </Button>
+            </a>
+          </Card>
+        )}
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">

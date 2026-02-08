@@ -12,13 +12,14 @@ import {
   MousePointer2,
   Pin,
   PlayCircle,
+  Settings,
 } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 
 const InstructionCard = ({
   icon,
@@ -49,7 +50,7 @@ const HowToUse = () => {
     <div className="min-h-screen bg-background text-foreground pb-16">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/">
+          <Link href={Routes.HOME}>
             <Button variant="ghost" size="icon" data-testid="button-back">
               <ArrowLeft className={IconSizeStyle.HW5} />
             </Button>
@@ -130,20 +131,47 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<Pin className={IconSizeStyle.HW5} />}
                 title="Pinned"
-                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
+                description="Pin important tasks to keep them at the top of your list."
                 testId="card-pinned"
               />
               <InstructionCard
                 icon={<PlayCircle className={IconSizeStyle.HW5} />}
                 title="In Progress (if setting enabled)"
-                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
+                description="Pins to the top of your list, while also accumulating time spent in progress."
                 testId="card-in-progress"
               />
               <InstructionCard
                 icon={<CheckCircle2 className={IconSizeStyle.HW5} />}
                 title="Completed"
-                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
+                description="Completed tasks are moved to a separate list you can access from the menu."
                 testId="card-completed"
+              />
+            </div>
+          </section>
+
+          <section data-testid="section-settings">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Settings
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Settings className={IconSizeStyle.HW5} />}
+                title="Customize Your Experience"
+                description={
+                  <>
+                    Visit the{' '}
+                    <Link
+                      href={Routes.SETTINGS}
+                      className="text-primary underline underline-offset-2"
+                    >
+                      Settings page
+                    </Link>{' '}
+                    to configure which rank fields are visible or required,
+                    toggle features like auto-pinning new tasks, In Progress
+                    status, time tracking, and more.
+                  </>
+                }
+                testId="card-settings"
               />
             </div>
           </section>
