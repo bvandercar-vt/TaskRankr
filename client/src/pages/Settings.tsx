@@ -6,6 +6,17 @@ import { useRef, useState } from 'react'
 import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/primitives/overlays/AlertDialog'
 import { Button } from '@/components/primitives/Button'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { Switch } from '@/components/primitives/forms/Switch'
@@ -336,19 +347,42 @@ const Settings = () => {
             Remove all locally cached data. Your synced data on the server
             won't be affected.
           </p>
-          <Button
-            variant="destructive"
-            className="gap-2"
-            onClick={() => {
-              localStorage.clear()
-              toast({ title: 'Local storage cleared' })
-              window.location.reload()
-            }}
-            data-testid="button-clear-local-storage"
-          >
-            <Trash2 className={IconSizeStyle.HW4} />
-            Clear Local Storage
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2"
+                data-testid="button-clear-local-storage"
+              >
+                <Trash2 className={IconSizeStyle.HW4} />
+                Clear Local Storage
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear Local Storage?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all locally cached data and reload the app.
+                  Your synced data on the server won't be affected.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel data-testid="button-cancel-clear">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    localStorage.clear()
+                    toast({ title: 'Local storage cleared' })
+                    window.location.reload()
+                  }}
+                  data-testid="button-confirm-clear"
+                >
+                  Clear
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Card>
 
         <div className="mt-16 text-center text-muted-foreground">
