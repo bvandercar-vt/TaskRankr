@@ -469,7 +469,9 @@ export const TaskForm = ({
                             )}
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={(v) =>
+                              field.onChange(v === 'none' ? null : v)
+                            }
                             value={field.value ?? 'none'}
                           >
                             <FormControl>
