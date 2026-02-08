@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   closestCenter,
   DndContext,
@@ -21,7 +21,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { type Resolver, zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
 import {
@@ -362,34 +362,15 @@ export const TaskForm = ({
     [getVisibility],
   )
 
-  const formSchemaRef = useRef<z.ZodTypeAny>(
-    insertTaskSchema.omit({ userId: true }),
-  )
-
-  formSchemaRef.current = useMemo(() => {
-    const requiredFields = RANK_FIELDS_CRITERIA.filter(({ name }) =>
-      getRequired(name),
-    ).map(({ name }) => name)
-
-    return insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
-      for (const field of requiredFields) {
-        if (!data[field]) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Required',
-            path: [field],
-          })
-        }
-      }
-    })
+  const formSchema = useMemo(() => {
+    const base = insertTaskSchema.omit({ userId: true })
+    const required = Object.fromEntries(
+      RANK_FIELDS_CRITERIA.filter(({ name }) => getRequired(name)).map(
+        ({ name }) => [name, z.string().min(1)],
+      ),
+    )
+    return Object.keys(required).length ? base.extend(required) : base
   }, [getRequired])
-
-  const stableResolver = useMemo(
-    () =>
-      (...args: Parameters<Resolver>) =>
-        zodResolver(formSchemaRef.current)(...args),
-    [],
-  )
 
   const getFormDefaults = useCallback(
     (data: Task | undefined): MutateTaskContent =>
@@ -423,7 +404,7 @@ export const TaskForm = ({
   )
 
   const form = useForm<MutateTask>({
-    resolver: stableResolver,
+    resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: getFormDefaults(initialData),
   })
@@ -434,7 +415,7 @@ export const TaskForm = ({
 
   useEffect(() => {
     form.trigger()
-  }, [form])
+  }, [formSchema, form])
 
   const isValid = form.formState.isValid
 
