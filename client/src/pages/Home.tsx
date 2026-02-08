@@ -5,10 +5,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { LayoutList, Plus, Search, X } from 'lucide-react'
+import { HelpCircle, LayoutList, Plus, Search, X } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { MainMenu } from '@/components/MainMenu'
+import { MainDropdownMenu } from '@/components/MainDropdownMenu'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { Input } from '@/components/primitives/forms/Input'
@@ -359,7 +359,7 @@ const Home = () => {
         <HowToUseBanner />
         <div className="flex items-center justify-between mb-4 pr-2">
           <div className="flex items-center gap-2">
-            <MainMenu
+            <MainDropdownMenu
               isGuestMode={isGuestMode}
               exitGuestMode={exitGuestMode}
               onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
