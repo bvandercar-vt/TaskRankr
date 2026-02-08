@@ -4,7 +4,7 @@
  * optional search bar that slides in below the header row.
  */
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   CheckCircle2,
   HelpCircle,
@@ -14,27 +14,27 @@ import {
   Menu,
   Search,
   Settings,
-} from "lucide-react";
-import { Link, useLocation } from "wouter";
+} from 'lucide-react'
+import { Link, useLocation } from 'wouter'
 
-import { Button } from "@/components/primitives/Button";
+import { Button } from '@/components/primitives/Button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/primitives/DropdownMenu";
-import { Input } from "@/components/primitives/forms/Input";
-import { useGuestModeState } from "@/hooks/useGuestModeState";
-import { IconSizeStyle, Routes } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import { authPaths } from "~/shared/constants";
+} from '@/components/primitives/DropdownMenu'
+import { Input } from '@/components/primitives/forms/Input'
+import { useGuestModeState } from '@/hooks/useGuestModeState'
+import { IconSizeStyle, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 
 interface DropdownMenuHeaderProps {
-  search: string;
-  onSearchChange: (value: string) => void;
-  children?: React.ReactNode;
+  search: string
+  onSearchChange: (value: string) => void
+  children?: React.ReactNode
 }
 
 export const DropdownMenuHeader = ({
@@ -42,17 +42,17 @@ export const DropdownMenuHeader = ({
   onSearchChange,
   children,
 }: DropdownMenuHeaderProps) => {
-  const { isGuestMode, exitGuestMode } = useGuestModeState();
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [location] = useLocation();
-  const isHome = location === Routes.HOME;
+  const { isGuestMode, exitGuestMode } = useGuestModeState()
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [location] = useLocation()
+  const isHome = location === Routes.HOME
 
   const toggleSearch = () => {
     setIsSearchExpanded((prev) => {
-      if (prev) onSearchChange("");
-      return !prev;
-    });
-  };
+      if (prev) onSearchChange('')
+      return !prev
+    })
+  }
 
   return (
     <>
@@ -135,7 +135,7 @@ export const DropdownMenuHeader = ({
 
       {isSearchExpanded && (
         <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
-          <Search className={cn(IconSizeStyle.HW4, "shrink-0 text-primary")} />
+          <Search className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')} />
           <Input
             placeholder="Search..."
             className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
@@ -148,5 +148,5 @@ export const DropdownMenuHeader = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
