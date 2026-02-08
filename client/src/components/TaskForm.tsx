@@ -3,11 +3,31 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import {
   Calendar as CalendarIcon,
+  Check,
   ChevronDown,
+  GripVertical,
   Loader2,
   Pencil,
   Plus,
@@ -15,7 +35,6 @@ import {
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Button } from '@/components/primitives/Button'
 import { Calendar } from '@/components/primitives/forms/Calendar'
 import {
@@ -42,7 +61,14 @@ import {
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
-import { useDeleteTask, useTaskParentChain, useTasks } from '@/hooks/useTasks'
+import {
+  sortTasksByOrder,
+  useReorderSubtasks,
+  useSetTaskStatus,
+  useTaskParentChain,
+  useTasks,
+  useUpdateTask,
+} from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
@@ -51,9 +77,121 @@ import {
   type MutateTask,
   RANK_FIELDS_CRITERIA,
   type RankField,
+  type SubtaskSortMode,
   type Task,
   type TaskWithSubtasks,
 } from '~/shared/schema'
+
+interface SortableSubtaskItemProps {
+  task: Task & { depth: number }
+  onEdit?: (task: Task) => void
+  onDelete: (task: { id: number; name: string }) => void
+  onToggleComplete: (task: Task) => void
+  isManualMode: boolean
+  isDragDisabled?: boolean
+}
+
+const SortableSubtaskItem = ({
+  task,
+  onEdit,
+  onDelete,
+  onToggleComplete,
+  isManualMode,
+  isDragDisabled,
+}: SortableSubtaskItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id, disabled: isDragDisabled })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    paddingLeft: `${12 + task.depth * 16}px`,
+  }
+
+  const isDirect = task.depth === 0
+  const showDragHandle = isManualMode && isDirect
+  const isCompleted = task.status === 'completed'
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none',
+        isDragging && 'opacity-50 bg-secondary/20',
+      )}
+      data-testid={`subtask-row-${task.id}`}
+    >
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        {showDragHandle && (
+          <button
+            type="button"
+            className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-muted-foreground"
+            {...attributes}
+            {...listeners}
+            data-testid={`drag-handle-${task.id}`}
+          >
+            <GripVertical className={IconSizeStyle.HW4} />
+          </button>
+        )}
+        {task.depth > 0 && (
+          <span className="text-muted-foreground/50 text-xs leading-none">
+            └
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => onToggleComplete(task as Task)}
+          className={cn(
+            'shrink-0 h-4 w-4 rounded-sm border transition-colors',
+            isCompleted
+              ? 'bg-emerald-600 border-emerald-600 text-white'
+              : 'border-muted-foreground/40 hover:border-muted-foreground',
+          )}
+          data-testid={`checkbox-complete-subtask-${task.id}`}
+        >
+          {isCompleted && <Check className="h-3 w-3 mx-auto" />}
+        </button>
+        <span
+          className={cn(
+            'text-sm truncate',
+            isCompleted && 'line-through text-muted-foreground',
+          )}
+        >
+          {task.name}
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        {onEdit && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(task as Task)}
+            data-testid={`button-edit-subtask-${task.id}`}
+          >
+            <Pencil className={IconSizeStyle.HW4} />
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => onDelete({ id: task.id, name: task.name })}
+          data-testid={`button-delete-subtask-${task.id}`}
+        >
+          <Trash2 className={cn(IconSizeStyle.HW4, 'text-destructive')} />
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 export interface TaskFormProps {
   onSubmit: (data: MutateTask) => void
@@ -63,6 +201,7 @@ export interface TaskFormProps {
   onCancel: () => void
   onAddChild?: (parentId: number) => void
   onEditChild?: (task: Task) => void
+  onSubtaskDelete?: (task: { id: number; name: string }) => void
 }
 
 export const TaskForm = ({
@@ -73,16 +212,39 @@ export const TaskForm = ({
   onCancel,
   onAddChild,
   onEditChild,
+  onSubtaskDelete,
 }: TaskFormProps) => {
   const [subtasksExpanded, setSubtasksExpanded] = useState(false)
-  const [subtaskToDelete, setSubtaskToDelete] = useState<{
-    id: number
-    name: string
-  } | null>(null)
+  const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
+    null,
+  )
   const parentChain = useTaskParentChain(parentId || undefined)
   const { settings } = useSettings()
   const { data: allTasks } = useTasks()
-  const deleteTask = useDeleteTask()
+  const updateTask = useUpdateTask()
+  const setTaskStatus = useSetTaskStatus()
+  const reorderSubtasks = useReorderSubtasks()
+
+  const [sortMode, setSortMode] = useState<SubtaskSortMode>(
+    initialData?.subtaskSortMode || 'inherit',
+  )
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
 
   const subtasks = useMemo(() => {
     if (!initialData || !allTasks) return []
@@ -99,20 +261,84 @@ export const TaskForm = ({
     const flatList = flattenTasks(allTasks)
 
     const collectDescendants = (
-      thisParentId: number,
+      parentId_: number,
       depth: number,
-    ): Array<TaskWithSubtasks & { depth: number }> => {
-      const children = flatList.filter((t) => t.parentId === thisParentId)
+      parentSortMode: SubtaskSortMode,
+    ): (TaskWithSubtasks & { depth: number })[] => {
+      let children = flatList.filter((t) => t.parentId === parentId_)
+
+      if (parentSortMode === 'manual') {
+        if (depth === 0 && localSubtaskOrder) {
+          children = [...children].sort(
+            (a, b) =>
+              localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
+          )
+        } else {
+          const parentTask = flatList.find((t) => t.id === parentId_)
+          const order = parentTask?.subtaskOrder ?? []
+          children = sortTasksByOrder(children, order)
+        }
+      }
+
       const result: Array<TaskWithSubtasks & { depth: number }> = []
       for (const child of children) {
         result.push({ ...child, depth })
-        result.push(...collectDescendants(child.id, depth + 1))
+        result.push(
+          ...collectDescendants(child.id, depth + 1, child.subtaskSortMode),
+        )
       }
       return result
     }
 
-    return collectDescendants(initialData.id, 0)
-  }, [initialData, allTasks])
+    return collectDescendants(initialData.id, 0, sortMode)
+  }, [initialData, allTasks, sortMode, localSubtaskOrder])
+
+  const directChildIds = useMemo(
+    () => subtasks.filter((t) => t.depth === 0).map((t) => t.id),
+    [subtasks],
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id && initialData) {
+      const oldIndex = directChildIds.indexOf(active.id as number)
+      const newIndex = directChildIds.indexOf(over.id as number)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
+        setLocalSubtaskOrder(newOrder)
+        reorderSubtasks.mutate({
+          parentId: initialData.id,
+          orderedIds: newOrder,
+        })
+      }
+    }
+  }
+
+  const handleSortModeToggle = () => {
+    if (!initialData || updateTask.isPending || reorderSubtasks.isPending)
+      return
+    const newMode: SubtaskSortMode =
+      sortMode === 'inherit' ? 'manual' : 'inherit'
+
+    setSortMode(newMode)
+
+    if (newMode === 'manual' && directChildIds.length > 0) {
+      reorderSubtasks.mutate({
+        parentId: initialData.id,
+        orderedIds: directChildIds,
+      })
+    }
+
+    setLocalSubtaskOrder(null)
+    updateTask.mutate({
+      id: initialData.id,
+      subtaskSortMode: newMode,
+    })
+  }
+
+  const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
   const getVisibility = useCallback(
     (attr: RankField) => getIsVisible(attr, settings),
@@ -203,8 +429,9 @@ export const TaskForm = ({
   }, [initialData, parentId, form])
 
   const onSubmitWithNulls = (data: MutateTask) => {
+    const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
     const formattedData = {
-      ...data,
+      ...rest,
       priority: data.priority === 'none' ? null : data.priority,
       ease: data.ease === 'none' ? null : data.ease,
       enjoyment: data.enjoyment === 'none' ? null : data.enjoyment,
@@ -346,7 +573,7 @@ export const TaskForm = ({
                 <FormControl>
                   <Textarea
                     placeholder="Additional details..."
-                    className="bg-secondary/20 border-white/5 min-h-[120px] resize-none focus-visible:ring-primary/50"
+                    className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
                     {...field}
                     value={field.value || ''}
                   />
@@ -354,6 +581,146 @@ export const TaskForm = ({
               </FormItem>
             )}
           />
+
+          {initialData && onAddChild && (
+            <div className="border border-white/10 rounded-lg overflow-hidden">
+              {subtasks.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setSubtasksExpanded(!subtasksExpanded)}
+                    className="w-full flex items-center justify-between gap-2 p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
+                    data-testid="button-toggle-subtasks"
+                  >
+                    <span className="text-sm font-medium">
+                      Subtasks ({subtasks.length})
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        IconSizeStyle.HW4,
+                        'text-muted-foreground transition-transform',
+                        subtasksExpanded && 'rotate-180',
+                      )}
+                    />
+                  </button>
+                  {subtasksExpanded && (
+                    <>
+                      <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
+                        <span
+                          className="text-xs font-medium text-muted-foreground"
+                          data-testid="label-sorting-method"
+                        >
+                          Sorting Method
+                        </span>
+                        <div
+                          className={cn(
+                            'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
+                            isMutating && 'opacity-50 pointer-events-none',
+                          )}
+                          role="radiogroup"
+                          aria-label="Subtask sort order"
+                          data-testid="toggle-sort-mode"
+                        >
+                          <label
+                            className={cn(
+                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                              sortMode === 'inherit'
+                                ? 'bg-secondary text-foreground'
+                                : 'bg-transparent text-muted-foreground',
+                            )}
+                            data-testid="toggle-sort-inherit"
+                          >
+                            <input
+                              type="radio"
+                              name="subtask-sort-mode"
+                              value="inherit"
+                              checked={sortMode === 'inherit'}
+                              onChange={() =>
+                                sortMode !== 'inherit' && handleSortModeToggle()
+                              }
+                              className="sr-only"
+                            />
+                            Inherit
+                          </label>
+                          <label
+                            className={cn(
+                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                              sortMode === 'manual'
+                                ? 'bg-secondary text-foreground'
+                                : 'bg-transparent text-muted-foreground',
+                            )}
+                            data-testid="toggle-sort-manual"
+                          >
+                            <input
+                              type="radio"
+                              name="subtask-sort-mode"
+                              value="manual"
+                              checked={sortMode === 'manual'}
+                              onChange={() =>
+                                sortMode !== 'manual' && handleSortModeToggle()
+                              }
+                              className="sr-only"
+                            />
+                            Manual
+                          </label>
+                        </div>
+                        <span
+                          className="text-[11px] text-muted-foreground/70 leading-snug"
+                          data-testid="text-sort-caption"
+                        >
+                          {sortMode === 'inherit'
+                            ? 'Subtasks follow the same sort order as the main task list.'
+                            : 'Drag subtasks into your preferred order using the grip handles.'}
+                        </span>
+                      </div>
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={directChildIds}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="divide-y divide-white/5">
+                            {subtasks.map((subtask) => (
+                              <SortableSubtaskItem
+                                key={subtask.id}
+                                task={subtask}
+                                onEdit={onEditChild}
+                                onDelete={(task) => onSubtaskDelete?.(task)}
+                                onToggleComplete={(task) => {
+                                  const newStatus =
+                                    task.status === 'completed'
+                                      ? 'open'
+                                      : 'completed'
+                                  setTaskStatus.mutate({
+                                    id: task.id,
+                                    status: newStatus,
+                                  })
+                                }}
+                                isManualMode={sortMode === 'manual'}
+                                isDragDisabled={isMutating}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                    </>
+                  )}
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => onAddChild(initialData.id)}
+                className="w-full flex items-center justify-center gap-2 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground border-t border-white/5"
+                data-testid="button-add-subtask"
+              >
+                <Plus className={IconSizeStyle.HW4} />
+                Add Subtask
+              </button>
+            </div>
+          )}
 
           <div className="flex flex-col gap-4 py-2 border-t border-white/5 mt-4">
             <FormField
@@ -476,102 +843,6 @@ export const TaskForm = ({
               </div>
             )}
           </div>
-
-          {initialData && subtasks.length > 0 && (
-            <div className="border border-white/10 rounded-lg overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setSubtasksExpanded(!subtasksExpanded)}
-                className="w-full flex items-center justify-between gap-2 p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
-                data-testid="button-toggle-subtasks"
-              >
-                <span className="text-sm font-medium">
-                  Subtasks ({subtasks.length})
-                </span>
-                <ChevronDown
-                  className={cn(
-                    IconSizeStyle.HW4,
-                    'text-muted-foreground transition-transform',
-                    subtasksExpanded && 'rotate-180',
-                  )}
-                />
-              </button>
-              {subtasksExpanded && (
-                <div className="divide-y divide-white/5">
-                  {subtasks.map((subtask) => (
-                    <div
-                      key={subtask.id}
-                      className="flex items-center justify-between gap-2 px-3 py-0 bg-secondary/5"
-                      style={{ paddingLeft: `${12 + subtask.depth * 16}px` }}
-                      data-testid={`subtask-row-${subtask.id}`}
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        {subtask.depth > 0 && (
-                          <span className="text-muted-foreground/50 text-xs leading-none">
-                            └
-                          </span>
-                        )}
-                        <span
-                          className={cn(
-                            'text-sm truncate',
-                            subtask.status === 'completed' &&
-                              'line-through text-muted-foreground',
-                          )}
-                        >
-                          {subtask.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {onEditChild && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onEditChild(subtask as Task)}
-                            data-testid={`button-edit-subtask-${subtask.id}`}
-                          >
-                            <Pencil className={IconSizeStyle.HW4} />
-                          </Button>
-                        )}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            setSubtaskToDelete({
-                              id: subtask.id,
-                              name: subtask.name,
-                            })
-                          }
-                          data-testid={`button-delete-subtask-${subtask.id}`}
-                        >
-                          <Trash2
-                            className={cn(
-                              IconSizeStyle.HW4,
-                              'text-destructive',
-                            )}
-                          />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {initialData && onAddChild && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full bg-secondary/10 border-white/5 hover:bg-secondary/20 h-10"
-              onClick={() => onAddChild(initialData.id)}
-            >
-              <Plus className={cn(IconSizeStyle.HW4, 'mr-2')} />
-              Add Subtask
-            </Button>
-          )}
         </div>
 
         <div className="pt-4 mt-auto flex gap-3">
@@ -595,17 +866,6 @@ export const TaskForm = ({
           </Button>
         </div>
       </form>
-      <ConfirmDeleteDialog
-        open={!!subtaskToDelete}
-        onOpenChange={(open) => !open && setSubtaskToDelete(null)}
-        taskName={subtaskToDelete?.name ?? ''}
-        onConfirm={() => {
-          if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id)
-            setSubtaskToDelete(null)
-          }
-        }}
-      />
     </Form>
   )
 }

@@ -34,7 +34,7 @@ import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { getIsVisible, useSettings } from '@/hooks/useSettings'
-import { useTasks } from '@/hooks/useTasks'
+import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
@@ -44,6 +44,7 @@ import {
   type Priority,
   RANK_FIELDS_CRITERIA,
   type SortOption,
+  type SubtaskSortMode,
   type TaskWithSubtasks,
   type Time,
 } from '~/shared/schema'
@@ -229,22 +230,34 @@ const Home = () => {
     [],
   )
 
-  // Recursive function to filter task tree
+  // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
     (
       nodes: TaskWithSubtasks[],
       term: string,
       sort: SortOption,
+      parentSortMode?: SubtaskSortMode,
+      parentSubtaskOrder?: number[],
     ): TaskWithSubtasks[] => {
       const result = nodes.reduce((acc: TaskWithSubtasks[], node) => {
         const matches = node.name.toLowerCase().includes(term.toLowerCase())
-        const filteredSubtasks = filterAndSortTree(node.subtasks, term, sort)
+        const filteredSubtasks = filterAndSortTree(
+          node.subtasks,
+          term,
+          sort,
+          node.subtaskSortMode,
+          node.subtaskOrder,
+        )
 
         if (matches || filteredSubtasks.length > 0) {
           acc.push({ ...node, subtasks: filteredSubtasks })
         }
         return acc
       }, [])
+
+      if (parentSortMode === 'manual' && parentSubtaskOrder) {
+        return sortTasksByOrder(result, parentSubtaskOrder)
+      }
 
       return sortTasks(result, sort)
     },
@@ -272,10 +285,10 @@ const Home = () => {
 
     activeTasks.forEach((task) => {
       if (task.status === 'in_progress') {
-        inProgressList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
+        inProgressList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
       } else if (task.status === 'pinned') {
-        pinnedList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
+        pinnedList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
       }
     })
@@ -290,7 +303,7 @@ const Home = () => {
     const roots: TaskWithSubtasks[] = []
 
     activeTasks.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] } as TaskWithSubtasks
+      nodes[task.id] = { ...task, subtasks: [] }
     })
 
     activeTasks.forEach((task) => {
