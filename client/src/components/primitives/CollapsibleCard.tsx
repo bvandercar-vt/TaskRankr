@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
