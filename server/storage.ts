@@ -11,7 +11,7 @@ import { and, eq } from 'drizzle-orm'
 import {
   type InsertTask,
   type Task,
-  type TaskStatus,
+  TaskStatus,
   tasks,
   type UpdateTask,
   type UserSettings,
@@ -83,11 +83,14 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Handle status transitions
-    if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
+    if (
+      newStatus === TaskStatus.IN_PROGRESS &&
+      oldStatus !== TaskStatus.IN_PROGRESS
+    ) {
       // Starting in-progress: demote current in_progress task to pinned
       const allTasks = await this.getTasks(userId)
       const currentInProgressTask = allTasks.find(
-        (t) => t.status === 'in_progress' && t.id !== id,
+        (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
       )
       if (currentInProgressTask) {
         // Stop timer on old in-progress task and set to pinned
@@ -97,7 +100,7 @@ export class DatabaseStorage implements IStorage {
         await db
           .update(tasks)
           .set({
-            status: 'pinned',
+            status: TaskStatus.PINNED,
             inProgressTime:
               (currentInProgressTask.inProgressTime || 0) + elapsed,
             inProgressStartedAt: null,
@@ -109,8 +112,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (
-      oldStatus === 'in_progress' &&
-      newStatus !== 'in_progress' &&
+      oldStatus === TaskStatus.IN_PROGRESS &&
+      newStatus !== TaskStatus.IN_PROGRESS &&
       currentTask.inProgressStartedAt
     ) {
       // Leaving in-progress: accumulate time
@@ -119,11 +122,14 @@ export class DatabaseStorage implements IStorage {
       updates.inProgressStartedAt = null
     }
 
-    if (newStatus === 'completed') {
+    if (newStatus === TaskStatus.COMPLETED) {
       updates.completedAt = new Date()
     }
 
-    if (oldStatus === 'completed' && newStatus !== 'completed') {
+    if (
+      oldStatus === TaskStatus.COMPLETED &&
+      newStatus !== TaskStatus.COMPLETED
+    ) {
       updates.completedAt = null
     }
 
@@ -135,8 +141,8 @@ export class DatabaseStorage implements IStorage {
 
     // Cascade status to children for completed/restored
     if (
-      newStatus === 'completed' ||
-      (oldStatus === 'completed' && newStatus === 'open')
+      newStatus === TaskStatus.COMPLETED ||
+      (oldStatus === TaskStatus.COMPLETED && newStatus === TaskStatus.OPEN)
     ) {
       const childTasks = await db
         .select()

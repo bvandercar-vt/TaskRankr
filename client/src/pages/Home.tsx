@@ -43,8 +43,9 @@ import {
   type Enjoyment,
   type Priority,
   RANK_FIELDS_CRITERIA,
-  type SortOption,
-  type SubtaskSortMode,
+  SortOption,
+  SubtaskSortMode,
+  TaskStatus,
   type TaskWithSubtasks,
   type Time,
 } from '~/shared/schema'
@@ -158,12 +159,17 @@ const getLevelWeight = (
   level: keyof typeof LEVEL_WEIGHTS | null | undefined,
 ): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
 
-const SORT_DIRECTIONS: Record<string, 'asc' | 'desc'> = {
-  date: 'desc',
-  priority: 'desc',
-  ease: 'asc',
-  enjoyment: 'desc',
-  time: 'asc',
+enum SortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
+const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
+  date: SortDirection.DESC,
+  priority: SortDirection.DESC,
+  ease: SortDirection.ASC,
+  enjoyment: SortDirection.DESC,
+  time: SortDirection.ASC,
 }
 
 const Home = () => {
@@ -182,7 +188,7 @@ const Home = () => {
   const sortTasks = useCallback(
     (theseTasks: TaskWithSubtasks[], sort: SortOption): TaskWithSubtasks[] => {
       const sorted = [...theseTasks]
-      if (sort === 'date') {
+      if (sort === SortOption.DATE) {
         sorted.sort((a, b) => {
           const dateA = new Date(a.createdAt).getTime()
           const dateB = new Date(b.createdAt).getTime()
@@ -190,12 +196,12 @@ const Home = () => {
         })
       } else {
         sorted.sort((a, b) => {
-          const direction = SORT_DIRECTIONS[sort] || 'desc'
+          const direction = SORT_DIRECTIONS[sort] || SortDirection.DESC
           const valA = getLevelWeight(a[sort])
           const valB = getLevelWeight(b[sort])
 
           if (valA !== valB) {
-            return direction === 'desc' ? valB - valA : valA - valB
+            return direction === SortDirection.DESC ? valB - valA : valA - valB
           }
 
           const pA = getLevelWeight(a.priority)
@@ -205,19 +211,19 @@ const Home = () => {
           const jA = getLevelWeight(a.enjoyment)
           const jB = getLevelWeight(b.enjoyment)
 
-          if (sort === 'priority') {
+          if (sort === SortOption.PRIORITY) {
             if (eA !== eB) return eA - eB
             return jB - jA
           }
-          if (sort === 'ease') {
+          if (sort === SortOption.EASE) {
             if (pA !== pB) return pB - pA
             return jB - jA
           }
-          if (sort === 'enjoyment') {
+          if (sort === SortOption.ENJOYMENT) {
             if (pA !== pB) return pB - pA
             return eA - eB
           }
-          if (sort === 'time') {
+          if (sort === SortOption.TIME) {
             if (pA !== pB) return pB - pA
             if (eA !== eB) return eA - eB
             return pB - pA
@@ -255,7 +261,7 @@ const Home = () => {
         return acc
       }, [])
 
-      if (parentSortMode === 'manual' && parentSubtaskOrder) {
+      if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
         return sortTasksByOrder(result, parentSubtaskOrder)
       }
 
@@ -272,7 +278,7 @@ const Home = () => {
 
     // Filter out completed ROOT tasks (completed subtasks stay under their parent)
     const activeTasks = tasks.filter(
-      (task) => task.status !== 'completed' || task.parentId !== null,
+      (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
     )
 
     // Collect tasks to hoist:
@@ -284,10 +290,10 @@ const Home = () => {
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
-      if (task.status === 'in_progress') {
+      if (task.status === TaskStatus.IN_PROGRESS) {
         inProgressList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
-      } else if (task.status === 'pinned') {
+      } else if (task.status === TaskStatus.PINNED) {
         pinnedList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
       }
@@ -330,13 +336,15 @@ const Home = () => {
 
     // Separate in_progress (always first) from pinned, then sort pinned
     const inProgressTask = filteredPinned.filter(
-      (t) => t.status === 'in_progress',
+      (t) => t.status === TaskStatus.IN_PROGRESS,
     )
-    const pinnedOnly = filteredPinned.filter((t) => t.status === 'pinned')
+    const pinnedOnly = filteredPinned.filter(
+      (t) => t.status === TaskStatus.PINNED,
+    )
 
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
     let sortedPinned: TaskWithSubtasks[]
-    if (settings.alwaysSortPinnedByPriority && sortBy !== 'priority') {
+    if (settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY) {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
         const pA = getLevelWeight(a.priority)
@@ -344,15 +352,15 @@ const Home = () => {
         if (pA !== pB) return pB - pA // Priority descending
 
         // Secondary sort by current sortBy
-        if (sortBy === 'date') {
+        if (sortBy === SortOption.DATE) {
           return (
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )
         }
-        const direction = SORT_DIRECTIONS[sortBy] || 'desc'
+        const direction = SORT_DIRECTIONS[sortBy] || SortDirection.DESC
         const valA = getLevelWeight(a[sortBy])
         const valB = getLevelWeight(b[sortBy])
-        return direction === 'desc' ? valB - valA : valA - valB
+        return direction === SortDirection.DESC ? valB - valA : valA - valB
       })
     } else {
       sortedPinned = sortTasks(pinnedOnly, sortBy)
@@ -477,7 +485,7 @@ const Home = () => {
           <div className="flex items-center gap-1">
             <SortButton
               label="Date"
-              value="date"
+              value={SortOption.DATE}
               className="min-w-12 max-w-16"
               current={sortBy}
               onSelect={setSortBy}
