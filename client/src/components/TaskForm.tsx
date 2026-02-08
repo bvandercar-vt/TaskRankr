@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   closestCenter,
   DndContext,
@@ -83,6 +83,7 @@ import {
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
+import { z } from 'zod'
 
 export type MutateTaskArgs = Omit<MutateTask, 'id'>
 
@@ -362,7 +363,36 @@ export const TaskForm = ({
     [getVisibility],
   )
 
-  const baseFormSchema = insertTaskSchema.omit({ userId: true })
+  const formSchemaRef = useRef<z.ZodTypeAny>(
+    insertTaskSchema.omit({ userId: true }),
+  )
+
+  formSchemaRef.current = useMemo(() => {
+    const requiredFields = RANK_FIELDS_CRITERIA.filter(({ name }) =>
+      getRequired(name),
+    ).map(({ name }) => name)
+
+    return insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Required',
+            path: [field],
+          })
+        }
+      }
+    })
+  }, [getRequired])
+
+  const stableResolver = useMemo(
+    () =>
+      ((...args: Parameters<ReturnType<typeof zodResolver>>) =>
+        zodResolver(formSchemaRef.current)(...args)) as ReturnType<
+        typeof zodResolver
+      >,
+    [],
+  )
 
   const getFormDefaults = useCallback(
     (data: Task | undefined): MutateTaskArgs =>
@@ -396,28 +426,20 @@ export const TaskForm = ({
   )
 
   const form = useForm<MutateTask>({
-    resolver: zodResolver(baseFormSchema),
+    resolver: stableResolver,
     mode: 'onChange',
     defaultValues: getFormDefaults(initialData),
   })
 
-  // Use useEffect to reset form when initialData or parentId changes
-  // to ensure "Add Subtask" dialog is clean.
   useEffect(() => {
     form.reset(getFormDefaults(initialData))
   }, [initialData, form, getFormDefaults])
 
-  const watchedValues = form.watch()
+  useEffect(() => {
+    form.trigger()
+  }, [getRequired, form])
 
-  const requiredAttributesFilled = useMemo(
-    () =>
-      !visibleRankFields.some(
-        (attr) => getRequired(attr.name) && !watchedValues[attr.name],
-      ),
-    [watchedValues, visibleRankFields, getRequired],
-  )
-
-  const isValid = form.formState.isValid && requiredAttributesFilled
+  const isValid = form.formState.isValid
 
   return (
     <Form {...form}>
