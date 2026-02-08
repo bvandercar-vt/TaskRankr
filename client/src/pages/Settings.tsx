@@ -5,7 +5,6 @@
 import { useRef, useState } from 'react'
 import {
   ArrowLeft,
-  ChevronDown,
   Download,
   LogOut,
   Trash2,
@@ -14,6 +13,7 @@ import {
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { Switch } from '@/components/primitives/forms/Switch'
 import {
@@ -86,38 +86,6 @@ const SwitchCard = (props: SwitchSettingProps) => (
   </Card>
 )
 
-const CollapsibleCard = ({
-  title,
-  children,
-  className,
-  'data-testid': testId,
-}: React.PropsWithChildren<{
-  title: string
-  className?: string
-  'data-testid'?: string
-}>) => {
-  const [open, setOpen] = useState(false)
-  return (
-    <Card className={className}>
-      <button
-        type="button"
-        className="flex items-center justify-between w-full text-left"
-        onClick={() => setOpen(!open)}
-        data-testid={testId}
-      >
-        <h3 className="font-semibold text-muted-foreground">{title}</h3>
-        <ChevronDown
-          className={cn(
-            IconSizeStyle.HW4,
-            'text-muted-foreground transition-transform',
-            open && 'rotate-180',
-          )}
-        />
-      </button>
-      {open && <div className="mt-4">{children}</div>}
-    </Card>
-  )
-}
 
 const Settings = () => {
   const { settings, updateSetting, updateFieldFlags } = useSettings()
