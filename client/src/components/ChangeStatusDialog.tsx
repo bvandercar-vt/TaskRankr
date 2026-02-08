@@ -197,6 +197,7 @@ export const ChangeStatusDialog = ({
                   onHoursChange={setHours}
                   onMinutesChange={setMinutes}
                   onBlur={handleTimeChange}
+                  className="w-16 h-8 text-center text-sm bg-secondary/30"
                 />
               </div>
             )}
