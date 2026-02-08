@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { TaskCard } from '@/components/TaskCard'
@@ -60,6 +61,7 @@ const Completed = () => {
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
+        <HowToUseBanner />
         <div className="flex items-center gap-4 mb-8 px-2">
           <Link href={Routes.HOME}>
             <Button
