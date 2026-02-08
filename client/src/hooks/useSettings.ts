@@ -3,6 +3,8 @@
  * updates.
  */
 
+import { toMerged } from 'es-toolkit'
+
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import type { FieldFlags, RankField, UserSettings } from '~/shared/schema'
@@ -26,12 +28,8 @@ export const useSettings = () => {
 
   const updateFieldFlags = (field: RankField, flags: Partial<FieldFlags>) => {
     if (!localState) return
-    const current = settings.fieldConfig[field]
     localState.updateSettings({
-      fieldConfig: {
-        ...settings.fieldConfig,
-        [field]: { ...current, ...flags },
-      },
+      fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
     })
   }
 
