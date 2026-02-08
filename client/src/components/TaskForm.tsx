@@ -414,7 +414,7 @@ export const TaskForm = ({
 
   useEffect(() => {
     form.trigger()
-  }, [form])
+  }, [getRequired, form])
 
   const isValid = form.formState.isValid
 
