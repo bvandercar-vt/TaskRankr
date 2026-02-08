@@ -407,6 +407,9 @@ export const TaskForm = ({
     mode: 'onChange',
     defaultValues: getFormDefaults(initialData),
   })
+  const {
+    formState: { isValid },
+  } = form
 
   useEffect(() => {
     form.reset(getFormDefaults(initialData))
@@ -415,8 +418,6 @@ export const TaskForm = ({
   useEffect(() => {
     form.trigger()
   }, [getRequired, form])
-
-  const isValid = form.formState.isValid
 
   return (
     <Form {...form}>
