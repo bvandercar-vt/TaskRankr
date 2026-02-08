@@ -8,14 +8,21 @@ import { ChevronDown } from 'lucide-react'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
-import type { RankFieldValueMap, SortOption } from '~/shared/schema'
+import {
+  Ease,
+  Enjoyment,
+  Priority,
+  type RankFieldValueMap,
+  SortOption,
+  Time,
+} from '~/shared/schema'
 
 const SORT_INFO_ATTR_LABELS = {
   priority: 'Priority',
   ease: 'Ease',
   enjoyment: 'Enjoyment',
   time: 'Time',
-  date: 'Date created',
+  date: 'Date Created',
 } as const satisfies Record<SortOption, string>
 
 const SORT_INFO_CONFIG: {
@@ -26,40 +33,40 @@ const SORT_INFO_CONFIG: {
   }[]
 }[] = [
   {
-    name: 'Priority',
+    name: SORT_INFO_ATTR_LABELS.priority,
     criteria: [
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
-      { attr: 'enjoyment', value: 'highest' },
+      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
+      { attr: SortOption.EASE, value: Ease.EASIEST },
+      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
     ],
   },
   {
-    name: 'Ease',
+    name: SORT_INFO_ATTR_LABELS.ease,
     criteria: [
-      { attr: 'ease', value: 'easiest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'enjoyment', value: 'highest' },
+      { attr: SortOption.EASE, value: Ease.EASIEST },
+      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
+      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
     ],
   },
   {
-    name: 'Enjoyment',
+    name: SORT_INFO_ATTR_LABELS.enjoyment,
     criteria: [
-      { attr: 'enjoyment', value: 'highest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
+      { attr: SortOption.ENJOYMENT, value: Enjoyment.HIGHEST },
+      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
+      { attr: SortOption.EASE, value: Ease.EASIEST },
     ],
   },
   {
-    name: 'Time',
+    name: SORT_INFO_ATTR_LABELS.time,
     criteria: [
-      { attr: 'time', value: 'lowest' },
-      { attr: 'priority', value: 'highest' },
-      { attr: 'ease', value: 'easiest' },
+      { attr: SortOption.TIME, value: Time.LOWEST },
+      { attr: SortOption.PRIORITY, value: Priority.HIGHEST },
+      { attr: SortOption.EASE, value: Ease.EASIEST },
     ],
   },
   {
-    name: 'Date',
-    criteria: [{ attr: 'date', value: 'newest' }],
+    name: SORT_INFO_ATTR_LABELS.date,
+    criteria: [{ attr: SortOption.DATE, value: 'newest' }],
   },
 ]
 
@@ -114,7 +121,7 @@ export const SortInfo = ({
                 >
                   {item.criteria.map((c) => {
                     const style =
-                      c.attr !== 'date'
+                      c.attr !== SortOption.DATE
                         ? getRankFieldStyle(
                             c.attr,
                             c.value satisfies string as RankFieldValueMap[typeof c.attr],

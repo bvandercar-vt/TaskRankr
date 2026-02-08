@@ -28,7 +28,7 @@ import {
 import { useSettings } from '@/hooks/useSettings'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
-import type { TaskStatus } from '~/shared/schema'
+import { TaskStatus } from '~/shared/schema'
 
 interface StatusButtonProps {
   icon: LucideIcon
@@ -77,9 +77,9 @@ export const ChangeStatusDialog = ({
   onUpdateTime,
   onDeleteClick,
 }: ChangeStatusDialogProps) => {
-  const isCompleted = status === 'completed'
-  const isInProgress = status === 'in_progress'
-  const isPinned = status === 'pinned'
+  const isCompleted = status === TaskStatus.COMPLETED
+  const isInProgress = status === TaskStatus.IN_PROGRESS
+  const isPinned = status === TaskStatus.PINNED
 
   const {
     settings: {
@@ -139,14 +139,14 @@ export const ChangeStatusDialog = ({
                     <StatusButton
                       icon={StopCircle}
                       label="Stop Progress"
-                      onClick={() => onSetStatus('open')}
+                      onClick={() => onSetStatus(TaskStatus.OPEN)}
                       data-testid="button-stop-progress"
                     />
                   ) : (
                     <StatusButton
                       icon={Clock}
                       label="In Progress"
-                      onClick={() => onSetStatus('in_progress')}
+                      onClick={() => onSetStatus(TaskStatus.IN_PROGRESS)}
                       data-testid="button-start-progress"
                       colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
                     />
@@ -155,14 +155,14 @@ export const ChangeStatusDialog = ({
                   <StatusButton
                     icon={PinOff}
                     label="Unpin"
-                    onClick={() => onSetStatus('open')}
+                    onClick={() => onSetStatus(TaskStatus.OPEN)}
                     data-testid="button-unpin"
                   />
                 ) : (
                   <StatusButton
                     icon={Pin}
                     label="Pin to Top"
-                    onClick={() => onSetStatus('pinned')}
+                    onClick={() => onSetStatus(TaskStatus.PINNED)}
                     data-testid="button-pin"
                   />
                 )}
@@ -170,7 +170,11 @@ export const ChangeStatusDialog = ({
             )}
 
             <AlertDialogAction
-              onClick={() => onSetStatus(isCompleted ? 'open' : 'completed')}
+              onClick={() =>
+                onSetStatus(
+                  isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
+                )
+              }
               className={cn(
                 'w-full h-11 text-base font-semibold',
                 isCompleted

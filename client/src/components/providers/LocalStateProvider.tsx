@@ -16,12 +16,17 @@ import {
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
-import type {
-  CreateTask,
+import {
+  type CreateTask,
+  Ease,
+  Enjoyment,
+  Priority,
+  SubtaskSortMode,
   TaskStatus,
-  TaskWithSubtasks,
-  UpdateTask,
-  UserSettings,
+  type TaskWithSubtasks,
+  Time,
+  type UpdateTask,
+  type UserSettings,
 } from '~/shared/schema'
 
 type CreateTaskArg = Omit<CreateTask, 'userId'>
@@ -297,17 +302,17 @@ export const LocalStateProvider = ({
         userId: 'local',
         name: data.name,
         description: data.description ?? null,
-        priority: data.priority ?? 'none',
-        ease: data.ease ?? 'none',
-        enjoyment: data.enjoyment ?? 'none',
-        time: data.time ?? 'none',
+        priority: data.priority ?? Priority.NONE,
+        ease: data.ease ?? Ease.NONE,
+        enjoyment: data.enjoyment ?? Enjoyment.NONE,
+        time: data.time ?? Time.NONE,
         parentId: data.parentId ?? null,
-        status: settings.autoPinNewTasks ? 'pinned' : 'open',
+        status: settings.autoPinNewTasks ? TaskStatus.PINNED : TaskStatus.OPEN,
         inProgressTime: 0,
         inProgressStartedAt: null,
         createdAt: new Date(),
         completedAt: null,
-        subtaskSortMode: data.subtaskSortMode ?? 'inherit',
+        subtaskSortMode: data.subtaskSortMode ?? SubtaskSortMode.INHERIT,
         subtaskOrder: data.subtaskOrder ?? [],
         subtasks: [],
       }
@@ -316,7 +321,7 @@ export const LocalStateProvider = ({
         let updated = addTaskToTree(prev, newTask, data.parentId ?? null)
         if (data.parentId) {
           updated = updateTaskInTree(updated, data.parentId, (parent) => {
-            if (parent.subtaskSortMode === 'manual') {
+            if (parent.subtaskSortMode === SubtaskSortMode.MANUAL) {
               return {
                 ...parent,
                 subtaskOrder: [...parent.subtaskOrder, tempId],
@@ -356,12 +361,12 @@ export const LocalStateProvider = ({
       setTasks((prev) => {
         let newTasks = prev
 
-        if (status === 'in_progress') {
+        if (status === TaskStatus.IN_PROGRESS) {
           newTasks = newTasks.map((t) => {
-            if (t.id !== id && t.status === 'in_progress') {
+            if (t.id !== id && t.status === TaskStatus.IN_PROGRESS) {
               return {
                 ...t,
-                status: 'pinned' as const,
+                status: TaskStatus.PINNED,
                 inProgressStartedAt: null,
               }
             }
@@ -370,16 +375,16 @@ export const LocalStateProvider = ({
           newTasks = updateTaskInTree(newTasks, id, (task) => {
             updatedTask = {
               ...task,
-              status: 'in_progress',
+              status: TaskStatus.IN_PROGRESS,
               inProgressStartedAt: new Date(),
             }
             return updatedTask
           })
-        } else if (status === 'completed') {
+        } else if (status === TaskStatus.COMPLETED) {
           newTasks = updateTaskInTree(newTasks, id, (task) => {
             updatedTask = {
               ...task,
-              status: 'completed',
+              status: TaskStatus.COMPLETED,
               completedAt: new Date(),
               inProgressStartedAt: null,
             }
@@ -502,14 +507,13 @@ export const LocalStateProvider = ({
     const idsToDelete = new Set(demoTaskIds)
     const filterDemoTasks = (
       taskList: TaskWithSubtasks[],
-    ): TaskWithSubtasks[] => {
-      return taskList
+    ): TaskWithSubtasks[] =>
+      taskList
         .filter((task) => !idsToDelete.has(task.id))
         .map((task) => ({
           ...task,
           subtasks: filterDemoTasks(task.subtasks),
         }))
-    }
     setTasks((prev) => filterDemoTasks(prev))
     setDemoTaskIds([])
   }, [demoTaskIds])

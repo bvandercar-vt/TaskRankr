@@ -73,13 +73,18 @@ import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
+  Ease,
+  Enjoyment,
   insertTaskSchema,
   type MutateTask,
+  Priority,
   RANK_FIELDS_CRITERIA,
   type RankField,
-  type SubtaskSortMode,
+  SubtaskSortMode,
   type Task,
+  TaskStatus,
   type TaskWithSubtasks,
+  Time,
 } from '~/shared/schema'
 
 interface SortableSubtaskItemProps {
@@ -116,7 +121,7 @@ const SortableSubtaskItem = ({
 
   const isDirect = task.depth === 0
   const showDragHandle = isManualMode && isDirect
-  const isCompleted = task.status === 'completed'
+  const isCompleted = task.status === TaskStatus.COMPLETED
 
   return (
     <div
@@ -147,7 +152,7 @@ const SortableSubtaskItem = ({
         )}
         <button
           type="button"
-          onClick={() => onToggleComplete(task as Task)}
+          onClick={() => onToggleComplete(task)}
           className={cn(
             'shrink-0 h-4 w-4 rounded-sm border transition-colors',
             isCompleted
@@ -173,7 +178,7 @@ const SortableSubtaskItem = ({
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => onEdit(task as Task)}
+            onClick={() => onEdit(task)}
             data-testid={`button-edit-subtask-${task.id}`}
           >
             <Pencil className={IconSizeStyle.HW4} />
@@ -226,7 +231,7 @@ export const TaskForm = ({
   const reorderSubtasks = useReorderSubtasks()
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
-    initialData?.subtaskSortMode || 'inherit',
+    initialData?.subtaskSortMode || SubtaskSortMode.INHERIT,
   )
 
   const sensors = useSensors(
@@ -267,7 +272,7 @@ export const TaskForm = ({
     ): (TaskWithSubtasks & { depth: number })[] => {
       let children = flatList.filter((t) => t.parentId === parentId_)
 
-      if (parentSortMode === 'manual') {
+      if (parentSortMode === SubtaskSortMode.MANUAL) {
         if (depth === 0 && localSubtaskOrder) {
           children = [...children].sort(
             (a, b) =>
@@ -320,11 +325,13 @@ export const TaskForm = ({
     if (!initialData || updateTask.isPending || reorderSubtasks.isPending)
       return
     const newMode: SubtaskSortMode =
-      sortMode === 'inherit' ? 'manual' : 'inherit'
+      sortMode === SubtaskSortMode.INHERIT
+        ? SubtaskSortMode.MANUAL
+        : SubtaskSortMode.INHERIT
 
     setSortMode(newMode)
 
-    if (newMode === 'manual' && directChildIds.length > 0) {
+    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
       reorderSubtasks.mutate({
         parentId: initialData.id,
         orderedIds: directChildIds,
@@ -367,10 +374,10 @@ export const TaskForm = ({
       ? {
           name: initialData.name,
           description: initialData.description || '',
-          priority: initialData.priority || 'none',
-          ease: initialData.ease || 'none',
-          enjoyment: initialData.enjoyment || 'none',
-          time: initialData.time || 'none',
+          priority: initialData.priority || Priority.NONE,
+          ease: initialData.ease || Ease.NONE,
+          enjoyment: initialData.enjoyment || Enjoyment.NONE,
+          time: initialData.time || Time.NONE,
           parentId: initialData.parentId,
           createdAt: initialData.createdAt
             ? new Date(initialData.createdAt)
@@ -383,10 +390,10 @@ export const TaskForm = ({
       : {
           name: '',
           description: '',
-          priority: 'none',
-          ease: 'none',
-          enjoyment: 'none',
-          time: 'none',
+          priority: Priority.NONE,
+          ease: Ease.NONE,
+          enjoyment: Enjoyment.NONE,
+          time: Time.NONE,
           parentId: parentId || null,
           createdAt: new Date(),
           inProgressTime: 0,
@@ -401,10 +408,10 @@ export const TaskForm = ({
         ? {
             name: initialData.name,
             description: initialData.description || '',
-            priority: initialData.priority || 'none',
-            ease: initialData.ease || 'none',
-            enjoyment: initialData.enjoyment || 'none',
-            time: initialData.time || 'none',
+            priority: initialData.priority || Priority.NONE,
+            ease: initialData.ease || Ease.NONE,
+            enjoyment: initialData.enjoyment || Enjoyment.NONE,
+            time: initialData.time || Time.NONE,
             parentId: initialData.parentId,
             createdAt: initialData.createdAt
               ? new Date(initialData.createdAt)
@@ -417,10 +424,10 @@ export const TaskForm = ({
         : {
             name: '',
             description: '',
-            priority: 'none',
-            ease: 'none',
-            enjoyment: 'none',
-            time: 'none',
+            priority: Priority.NONE,
+            ease: Ease.NONE,
+            enjoyment: Enjoyment.NONE,
+            time: Time.NONE,
             parentId: parentId || null,
             createdAt: new Date(),
             inProgressTime: 0,
@@ -432,10 +439,10 @@ export const TaskForm = ({
     const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
     const formattedData = {
       ...rest,
-      priority: data.priority === 'none' ? null : data.priority,
-      ease: data.ease === 'none' ? null : data.ease,
-      enjoyment: data.enjoyment === 'none' ? null : data.enjoyment,
-      time: data.time === 'none' ? null : data.time,
+      priority: data.priority === Priority.NONE ? null : data.priority,
+      ease: data.ease === Ease.NONE ? null : data.ease,
+      enjoyment: data.enjoyment === Enjoyment.NONE ? null : data.enjoyment,
+      time: data.time === Time.NONE ? null : data.time,
     }
     onSubmit(formattedData)
   }
@@ -624,7 +631,7 @@ export const TaskForm = ({
                           <label
                             className={cn(
                               'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                              sortMode === 'inherit'
+                              sortMode === SubtaskSortMode.INHERIT
                                 ? 'bg-secondary text-foreground'
                                 : 'bg-transparent text-muted-foreground',
                             )}
@@ -633,10 +640,11 @@ export const TaskForm = ({
                             <input
                               type="radio"
                               name="subtask-sort-mode"
-                              value="inherit"
-                              checked={sortMode === 'inherit'}
+                              value={SubtaskSortMode.INHERIT}
+                              checked={sortMode === SubtaskSortMode.INHERIT}
                               onChange={() =>
-                                sortMode !== 'inherit' && handleSortModeToggle()
+                                sortMode !== SubtaskSortMode.INHERIT &&
+                                handleSortModeToggle()
                               }
                               className="sr-only"
                             />
@@ -645,7 +653,7 @@ export const TaskForm = ({
                           <label
                             className={cn(
                               'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                              sortMode === 'manual'
+                              sortMode === SubtaskSortMode.MANUAL
                                 ? 'bg-secondary text-foreground'
                                 : 'bg-transparent text-muted-foreground',
                             )}
@@ -654,10 +662,11 @@ export const TaskForm = ({
                             <input
                               type="radio"
                               name="subtask-sort-mode"
-                              value="manual"
-                              checked={sortMode === 'manual'}
+                              value={SubtaskSortMode.MANUAL}
+                              checked={sortMode === SubtaskSortMode.MANUAL}
                               onChange={() =>
-                                sortMode !== 'manual' && handleSortModeToggle()
+                                sortMode !== SubtaskSortMode.MANUAL &&
+                                handleSortModeToggle()
                               }
                               className="sr-only"
                             />
@@ -668,7 +677,7 @@ export const TaskForm = ({
                           className="text-[11px] text-muted-foreground/70 leading-snug"
                           data-testid="text-sort-caption"
                         >
-                          {sortMode === 'inherit'
+                          {sortMode === SubtaskSortMode.INHERIT
                             ? 'Subtasks follow the same sort order as the main task list.'
                             : 'Drag subtasks into your preferred order using the grip handles.'}
                         </span>
@@ -691,15 +700,17 @@ export const TaskForm = ({
                                 onDelete={(task) => onSubtaskDelete?.(task)}
                                 onToggleComplete={(task) => {
                                   const newStatus =
-                                    task.status === 'completed'
-                                      ? 'open'
-                                      : 'completed'
+                                    task.status === TaskStatus.COMPLETED
+                                      ? TaskStatus.OPEN
+                                      : TaskStatus.COMPLETED
                                   setTaskStatus.mutate({
                                     id: task.id,
                                     status: newStatus,
                                   })
                                 }}
-                                isManualMode={sortMode === 'manual'}
+                                isManualMode={
+                                  sortMode === SubtaskSortMode.MANUAL
+                                }
                                 isDragDisabled={isMutating}
                               />
                             ))}
@@ -774,7 +785,7 @@ export const TaskForm = ({
               )}
             />
 
-            {initialData?.status === 'completed' &&
+            {initialData?.status === TaskStatus.COMPLETED &&
               initialData?.completedAt && (
                 <div className="flex items-center justify-between gap-4">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -786,7 +797,7 @@ export const TaskForm = ({
                 </div>
               )}
 
-            {initialData?.status === 'completed' && (
+            {initialData?.status === TaskStatus.COMPLETED && (
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Time Spent

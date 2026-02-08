@@ -26,92 +26,88 @@ import { z } from 'zod'
 export * from './models/auth'
 
 // Status constants and types
-export const TASK_STATUSES = [
-  'open',
-  'in_progress',
-  'pinned',
-  'completed',
-] as const
-export type TaskStatus = (typeof TASK_STATUSES)[number]
-export const taskStatusEnum = z.enum(TASK_STATUSES)
+export enum TaskStatus {
+  OPEN = 'open',
+  IN_PROGRESS = 'in_progress',
+  PINNED = 'pinned',
+  COMPLETED = 'completed',
+}
 
 // Subtask sort mode constants
-export const SUBTASK_SORT_MODES = ['inherit', 'manual'] as const
-export type SubtaskSortMode = (typeof SUBTASK_SORT_MODES)[number]
-export const subtaskSortModeEnum = z.enum(SUBTASK_SORT_MODES)
+export enum SubtaskSortMode {
+  INHERIT = 'inherit',
+  MANUAL = 'manual',
+}
 
 // Attribute level constants and types
-export const PRIORITY_LEVELS = [
-  'none',
-  'lowest',
-  'low',
-  'medium',
-  'high',
-  'highest',
-] as const
-export const EASE_LEVELS = [
-  'none',
-  'easiest',
-  'easy',
-  'medium',
-  'hard',
-  'hardest',
-] as const
-export const ENJOYMENT_LEVELS = [
-  'none',
-  'lowest',
-  'low',
-  'medium',
-  'high',
-  'highest',
-] as const
-export const TIME_LEVELS = [
-  'none',
-  'lowest',
-  'low',
-  'medium',
-  'high',
-  'highest',
-] as const
+export enum Priority {
+  NONE = 'none',
+  LOWEST = 'lowest',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  HIGHEST = 'highest',
+}
 
-export type Priority = (typeof PRIORITY_LEVELS)[number]
-export type Ease = (typeof EASE_LEVELS)[number]
-export type Enjoyment = (typeof ENJOYMENT_LEVELS)[number]
-export type Time = (typeof TIME_LEVELS)[number]
+export enum Ease {
+  NONE = 'none',
+  EASIEST = 'easiest',
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard',
+  HARDEST = 'hardest',
+}
 
-export const SORT_OPTIONS = [
-  'date',
-  'priority',
-  'ease',
-  'enjoyment',
-  'time',
-] as const
-export type SortOption = (typeof SORT_OPTIONS)[number]
+export enum Enjoyment {
+  NONE = 'none',
+  LOWEST = 'lowest',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  HIGHEST = 'highest',
+}
 
-export type RankField = Exclude<SortOption, 'date'>
+export enum Time {
+  NONE = 'none',
+  LOWEST = 'lowest',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  HIGHEST = 'highest',
+}
+
+export enum SortOption {
+  DATE = 'date',
+  PRIORITY = 'priority',
+  EASE = 'ease',
+  ENJOYMENT = 'enjoyment',
+  TIME = 'time',
+}
+
+export type RankField = Exclude<SortOption, SortOption.DATE>
 
 /** Are in display order. */
 export const RANK_FIELDS_CRITERIA = [
   {
-    name: 'priority',
+    name: SortOption.PRIORITY,
     label: 'Priority',
-    levels: PRIORITY_LEVELS,
+    levels: Object.values(Priority),
   },
   {
-    name: 'ease',
+    name: SortOption.EASE,
     label: 'Ease',
-    levels: EASE_LEVELS,
+    levels: Object.values(Ease),
   },
   {
-    name: 'enjoyment',
+    name: SortOption.ENJOYMENT,
     label: 'Enjoyment',
     labelShort: 'Enjoy',
-    levels: ENJOYMENT_LEVELS,
+    levels: Object.values(Enjoyment),
   },
   {
-    name: 'time',
+    name: SortOption.TIME,
     label: 'Time',
-    levels: TIME_LEVELS,
+    levels: Object.values(Time),
   },
 ] as const satisfies {
   name: RankField
@@ -126,12 +122,6 @@ export type RankFieldValueMap = {
   enjoyment: Enjoyment
   time: Time
 }
-
-// Zod enums for validation
-export const priorityEnum = z.enum(PRIORITY_LEVELS)
-export const easeEnum = z.enum(EASE_LEVELS)
-export const enjoymentEnum = z.enum(ENJOYMENT_LEVELS)
-export const timeEnum = z.enum(TIME_LEVELS)
 
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
@@ -169,12 +159,14 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 const taskSchemaCommon = {
   userId: z.string().min(1, 'User ID is required'),
   name: z.string().min(1, 'Name is required'),
-  status: taskStatusEnum,
-  priority: priorityEnum.nullable(),
-  ease: easeEnum.nullable(),
-  enjoyment: enjoymentEnum.nullable(),
-  time: timeEnum.nullable(),
-  subtaskSortMode: subtaskSortModeEnum.default('inherit'),
+  status: z.nativeEnum(TaskStatus),
+  priority: z.nativeEnum(Priority).nullable(),
+  ease: z.nativeEnum(Ease).nullable(),
+  enjoyment: z.nativeEnum(Enjoyment).nullable(),
+  time: z.nativeEnum(Time).nullable(),
+  subtaskSortMode: z
+    .nativeEnum(SubtaskSortMode)
+    .default(SubtaskSortMode.INHERIT),
   subtaskOrder: z.array(z.number()).default([]),
   createdAt: z.coerce.date(),
   completedAt: z.coerce.date().nullish(),
@@ -234,7 +226,7 @@ export const userSettings = pgTable('user_settings', {
 
 const userSettingsCommon = {
   userId: z.string().min(1),
-  sortBy: z.enum(SORT_OPTIONS).optional().default('date'),
+  sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE),
 }
 
 export const userSettingsSchema = createSelectSchema(
