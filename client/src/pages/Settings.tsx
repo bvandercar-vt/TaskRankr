@@ -3,7 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, Download, LogOut, Upload } from 'lucide-react'
+import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -327,6 +327,29 @@ const Settings = () => {
             </a>
           </Card>
         )}
+
+        <Card className="mt-8">
+          <h3 className="font-semibold text-foreground mb-2">
+            Clear Local Data
+          </h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            Remove all locally cached data. Your synced data on the server
+            won't be affected.
+          </p>
+          <Button
+            variant="destructive"
+            className="gap-2"
+            onClick={() => {
+              localStorage.clear()
+              toast({ title: 'Local storage cleared' })
+              window.location.reload()
+            }}
+            data-testid="button-clear-local-storage"
+          >
+            <Trash2 className={IconSizeStyle.HW4} />
+            Clear Local Storage
+          </Button>
+        </Card>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
