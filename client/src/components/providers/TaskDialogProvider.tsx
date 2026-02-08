@@ -14,9 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
+import {
+  type MutateTaskArgs,
+  TaskForm,
+  type TaskFormProps,
+} from '@/components/TaskForm'
 import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
-import type { CreateTask, MutateTask, Task } from '~/shared/schema'
+import type { CreateTask, Task } from '~/shared/schema'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -171,7 +175,7 @@ export const TaskDialogProvider = ({
   const openEditDialog = (task: Task) => {
     setMode('edit')
     setActiveTask(task)
-    setParentId(task.parentId || undefined)
+    setParentId(task.parentId ?? undefined)
     setReturnToTask(undefined)
     setIsOpen(true)
   }
@@ -182,7 +186,7 @@ export const TaskDialogProvider = ({
     }
     setMode('edit')
     setActiveTask(task)
-    setParentId(task.parentId || undefined)
+    setParentId(task.parentId ?? undefined)
     setIsOpen(true)
   }
 
@@ -192,7 +196,7 @@ export const TaskDialogProvider = ({
       setReturnToTask(undefined)
       setMode('edit')
       setActiveTask(taskToReturn)
-      setParentId(taskToReturn.parentId || undefined)
+      setParentId(taskToReturn.parentId ?? undefined)
     } else {
       setIsOpen(false)
       setTimeout(() => {
@@ -202,7 +206,7 @@ export const TaskDialogProvider = ({
     }
   }
 
-  const handleSubmit = (data: MutateTask) => {
+  const handleSubmit = (data: MutateTaskArgs) => {
     if (mode === 'create') {
       createTask.mutate({ ...data, parentId } as CreateTask, {
         onSuccess: closeDialog,

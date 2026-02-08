@@ -13,18 +13,15 @@ import {
   useRef,
   useState,
 } from 'react'
+import { pick } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
-  Ease,
-  Enjoyment,
-  Priority,
   SubtaskSortMode,
   TaskStatus,
   type TaskWithSubtasks,
-  Time,
   type UpdateTask,
   type UserSettings,
 } from '~/shared/schema'
@@ -303,21 +300,31 @@ export const LocalStateProvider = ({
       const newTask: TaskWithSubtasks = {
         id: tempId,
         userId: 'local',
-        name: data.name,
-        description: data.description ?? null,
-        priority: data.priority ?? Priority.NONE,
-        ease: data.ease ?? Ease.NONE,
-        enjoyment: data.enjoyment ?? Enjoyment.NONE,
-        time: data.time ?? Time.NONE,
-        parentId: data.parentId ?? null,
+        description: null,
+        priority: null,
+        ease: null,
+        enjoyment: null,
+        time: null,
+        parentId: null,
         status: settings.autoPinNewTasks ? TaskStatus.PINNED : TaskStatus.OPEN,
         inProgressTime: 0,
         inProgressStartedAt: null,
         createdAt: new Date(),
         completedAt: null,
-        subtaskSortMode: data.subtaskSortMode ?? SubtaskSortMode.INHERIT,
-        subtaskOrder: data.subtaskOrder ?? [],
+        subtaskSortMode: SubtaskSortMode.INHERIT,
+        subtaskOrder: [],
         subtasks: [],
+        ...pick(data, [
+          'name',
+          'description',
+          'priority',
+          'ease',
+          'enjoyment',
+          'time',
+          'parentId',
+          'subtaskSortMode',
+          'subtaskOrder',
+        ]),
       }
 
       setTasks((prev) => {

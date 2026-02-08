@@ -41,7 +41,6 @@ export enum SubtaskSortMode {
 
 // Attribute level constants and types
 export enum Priority {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',
@@ -50,7 +49,6 @@ export enum Priority {
 }
 
 export enum Ease {
-  NONE = 'none',
   EASIEST = 'easiest',
   EASY = 'easy',
   MEDIUM = 'medium',
@@ -59,7 +57,6 @@ export enum Ease {
 }
 
 export enum Enjoyment {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',
@@ -68,7 +65,6 @@ export enum Enjoyment {
 }
 
 export enum Time {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',

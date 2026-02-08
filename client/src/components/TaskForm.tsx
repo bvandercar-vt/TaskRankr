@@ -23,6 +23,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
+import { omit, pick } from 'es-toolkit'
 import {
   Calendar as CalendarIcon,
   Check,
@@ -73,19 +74,17 @@ import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
-  Ease,
-  Enjoyment,
   insertTaskSchema,
   type MutateTask,
-  Priority,
   RANK_FIELDS_CRITERIA,
   type RankField,
   SubtaskSortMode,
   type Task,
   TaskStatus,
   type TaskWithSubtasks,
-  Time,
 } from '~/shared/schema'
+
+export type MutateTaskArgs = Omit<MutateTask, 'id'>
 
 interface SortableSubtaskItemProps {
   task: Task & { depth: number }
@@ -199,7 +198,7 @@ const SortableSubtaskItem = ({
 }
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTask) => void
+  onSubmit: (data: MutateTaskArgs) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -223,7 +222,7 @@ export const TaskForm = ({
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
   )
-  const parentChain = useTaskParentChain(parentId || undefined)
+  const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
   const { data: allTasks } = useTasks()
   const updateTask = useUpdateTask()
@@ -367,85 +366,48 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
+  const getFormDefaults = useCallback(
+    (data: Task | undefined): MutateTaskArgs =>
+      data
+        ? {
+            description: data.description ?? '',
+            ...pick(data, [
+              'name',
+              'priority',
+              'ease',
+              'enjoyment',
+              'time',
+              'parentId',
+              'inProgressTime',
+            ]),
+            createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+            completedAt: data.completedAt ? new Date(data.completedAt) : null,
+          }
+        : {
+            name: '',
+            description: '',
+            priority: null,
+            ease: null,
+            enjoyment: null,
+            time: null,
+            parentId: parentId ?? null,
+            createdAt: new Date(),
+            inProgressTime: 0,
+          },
+    [parentId],
+  )
+
   const form = useForm<MutateTask>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
-    defaultValues: initialData
-      ? {
-          name: initialData.name,
-          description: initialData.description || '',
-          priority: initialData.priority || Priority.NONE,
-          ease: initialData.ease || Ease.NONE,
-          enjoyment: initialData.enjoyment || Enjoyment.NONE,
-          time: initialData.time || Time.NONE,
-          parentId: initialData.parentId,
-          createdAt: initialData.createdAt
-            ? new Date(initialData.createdAt)
-            : new Date(),
-          completedAt: initialData.completedAt
-            ? new Date(initialData.completedAt)
-            : null,
-          inProgressTime: initialData.inProgressTime || 0,
-        }
-      : {
-          name: '',
-          description: '',
-          priority: Priority.NONE,
-          ease: Ease.NONE,
-          enjoyment: Enjoyment.NONE,
-          time: Time.NONE,
-          parentId: parentId || null,
-          createdAt: new Date(),
-          inProgressTime: 0,
-        },
+    defaultValues: getFormDefaults(initialData),
   })
 
   // Use useEffect to reset form when initialData or parentId changes
   // to ensure "Add Subtask" dialog is clean.
   useEffect(() => {
-    form.reset(
-      initialData
-        ? {
-            name: initialData.name,
-            description: initialData.description || '',
-            priority: initialData.priority || Priority.NONE,
-            ease: initialData.ease || Ease.NONE,
-            enjoyment: initialData.enjoyment || Enjoyment.NONE,
-            time: initialData.time || Time.NONE,
-            parentId: initialData.parentId,
-            createdAt: initialData.createdAt
-              ? new Date(initialData.createdAt)
-              : new Date(),
-            completedAt: initialData.completedAt
-              ? new Date(initialData.completedAt)
-              : null,
-            inProgressTime: initialData.inProgressTime || 0,
-          }
-        : {
-            name: '',
-            description: '',
-            priority: Priority.NONE,
-            ease: Ease.NONE,
-            enjoyment: Enjoyment.NONE,
-            time: Time.NONE,
-            parentId: parentId || null,
-            createdAt: new Date(),
-            inProgressTime: 0,
-          },
-    )
-  }, [initialData, parentId, form])
-
-  const onSubmitWithNulls = (data: MutateTask) => {
-    const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
-    const formattedData = {
-      ...rest,
-      priority: data.priority === Priority.NONE ? null : data.priority,
-      ease: data.ease === Ease.NONE ? null : data.ease,
-      enjoyment: data.enjoyment === Enjoyment.NONE ? null : data.enjoyment,
-      time: data.time === Time.NONE ? null : data.time,
-    }
-    onSubmit(formattedData)
-  }
+    form.reset(getFormDefaults(initialData))
+  }, [initialData, form, getFormDefaults])
 
   const watchedValues = form.watch()
 
@@ -453,7 +415,7 @@ export const TaskForm = ({
     for (const attr of visibleAttributes) {
       if (getRequired(attr.name)) {
         const value = watchedValues[attr.name]
-        if (!value || value === 'none') {
+        if (!value) {
           return false
         }
       }
@@ -466,7 +428,9 @@ export const TaskForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmitWithNulls)}
+        onSubmit={form.handleSubmit((data) =>
+          onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder'])),
+        )}
         className="flex flex-col h-full space-y-6"
       >
         <div className="flex-1 space-y-6">
@@ -501,8 +465,7 @@ export const TaskForm = ({
                     control={form.control}
                     name={attr.name}
                     render={({ field }) => {
-                      const hasError =
-                        isRequired && (!field.value || field.value === 'none')
+                      const hasError = isRequired && !field.value
                       return (
                         <FormItem>
                           <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -513,7 +476,7 @@ export const TaskForm = ({
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value || 'none'}
+                            value={field.value ?? 'none'}
                           >
                             <FormControl>
                               <SelectTrigger
@@ -522,9 +485,11 @@ export const TaskForm = ({
                                   hasError
                                     ? 'border-destructive/50'
                                     : 'border-white/5',
-                                  field.value && field.value !== 'none'
-                                    ? getRankFieldStyle(attr.name, field.value)
-                                    : 'text-muted-foreground',
+                                  getRankFieldStyle(
+                                    attr.name,
+                                    field.value,
+                                    'text-muted-foreground',
+                                  ),
                                 )}
                               >
                                 <SelectValue placeholder="Select..." />
@@ -539,20 +504,18 @@ export const TaskForm = ({
                                   None
                                 </SelectItem>
                               )}
-                              {attr.levels
-                                .filter((level) => level !== 'none')
-                                .map((level) => (
-                                  <SelectItem
-                                    key={level}
-                                    value={level}
-                                    className={cn(
-                                      'capitalize font-semibold',
-                                      getRankFieldStyle(attr.name, level),
-                                    )}
-                                  >
-                                    {level}
-                                  </SelectItem>
-                                ))}
+                              {attr.levels.filter(Boolean).map((level) => (
+                                <SelectItem
+                                  key={level}
+                                  value={level}
+                                  className={cn(
+                                    'capitalize font-semibold',
+                                    getRankFieldStyle(attr.name, level),
+                                  )}
+                                >
+                                  {level}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           {hasError && (
@@ -582,7 +545,7 @@ export const TaskForm = ({
                     placeholder="Additional details..."
                     className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
                     {...field}
-                    value={field.value || ''}
+                    value={field.value ?? ''}
                   />
                 </FormControl>
               </FormItem>
