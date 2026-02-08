@@ -14,6 +14,7 @@ import { Button } from '@/components/primitives/Button'
 import { Input } from '@/components/primitives/forms/Input'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
+import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useSettings } from '@/hooks/useSettings'
@@ -32,42 +33,11 @@ import {
   type TaskWithSubtasks,
 } from '~/shared/schema'
 
-const SortButton = ({
-  label,
-  value,
-  className,
-  current,
-  onSelect,
-}: {
-  label: string
-  value: SortOption
-  className?: string
-  current: SortOption
-  onSelect: (v: SortOption) => void
-}) => (
-  <Button
-    variant={current === value ? 'default' : 'ghost'}
-    size="sm"
-    onClick={() => onSelect(value)}
-    className={cn(
-      'h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate',
-      current === value
-        ? 'bg-primary text-primary-foreground'
-        : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
-      className,
-    )}
-    data-testid={`button-sort-${value}`}
-  >
-    {label}
-  </Button>
-)
-
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSettings } = useSettings()
-  const { isGuestMode, exitGuestMode, hasDemoData, deleteDemoData } =
-    useGuestModeState()
+  const { hasDemoData, deleteDemoData } = useGuestModeState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
@@ -200,8 +170,6 @@ const Home = () => {
         <div className="flex items-center justify-between mb-4 pr-2">
           <div className="flex items-center gap-2">
             <MainDropdownMenu
-              isGuestMode={isGuestMode}
-              exitGuestMode={exitGuestMode}
               onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
             />
 

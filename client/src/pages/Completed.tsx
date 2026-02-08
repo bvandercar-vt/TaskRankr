@@ -10,7 +10,6 @@ import { MainDropdownMenu } from '@/components/MainDropdownMenu'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Input } from '@/components/primitives/forms/Input'
 import { TaskCard } from '@/components/TaskCard'
-import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
@@ -19,7 +18,6 @@ import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
-  const { isGuestMode, exitGuestMode } = useGuestModeState()
   const [search, setSearch] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
@@ -82,8 +80,6 @@ const Completed = () => {
         <div className="flex items-center justify-between mb-4 pr-2">
           <div className="flex items-center gap-2">
             <MainDropdownMenu
-              isGuestMode={isGuestMode}
-              exitGuestMode={exitGuestMode}
               onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
               currentPage="completed"
             />
