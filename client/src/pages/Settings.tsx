@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
 import { useSetTaskStatus, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
@@ -120,7 +120,7 @@ const Settings = () => {
     <div className="min-h-screen bg-background text-foreground">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href="/">
+          <Link href={Routes.HOME}>
             <Button variant="ghost" size="icon" data-testid="button-back">
               <ArrowLeft className={IconSizeStyle.HW5} />
             </Button>
