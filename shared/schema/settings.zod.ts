@@ -1,8 +1,6 @@
 /**
- * @fileoverview Drizzle ORM schema definitions, Zod validation schemas, and
- * TypeScript types that are inferred from said schemas, including constants
- * (ie, string enums) that are relevant to these schemas (such as task status,
- * priority, etc.).
+ * @fileoverview User settings Drizzle schema, Zod validation, and types.
+ * Includes per-field visibility/required config (fieldConfig JSONB column).
  */
 
 import { boolean, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core'

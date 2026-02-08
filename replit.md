@@ -69,7 +69,7 @@ The app uses a local-first data model where all changes happen locally first, th
 ### Data Storage
 - **Database**: PostgreSQL (Neon-backed)
 - **ORM**: Drizzle ORM with drizzle-zod for schema-to-validation integration
-- **Schema Location**: `shared/schema.ts` - defines tasks and user_settings tables
+- **Schema Location**: `shared/schema/` - split into `tasks.zod.ts` (tasks table, enums, rank fields) and `settings.zod.ts` (user_settings table, fieldConfig), re-exported from `index.ts`
 - **Migrations**: Drizzle Kit for schema migrations (`drizzle-kit push`)
 
 ### Project Structure
@@ -131,7 +131,10 @@ The app uses a local-first data model where all changes happen locally first, th
 │   └── replit_integrations/auth/  # Replit Auth (OIDC)
 │       ├── index.ts, replitAuth.ts, routes.ts, storage.ts
 ├── shared/
-│   ├── schema.ts         # Drizzle schema + Zod types + RANK_FIELDS_CRITERIA
+│   ├── schema/
+│   │   ├── index.ts        # Re-exports from tasks.zod.ts, settings.zod.ts, and auth models
+│   │   ├── tasks.zod.ts    # Task table, enums, rank fields, Zod schemas/types
+│   │   └── settings.zod.ts # User settings table, fieldConfig, Zod schemas/types
 │   ├── contract.ts       # ts-rest API contract
 │   ├── constants.ts      # Auth path constants
 │   └── models/
@@ -210,9 +213,9 @@ Status behaviors:
 - Visual indicators: blue border for in_progress, slate blue-gray border + pin icon for pinned
 
 ### Shared Utilities
-- `RANK_FIELDS_CRITERIA` in `shared/schema.ts` - Central config for rank fields (name, label, levels, colors)
-- `DEFAULT_FIELD_CONFIG` / `fieldConfigSchema` in `shared/schema.ts` - Default field config and Zod schema for validation
-- `FieldConfig` / `FieldFlags` types in `shared/schema.ts` - TypeScript types for the fieldConfig structure
+- `RANK_FIELDS_CRITERIA` in `shared/schema/tasks.zod.ts` - Central config for rank fields (name, label, levels)
+- `DEFAULT_FIELD_CONFIG` / `fieldConfigSchema` in `shared/schema/settings.zod.ts` - Default field config and Zod schema for validation
+- `FieldConfig` / `FieldFlags` types in `shared/schema/settings.zod.ts` - TypeScript types for the fieldConfig structure
 
 ## External Dependencies
 
