@@ -197,7 +197,10 @@ export const LocalStateProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   useEffect(() => {
-    const loadedSettings = loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS)
+    const loadedSettings = loadFromStorage(
+      storageKeys.settings,
+      DEFAULT_SETTINGS,
+    )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
     const loadedQueue = loadFromStorage<SyncOperation[]>(

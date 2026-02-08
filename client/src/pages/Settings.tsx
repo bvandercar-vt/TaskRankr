@@ -3,9 +3,19 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, ChevronDown, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  Download,
+  LogOut,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
+import { Button } from '@/components/primitives/Button'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
+import { Switch } from '@/components/primitives/forms/Switch'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +27,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/primitives/overlays/AlertDialog'
-import { Button } from '@/components/primitives/Button'
-import { Checkbox } from '@/components/primitives/forms/Checkbox'
-import { Switch } from '@/components/primitives/forms/Switch'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
@@ -379,8 +386,8 @@ const Settings = () => {
           data-testid="collapsible-clear-local-data"
         >
           <p className="text-sm text-muted-foreground mb-3">
-            Remove all locally cached data. Your synced data on the server
-            won't be affected.
+            Remove all locally cached data. Your synced data on the server won't
+            be affected.
           </p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
