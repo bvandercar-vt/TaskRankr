@@ -47,6 +47,56 @@ import type {
   MutateTaskContent,
 } from './providers/LocalStateProvider'
 
+interface DateCreatedInputProps {
+  value: Date | undefined
+  onChange: (date: Date | undefined) => void
+}
+
+const DateCreatedInput = ({ value, onChange }: DateCreatedInputProps) => (
+  <FormItem className="flex items-center justify-between gap-4">
+    <div>
+      <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        Date Created
+      </FormLabel>
+    </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <FormControl>
+          <Button
+            variant={'outline'}
+            className={cn(
+              'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
+              !value && 'text-muted-foreground',
+            )}
+          >
+            {value ? (
+              format(value, 'PPP')
+            ) : (
+              <span>Pick a date</span>
+            )}
+            <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
+          </Button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 bg-card border-white/10 z-[300]"
+        align="end"
+      >
+        <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
+          Select Creation Date
+        </div>
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={onChange}
+          initialFocus
+          className="rounded-md border-0"
+        />
+      </PopoverContent>
+    </Popover>
+  </FormItem>
+)
+
 export interface TaskFormProps {
   onSubmit: (data: MutateTaskContent) => void
   isPending: boolean
@@ -238,50 +288,10 @@ export const TaskForm = ({
               control={form.control}
               name="createdAt"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between gap-4">
-                  <div>
-                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Date Created
-                    </FormLabel>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0 bg-card border-white/10 z-[300]"
-                      align="end"
-                    >
-                      <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
-                        Select Creation Date
-                      </div>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date)
-                        }}
-                        initialFocus
-                        className="rounded-md border-0"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
+                <DateCreatedInput
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               )}
             />
 
