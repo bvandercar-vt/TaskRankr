@@ -69,7 +69,7 @@ The app uses a local-first data model where all changes happen locally first, th
 ### Data Storage
 - **Database**: PostgreSQL (Neon-backed)
 - **ORM**: Drizzle ORM with drizzle-zod for schema-to-validation integration
-- **Schema Location**: `shared/schema.ts` - defines tasks and user_settings tables
+- **Schema Location**: `shared/schema/` - define tables for database as well as zod parsing schemas.
 - **Migrations**: Drizzle Kit for schema migrations (`drizzle-kit push`)
 
 ### Project Structure
@@ -119,8 +119,6 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
-│       ├── types/
-│       │   └── index.ts          # Frontend-specific types
 │       ├── App.tsx               # Main app with routing and providers
 │       └── main.tsx              # React entry point
 ├── server/
@@ -133,7 +131,10 @@ The app uses a local-first data model where all changes happen locally first, th
 │   └── replit_integrations/auth/  # Replit Auth (OIDC)
 │       ├── index.ts, replitAuth.ts, routes.ts, storage.ts
 ├── shared/
-│   ├── schema.ts         # Drizzle schema + Zod types + RANK_FIELDS_CRITERIA
+│   ├── schema/
+│   │   ├── index.ts        # Re-exports from tasks.zod.ts, settings.zod.ts, and auth models
+│   │   ├── tasks.zod.ts    # Task table, enums, rank fields, Zod schemas/types
+│   │   └── settings.zod.ts # User settings table, fieldConfig, Zod schemas/types
 │   ├── contract.ts       # ts-rest API contract
 │   ├── constants.ts      # Auth path constants
 │   └── models/
@@ -190,13 +191,13 @@ Per-user settings stored in `user_settings` table:
 - `enableInProgressTime` - Track time spent on in-progress tasks (only visible when enableInProgressStatus is true)
 - `alwaysSortPinnedByPriority` - Sort pinned tasks by priority first
 - `sortBy` - Current sort preference (date/priority/ease/enjoyment/time)
-- `{attribute}Visible` - Whether each attribute column is shown
-- `{attribute}Required` - Whether each attribute must be set on task creation
+- `fieldConfig` - JSONB column: `Record<RankField, { visible: boolean; required: boolean }>` storing per-field visibility and required flags
 
 ### Settings Hook Pattern
 Always use `useSettings()` hook for reading/updating settings in React components:
 - **`useSettings()`** - Reactive hook from LocalStateProvider. Works for both guest and authenticated modes. Re-renders on changes.
-- **`getIsVisible(field, settings)`** / **`getIsRequired(field, settings)`** - Helper functions for rank field visibility/required checks.
+- **`updateFieldFlags(field, flags)`** - Update visibility/required for a rank field
+- Access field flags directly via `settings.fieldConfig[field].visible` / `.required`
 
 ### Task Status System
 - **open**: Default state for new tasks
@@ -212,9 +213,9 @@ Status behaviors:
 - Visual indicators: blue border for in_progress, slate blue-gray border + pin icon for pinned
 
 ### Shared Utilities
-- `RANK_FIELDS_CRITERIA` in `shared/schema.ts` - Central config for rank fields (name, label, levels, colors)
-- `getIsVisible(field, settings)` / `getIsRequired(field, settings)` - Type-safe settings access
-- `PickByKey<T, Matcher>` - Type utility for selecting keys matching a pattern
+- `RANK_FIELDS_CRITERIA` in `shared/schema/tasks.zod.ts` - Central config for rank fields (name, label, levels)
+- `DEFAULT_FIELD_CONFIG` / `fieldConfigSchema` in `shared/schema/settings.zod.ts` - Default field config and Zod schema for validation
+- `FieldConfig` / `FieldFlags` types in `shared/schema/settings.zod.ts` - TypeScript types for the fieldConfig structure
 
 ## External Dependencies
 

@@ -3,18 +3,14 @@
  * updates.
  */
 
+import { toMerged } from 'es-toolkit'
+
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
-import type { PickByKey } from '@/types'
-import type { RankField, UserSettings } from '~/shared/schema'
+import type { FieldFlags, RankField, UserSettings } from '~/shared/schema'
 
 export type { UserSettings }
 export { DEFAULT_SETTINGS }
-
-export interface AttributeVisibility {
-  visible: boolean
-  required: boolean
-}
 
 export const useSettings = () => {
   const localState = useLocalStateSafe()
@@ -30,33 +26,17 @@ export const useSettings = () => {
     localState.updateSettings({ [key]: value })
   }
 
-  const updateVisibility = (field: RankField, visible: boolean) =>
-    updateSetting(getIsVisibleKey(field), visible)
-
-  const updateRequired = (field: RankField, required: boolean) =>
-    updateSetting(getIsRequiredKey(field), required)
+  const updateFieldFlags = (field: RankField, flags: Partial<FieldFlags>) => {
+    if (!localState) return
+    localState.updateSettings({
+      fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
+    })
+  }
 
   return {
     settings,
     isLoading,
     updateSetting,
-    updateVisibility,
-    updateRequired,
+    updateFieldFlags,
   }
 }
-
-const getIsVisibleKey = <T extends RankField>(field: T) =>
-  `${field}Visible` as const satisfies keyof UserSettings
-
-const getIsRequiredKey = <T extends RankField>(field: T) =>
-  `${field}Required` as const satisfies keyof UserSettings
-
-export const getIsVisible = (
-  field: RankField,
-  settings: PickByKey<UserSettings, `${string}Visible`>,
-) => settings[getIsVisibleKey(field)]
-
-export const getIsRequired = (
-  field: RankField,
-  settings: PickByKey<UserSettings, `${string}Required`>,
-) => settings[getIsRequiredKey(field)]
