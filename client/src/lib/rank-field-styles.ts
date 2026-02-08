@@ -13,10 +13,8 @@ const STYLES_COMMON = {
   green_bold: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
   green_dull: 'text-emerald-600/60 bg-emerald-600/5 border-emerald-600/10',
   red_dull: 'text-red-400/60 bg-red-400/10 border-red-500/60',
-  none: 'text-muted-foreground italic',
+  none: '',
 }
-
-const DEFAULT_STYLE = 'text-slate-400'
 
 const RANK_FIELD_STYLES = {
   priority: {
@@ -25,7 +23,6 @@ const RANK_FIELD_STYLES = {
     medium: STYLES_COMMON.yellow,
     low: STYLES_COMMON.green,
     lowest: STYLES_COMMON.green_dull,
-    none: STYLES_COMMON.none,
   },
   ease: {
     hardest: STYLES_COMMON.red_dull,
@@ -33,7 +30,6 @@ const RANK_FIELD_STYLES = {
     medium: STYLES_COMMON.yellow,
     easy: STYLES_COMMON.green,
     easiest: STYLES_COMMON.green_bold,
-    none: STYLES_COMMON.none,
   },
   enjoyment: {
     lowest: STYLES_COMMON.red_dull,
@@ -41,7 +37,6 @@ const RANK_FIELD_STYLES = {
     medium: STYLES_COMMON.yellow,
     high: STYLES_COMMON.green,
     highest: STYLES_COMMON.green_bold,
-    none: STYLES_COMMON.none,
   },
   time: {
     highest: STYLES_COMMON.red_dull,
@@ -49,7 +44,6 @@ const RANK_FIELD_STYLES = {
     medium: STYLES_COMMON.yellow,
     low: STYLES_COMMON.green,
     lowest: STYLES_COMMON.green_bold,
-    none: STYLES_COMMON.none,
   },
 } as const satisfies {
   [F in RankField]: Record<RankFieldValueMap[F], string>
@@ -61,10 +55,9 @@ export const getRankFieldStyle = <
 >(
   field: Field,
   value: Value | null | undefined,
-  defaultStyle: string = DEFAULT_STYLE,
+  defaultStyle = 'text-slate-400 text-muted-foreground italic',
 ): string => {
   const styles = RANK_FIELD_STYLES[field] as Record<Value, string>
   if (!styles || !value) return defaultStyle
-  const style = styles[value] ?? defaultStyle
-  return style === DEFAULT_STYLE ? defaultStyle : style
+  return styles[value] ?? defaultStyle
 }

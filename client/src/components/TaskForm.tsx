@@ -23,6 +23,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
+import { omit, pick } from 'es-toolkit'
 import {
   Calendar as CalendarIcon,
   Check,
@@ -60,7 +61,7 @@ import {
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
-import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import {
   sortTasksByOrder,
   useReorderSubtasks,
@@ -73,19 +74,16 @@ import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
-  Ease,
-  Enjoyment,
   insertTaskSchema,
   type MutateTask,
-  Priority,
   RANK_FIELDS_CRITERIA,
   type RankField,
   SubtaskSortMode,
   type Task,
   TaskStatus,
   type TaskWithSubtasks,
-  Time,
 } from '~/shared/schema'
+import type { MutateTaskContent } from './providers/LocalStateProvider'
 
 interface SortableSubtaskItemProps {
   task: Task & { depth: number }
@@ -199,7 +197,7 @@ const SortableSubtaskItem = ({
 }
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTask) => void
+  onSubmit: (data: MutateTaskContent) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -223,7 +221,7 @@ export const TaskForm = ({
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
   )
-  const parentChain = useTaskParentChain(parentId || undefined)
+  const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
   const { data: allTasks } = useTasks()
   const updateTask = useUpdateTask()
@@ -273,16 +271,11 @@ export const TaskForm = ({
       let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
-        if (depth === 0 && localSubtaskOrder) {
-          children = [...children].sort(
-            (a, b) =>
-              localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
-          )
-        } else {
-          const parentTask = flatList.find((t) => t.id === parentId_)
-          const order = parentTask?.subtaskOrder ?? []
-          children = sortTasksByOrder(children, order)
-        }
+        const order =
+          depth === 0 && localSubtaskOrder
+            ? localSubtaskOrder
+            : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
+        children = sortTasksByOrder(children, order)
       }
 
       const result: Array<TaskWithSubtasks & { depth: number }> = []
@@ -347,126 +340,98 @@ export const TaskForm = ({
 
   const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
-  const getVisibility = useCallback(
-    (attr: RankField) => getIsVisible(attr, settings),
+  const rankFieldConfig = useMemo(
+    () =>
+      new Map(
+        RANK_FIELDS_CRITERIA.map(({ name }) => {
+          const { visible, required: rawRequired } = settings.fieldConfig[name]
+          const required = visible && rawRequired
+          return [name, { visible, required }]
+        }),
+      ),
     [settings],
   )
 
-  const getRequired = useCallback(
-    (attr: RankField) =>
-      getIsVisible(attr, settings) && getIsRequired(attr, settings),
-    [settings],
+  const visibleRankFields = useMemo(
+    () =>
+      RANK_FIELDS_CRITERIA.filter(
+        (attr) => rankFieldConfig.get(attr.name)?.visible,
+      ),
+    [rankFieldConfig],
   )
 
-  const visibleAttributes = useMemo(
-    () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
-    [getVisibility],
+  const formSchema = useMemo(
+    () =>
+      insertTaskSchema
+        .omit({ userId: true })
+        .required(
+          Object.fromEntries(
+            RANK_FIELDS_CRITERIA.map(({ name }) => [
+              name,
+              Boolean(rankFieldConfig.get(name)?.required),
+            ]).filter(([, isReq]) => isReq),
+          ) satisfies Record<RankField, boolean>,
+        ),
+    [rankFieldConfig],
   )
 
-  const baseFormSchema = insertTaskSchema.omit({ userId: true })
-
-  const formSchemaToUse = baseFormSchema
-
-  const form = useForm<MutateTask>({
-    resolver: zodResolver(formSchemaToUse),
-    mode: 'onChange',
-    defaultValues: initialData
-      ? {
-          name: initialData.name,
-          description: initialData.description || '',
-          priority: initialData.priority || Priority.NONE,
-          ease: initialData.ease || Ease.NONE,
-          enjoyment: initialData.enjoyment || Enjoyment.NONE,
-          time: initialData.time || Time.NONE,
-          parentId: initialData.parentId,
-          createdAt: initialData.createdAt
-            ? new Date(initialData.createdAt)
-            : new Date(),
-          completedAt: initialData.completedAt
-            ? new Date(initialData.completedAt)
-            : null,
-          inProgressTime: initialData.inProgressTime || 0,
-        }
-      : {
-          name: '',
-          description: '',
-          priority: Priority.NONE,
-          ease: Ease.NONE,
-          enjoyment: Enjoyment.NONE,
-          time: Time.NONE,
-          parentId: parentId || null,
-          createdAt: new Date(),
-          inProgressTime: 0,
-        },
-  })
-
-  // Use useEffect to reset form when initialData or parentId changes
-  // to ensure "Add Subtask" dialog is clean.
-  useEffect(() => {
-    form.reset(
-      initialData
+  const getFormDefaults = useCallback(
+    (data: Task | undefined): MutateTaskContent =>
+      data
         ? {
-            name: initialData.name,
-            description: initialData.description || '',
-            priority: initialData.priority || Priority.NONE,
-            ease: initialData.ease || Ease.NONE,
-            enjoyment: initialData.enjoyment || Enjoyment.NONE,
-            time: initialData.time || Time.NONE,
-            parentId: initialData.parentId,
-            createdAt: initialData.createdAt
-              ? new Date(initialData.createdAt)
-              : new Date(),
-            completedAt: initialData.completedAt
-              ? new Date(initialData.completedAt)
-              : null,
-            inProgressTime: initialData.inProgressTime || 0,
+            description: data.description ?? '',
+            ...pick(data, [
+              'name',
+              'priority',
+              'ease',
+              'enjoyment',
+              'time',
+              'parentId',
+              'inProgressTime',
+            ]),
+            createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+            completedAt: data.completedAt ? new Date(data.completedAt) : null,
           }
         : {
             name: '',
             description: '',
-            priority: Priority.NONE,
-            ease: Ease.NONE,
-            enjoyment: Enjoyment.NONE,
-            time: Time.NONE,
-            parentId: parentId || null,
+            priority: null,
+            ease: null,
+            enjoyment: null,
+            time: null,
+            parentId: parentId ?? null,
             createdAt: new Date(),
             inProgressTime: 0,
           },
-    )
-  }, [initialData, parentId, form])
+    [parentId],
+  )
 
-  const onSubmitWithNulls = (data: MutateTask) => {
-    const { subtaskSortMode: _ssm, subtaskOrder: _so, ...rest } = data
-    const formattedData = {
-      ...rest,
-      priority: data.priority === Priority.NONE ? null : data.priority,
-      ease: data.ease === Ease.NONE ? null : data.ease,
-      enjoyment: data.enjoyment === Enjoyment.NONE ? null : data.enjoyment,
-      time: data.time === Time.NONE ? null : data.time,
-    }
-    onSubmit(formattedData)
-  }
+  const form = useForm<MutateTask>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: getFormDefaults(initialData),
+  })
+  const {
+    formState: { isValid },
+  } = form
 
-  const watchedValues = form.watch()
+  useEffect(() => {
+    form.reset(getFormDefaults(initialData))
+  }, [initialData, form, getFormDefaults])
 
-  const requiredAttributesFilled = useMemo(() => {
-    for (const attr of visibleAttributes) {
-      if (getRequired(attr.name)) {
-        const value = watchedValues[attr.name]
-        if (!value || value === 'none') {
-          return false
-        }
-      }
-    }
-    return true
-  }, [watchedValues, visibleAttributes, getRequired])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
+  useEffect(() => {
+    void form.trigger()
+  }, [rankFieldConfig, form])
 
-  const isValid = form.formState.isValid && requiredAttributesFilled
+  const NONE_VALUE = 'none'
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmitWithNulls)}
+        onSubmit={form.handleSubmit((data) =>
+          onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder'])),
+        )}
         className="flex flex-col h-full space-y-6"
       >
         <div className="flex-1 space-y-6">
@@ -489,10 +454,12 @@ export const TaskForm = ({
             )}
           />
 
-          {visibleAttributes.length > 0 && (
+          {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              {visibleAttributes.map((attr) => {
-                const isRequired = getRequired(attr.name)
+              {visibleRankFields.map((attr) => {
+                const isRequired = Boolean(
+                  rankFieldConfig.get(attr.name)?.required,
+                )
                 const showNoneOption = !isRequired
 
                 return (
@@ -501,8 +468,7 @@ export const TaskForm = ({
                     control={form.control}
                     name={attr.name}
                     render={({ field }) => {
-                      const hasError =
-                        isRequired && (!field.value || field.value === 'none')
+                      const hasError = isRequired && !field.value
                       return (
                         <FormItem>
                           <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -512,8 +478,10 @@ export const TaskForm = ({
                             )}
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
-                            value={field.value || 'none'}
+                            onValueChange={(v) =>
+                              field.onChange(v === NONE_VALUE ? null : v)
+                            }
+                            value={field.value ?? NONE_VALUE}
                           >
                             <FormControl>
                               <SelectTrigger
@@ -522,9 +490,11 @@ export const TaskForm = ({
                                   hasError
                                     ? 'border-destructive/50'
                                     : 'border-white/5',
-                                  field.value && field.value !== 'none'
-                                    ? getRankFieldStyle(attr.name, field.value)
-                                    : 'text-muted-foreground',
+                                  getRankFieldStyle(
+                                    attr.name,
+                                    field.value,
+                                    'text-muted-foreground',
+                                  ),
                                 )}
                               >
                                 <SelectValue placeholder="Select..." />
@@ -533,26 +503,24 @@ export const TaskForm = ({
                             <SelectContent className="bg-card border-white/10 z-[200]">
                               {showNoneOption && (
                                 <SelectItem
-                                  value="none"
+                                  value={NONE_VALUE}
                                   className="text-muted-foreground italic"
                                 >
                                   None
                                 </SelectItem>
                               )}
-                              {attr.levels
-                                .filter((level) => level !== 'none')
-                                .map((level) => (
-                                  <SelectItem
-                                    key={level}
-                                    value={level}
-                                    className={cn(
-                                      'capitalize font-semibold',
-                                      getRankFieldStyle(attr.name, level),
-                                    )}
-                                  >
-                                    {level}
-                                  </SelectItem>
-                                ))}
+                              {attr.levels.filter(Boolean).map((level) => (
+                                <SelectItem
+                                  key={level}
+                                  value={level}
+                                  className={cn(
+                                    'capitalize font-semibold',
+                                    getRankFieldStyle(attr.name, level),
+                                  )}
+                                >
+                                  {level}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           {hasError && (
@@ -582,7 +550,7 @@ export const TaskForm = ({
                     placeholder="Additional details..."
                     className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
                     {...field}
-                    value={field.value || ''}
+                    value={field.value ?? ''}
                   />
                 </FormControl>
               </FormItem>

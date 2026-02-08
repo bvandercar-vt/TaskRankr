@@ -1,13 +1,9 @@
 /**
- * @fileoverview Drizzle ORM schema definitions, Zod validation schemas, and
- * TypeScript types that are inferred from said schemas, including constants
- * (ie, string enums) that are relevant to these schemas (such as task status,
- * priority, etc.).
+ * @fileoverview Task-related Drizzle schema, Zod validation, types, and enums.
  */
 
 import { relations, sql } from 'drizzle-orm'
 import {
-  boolean,
   integer,
   pgTable,
   serial,
@@ -21,9 +17,6 @@ import {
   createUpdateSchema,
 } from 'drizzle-zod'
 import { z } from 'zod'
-
-// Re-export auth models
-export * from './models/auth'
 
 // Status constants and types
 export enum TaskStatus {
@@ -41,7 +34,6 @@ export enum SubtaskSortMode {
 
 // Attribute level constants and types
 export enum Priority {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',
@@ -50,7 +42,6 @@ export enum Priority {
 }
 
 export enum Ease {
-  NONE = 'none',
   EASIEST = 'easiest',
   EASY = 'easy',
   MEDIUM = 'medium',
@@ -59,7 +50,6 @@ export enum Ease {
 }
 
 export enum Enjoyment {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',
@@ -68,7 +58,6 @@ export enum Enjoyment {
 }
 
 export enum Time {
-  NONE = 'none',
   LOWEST = 'lowest',
   LOW = 'low',
   MEDIUM = 'medium',
@@ -198,46 +187,3 @@ export const updateTaskSchema = createUpdateSchema(tasks, taskSchemaCommon)
 export type UpdateTask = z.infer<typeof updateTaskSchema>
 
 export type MutateTask = CreateTask | UpdateTask
-
-// User Settings
-export const userSettings = pgTable('user_settings', {
-  userId: varchar('user_id').primaryKey(),
-  autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),
-  enableInProgressStatus: boolean('enable_in_progress_status')
-    .default(true)
-    .notNull(),
-  enableInProgressTime: boolean('enable_in_progress_time')
-    .default(true)
-    .notNull(),
-  alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
-    .default(true)
-    .notNull(),
-  sortBy: text('sort_by').default('priority').notNull(),
-  // Attribute visibility settings
-  priorityVisible: boolean('priority_visible').default(true).notNull(),
-  priorityRequired: boolean('priority_required').default(true).notNull(),
-  easeVisible: boolean('ease_visible').default(true).notNull(),
-  easeRequired: boolean('ease_required').default(true).notNull(),
-  enjoymentVisible: boolean('enjoyment_visible').default(true).notNull(),
-  enjoymentRequired: boolean('enjoyment_required').default(true).notNull(),
-  timeVisible: boolean('time_visible').default(true).notNull(),
-  timeRequired: boolean('time_required').default(true).notNull(),
-})
-
-const userSettingsCommon = {
-  userId: z.string().min(1),
-  sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE),
-}
-
-export const userSettingsSchema = createSelectSchema(
-  userSettings,
-  userSettingsCommon,
-)
-
-export const insertUserSettingsSchema = createInsertSchema(
-  userSettings,
-  userSettingsCommon,
-)
-
-export type UserSettings = z.infer<typeof userSettingsSchema>
-export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>
