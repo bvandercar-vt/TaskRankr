@@ -2,11 +2,11 @@
  * @fileoverview Demo task data for guest mode.
  */
 
-import type { TaskResponse } from '~/shared/schema'
+import type { TaskWithSubtasks } from '~/shared/schema'
 
 export const createDemoTasks = (nextIdRef: {
   current: number
-}): TaskResponse[] => {
+}): TaskWithSubtasks[] => {
   const now = new Date()
 
   const getNextId = () => {
@@ -18,7 +18,7 @@ export const createDemoTasks = (nextIdRef: {
   const researchSubtaskId = getNextId()
   const completedWithSubtaskId = getNextId()
 
-  const demoTasks: TaskResponse[] = [
+  const demoTasks: TaskWithSubtasks[] = [
     {
       id: getNextId(),
       userId: 'local',

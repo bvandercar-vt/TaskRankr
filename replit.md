@@ -27,20 +27,20 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 ### Offline-First Architecture
 The app uses a local-first data model where all changes happen locally first, then sync to the server:
 
-- **LocalStateProvider** (`client/src/components/LocalStateProvider.tsx`):
+- **LocalStateProvider** (`client/src/components/providers/LocalStateProvider.tsx`):
   - Manages tasks and settings in localStorage
   - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-guest-*` for guest mode
   - All CRUD operations update local state immediately
   - Enqueues sync operations when `shouldSync` is true (authenticated mode)
   - Uses negative temp IDs for locally-created tasks until synced
 
-- **SyncProvider** (`client/src/components/SyncProvider.tsx`):
+- **SyncProvider** (`client/src/components/providers/SyncProvider.tsx`):
   - Processes sync queue in background when online and authenticated
   - Maintains idMap to resolve temp IDs to real server IDs during batch processing
   - Fetches server data on auth (waits for queue to drain first)
   - Shows offline/syncing status via StatusBanner
 
-- **GuestModeProvider** (`client/src/components/GuestModeProvider.tsx`):
+- **GuestModeProvider** (`client/src/components/providers/GuestModeProvider.tsx`):
   - Simple flag for guest mode (`isGuestMode`)
   - When in guest mode: uses LocalStateProvider with `shouldSync=false`
   - Demo data (sample tasks) created on first entry to help users learn the app
@@ -84,13 +84,14 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
-│       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
-│       │   ├── SyncProvider.tsx  # Background sync to API
-│       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
-│       │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
+│       │   ├── providers/        # Context providers
+│       │   │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
+│       │   │   ├── SyncProvider.tsx  # Background sync to API
+│       │   │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
+│       │   │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
+│       │   │   └── TaskDialogProvider.tsx  # Context for task dialog state
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
-│       │   ├── TaskDialogProvider.tsx  # Context for task dialog state
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
 │       │   ├── ConfirmDeleteDialog.tsx
 │       │   └── SortInfo.tsx      # Reusable sort explanation component
