@@ -269,7 +269,7 @@ const Settings = () => {
         </Card>
 
         <div className="mt-8">
-          <SortInfo testIdPrefix="settings" />
+          <SortInfo />
         </div>
 
         {!isGuestMode && (

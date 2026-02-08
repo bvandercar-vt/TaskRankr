@@ -16,7 +16,6 @@ import {
 
 import { Button } from '@/components/primitives/Button'
 import { TimeInput } from '@/components/primitives/forms/TimeInput'
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -198,7 +197,6 @@ export const ChangeStatusDialog = ({
                   onHoursChange={setHours}
                   onMinutesChange={setMinutes}
                   onBlur={handleTimeChange}
-                  testIdPrefix="input"
                 />
               </div>
             )}

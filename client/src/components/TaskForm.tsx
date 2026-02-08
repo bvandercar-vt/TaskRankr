@@ -47,7 +47,6 @@ import {
   FormMessage,
 } from '@/components/primitives/forms/Form'
 import { Input } from '@/components/primitives/forms/Input'
-import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   Select,
   SelectContent,
@@ -56,6 +55,7 @@ import {
   SelectValue,
 } from '@/components/primitives/forms/Select'
 import { Textarea } from '@/components/primitives/forms/Textarea'
+import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   Popover,
   PopoverContent,
@@ -784,7 +784,6 @@ export const TaskForm = ({
                     )
                   }}
                   className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                  testIdPrefix="input-time"
                 />
               </div>
             )}

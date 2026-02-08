@@ -95,7 +95,7 @@ const HowToUse = () => {
                       You can customize which rank fields are visible in
                       Settings.
                     </div>
-                    <SortInfo defaultExpanded={false} testIdPrefix="howto" />
+                    <SortInfo defaultExpanded={false} />
                   </>
                 }
                 testId="card-sorting"

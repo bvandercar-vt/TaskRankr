@@ -7,7 +7,7 @@ type TimeInputProps = {
   onMinutesChange: (minutes: number) => void
   onBlur?: () => void
   className?: string
-  testIdPrefix?: string
+  'data-testid'?: string
 }
 
 export const TimeInput = ({
@@ -17,9 +17,9 @@ export const TimeInput = ({
   onMinutesChange,
   onBlur,
   className = 'w-16 h-8 text-center text-sm',
-  testIdPrefix = 'input-time',
+  'data-testid': testId = 'time-input',
 }: TimeInputProps) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2" data-testid={testId}>
     <div className="flex items-center gap-1">
       <Input
         type="number"
@@ -30,7 +30,7 @@ export const TimeInput = ({
         }
         onBlur={onBlur}
         className={className}
-        data-testid={`${testIdPrefix}-hours`}
+        data-testid={`${testId}-hours`}
       />
       <span className="text-xs text-muted-foreground">h</span>
     </div>
@@ -47,7 +47,7 @@ export const TimeInput = ({
         }
         onBlur={onBlur}
         className={className}
-        data-testid={`${testIdPrefix}-minutes`}
+        data-testid={`${testId}-minutes`}
       />
       <span className="text-xs text-muted-foreground">m</span>
     </div>
