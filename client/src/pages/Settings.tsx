@@ -3,7 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import {
@@ -78,6 +78,39 @@ const SwitchCard = (props: SwitchSettingProps) => (
     <SwitchSetting {...props} />
   </Card>
 )
+
+const CollapsibleCard = ({
+  title,
+  children,
+  className,
+  'data-testid': testId,
+}: React.PropsWithChildren<{
+  title: string
+  className?: string
+  'data-testid'?: string
+}>) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <Card className={className}>
+      <button
+        type="button"
+        className="flex items-center justify-between w-full text-left"
+        onClick={() => setOpen(!open)}
+        data-testid={testId}
+      >
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        <ChevronDown
+          className={cn(
+            IconSizeStyle.HW4,
+            'text-muted-foreground transition-transform',
+            open && 'rotate-180',
+          )}
+        />
+      </button>
+      {open && <div className="mt-4">{children}</div>}
+    </Card>
+  )
+}
 
 const Settings = () => {
   const { settings, updateSetting, updateFieldFlags } = useSettings()
@@ -271,10 +304,11 @@ const Settings = () => {
           <SortInfo testIdPrefix="settings" />
         </div>
 
-        <Card className="mt-8">
-          <h3 className="font-semibold text-foreground mb-3 text-center">
-            Data
-          </h3>
+        <CollapsibleCard
+          title="Import/Export Data"
+          className="mt-8"
+          data-testid="collapsible-import-export"
+        >
           <div className="flex flex-wrap justify-center gap-3">
             <Button
               variant="outline"
@@ -308,7 +342,7 @@ const Settings = () => {
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.
           </p>
-        </Card>
+        </CollapsibleCard>
 
         {!isGuestMode && (
           <Card className="mt-4 flex items-center justify-between">
@@ -339,10 +373,11 @@ const Settings = () => {
           </Card>
         )}
 
-        <Card className="mt-8">
-          <h3 className="font-semibold text-foreground mb-2">
-            Clear Local Data
-          </h3>
+        <CollapsibleCard
+          title="Clear Local Data"
+          className="mt-8"
+          data-testid="collapsible-clear-local-data"
+        >
           <p className="text-sm text-muted-foreground mb-3">
             Remove all locally cached data. Your synced data on the server
             won't be affected.
@@ -383,7 +418,7 @@ const Settings = () => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </Card>
+        </CollapsibleCard>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
