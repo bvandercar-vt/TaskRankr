@@ -6,6 +6,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import {
   Dialog,
   DialogContent,
@@ -13,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { useCreateTask, useUpdateTask } from '@/hooks/useTasks'
+import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
+import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
 import type { CreateTask, MutateTask, Task } from '~/shared/schema'
-import { TaskForm, type TaskFormProps } from '../TaskForm'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -37,7 +38,7 @@ export const useTaskDialog = () => {
 interface DialogProps
   extends Pick<
     TaskFormProps,
-    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild'
+    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -58,6 +59,7 @@ const DesktopDialog = ({
   onClose,
   onAddChild,
   onEditChild,
+  onSubtaskDelete,
 }: DialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
@@ -91,6 +93,7 @@ const DesktopDialog = ({
               onCancel={onClose}
               onAddChild={onAddChild}
               onEditChild={onEditChild}
+              onSubtaskDelete={onSubtaskDelete}
             />
           </div>
         </div>
@@ -108,6 +111,7 @@ const MobileDialog = ({
   onClose,
   onAddChild,
   onEditChild,
+  onSubtaskDelete,
 }: Omit<DialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
@@ -127,6 +131,7 @@ const MobileDialog = ({
             onCancel={onClose}
             onAddChild={onAddChild}
             onEditChild={onEditChild}
+            onSubtaskDelete={onSubtaskDelete}
           />
         </div>
       </motion.div>
@@ -144,8 +149,14 @@ export const TaskDialogProvider = ({
   const [parentId, setParentId] = useState<number | undefined>(undefined)
   const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
 
+  const [subtaskToDelete, setSubtaskToDelete] = useState<{
+    id: number
+    name: string
+  } | null>(null)
+
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
+  const deleteTask = useDeleteTask()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -234,6 +245,7 @@ export const TaskDialogProvider = ({
         onClose={closeDialog}
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
+        onSubtaskDelete={setSubtaskToDelete}
       />
 
       <MobileDialog
@@ -245,6 +257,19 @@ export const TaskDialogProvider = ({
         onClose={closeDialog}
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
+        onSubtaskDelete={setSubtaskToDelete}
+      />
+
+      <ConfirmDeleteDialog
+        open={!!subtaskToDelete}
+        onOpenChange={(open) => !open && setSubtaskToDelete(null)}
+        taskName={subtaskToDelete?.name ?? ''}
+        onConfirm={() => {
+          if (subtaskToDelete) {
+            deleteTask.mutate(subtaskToDelete.id)
+            setSubtaskToDelete(null)
+          }
+        }}
       />
     </TaskDialogContext.Provider>
   )

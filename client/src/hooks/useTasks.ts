@@ -131,3 +131,36 @@ export const useDeleteTask = () => {
     },
   })
 }
+
+export const useReorderSubtasks = () => {
+  const localState = useLocalStateSafe()
+
+  return useMutation({
+    // biome-ignore lint/suspicious/useAwait: expects a promise
+    mutationFn: async ({
+      parentId,
+      orderedIds,
+    }: {
+      parentId: number
+      orderedIds: number[]
+    }) => {
+      if (!localState) {
+        throw new Error('Local state not initialized')
+      }
+      localState.reorderSubtasks(parentId, orderedIds)
+    },
+  })
+}
+
+export const sortTasksByOrder = (
+  tasks: TaskWithSubtasks[],
+  order: number[],
+): TaskWithSubtasks[] =>
+  [...tasks].sort((a, b) => {
+    const indexA = order.indexOf(a.id)
+    const indexB = order.indexOf(b.id)
+    return (
+      (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
+      (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
+    )
+  })
