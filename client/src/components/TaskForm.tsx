@@ -48,14 +48,15 @@ import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
-  type MutateTaskRequest,
+  type MutateTask,
   RANK_FIELDS_CRITERIA,
   type RankField,
   type Task,
+  type TaskWithSubtasks,
 } from '~/shared/schema'
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskRequest) => void
+  onSubmit: (data: MutateTask) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -85,8 +86,8 @@ export const TaskForm = ({
 
   const subtasks = useMemo(() => {
     if (!initialData || !allTasks) return []
-    const flattenTasks = (tasks: typeof allTasks): typeof allTasks => {
-      const result: typeof allTasks = []
+    const flattenTasks = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] => {
+      const result: TaskWithSubtasks[] = []
       for (const t of tasks) {
         result.push(t)
         if (t.subtasks.length > 0) {
@@ -100,9 +101,9 @@ export const TaskForm = ({
     const collectDescendants = (
       thisParentId: number,
       depth: number,
-    ): Array<(typeof allTasks)[number] & { depth: number }> => {
+    ): Array<TaskWithSubtasks & { depth: number }> => {
       const children = flatList.filter((t) => t.parentId === thisParentId)
-      const result: Array<(typeof allTasks)[number] & { depth: number }> = []
+      const result: Array<TaskWithSubtasks & { depth: number }> = []
       for (const child of children) {
         result.push({ ...child, depth })
         result.push(...collectDescendants(child.id, depth + 1))
@@ -133,7 +134,7 @@ export const TaskForm = ({
 
   const formSchemaToUse = baseFormSchema
 
-  const form = useForm<MutateTaskRequest>({
+  const form = useForm<MutateTask>({
     resolver: zodResolver(formSchemaToUse),
     mode: 'onChange',
     defaultValues: initialData
@@ -201,7 +202,7 @@ export const TaskForm = ({
     )
   }, [initialData, parentId, form])
 
-  const onSubmitWithNulls = (data: MutateTaskRequest) => {
+  const onSubmitWithNulls = (data: MutateTask) => {
     const formattedData = {
       ...data,
       priority: data.priority === 'none' ? null : data.priority,

@@ -10,7 +10,7 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/Badge'
-import { useTaskDialog } from '@/components/TaskDialogProvider'
+import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { getIsVisible, useSettings } from '@/hooks/useSettings'
 import {
@@ -23,8 +23,8 @@ import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   RANK_FIELDS_CRITERIA,
-  type TaskResponse,
   type TaskStatus,
+  type TaskWithSubtasks,
 } from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
 
@@ -50,21 +50,10 @@ const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
 )
 
 interface TaskCardProps {
-  task: TaskResponse
+  task: TaskWithSubtasks
   level?: number
   showRestore?: boolean
   showCompletedDate?: boolean
-}
-
-// Format date helper
-const formatCompletedDate = (dateValue: Date | string | null | undefined) => {
-  if (!dateValue) return null
-  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 // Format duration helper (milliseconds to human-readable)
@@ -85,23 +74,16 @@ const formatDuration = (ms: number) => {
   }
 }
 
-// Calculate current accumulated time for a single task (not including subtasks)
-const getTaskOwnTime = (task: TaskResponse): number => {
+// Calculate total accumulated time including all subtasks recursively
+const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
+  // Calculate for this task
   let total = task.inProgressTime
   if (task.status === 'in_progress' && task.inProgressStartedAt) {
-    const startedAt =
-      typeof task.inProgressStartedAt === 'string'
-        ? new Date(task.inProgressStartedAt)
-        : task.inProgressStartedAt
-    const elapsed = Date.now() - startedAt.getTime()
+    const elapsed = Date.now() - task.inProgressStartedAt.getTime()
     total += elapsed
   }
-  return total
-}
 
-// Calculate total accumulated time including all subtasks recursively
-const getTotalAccumulatedTime = (task: TaskResponse): number => {
-  let total = getTaskOwnTime(task)
+  // Add cumulative time from subtasks recursively
   for (const subtask of task.subtasks) {
     total += getTotalAccumulatedTime(subtask)
   }
@@ -169,7 +151,7 @@ export const TaskCard = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          'relative flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 select-none cursor-pointer',
+          'relative flex items-center gap-2 pr-2 pl-1 py-1 rounded-lg border transition-all duration-200 select-none cursor-pointer',
           isNestedWithStatus
             ? 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]'
             : isInProgress
@@ -275,7 +257,12 @@ export const TaskCard = ({
               <div className="flex flex-col items-end mt-0.5">
                 {task.completedAt && (
                   <span className="text-[10px] text-muted-foreground">
-                    Completed: {formatCompletedDate(task.completedAt)}
+                    Completed:{' '}
+                    {task.completedAt.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </span>
                 )}
                 {settings.enableInProgressTime &&
