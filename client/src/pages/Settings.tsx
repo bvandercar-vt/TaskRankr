@@ -3,12 +3,24 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, Download, LogOut, Upload } from 'lucide-react'
+import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { Switch } from '@/components/primitives/forms/Switch'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/primitives/overlays/AlertDialog'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
@@ -195,7 +207,7 @@ const Settings = () => {
           </Card>
         </div>
 
-        <Card className="mt-8">
+        <Card className="mt-4">
           <h3 className="font-semibold text-foreground mb-4">
             Attribute Settings
           </h3>
@@ -260,10 +272,40 @@ const Settings = () => {
           <SortInfo testIdPrefix="settings" />
         </div>
 
-        <Card className="mt-8">
-          <h3 className="font-semibold text-foreground mb-3 text-center">
-            Data
-          </h3>
+        {!isGuestMode && (
+          <Card className="mt-8 flex items-center justify-between">
+            <div>
+              <p
+                className="font-semibold text-foreground"
+                data-testid="text-user-name"
+              >
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="text-user-email"
+              >
+                {user?.email}
+              </p>
+            </div>
+            <a href={authPaths.logout}>
+              <Button
+                variant="outline"
+                className="gap-2"
+                data-testid="button-logout"
+              >
+                <LogOut className={IconSizeStyle.HW4} />
+                Log Out
+              </Button>
+            </a>
+          </Card>
+        )}
+
+        <CollapsibleCard
+          title="Import/Export Data"
+          className="mt-8 bg-card/50"
+          data-testid="collapsible-import-export"
+        >
           <div className="flex flex-wrap justify-center gap-3">
             <Button
               variant="outline"
@@ -297,36 +339,54 @@ const Settings = () => {
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.
           </p>
-        </Card>
+        </CollapsibleCard>
 
-        {!isGuestMode && (
-          <Card className="mt-4 flex items-center justify-between">
-            <div>
-              <p
-                className="font-semibold text-foreground"
-                data-testid="text-user-name"
-              >
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="text-user-email"
-              >
-                {user?.email}
-              </p>
-            </div>
-            <a href={authPaths.logout}>
+        <CollapsibleCard
+          title="Clear Local Data"
+          className="mt-3 bg-card/50"
+          data-testid="collapsible-clear-local-data"
+        >
+          <p className="text-sm text-muted-foreground mb-3">
+            Remove all locally cached data. Your synced data on the server won't
+            be affected.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-2"
-                data-testid="button-logout"
+                className="gap-2 text-red-400/70 border-red-400/30"
+                data-testid="button-clear-local-storage"
               >
-                <LogOut className={IconSizeStyle.HW4} />
-                Log Out
+                <Trash2 className={IconSizeStyle.HW4} />
+                Clear Local Storage
               </Button>
-            </a>
-          </Card>
-        )}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear Local Storage?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all locally cached data and reload the app.
+                  Your synced data on the server won't be affected.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel data-testid="button-cancel-clear">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    localStorage.clear()
+                    toast({ title: 'Local storage cleared' })
+                    window.location.reload()
+                  }}
+                  data-testid="button-confirm-clear"
+                >
+                  Clear
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CollapsibleCard>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
