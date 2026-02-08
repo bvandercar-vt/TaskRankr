@@ -69,11 +69,7 @@ const DateCreatedInput = ({ value, onChange }: DateCreatedInputProps) => (
               !value && 'text-muted-foreground',
             )}
           >
-            {value ? (
-              format(value, 'PPP')
-            ) : (
-              <span>Pick a date</span>
-            )}
+            {value ? format(value, 'PPP') : <span>Pick a date</span>}
             <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
           </Button>
         </FormControl>
