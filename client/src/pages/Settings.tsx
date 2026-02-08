@@ -3,9 +3,9 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
-import { Link } from 'wouter'
+import { Download, LogOut, Trash2, Upload } from 'lucide-react'
 
+import { BackButton } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
@@ -170,11 +170,7 @@ const Settings = () => {
     <div className="min-h-screen bg-background text-foreground">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href={Routes.HOME}>
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ArrowLeft className={IconSizeStyle.HW5} />
-            </Button>
-          </Link>
+          <BackButton />
           <h1 className="text-2xl font-bold" data-testid="heading-settings">
             Settings
           </h1>
