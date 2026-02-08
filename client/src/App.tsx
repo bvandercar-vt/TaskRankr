@@ -14,7 +14,10 @@ import {
   GuestModeProvider,
   useGuestMode,
 } from '@/components/providers/GuestModeProvider'
-import { LocalStateProvider } from '@/components/providers/LocalStateProvider'
+import {
+  LocalStateProvider,
+  StorageMode,
+} from '@/components/providers/LocalStateProvider'
 import { SyncProvider, useSyncSafe } from '@/components/providers/SyncProvider'
 import { TaskDialogProvider } from '@/components/providers/TaskDialogProvider'
 import { useAuth } from '@/hooks/useAuth'
@@ -30,14 +33,15 @@ import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
 import { authPaths } from '~/shared/constants'
+import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 
 const Router = () => (
   <Switch>
-    <Route path="/" component={Home} />
-    <Route path="/completed" component={Completed} />
-    <Route path="/settings" component={Settings} />
-    <Route path="/how-to-use" component={HowToUse} />
+    <Route path={Routes.HOME} component={Home} />
+    <Route path={Routes.COMPLETED} component={Completed} />
+    <Route path={Routes.SETTINGS} component={Settings} />
+    <Route path={Routes.HOW_TO_USE} component={HowToUse} />
     <Route component={NotFound} />
   </Switch>
 )
@@ -48,7 +52,7 @@ const StatusBanner = () => {
   const [location] = useLocation()
 
   // Hide guest mode banner on How To Use page
-  if (isGuestMode && location === '/how-to-use') {
+  if (isGuestMode && location === Routes.HOW_TO_USE) {
     return null
   }
 
@@ -143,7 +147,7 @@ const AuthenticatedApp = () => {
   }
 
   const shouldSync = isAuthenticated && !isGuestMode
-  const storageMode = isGuestMode ? 'guest' : 'auth'
+  const storageMode = isGuestMode ? StorageMode.GUEST : StorageMode.AUTH
 
   return (
     <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
