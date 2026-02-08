@@ -91,54 +91,40 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
   time: SortDirection.ASC,
 }
 
+const SORT_CHAINS: Record<SortOption, SortOption[]> = {
+  date: [SortOption.DATE],
+  priority: [SortOption.PRIORITY, SortOption.EASE, SortOption.ENJOYMENT],
+  ease: [SortOption.EASE, SortOption.PRIORITY, SortOption.ENJOYMENT],
+  enjoyment: [SortOption.ENJOYMENT, SortOption.PRIORITY, SortOption.EASE],
+  time: [SortOption.TIME, SortOption.PRIORITY, SortOption.EASE],
+}
+
+const compareByField = (
+  a: TaskWithSubtasks,
+  b: TaskWithSubtasks,
+  field: SortOption,
+): number => {
+  if (field === SortOption.DATE) {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  }
+  const direction = SORT_DIRECTIONS[field]
+  const valA = getLevelWeight(a[field])
+  const valB = getLevelWeight(b[field])
+  return direction === SortDirection.DESC ? valB - valA : valA - valB
+}
+
 const sortTasks = (
   tasks: TaskWithSubtasks[],
-  sort: SortOption,
+  fields: SortOption[],
 ): TaskWithSubtasks[] => {
   const sorted = [...tasks]
-  if (sort === SortOption.DATE) {
-    sorted.sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime()
-      const dateB = new Date(b.createdAt).getTime()
-      return dateB - dateA
-    })
-  } else {
-    sorted.sort((a, b) => {
-      const direction: SortDirection = SORT_DIRECTIONS[sort]
-      const valA = getLevelWeight(a[sort])
-      const valB = getLevelWeight(b[sort])
-
-      if (valA !== valB) {
-        return direction === SortDirection.DESC ? valB - valA : valA - valB
-      }
-
-      const pA = getLevelWeight(a.priority)
-      const pB = getLevelWeight(b.priority)
-      const eA = getLevelWeight(a.ease)
-      const eB = getLevelWeight(b.ease)
-      const jA = getLevelWeight(a.enjoyment)
-      const jB = getLevelWeight(b.enjoyment)
-
-      if (sort === SortOption.PRIORITY) {
-        if (eA !== eB) return eA - eB
-        return jB - jA
-      }
-      if (sort === SortOption.EASE) {
-        if (pA !== pB) return pB - pA
-        return jB - jA
-      }
-      if (sort === SortOption.ENJOYMENT) {
-        if (pA !== pB) return pB - pA
-        return eA - eB
-      }
-      if (sort === SortOption.TIME) {
-        if (pA !== pB) return pB - pA
-        if (eA !== eB) return eA - eB
-        return pB - pA
-      }
-      return 0
-    })
-  }
+  sorted.sort((a, b) => {
+    for (const field of fields) {
+      const cmp = compareByField(a, b, field)
+      if (cmp !== 0) return cmp
+    }
+    return 0
+  })
   return sorted
 }
 
@@ -183,7 +169,7 @@ const Home = () => {
         return sortTasksByOrder(result, parentSubtaskOrder)
       }
 
-      return sortTasks(result, sort)
+      return sortTasks(result, SORT_CHAINS[sort])
     },
     [],
   )
@@ -260,29 +246,11 @@ const Home = () => {
       (t) => t.status === TaskStatus.PINNED,
     )
 
-    // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    let sortedPinned: TaskWithSubtasks[]
-    if (settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY) {
-      // Sort by priority first, with current sortBy as secondary
-      sortedPinned = [...pinnedOnly].sort((a, b) => {
-        const pA = getLevelWeight(a.priority)
-        const pB = getLevelWeight(b.priority)
-        if (pA !== pB) return pB - pA // Priority descending
-
-        // Secondary sort by current sortBy
-        if (sortBy === SortOption.DATE) {
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-        }
-        const direction: SortDirection = SORT_DIRECTIONS[sortBy]
-        const valA = getLevelWeight(a[sortBy])
-        const valB = getLevelWeight(b[sortBy])
-        return direction === SortDirection.DESC ? valB - valA : valA - valB
-      })
-    } else {
-      sortedPinned = sortTasks(pinnedOnly, sortBy)
-    }
+    const pinnedSortChain =
+      settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
+        ? [SortOption.PRIORITY, ...SORT_CHAINS[sortBy]]
+        : SORT_CHAINS[sortBy]
+    const sortedPinned = sortTasks(pinnedOnly, pinnedSortChain)
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
