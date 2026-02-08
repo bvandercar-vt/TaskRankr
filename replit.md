@@ -69,7 +69,7 @@ The app uses a local-first data model where all changes happen locally first, th
 ### Data Storage
 - **Database**: PostgreSQL (Neon-backed)
 - **ORM**: Drizzle ORM with drizzle-zod for schema-to-validation integration
-- **Schema Location**: `shared/schema/` - split into `tasks.zod.ts` (tasks table, enums, rank fields) and `settings.zod.ts` (user_settings table, fieldConfig), re-exported from `index.ts`
+- **Schema Location**: `shared/schema/` - define tables for database as well as zod parsing schemas.
 - **Migrations**: Drizzle Kit for schema migrations (`drizzle-kit push`)
 
 ### Project Structure

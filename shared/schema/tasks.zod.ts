@@ -1,6 +1,5 @@
 /**
- * @fileoverview Task-related Drizzle schema, Zod validation, types, and enums
- * (status, priority, ease, enjoyment, time, sort options, subtask sort mode).
+ * @fileoverview Task-related Drizzle schema, Zod validation, types, and enums.
  */
 
 import { relations, sql } from 'drizzle-orm'
