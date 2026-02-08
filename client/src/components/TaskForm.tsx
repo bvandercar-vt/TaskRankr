@@ -61,7 +61,7 @@ import {
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
-import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import {
   sortTasksByOrder,
   useReorderSubtasks,
@@ -344,8 +344,8 @@ export const TaskForm = ({
     () =>
       new Map(
         RANK_FIELDS_CRITERIA.map(({ name }) => {
-          const visible = getIsVisible(name, settings)
-          const required = visible && getIsRequired(name, settings)
+          const { visible, required: rawRequired } = settings.fieldConfig[name]
+          const required = visible && rawRequired
           return [name, { visible, required }]
         }),
       ),

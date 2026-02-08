@@ -19,6 +19,9 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
+  DEFAULT_FIELD_CONFIG,
+  type FieldConfig,
+  RANK_FIELDS_CRITERIA,
   SubtaskSortMode,
   TaskStatus,
   type TaskWithSubtasks,
@@ -103,6 +106,25 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
   } catch {
     return fallback
   }
+}
+
+const migrateSettings = (raw: Record<string, unknown>): UserSettings => {
+  const base = { ...DEFAULT_SETTINGS, ...raw }
+
+  if (!raw.fieldConfig) {
+    const migrated = { ...DEFAULT_FIELD_CONFIG } as FieldConfig
+    for (const { name } of RANK_FIELDS_CRITERIA) {
+      const vis = raw[`${name}Visible`]
+      const req = raw[`${name}Required`]
+      migrated[name] = {
+        visible: typeof vis === 'boolean' ? vis : true,
+        required: typeof req === 'boolean' ? req : true,
+      }
+    }
+    base.fieldConfig = migrated
+  }
+
+  return base as UserSettings
 }
 
 const updateTaskInTree = (
@@ -197,9 +219,8 @@ export const LocalStateProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   useEffect(() => {
-    const loadedSettings = loadFromStorage(
-      storageKeys.settings,
-      DEFAULT_SETTINGS,
+    const loadedSettings = migrateSettings(
+      loadFromStorage<Record<string, unknown>>(storageKeys.settings, DEFAULT_SETTINGS as unknown as Record<string, unknown>),
     )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)

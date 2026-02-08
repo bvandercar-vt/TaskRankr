@@ -9,6 +9,7 @@ import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -119,6 +120,28 @@ export type RankFieldValueMap = {
   time: Time
 }
 
+export type FieldFlags = { visible: boolean; required: boolean }
+export type FieldConfig = Record<RankField, FieldFlags>
+
+const fieldFlagsSchema = z.object({
+  visible: z.boolean(),
+  required: z.boolean(),
+})
+
+export const fieldConfigSchema: z.ZodType<FieldConfig> = z.object({
+  priority: fieldFlagsSchema,
+  ease: fieldFlagsSchema,
+  enjoyment: fieldFlagsSchema,
+  time: fieldFlagsSchema,
+})
+
+export const DEFAULT_FIELD_CONFIG: FieldConfig = {
+  priority: { visible: true, required: true },
+  ease: { visible: true, required: true },
+  enjoyment: { visible: true, required: true },
+  time: { visible: true, required: true },
+}
+
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Owner of the task
@@ -209,20 +232,16 @@ export const userSettings = pgTable('user_settings', {
     .default(true)
     .notNull(),
   sortBy: text('sort_by').default('priority').notNull(),
-  // Attribute visibility settings
-  priorityVisible: boolean('priority_visible').default(true).notNull(),
-  priorityRequired: boolean('priority_required').default(true).notNull(),
-  easeVisible: boolean('ease_visible').default(true).notNull(),
-  easeRequired: boolean('ease_required').default(true).notNull(),
-  enjoymentVisible: boolean('enjoyment_visible').default(true).notNull(),
-  enjoymentRequired: boolean('enjoyment_required').default(true).notNull(),
-  timeVisible: boolean('time_visible').default(true).notNull(),
-  timeRequired: boolean('time_required').default(true).notNull(),
+  fieldConfig: jsonb('field_config')
+    .$type<FieldConfig>()
+    .default(DEFAULT_FIELD_CONFIG)
+    .notNull(),
 })
 
 const userSettingsCommon = {
   userId: z.string().min(1),
   sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE),
+  fieldConfig: fieldConfigSchema.default(DEFAULT_FIELD_CONFIG),
 }
 
 export const userSettingsSchema = createSelectSchema(

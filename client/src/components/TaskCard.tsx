@@ -12,7 +12,7 @@ import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/Badge'
 import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
-import { getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import {
   useDeleteTask,
   useSetTaskStatus,
@@ -237,7 +237,7 @@ export const TaskCard = ({
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
               {RANK_FIELDS_CRITERIA.map(({ name: field }) => {
-                if (!getIsVisible(field, settings)) return null
+                if (!settings.fieldConfig[field].visible) return null
                 const value = task[field]
                 return (
                   <TaskBadge

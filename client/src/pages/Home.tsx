@@ -33,7 +33,7 @@ import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
-import { getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -478,7 +478,7 @@ const Home = () => {
               onSelect={setSortBy}
             />
             {RANK_FIELDS_CRITERIA.map((field) =>
-              getIsVisible(field.name, settings) ? (
+              settings.fieldConfig[field.name].visible ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}
                   label={'labelShort' in field ? field.labelShort : field.label}

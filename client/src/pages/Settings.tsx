@@ -12,7 +12,7 @@ import { Switch } from '@/components/primitives/forms/Switch'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
-import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import { useSetTaskStatus, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
 import { IconSizeStyle, Routes } from '@/lib/constants'
@@ -69,7 +69,7 @@ const SwitchCard = (props: SwitchSettingProps) => (
 )
 
 const Settings = () => {
-  const { settings, updateSetting, updateVisibility, updateRequired } =
+  const { settings, updateSetting, updateFieldFlags } =
     useSettings()
   const { user } = useAuth()
   const { isGuestMode } = useGuestMode()
@@ -219,33 +219,32 @@ const Settings = () => {
             </thead>
             <tbody>
               {RANK_FIELDS_CRITERIA.map(({ name, label }) => {
-                const isVisible = getIsVisible(name, settings)
-                const isRequired = getIsRequired(name, settings)
+                const { visible, required } = settings.fieldConfig[name]
 
                 return (
                   <tr key={name} className="border-b border-white/5">
                     <td className="py-3 text-foreground">{label}</td>
                     <td className="py-3 text-center">
                       <Checkbox
-                        checked={isVisible}
+                        checked={visible}
                         onCheckedChange={(checked) => {
                           const newVisible = !!checked
-                          updateVisibility(name, newVisible)
-                          if (!newVisible && isRequired) {
-                            updateRequired(name, false)
-                          }
+                          updateFieldFlags(name, {
+                            visible: newVisible,
+                            ...(!newVisible && required ? { required: false } : {}),
+                          })
                         }}
                         data-testid={`checkbox-${name}-visible`}
                       />
                     </td>
                     <td className="py-3 text-center">
                       <Checkbox
-                        checked={isRequired}
+                        checked={required}
                         onCheckedChange={(checked) =>
-                          updateRequired(name, !!checked)
+                          updateFieldFlags(name, { required: !!checked })
                         }
-                        disabled={!isVisible}
-                        className={!isVisible ? 'opacity-50' : ''}
+                        disabled={!visible}
+                        className={!visible ? 'opacity-50' : ''}
                         data-testid={`checkbox-${name}-required`}
                       />
                     </td>
