@@ -335,7 +335,7 @@ const Settings = () => {
 
         <CollapsibleCard
           title="Import/Export Data"
-          className="mt-8"
+          className="mt-8 bg-card/50"
           data-testid="collapsible-import-export"
         >
           <div className="flex flex-wrap justify-center gap-3">
@@ -375,7 +375,7 @@ const Settings = () => {
 
         <CollapsibleCard
           title="Clear Local Data"
-          className="mt-8"
+          className="mt-8 bg-card/50"
           data-testid="collapsible-clear-local-data"
         >
           <p className="text-sm text-muted-foreground mb-3">
