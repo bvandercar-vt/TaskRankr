@@ -537,11 +537,11 @@ const Home = () => {
           )}
 
           {hasDemoData && displayedTasks.length > 0 && (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-12 pt-6 flex justify-center">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive bg-destructive/10 hover:text-destructive hover:bg-destructive/15"
                 onClick={deleteDemoData}
                 data-testid="button-delete-demo-data"
               >
