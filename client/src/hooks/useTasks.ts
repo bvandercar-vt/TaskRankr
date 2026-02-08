@@ -8,7 +8,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import type {
   CreateTask,
-  TaskStatus,
+  Task,
   TaskWithSubtasks,
   UpdateTask,
 } from '~/shared/schema'
@@ -38,7 +38,7 @@ export const useTaskParentChain = (parentId?: number) => {
 
   if (!parentId || !tasks) return []
 
-  const chain: { id: number; name: string }[] = []
+  const chain: Pick<Task, 'id' | 'name'>[] = []
   let currentId: number | null | undefined = parentId
 
   while (currentId) {
@@ -109,7 +109,7 @@ export const useSetTaskStatus = () => {
 
   return useMutation({
     // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async ({ id, status }: { id: number; status: TaskStatus }) => {
+    mutationFn: async ({ id, status }: Pick<Task, 'id' | 'status'>) => {
       if (!localState) {
         throw new Error('Local state not initialized')
       }

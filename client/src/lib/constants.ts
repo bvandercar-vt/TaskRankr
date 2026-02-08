@@ -2,7 +2,7 @@
  * @fileoverview Application-wide constants and configuration values
  */
 
-import type { UserSettings } from '~/shared/schema'
+import { SortOption, type UserSettings } from '~/shared/schema'
 
 export const IconSizeStyle = {
   HW4: 'h-4 w-4',
@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   enableInProgressStatus: true,
   enableInProgressTime: true,
   alwaysSortPinnedByPriority: true,
-  sortBy: 'priority',
+  sortBy: SortOption.PRIORITY,
   priorityVisible: true,
   priorityRequired: true,
   easeVisible: true,
