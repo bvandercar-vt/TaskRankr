@@ -1,8 +1,6 @@
 /**
- * @fileoverview Drizzle ORM schema definitions, Zod validation schemas, and
- * TypeScript types that are inferred from said schemas, including constants
- * (ie, string enums) that are relevant to these schemas (such as task status,
- * priority, etc.).
+ * @fileoverview Task-related Drizzle schema, Zod validation, types, and enums
+ * (status, priority, ease, enjoyment, time, sort options, subtask sort mode).
  */
 
 import { relations, sql } from 'drizzle-orm'
