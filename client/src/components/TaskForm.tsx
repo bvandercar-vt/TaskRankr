@@ -21,7 +21,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { type Resolver, zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
 import {
@@ -35,6 +35,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/primitives/Button'
 import { Calendar } from '@/components/primitives/forms/Calendar'
@@ -83,9 +84,7 @@ import {
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
-import { z } from 'zod'
-
-export type MutateTaskArgs = Omit<MutateTask, 'id'>
+import type { MutateTaskContent } from './providers/LocalStateProvider'
 
 interface SortableSubtaskItemProps {
   task: Task & { depth: number }
@@ -199,7 +198,7 @@ const SortableSubtaskItem = ({
 }
 
 export interface TaskFormProps {
-  onSubmit: (data: MutateTaskArgs) => void
+  onSubmit: (data: MutateTaskContent) => void
   isPending: boolean
   initialData?: Task
   parentId?: number | null
@@ -387,15 +386,13 @@ export const TaskForm = ({
 
   const stableResolver = useMemo(
     () =>
-      ((...args: Parameters<ReturnType<typeof zodResolver>>) =>
-        zodResolver(formSchemaRef.current)(...args)) as ReturnType<
-        typeof zodResolver
-      >,
+      (...args: Parameters<Resolver>) =>
+        zodResolver(formSchemaRef.current)(...args),
     [],
   )
 
   const getFormDefaults = useCallback(
-    (data: Task | undefined): MutateTaskArgs =>
+    (data: Task | undefined): MutateTaskContent =>
       data
         ? {
             description: data.description ?? '',
@@ -437,7 +434,7 @@ export const TaskForm = ({
 
   useEffect(() => {
     form.trigger()
-  }, [getRequired, form])
+  }, [form])
 
   const isValid = form.formState.isValid
 

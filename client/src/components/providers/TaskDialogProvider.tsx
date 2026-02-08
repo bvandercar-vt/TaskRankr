@@ -14,13 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import {
-  type MutateTaskArgs,
-  TaskForm,
-  type TaskFormProps,
-} from '@/components/TaskForm'
+import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
 import type { CreateTask, Task } from '~/shared/schema'
+import type { MutateTaskContent } from './LocalStateProvider'
 
 interface TaskDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -206,7 +203,7 @@ export const TaskDialogProvider = ({
     }
   }
 
-  const handleSubmit = (data: MutateTaskArgs) => {
+  const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
       createTask.mutate({ ...data, parentId } as CreateTask, {
         onSuccess: closeDialog,

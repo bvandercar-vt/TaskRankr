@@ -26,16 +26,17 @@ import {
   type UserSettings,
 } from '~/shared/schema'
 
-type CreateTaskArg = Omit<CreateTask, 'userId'>
-type UpdateTaskArg = Omit<UpdateTask, 'id'>
+export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
+export type UpdateTaskContent = Omit<UpdateTask, 'id'>
+export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 
 export type SyncOperation =
   | {
       type: 'create_task'
       tempId: number
-      data: CreateTaskArg
+      data: CreateTaskContent
     }
-  | { type: 'update_task'; id: number; data: UpdateTaskArg }
+  | { type: 'update_task'; id: number; data: UpdateTaskContent }
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
   | { type: 'update_settings'; data: Partial<UserSettings> }
@@ -47,8 +48,8 @@ interface LocalStateContextValue {
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
-  createTask: (data: CreateTaskArg) => TaskWithSubtasks
-  updateTask: (id: number, updates: UpdateTaskArg) => TaskWithSubtasks
+  createTask: (data: CreateTaskContent) => TaskWithSubtasks
+  updateTask: (id: number, updates: UpdateTaskContent) => TaskWithSubtasks
   setTaskStatus: (id: number, status: TaskStatus) => TaskWithSubtasks
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
@@ -290,7 +291,7 @@ export const LocalStateProvider = ({
   }, [])
 
   const createTask = useCallback(
-    (data: CreateTaskArg): TaskWithSubtasks => {
+    (data: CreateTaskContent): TaskWithSubtasks => {
       const tempId = nextIdRef.current--
       localStorage.setItem(
         storageKeys.nextId,
@@ -350,7 +351,7 @@ export const LocalStateProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskArg): TaskWithSubtasks => {
+    (id: number, updates: UpdateTaskContent): TaskWithSubtasks => {
       let updatedTask: TaskWithSubtasks | undefined
       setTasks((prev) =>
         updateTaskInTree(prev, id, (task) => {
