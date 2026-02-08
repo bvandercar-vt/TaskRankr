@@ -415,8 +415,9 @@ export const TaskForm = ({
     form.reset(getFormDefaults(initialData))
   }, [initialData, form, getFormDefaults])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
-    form.trigger()
+    void form.trigger()
   }, [getRequired, form])
 
   const NONE_VALUE = 'none'
