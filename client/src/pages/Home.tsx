@@ -92,10 +92,10 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
 }
 
 const sortTasks = (
-  theseTasks: TaskWithSubtasks[],
+  tasks: TaskWithSubtasks[],
   sort: SortOption,
 ): TaskWithSubtasks[] => {
-  const sorted = [...theseTasks]
+  const sorted = [...tasks]
   if (sort === SortOption.DATE) {
     sorted.sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime()
