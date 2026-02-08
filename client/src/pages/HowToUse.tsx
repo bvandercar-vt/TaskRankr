@@ -12,6 +12,7 @@ import {
   MousePointer2,
   Pin,
   PlayCircle,
+  Settings,
 } from 'lucide-react'
 import { Link } from 'wouter'
 
@@ -118,6 +119,33 @@ const HowToUse = () => {
                 title="Manual Ordering"
                 description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
                 testId="card-manual-ordering"
+              />
+            </div>
+          </section>
+
+          <section data-testid="section-settings">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Settings
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Settings className={IconSizeStyle.HW5} />}
+                title="Customize Your Experience"
+                description={
+                  <>
+                    Visit the{' '}
+                    <Link
+                      href="/settings"
+                      className="text-primary underline underline-offset-2"
+                    >
+                      Settings page
+                    </Link>{' '}
+                    to configure which rank fields are visible or required,
+                    toggle features like auto-pinning new tasks, In Progress
+                    status, time tracking, and more.
+                  </>
+                }
+                testId="card-settings"
               />
             </div>
           </section>
