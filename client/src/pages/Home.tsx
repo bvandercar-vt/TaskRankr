@@ -34,7 +34,7 @@ import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { getIsVisible, useSettings } from '@/hooks/useSettings'
-import { useTasks } from '@/hooks/useTasks'
+import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
@@ -256,14 +256,7 @@ const Home = () => {
       }, [])
 
       if (parentSortMode === 'manual' && parentSubtaskOrder) {
-        return [...result].sort((a, b) => {
-          const indexA = parentSubtaskOrder.indexOf(a.id)
-          const indexB = parentSubtaskOrder.indexOf(b.id)
-          return (
-            (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
-            (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
-          )
-        })
+        return sortTasksByOrder(result, parentSubtaskOrder)
       }
 
       return sortTasks(result, sort)
@@ -292,10 +285,10 @@ const Home = () => {
 
     activeTasks.forEach((task) => {
       if (task.status === 'in_progress') {
-        inProgressList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
+        inProgressList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
       } else if (task.status === 'pinned') {
-        pinnedList.push({ ...task, subtasks: [] } as TaskWithSubtasks)
+        pinnedList.push({ ...task, subtasks: [] })
         hoistedIds.add(task.id)
       }
     })
@@ -310,7 +303,7 @@ const Home = () => {
     const roots: TaskWithSubtasks[] = []
 
     activeTasks.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] } as TaskWithSubtasks
+      nodes[task.id] = { ...task, subtasks: [] }
     })
 
     activeTasks.forEach((task) => {

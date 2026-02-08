@@ -61,6 +61,7 @@ import {
 import { TagChain } from '@/components/primitives/TagChain'
 import { getIsRequired, getIsVisible, useSettings } from '@/hooks/useSettings'
 import {
+  sortTasksByOrder,
   useReorderSubtasks,
   useSetTaskStatus,
   useTaskParentChain,
@@ -268,14 +269,7 @@ export const TaskForm = ({
         } else {
           const parentTask = flatList.find((t) => t.id === parentId_)
           const order = parentTask?.subtaskOrder ?? []
-          children = [...children].sort((a, b) => {
-            const indexA = order.indexOf(a.id)
-            const indexB = order.indexOf(b.id)
-            return (
-              (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
-              (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
-            )
-          })
+          children = sortTasksByOrder(children, order)
         }
       }
 

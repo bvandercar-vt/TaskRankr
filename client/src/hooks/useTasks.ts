@@ -151,3 +151,16 @@ export const useReorderSubtasks = () => {
     },
   })
 }
+
+export const sortTasksByOrder = (
+  tasks: TaskWithSubtasks[],
+  order: number[],
+): TaskWithSubtasks[] =>
+  [...tasks].sort((a, b) => {
+    const indexA = order.indexOf(a.id)
+    const indexB = order.indexOf(b.id)
+    return (
+      (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
+      (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
+    )
+  })
