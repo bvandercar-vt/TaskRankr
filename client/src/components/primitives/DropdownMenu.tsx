@@ -4,7 +4,7 @@
  */
 
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { Check, ChevronRight, Circle } from 'lucide-react'
+import { Check, ChevronRight, Circle, type LucideIcon } from 'lucide-react'
 
 import { IconSizeStyle } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
@@ -70,9 +70,9 @@ export const DropdownMenuContent = forwardRefHelper(
 
 export const DropdownMenuItem = forwardRefHelper<
   typeof DropdownMenuPrimitive.Item,
-  { inset?: boolean }
+  { inset?: boolean; label: React.ReactNode; icon?: LucideIcon }
 >(
-  ({ className, inset, ...props }, ref) => (
+  ({ className, inset, label, icon: IconComponent, ...props }, ref) => (
     <DropdownMenuPrimitive.Item
       ref={ref}
       className={cn(
@@ -81,7 +81,12 @@ export const DropdownMenuItem = forwardRefHelper<
         className,
       )}
       {...props}
-    />
+    >
+      {IconComponent && (
+        <IconComponent className={cn(IconSizeStyle.HW4, 'mr-2')} />
+      )}
+      {label}
+    </DropdownMenuPrimitive.Item>
   ),
   DropdownMenuPrimitive.Item,
 )
