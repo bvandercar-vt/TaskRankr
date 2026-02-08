@@ -357,14 +357,12 @@ export const TaskForm = ({
     [settings],
   )
 
-  const visibleAttributes = useMemo(
+  const visibleRankFields = useMemo(
     () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
     [getVisibility],
   )
 
   const baseFormSchema = insertTaskSchema.omit({ userId: true })
-
-  const formSchemaToUse = baseFormSchema
 
   const getFormDefaults = useCallback(
     (data: Task | undefined): MutateTaskArgs =>
@@ -398,7 +396,7 @@ export const TaskForm = ({
   )
 
   const form = useForm<MutateTask>({
-    resolver: zodResolver(formSchemaToUse),
+    resolver: zodResolver(baseFormSchema),
     mode: 'onChange',
     defaultValues: getFormDefaults(initialData),
   })
@@ -411,17 +409,13 @@ export const TaskForm = ({
 
   const watchedValues = form.watch()
 
-  const requiredAttributesFilled = useMemo(() => {
-    for (const attr of visibleAttributes) {
-      if (getRequired(attr.name)) {
-        const value = watchedValues[attr.name]
-        if (!value) {
-          return false
-        }
-      }
-    }
-    return true
-  }, [watchedValues, visibleAttributes, getRequired])
+  const requiredAttributesFilled = useMemo(
+    () =>
+      !visibleRankFields.some(
+        (attr) => getRequired(attr.name) && !watchedValues[attr.name],
+      ),
+    [watchedValues, visibleRankFields, getRequired],
+  )
 
   const isValid = form.formState.isValid && requiredAttributesFilled
 
@@ -453,9 +447,9 @@ export const TaskForm = ({
             )}
           />
 
-          {visibleAttributes.length > 0 && (
+          {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              {visibleAttributes.map((attr) => {
+              {visibleRankFields.map((attr) => {
                 const isRequired = getRequired(attr.name)
                 const showNoneOption = !isRequired
 
