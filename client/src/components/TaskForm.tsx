@@ -27,7 +27,6 @@ import { omit, pick } from 'es-toolkit'
 import {
   Calendar as CalendarIcon,
   Check,
-  ChevronDown,
   GripVertical,
   Loader2,
   Pencil,
@@ -37,6 +36,7 @@ import {
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Calendar } from '@/components/primitives/forms/Calendar'
 import {
   Form,
@@ -217,7 +217,6 @@ export const TaskForm = ({
   onEditChild,
   onSubtaskDelete,
 }: TaskFormProps) => {
-  const [subtasksExpanded, setSubtasksExpanded] = useState(false)
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
   )
@@ -560,134 +559,124 @@ export const TaskForm = ({
           {initialData && onAddChild && (
             <div className="border border-white/10 rounded-lg overflow-hidden">
               {subtasks.length > 0 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setSubtasksExpanded(!subtasksExpanded)}
-                    className="w-full flex items-center justify-between gap-2 p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
-                    data-testid="button-toggle-subtasks"
-                  >
+                <CollapsibleCard
+                  title={
                     <span className="text-sm font-medium">
                       Subtasks ({subtasks.length})
                     </span>
-                    <ChevronDown
+                  }
+                  noCard
+                  className="bg-secondary/10"
+                  triggerClassName="p-3 hover:bg-secondary/20 transition-colors"
+                  contentClassName="mt-0"
+                  data-testid="button-toggle-subtasks"
+                >
+                  <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
+                    <span
+                      className="text-xs font-medium text-muted-foreground"
+                      data-testid="label-sorting-method"
+                    >
+                      Sorting Method
+                    </span>
+                    <div
                       className={cn(
-                        IconSizeStyle.HW4,
-                        'text-muted-foreground transition-transform',
-                        subtasksExpanded && 'rotate-180',
+                        'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
+                        isMutating && 'opacity-50 pointer-events-none',
                       )}
-                    />
-                  </button>
-                  {subtasksExpanded && (
-                    <>
-                      <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
-                        <span
-                          className="text-xs font-medium text-muted-foreground"
-                          data-testid="label-sorting-method"
-                        >
-                          Sorting Method
-                        </span>
-                        <div
-                          className={cn(
-                            'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-                            isMutating && 'opacity-50 pointer-events-none',
-                          )}
-                          role="radiogroup"
-                          aria-label="Subtask sort order"
-                          data-testid="toggle-sort-mode"
-                        >
-                          <label
-                            className={cn(
-                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                              sortMode === SubtaskSortMode.INHERIT
-                                ? 'bg-secondary text-foreground'
-                                : 'bg-transparent text-muted-foreground',
-                            )}
-                            data-testid="toggle-sort-inherit"
-                          >
-                            <input
-                              type="radio"
-                              name="subtask-sort-mode"
-                              value={SubtaskSortMode.INHERIT}
-                              checked={sortMode === SubtaskSortMode.INHERIT}
-                              onChange={() =>
-                                sortMode !== SubtaskSortMode.INHERIT &&
-                                handleSortModeToggle()
-                              }
-                              className="sr-only"
-                            />
-                            Inherit
-                          </label>
-                          <label
-                            className={cn(
-                              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                              sortMode === SubtaskSortMode.MANUAL
-                                ? 'bg-secondary text-foreground'
-                                : 'bg-transparent text-muted-foreground',
-                            )}
-                            data-testid="toggle-sort-manual"
-                          >
-                            <input
-                              type="radio"
-                              name="subtask-sort-mode"
-                              value={SubtaskSortMode.MANUAL}
-                              checked={sortMode === SubtaskSortMode.MANUAL}
-                              onChange={() =>
-                                sortMode !== SubtaskSortMode.MANUAL &&
-                                handleSortModeToggle()
-                              }
-                              className="sr-only"
-                            />
-                            Manual
-                          </label>
-                        </div>
-                        <span
-                          className="text-[11px] text-muted-foreground/70 leading-snug"
-                          data-testid="text-sort-caption"
-                        >
-                          {sortMode === SubtaskSortMode.INHERIT
-                            ? 'Subtasks follow the same sort order as the main task list.'
-                            : 'Drag subtasks into your preferred order using the grip handles.'}
-                        </span>
-                      </div>
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
+                      role="radiogroup"
+                      aria-label="Subtask sort order"
+                      data-testid="toggle-sort-mode"
+                    >
+                      <label
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          sortMode === SubtaskSortMode.INHERIT
+                            ? 'bg-secondary text-foreground'
+                            : 'bg-transparent text-muted-foreground',
+                        )}
+                        data-testid="toggle-sort-inherit"
                       >
-                        <SortableContext
-                          items={directChildIds}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <div className="divide-y divide-white/5">
-                            {subtasks.map((subtask) => (
-                              <SortableSubtaskItem
-                                key={subtask.id}
-                                task={subtask}
-                                onEdit={onEditChild}
-                                onDelete={(task) => onSubtaskDelete?.(task)}
-                                onToggleComplete={(task) => {
-                                  const newStatus =
-                                    task.status === TaskStatus.COMPLETED
-                                      ? TaskStatus.OPEN
-                                      : TaskStatus.COMPLETED
-                                  setTaskStatus.mutate({
-                                    id: task.id,
-                                    status: newStatus,
-                                  })
-                                }}
-                                isManualMode={
-                                  sortMode === SubtaskSortMode.MANUAL
-                                }
-                                isDragDisabled={isMutating}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </DndContext>
-                    </>
-                  )}
-                </>
+                        <input
+                          type="radio"
+                          name="subtask-sort-mode"
+                          value={SubtaskSortMode.INHERIT}
+                          checked={sortMode === SubtaskSortMode.INHERIT}
+                          onChange={() =>
+                            sortMode !== SubtaskSortMode.INHERIT &&
+                            handleSortModeToggle()
+                          }
+                          className="sr-only"
+                        />
+                        Inherit
+                      </label>
+                      <label
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          sortMode === SubtaskSortMode.MANUAL
+                            ? 'bg-secondary text-foreground'
+                            : 'bg-transparent text-muted-foreground',
+                        )}
+                        data-testid="toggle-sort-manual"
+                      >
+                        <input
+                          type="radio"
+                          name="subtask-sort-mode"
+                          value={SubtaskSortMode.MANUAL}
+                          checked={sortMode === SubtaskSortMode.MANUAL}
+                          onChange={() =>
+                            sortMode !== SubtaskSortMode.MANUAL &&
+                            handleSortModeToggle()
+                          }
+                          className="sr-only"
+                        />
+                        Manual
+                      </label>
+                    </div>
+                    <span
+                      className="text-[11px] text-muted-foreground/70 leading-snug"
+                      data-testid="text-sort-caption"
+                    >
+                      {sortMode === SubtaskSortMode.INHERIT
+                        ? 'Subtasks follow the same sort order as the main task list.'
+                        : 'Drag subtasks into your preferred order using the grip handles.'}
+                    </span>
+                  </div>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={directChildIds}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="divide-y divide-white/5">
+                        {subtasks.map((subtask) => (
+                          <SortableSubtaskItem
+                            key={subtask.id}
+                            task={subtask}
+                            onEdit={onEditChild}
+                            onDelete={(task) => onSubtaskDelete?.(task)}
+                            onToggleComplete={(task) => {
+                              const newStatus =
+                                task.status === TaskStatus.COMPLETED
+                                  ? TaskStatus.OPEN
+                                  : TaskStatus.COMPLETED
+                              setTaskStatus.mutate({
+                                id: task.id,
+                                status: newStatus,
+                              })
+                            }}
+                            isManualMode={
+                              sortMode === SubtaskSortMode.MANUAL
+                            }
+                            isDragDisabled={isMutating}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </CollapsibleCard>
               )}
               <button
                 type="button"

@@ -5,26 +5,45 @@ import { Card } from '@/components/primitives/Card'
 import { cn } from '@/lib/utils'
 import { IconSizeStyle } from '@/lib/constants'
 
+type CollapsibleCardProps = React.PropsWithChildren<{
+  title: React.ReactNode
+  className?: string
+  triggerClassName?: string
+  contentClassName?: string
+  defaultOpen?: boolean
+  noCard?: boolean
+  'data-testid'?: string
+}>
+
 export const CollapsibleCard = ({
   title,
   children,
   className,
+  triggerClassName,
+  contentClassName,
+  defaultOpen = false,
+  noCard = false,
   'data-testid': testId,
-}: React.PropsWithChildren<{
-  title: string
-  className?: string
-  'data-testid'?: string
-}>) => {
-  const [open, setOpen] = useState(false)
+}: CollapsibleCardProps) => {
+  const [open, setOpen] = useState(defaultOpen)
+  const Wrapper = noCard ? 'div' : Card
+
   return (
-    <Card className={className}>
+    <Wrapper className={className}>
       <button
         type="button"
-        className="flex items-center justify-between w-full text-left"
+        className={cn(
+          'flex items-center justify-between w-full text-left',
+          triggerClassName,
+        )}
         onClick={() => setOpen(!open)}
         data-testid={testId}
       >
-        <h3 className="font-semibold text-muted-foreground">{title}</h3>
+        {typeof title === 'string' ? (
+          <h3 className="font-semibold text-muted-foreground">{title}</h3>
+        ) : (
+          title
+        )}
         <ChevronDown
           className={cn(
             IconSizeStyle.HW4,
@@ -33,7 +52,9 @@ export const CollapsibleCard = ({
           )}
         />
       </button>
-      {open && <div className="mt-4">{children}</div>}
-    </Card>
+      {open && (
+        <div className={cn('mt-4', contentClassName)}>{children}</div>
+      )}
+    </Wrapper>
   )
 }
