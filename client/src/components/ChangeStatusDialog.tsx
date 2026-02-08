@@ -245,7 +245,9 @@ export const ChangeStatusDialog = ({
                   }}
                   data-testid="button-delete-task"
                 >
-                  <span className="text-xs font-medium">Delete Permanently</span>
+                  <span className="text-xs font-medium">
+                    Delete Permanently
+                  </span>
                 </Button>
               </div>
             </div>

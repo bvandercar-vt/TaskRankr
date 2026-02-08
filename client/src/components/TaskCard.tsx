@@ -65,7 +65,12 @@ const formatDuration = (ms: number) => {
   }
 }
 
-const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
+const getTotalAccumulatedTime = (
+  task: Pick<
+    TaskWithSubtasks,
+    'inProgressTime' | 'inProgressStartedAt' | 'status' | 'subtasks'
+  >,
+): number => {
   let total = task.inProgressTime
   if (task.status === TaskStatus.IN_PROGRESS && task.inProgressStartedAt) {
     const elapsed = Date.now() - task.inProgressStartedAt.getTime()
@@ -78,48 +83,31 @@ const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
   return total
 }
 
-const CompletedTimeDisplay = ({ task }: { task: TaskWithSubtasks }) => {
-  const { settings } = useSettings()
-  const totalTime = getTotalAccumulatedTime(task)
-
-  return (
-    <div className="flex flex-col items-end mt-0.5">
-      {task.completedAt && (
-        <span className="text-[10px] text-muted-foreground">
-          Completed:{' '}
-          {task.completedAt.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </span>
-      )}
-      {settings.enableInProgressTime && totalTime > 0 && (
-        <span className="text-[10px] text-muted-foreground">
-          Time spent: {formatDuration(totalTime)}
-        </span>
-      )}
-    </div>
+const CompletedTimeDisplay = ({
+  completedAt,
+}: Pick<TaskWithSubtasks, 'completedAt'>) =>
+  completedAt && (
+    <span className="text-[10px] text-muted-foreground">
+      Completed:{' '}
+      {completedAt.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })}
+    </span>
   )
-}
 
-const InProgressTimeDisplay = ({ task }: { task: TaskWithSubtasks }) => {
+const InProgressTimeDisplay = (
+  task: Parameters<typeof getTotalAccumulatedTime>[0],
+) => {
   const { settings } = useSettings()
-  const [, setTick] = useState(0)
   const totalTime = getTotalAccumulatedTime(task)
-
-  useEffect(() => {
-    if (task.status !== TaskStatus.IN_PROGRESS || !task.inProgressStartedAt)
-      return
-    const interval = setInterval(() => setTick((t) => t + 1), 60_000)
-    return () => clearInterval(interval)
-  }, [task.status, task.inProgressStartedAt])
 
   if (!settings.enableInProgressTime || totalTime <= 0) return null
 
   return (
-    <span className="text-[10px] text-blue-400/70">
-      {formatDuration(totalTime)}
+    <span className="text-[10px] text-muted-foreground">
+      Time spent: {formatDuration(totalTime)}
     </span>
   )
 }
@@ -289,7 +277,12 @@ export const TaskCard = ({
                 )
               })}
             </div>
-            {showCompletedDate && <CompletedTimeDisplay task={task} />}
+            {showCompletedDate && (
+              <div className="flex flex-col items-end mt-0.5">
+                <CompletedTimeDisplay {...task} />
+                <InProgressTimeDisplay {...task} />
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
