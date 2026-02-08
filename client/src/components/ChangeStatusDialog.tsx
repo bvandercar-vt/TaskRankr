@@ -19,7 +19,6 @@ import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -30,8 +29,9 @@ import { useSettings } from '@/hooks/useSettings'
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
 
-interface StatusButtonProps {
+interface ChangeStatusButtonProps {
   icon: LucideIcon
   label: string
   onClick: () => void
@@ -39,13 +39,13 @@ interface StatusButtonProps {
   'data-testid': string
 }
 
-const StatusButton = ({
+const ChangeStatusButton = ({
   icon: Icon,
   label,
   onClick,
   colorClass = 'border-slate-400/50 text-slate-400 hover:bg-slate-500/10',
   'data-testid': testId,
-}: StatusButtonProps) => (
+}: ChangeStatusButtonProps) => (
   <Button
     onClick={onClick}
     variant="outline"
@@ -55,43 +55,6 @@ const StatusButton = ({
     <Icon className={IconSizeStyle.HW4} />
     {label}
   </Button>
-)
-
-interface ConfirmDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  taskName: string
-  onConfirm: () => void
-}
-
-const ConfirmDeleteDialog = ({
-  open,
-  onOpenChange,
-  taskName,
-  onConfirm,
-}: ConfirmDeleteDialogProps) => (
-  <AlertDialog open={open} onOpenChange={onOpenChange}>
-    <AlertDialogContent className="bg-card border-white/10">
-      <AlertDialogHeader>
-        <AlertDialogTitle>Delete Task Permanently?</AlertDialogTitle>
-        <AlertDialogDescription>
-          This will permanently delete "{taskName}" and all its subtasks. This
-          action cannot be undone.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">
-          Cancel
-        </AlertDialogCancel>
-        <AlertDialogAction
-          onClick={onConfirm}
-          className="bg-destructive hover:bg-destructive/90 text-white"
-        >
-          Delete Permanently
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
 )
 
 interface ChangeStatusDialogProps {
@@ -170,14 +133,14 @@ export const ChangeStatusDialog = ({
                 <>
                   {showInProgressOption &&
                     (isInProgress ? (
-                      <StatusButton
+                      <ChangeStatusButton
                         icon={StopCircle}
                         label="Stop Progress"
                         onClick={() => onSetStatus(TaskStatus.OPEN)}
                         data-testid="button-stop-progress"
                       />
                     ) : (
-                      <StatusButton
+                      <ChangeStatusButton
                         icon={Clock}
                         label="In Progress"
                         onClick={() => onSetStatus(TaskStatus.IN_PROGRESS)}
@@ -186,14 +149,14 @@ export const ChangeStatusDialog = ({
                       />
                     ))}
                   {isInProgress || isPinned ? (
-                    <StatusButton
+                    <ChangeStatusButton
                       icon={PinOff}
                       label="Unpin"
                       onClick={() => onSetStatus(TaskStatus.OPEN)}
                       data-testid="button-unpin"
                     />
                   ) : (
-                    <StatusButton
+                    <ChangeStatusButton
                       icon={Pin}
                       label="Pin to Top"
                       onClick={() => onSetStatus(TaskStatus.PINNED)}
