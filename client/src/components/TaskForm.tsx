@@ -340,20 +340,20 @@ export const TaskForm = ({
 
   const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
-  const getVisibility = useCallback(
-    (attr: RankField) => getIsVisible(attr, settings),
-    [settings],
-  )
-
-  const getRequired = useCallback(
-    (attr: RankField) =>
-      getIsVisible(attr, settings) && getIsRequired(attr, settings),
+  const rankFieldFlags = useMemo(
+    () =>
+      new Map(
+        RANK_FIELDS_CRITERIA.map(({ name }) => {
+          const visible = getIsVisible(name, settings)
+          return [name, { visible, required: visible && getIsRequired(name, settings) }]
+        }),
+      ),
     [settings],
   )
 
   const visibleRankFields = useMemo(
-    () => RANK_FIELDS_CRITERIA.filter((attr) => getVisibility(attr.name)),
-    [getVisibility],
+    () => RANK_FIELDS_CRITERIA.filter((attr) => rankFieldFlags.get(attr.name)?.visible),
+    [rankFieldFlags],
   )
 
   const formSchema = useMemo(
@@ -364,11 +364,11 @@ export const TaskForm = ({
           Object.fromEntries(
             RANK_FIELDS_CRITERIA.map(({ name }) => [
               name,
-              getRequired(name),
+              rankFieldFlags.get(name)?.required ?? false,
             ]).filter(([, isReq]) => isReq),
           ) satisfies Record<RankField, boolean>,
         ),
-    [getRequired],
+    [rankFieldFlags],
   )
 
   const getFormDefaults = useCallback(
@@ -415,10 +415,9 @@ export const TaskForm = ({
     form.reset(getFormDefaults(initialData))
   }, [initialData, form, getFormDefaults])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [getRequired, form])
+  }, [rankFieldFlags, form])
 
   const NONE_VALUE = 'none'
 
@@ -453,7 +452,7 @@ export const TaskForm = ({
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {visibleRankFields.map((attr) => {
-                const isRequired = getRequired(attr.name)
+                const isRequired = rankFieldFlags.get(attr.name)?.required ?? false
                 const showNoneOption = !isRequired
 
                 return (
