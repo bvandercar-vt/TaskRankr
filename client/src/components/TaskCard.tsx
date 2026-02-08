@@ -23,7 +23,7 @@ import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
 import {
   RANK_FIELDS_CRITERIA,
-  type TaskStatus,
+  TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
@@ -78,7 +78,7 @@ const formatDuration = (ms: number) => {
 const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
   // calculate own time
   let total = task.inProgressTime
-  if (task.status === 'in_progress' && task.inProgressStartedAt) {
+  if (task.status === TaskStatus.IN_PROGRESS && task.inProgressStartedAt) {
     const elapsed = Date.now() - task.inProgressStartedAt.getTime()
     total += elapsed
   }
@@ -110,9 +110,9 @@ export const TaskCard = ({
 
   const hasSubtasks = task.subtasks.length > 0
   const isExpanded = checkExpanded(task.id)
-  const isInProgress = task.status === 'in_progress'
-  const isPinned = task.status === 'pinned'
-  const isCompleted = task.status === 'completed'
+  const isInProgress = task.status === TaskStatus.IN_PROGRESS
+  const isPinned = task.status === TaskStatus.PINNED
+  const isCompleted = task.status === TaskStatus.COMPLETED
   const isNestedWithStatus = level > 0 && (isInProgress || isPinned)
   const isNestedCompleted = level > 0 && isCompleted
 

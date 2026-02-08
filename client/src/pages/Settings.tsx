@@ -20,7 +20,7 @@ import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { RANK_FIELDS_CRITERIA } from '~/shared/schema'
+import { RANK_FIELDS_CRITERIA, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
@@ -165,12 +165,12 @@ const Settings = () => {
                     updateSetting('enableInProgressTime', false)
                     // Demote any in_progress task to pinned
                     const inProgressTask = tasks?.find(
-                      (t) => t.status === 'in_progress',
+                      (t) => t.status === TaskStatus.IN_PROGRESS,
                     )
                     if (inProgressTask) {
                       setTaskStatus.mutate({
                         id: inProgressTask.id,
-                        status: 'pinned',
+                        status: TaskStatus.PINNED,
                       })
                     }
                   }
@@ -226,9 +226,7 @@ const Settings = () => {
                     <td className="py-3 text-center">
                       <Checkbox
                         checked={isVisible}
-                        onCheckedChange={(
-                          checked: boolean | 'indeterminate',
-                        ) => {
+                        onCheckedChange={(checked) => {
                           const newVisible = !!checked
                           updateVisibility(name, newVisible)
                           if (!newVisible && isRequired) {
@@ -241,7 +239,7 @@ const Settings = () => {
                     <td className="py-3 text-center">
                       <Checkbox
                         checked={isRequired}
-                        onCheckedChange={(checked: boolean | 'indeterminate') =>
+                        onCheckedChange={(checked) =>
                           updateRequired(name, !!checked)
                         }
                         disabled={!isVisible}

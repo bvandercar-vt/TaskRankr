@@ -11,7 +11,11 @@ import { Button } from '@/components/primitives/Button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { RANK_FIELDS_CRITERIA, type TaskWithSubtasks } from '~/shared/schema'
+import {
+  RANK_FIELDS_CRITERIA,
+  TaskStatus,
+  type TaskWithSubtasks,
+} from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
@@ -23,7 +27,7 @@ const Completed = () => {
 
     // Find root-level completed tasks (no parent)
     const completedRoots = tasks.filter(
-      (task) => task.status === 'completed' && !task.parentId,
+      (task) => task.status === TaskStatus.COMPLETED && !task.parentId,
     )
 
     // Build subtask tree for each completed root
@@ -32,13 +36,13 @@ const Completed = () => {
       return children.map((child) => ({
         ...child,
         subtasks: buildSubtaskTree(child.id),
-      })) as TaskWithSubtasks[]
+      }))
     }
 
-    const roots = completedRoots.map((task) => ({
+    const roots: TaskWithSubtasks[] = completedRoots.map((task) => ({
       ...task,
       subtasks: buildSubtaskTree(task.id),
-    })) as TaskWithSubtasks[]
+    }))
 
     // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {

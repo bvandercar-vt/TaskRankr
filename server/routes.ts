@@ -12,6 +12,7 @@ import { isNil, omit } from 'es-toolkit'
 import type { Express } from 'express'
 
 import { contract } from '~/shared/contract'
+import { TaskStatus } from '~/shared/schema'
 import {
   isAuthenticated,
   registerAuthRoutes,
@@ -127,7 +128,7 @@ const router = s.router(contract, {
             time: rest.time || null,
             userId,
             parentId: null,
-            status: rest.status || 'open',
+            status: rest.status || TaskStatus.OPEN,
             inProgressTime: rest.inProgressTime || 0,
             inProgressStartedAt: null,
             createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),

@@ -10,7 +10,6 @@ import {
   insertTaskSchema,
   insertUserSettingsSchema,
   taskSchema,
-  taskStatusEnum,
   userSettingsSchema,
 } from './schema'
 
@@ -93,7 +92,7 @@ const tasksContract = c.router({
     pathParams: z.object({
       id: z.coerce.number(),
     }),
-    body: z.object({ status: taskStatusEnum }),
+    body: taskSchema.pick({ status: true }),
     responses: {
       200: taskSchema,
       400: errorSchemas.validation,
