@@ -34,7 +34,6 @@ export const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
   time: SortDirection.ASC,
 }
 
-/** Numeric weights for rank-field enum values (higher = more extreme). */
 const LEVEL_WEIGHTS = {
   highest: 5,
   hardest: 5,
@@ -47,7 +46,6 @@ const LEVEL_WEIGHTS = {
   easiest: 1,
 } as const satisfies Record<Priority | Ease | Enjoyment | Time, number>
 
-/** Returns the numeric weight for a rank-field value, or 0 for nullish. */
 const getLevelWeight = (
   level: keyof typeof LEVEL_WEIGHTS | null | undefined,
 ): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
@@ -67,7 +65,7 @@ const compareByField = (
   return direction === SortDirection.DESC ? valB - valA : valA - valB
 }
 
-/** Sorts tasks by a chain of fields; earlier fields take priority. */
+/** Sorts tasks by a passed sort order; earlier fields take priority. */
 export const sortTasks = (
   tasks: TaskWithSubtasks[],
   fields: SortOption[],
@@ -83,7 +81,6 @@ export const sortTasks = (
   return sorted
 }
 
-/** Maps each sort option to its tiebreaker chain (primary + secondaries). */
 export const SORT_ORDER_MAP = {
   date: [SortOption.DATE],
   priority: [SortOption.PRIORITY, SortOption.EASE, SortOption.ENJOYMENT],
@@ -96,7 +93,6 @@ export const SORT_ORDER_MAP = {
 // Column criteria
 // *****************************************************************************
 
-/** Maps each rank field to its TypeScript enum object. */
 export const RANK_FIELD_ENUMS = {
   priority: Priority,
   ease: Ease,
@@ -104,12 +100,10 @@ export const RANK_FIELD_ENUMS = {
   time: Time,
 } as const satisfies Record<RankField, Record<string, string>>
 
-/** Maps each rank field key to its union of valid enum values. */
 export type RankFieldValueMap = {
   [K in RankField]: ValueOf<(typeof RANK_FIELD_ENUMS)[K]>
 }
 
-/** Human-readable display labels for each sort option. */
 export const SORT_LABELS = {
   date: 'Date Created',
   priority: 'Priority',
