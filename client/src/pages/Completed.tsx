@@ -73,6 +73,7 @@ const Completed = () => {
           <h1 className="text-2xl font-bold tracking-tight">Completed Tasks</h1>
         </div>
 
+        {/* Column Headers */}
         {completedTasks.length > 0 && (
           <div className="flex items-center gap-2 px-2 mb-2">
             <div className="w-5 shrink-0" />
