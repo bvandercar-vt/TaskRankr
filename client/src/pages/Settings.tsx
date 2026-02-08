@@ -69,8 +69,7 @@ const SwitchCard = (props: SwitchSettingProps) => (
 )
 
 const Settings = () => {
-  const { settings, updateSetting, updateFieldFlags } =
-    useSettings()
+  const { settings, updateSetting, updateFieldFlags } = useSettings()
   const { user } = useAuth()
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
@@ -231,7 +230,9 @@ const Settings = () => {
                           const newVisible = !!checked
                           updateFieldFlags(name, {
                             visible: newVisible,
-                            ...(!newVisible && required ? { required: false } : {}),
+                            ...(!newVisible && required
+                              ? { required: false }
+                              : {}),
                           })
                         }}
                         data-testid={`checkbox-${name}-visible`}

@@ -220,7 +220,7 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     const loadedSettings = migrateSettings(
-      loadFromStorage<Record<string, unknown>>(storageKeys.settings, DEFAULT_SETTINGS as unknown as Record<string, unknown>),
+      loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS),
     )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
