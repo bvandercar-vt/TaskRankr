@@ -221,7 +221,7 @@ const SubtaskItem = ({
           className={cn(
             'shrink-0 h-4 w-4 rounded-sm border transition-colors',
             isCompleted
-              ? 'bg-emerald-600 border-emerald-600 text-white'
+              ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
               : 'border-muted-foreground/40 hover:border-muted-foreground',
           )}
           data-testid={`checkbox-complete-subtask-${task.id}`}
