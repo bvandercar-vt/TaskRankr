@@ -41,6 +41,80 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Configurable Rank Fields**: Priority, ease, enjoyment, and time fields have 6 levels and customizable visibility/required settings via `fieldConfig`.
 - **Task Status System**: A clear workflow with `open`, `in_progress`, `pinned`, and `completed` statuses, including automatic demotion of `in_progress` tasks and time tracking.
 - **Subtask Ordering**: Supports both inherited sorting from parent tasks and manual drag-and-drop reordering.
+- **Sorting Architecture**: All sorting logic lives in `client/src/lib/sort-tasks.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
+
+### Project Structure
+```
+├── client/               # React frontend
+│   └── src/
+│       ├── components/   # UI components
+│       │   ├── primitives/       # Base UI components (shadcn/ui)
+│       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea)
+│       │   │   ├── overlays/     # AlertDialog, Dialog, Popover, Toast, Toaster, Tooltip
+│       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
+│       │   │   ├── DropdownMenu.tsx, TagChain.tsx
+│       │   │   └── LucideIcon.tsx  # Dynamic icon helper
+│       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
+│       │   ├── MainDropdownMenu.tsx  # Hamburger dropdown menu (Home page)
+│       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
+│       │   ├── providers/        # Context providers
+│       │   │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
+│       │   │   ├── SyncProvider.tsx  # Background sync to API
+│       │   │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
+│       │   │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
+│       │   │   └── TaskDialogProvider.tsx  # Context for task dialog state
+│       │   ├── TaskCard.tsx      # Task display with status indicators
+│       │   ├── TaskForm.tsx      # Full-screen task create/edit form
+│       │   ├── ChangeStatusDialog.tsx  # Task status change modal
+│       │   ├── ConfirmDeleteDialog.tsx
+│       │   └── SortInfo.tsx      # Reusable sort explanation component
+│       ├── hooks/
+│       │   ├── useAuth.ts        # Authentication state hook
+│       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
+│       │   ├── useGuestModeState.ts  # Guest mode localStorage state
+│       │   ├── useMobile.tsx     # Mobile detection hook
+│       │   ├── useSettings.ts    # User settings with optimistic updates
+│       │   ├── useTasks.ts       # Task CRUD operations
+│       │   └── useToast.ts       # Toast notifications
+│       ├── pages/
+│       │   ├── Home.tsx          # Main task list with sorting
+│       │   ├── Settings.tsx      # User preferences & attribute visibility
+│       │   ├── Completed.tsx     # Completed tasks view
+│       │   ├── HowToUse.tsx      # Instructional page (tap-to-edit, hold-for-status)
+│       │   ├── Landing.tsx       # Unauthenticated landing page
+│       │   └── NotFound.tsx
+│       ├── lib/
+│       │   ├── sort-tasks.ts     # Sorting logic, SORT_ORDER_MAP, RANK_FIELDS_COLUMNS
+│       │   ├── rank-field-styles.ts  # Rank field color mappings
+│       │   ├── ts-rest.ts        # ts-rest client + QueryKeys
+│       │   ├── query-client.ts   # @tanstack/react-query client
+│       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
+│       │   ├── auth-utils.ts     # Authentication helpers
+│       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
+│       │   ├── demo-tasks.ts     # Demo task data for guest mode
+│       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
+│       ├── App.tsx               # Main app with routing and providers
+│       └── main.tsx              # React entry point
+├── server/
+│   ├── index.ts          # Server entry point
+│   ├── routes.ts         # API route handlers (ts-rest)
+│   ├── storage.ts        # Database access layer
+│   ├── db.ts             # Database connection
+│   ├── static.ts         # Static file serving
+│   ├── vite.ts           # Vite dev server integration
+│   └── replit_integrations/auth/  # Replit Auth (OIDC)
+│       ├── index.ts, replitAuth.ts, routes.ts, storage.ts
+├── shared/
+│   ├── schema/
+│   │   ├── index.ts        # Re-exports from tasks.zod.ts, settings.zod.ts, and auth models
+│   │   ├── tasks.zod.ts    # Task table, enums, rank fields, Zod schemas/types
+│   │   └── settings.zod.ts # User settings table, fieldConfig, Zod schemas/types
+│   ├── contract.ts       # ts-rest API contract
+│   ├── constants.ts      # Auth path constants
+│   └── models/
+│       └── auth.ts       # Auth model utilities
+└── migrations/           # Database migrations
+```
 
 ## External Dependencies
 
