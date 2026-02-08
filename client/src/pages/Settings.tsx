@@ -239,7 +239,7 @@ const Settings = () => {
           </Card>
         </div>
 
-        <Card className="mt-8">
+        <Card className="mt-4">
           <h3 className="font-semibold text-foreground mb-4">
             Attribute Settings
           </h3>
