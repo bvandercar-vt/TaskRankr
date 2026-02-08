@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 
 import { IconSizeStyle } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -50,12 +51,24 @@ export const CollapsibleCard = ({
         <ChevronDown
           className={cn(
             IconSizeStyle.HW4,
-            'text-muted-foreground transition-transform',
+            'text-muted-foreground transition-transform duration-200',
             open && 'rotate-180',
           )}
         />
       </button>
-      {open && <div className={cn('mt-4', contentClassName)}>{children}</div>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className={cn('mt-4', contentClassName)}>{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
