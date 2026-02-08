@@ -667,9 +667,7 @@ export const TaskForm = ({
                                 status: newStatus,
                               })
                             }}
-                            isManualMode={
-                              sortMode === SubtaskSortMode.MANUAL
-                            }
+                            isManualMode={sortMode === SubtaskSortMode.MANUAL}
                             isDragDisabled={isMutating}
                           />
                         ))}

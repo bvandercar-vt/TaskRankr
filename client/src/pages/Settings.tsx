@@ -3,13 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import {
-  ArrowLeft,
-  Download,
-  LogOut,
-  Trash2,
-  Upload,
-} from 'lucide-react'
+import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -85,7 +79,6 @@ const SwitchCard = (props: SwitchSettingProps) => (
     <SwitchSetting {...props} />
   </Card>
 )
-
 
 const Settings = () => {
   const { settings, updateSetting, updateFieldFlags } = useSettings()

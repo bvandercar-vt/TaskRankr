@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { IconSizeStyle } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 type CollapsibleCardProps = React.PropsWithChildren<{
   title: React.ReactNode
@@ -55,9 +55,7 @@ export const CollapsibleCard = ({
           )}
         />
       </button>
-      {open && (
-        <div className={cn('mt-4', contentClassName)}>{children}</div>
-      )}
+      {open && <div className={cn('mt-4', contentClassName)}>{children}</div>}
     </div>
   )
 }
