@@ -348,14 +348,7 @@ const Home = () => {
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
-  }, [
-    taskTree,
-    pinnedTasks,
-    search,
-    sortBy,
-    filterAndSortTree,
-    settings,
-  ])
+  }, [taskTree, pinnedTasks, search, sortBy, filterAndSortTree, settings])
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
