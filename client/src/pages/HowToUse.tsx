@@ -123,6 +123,32 @@ const HowToUse = () => {
             </div>
           </section>
 
+          <section data-testid="section-task-statuses">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Task Statuses
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Pin className={IconSizeStyle.HW5} />}
+                title="Pinned"
+                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
+                testId="card-pinned"
+              />
+              <InstructionCard
+                icon={<PlayCircle className={IconSizeStyle.HW5} />}
+                title="In Progress (if setting enabled)"
+                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
+                testId="card-in-progress"
+              />
+              <InstructionCard
+                icon={<CheckCircle2 className={IconSizeStyle.HW5} />}
+                title="Completed"
+                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
+                testId="card-completed"
+              />
+            </div>
+          </section>
+
           <section data-testid="section-settings">
             <h2 className="text-lg font-semibold mb-3 text-primary">
               Settings
@@ -146,32 +172,6 @@ const HowToUse = () => {
                   </>
                 }
                 testId="card-settings"
-              />
-            </div>
-          </section>
-
-          <section data-testid="section-task-statuses">
-            <h2 className="text-lg font-semibold mb-3 text-primary">
-              Task Statuses
-            </h2>
-            <div className="space-y-3">
-              <InstructionCard
-                icon={<Pin className={IconSizeStyle.HW5} />}
-                title="Pinned"
-                description="Pin important tasks to keep them at the top of your list, below any In Progress task. You can have multiple pinned tasks."
-                testId="card-pinned"
-              />
-              <InstructionCard
-                icon={<PlayCircle className={IconSizeStyle.HW5} />}
-                title="In Progress (if setting enabled)"
-                description="Only one task can be In Progress at a time. It appears at the very top of your list with a blue border. Time spent is tracked if you have that setting enabled."
-                testId="card-in-progress"
-              />
-              <InstructionCard
-                icon={<CheckCircle2 className={IconSizeStyle.HW5} />}
-                title="Completed"
-                description="Mark tasks as done when finished. Completed tasks are moved to a separate list you can access from the menu."
-                testId="card-completed"
               />
             </div>
           </section>
