@@ -272,16 +272,11 @@ export const TaskForm = ({
       let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
-        if (depth === 0 && localSubtaskOrder) {
-          children = [...children].sort(
-            (a, b) =>
-              localSubtaskOrder.indexOf(a.id) - localSubtaskOrder.indexOf(b.id),
-          )
-        } else {
-          const parentTask = flatList.find((t) => t.id === parentId_)
-          const order = parentTask?.subtaskOrder ?? []
-          children = sortTasksByOrder(children, order)
-        }
+        const order =
+          depth === 0 && localSubtaskOrder
+            ? localSubtaskOrder
+            : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
+        children = sortTasksByOrder(children, order)
       }
 
       const result: Array<TaskWithSubtasks & { depth: number }> = []
