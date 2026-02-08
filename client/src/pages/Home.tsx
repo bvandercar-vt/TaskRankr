@@ -4,7 +4,7 @@
  *
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CheckCircle2,
   HelpCircle,
@@ -16,28 +16,28 @@ import {
   Search,
   Settings,
   X,
-} from "lucide-react";
-import { Link } from "wouter";
+} from 'lucide-react'
+import { Link } from 'wouter'
 
-import { EmptyState, PageError, PageLoading } from "@/components/PageStates";
-import { Button } from "@/components/primitives/Button";
+import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
+import { Button } from '@/components/primitives/Button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/primitives/DropdownMenu";
-import { Input } from "@/components/primitives/forms/Input";
-import { Icon } from "@/components/primitives/LucideIcon";
-import { useTaskDialog } from "@/components/providers/TaskDialogProvider";
-import { TaskCard } from "@/components/TaskCard";
-import { useGuestModeState } from "@/hooks/useGuestModeState";
-import { getIsVisible, useSettings } from "@/hooks/useSettings";
-import { sortTasksByOrder, useTasks } from "@/hooks/useTasks";
-import { IconSizeStyle } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import { authPaths } from "~/shared/constants";
+} from '@/components/primitives/DropdownMenu'
+import { Input } from '@/components/primitives/forms/Input'
+import { Icon } from '@/components/primitives/LucideIcon'
+import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
+import { TaskCard } from '@/components/TaskCard'
+import { useGuestModeState } from '@/hooks/useGuestModeState'
+import { getIsVisible, useSettings } from '@/hooks/useSettings'
+import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
+import { IconSizeStyle } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 import {
   type Ease,
   type Enjoyment,
@@ -48,37 +48,36 @@ import {
   TaskStatus,
   type TaskWithSubtasks,
   type Time,
-} from "~/shared/schema";
+} from '~/shared/schema'
 
-const HOW_TO_USE_BANNER_KEY = "taskrankr-how-to-use-dismissed";
+const HOW_TO_USE_BANNER_KEY = 'taskrankr-how-to-use-dismissed'
 
 const HowToUseBanner = () => {
-  const [isDismissed, setIsDismissed] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(true)
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   useEffect(() => {
     try {
-      if (typeof window !== "undefined") {
-        const dismissed =
-          localStorage.getItem(HOW_TO_USE_BANNER_KEY) === "true";
-        setIsDismissed(dismissed);
+      if (typeof window !== 'undefined') {
+        const dismissed = localStorage.getItem(HOW_TO_USE_BANNER_KEY) === 'true'
+        setIsDismissed(dismissed)
       }
     } catch {
-      setIsDismissed(true);
+      setIsDismissed(true)
     }
-    setHasLoaded(true);
-  }, []);
+    setHasLoaded(true)
+  }, [])
 
   const dismiss = () => {
     try {
-      localStorage.setItem(HOW_TO_USE_BANNER_KEY, "true");
+      localStorage.setItem(HOW_TO_USE_BANNER_KEY, 'true')
     } catch {
       // noop
     }
-    setIsDismissed(true);
-  };
+    setIsDismissed(true)
+  }
 
-  if (!hasLoaded || isDismissed) return null;
+  if (!hasLoaded || isDismissed) return null
 
   return (
     <div
@@ -87,10 +86,10 @@ const HowToUseBanner = () => {
     >
       <div className="flex items-center gap-3 min-w-0">
         <HelpCircle
-          className={cn(IconSizeStyle.HW5, "shrink-0 text-primary")}
+          className={cn(IconSizeStyle.HW5, 'shrink-0 text-primary')}
         />
         <span className="text-sm text-foreground">
-          New here?{" "}
+          New here?{' '}
           <Link href="/how-to-use">
             <span
               className="text-primary underline underline-offset-2 cursor-pointer"
@@ -110,8 +109,8 @@ const HowToUseBanner = () => {
         <X className={IconSizeStyle.HW4} />
       </Button>
     </div>
-  );
-};
+  )
+}
 
 const SortButton = ({
   label,
@@ -120,28 +119,28 @@ const SortButton = ({
   current,
   onSelect,
 }: {
-  label: string;
-  value: SortOption;
-  className?: string;
-  current: SortOption;
-  onSelect: (v: SortOption) => void;
+  label: string
+  value: SortOption
+  className?: string
+  current: SortOption
+  onSelect: (v: SortOption) => void
 }) => (
   <Button
-    variant={current === value ? "default" : "ghost"}
+    variant={current === value ? 'default' : 'ghost'}
     size="sm"
     onClick={() => onSelect(value)}
     className={cn(
-      "h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate",
+      'h-8 p-0 text-[10px] font-bold uppercase tracking-wider transition-all rounded-md no-default-hover-elevate no-default-active-elevate',
       current === value
-        ? "bg-primary text-primary-foreground"
-        : "text-muted-foreground hover:text-foreground hover:bg-white/5",
+        ? 'bg-primary text-primary-foreground'
+        : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
       className,
     )}
     data-testid={`button-sort-${value}`}
   >
     {label}
   </Button>
-);
+)
 
 const LEVEL_WEIGHTS = {
   highest: 5,
@@ -154,15 +153,15 @@ const LEVEL_WEIGHTS = {
   lowest: 1,
   easiest: 1,
   none: 0,
-} as const satisfies Record<Priority | Ease | Enjoyment | Time, number>;
+} as const satisfies Record<Priority | Ease | Enjoyment | Time, number>
 
 const getLevelWeight = (
   level: keyof typeof LEVEL_WEIGHTS | null | undefined,
-): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0);
+): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
 
 enum SortDirection {
-  ASC = "asc",
-  DESC = "desc",
+  ASC = 'asc',
+  DESC = 'desc',
 }
 
 const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
@@ -171,71 +170,71 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
   ease: SortDirection.ASC,
   enjoyment: SortDirection.DESC,
   time: SortDirection.ASC,
-};
+}
 
 const Home = () => {
-  const { data: tasks, isLoading, error } = useTasks();
-  const { openCreateDialog } = useTaskDialog();
-  const { settings, updateSetting } = useSettings();
+  const { data: tasks, isLoading, error } = useTasks()
+  const { openCreateDialog } = useTaskDialog()
+  const { settings, updateSetting } = useSettings()
   const { isGuestMode, exitGuestMode, hasDemoData, deleteDemoData } =
-    useGuestModeState();
-  const [search, setSearch] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+    useGuestModeState()
+  const [search, setSearch] = useState('')
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
-  const sortBy = settings.sortBy;
-  const setSortBy = (value: SortOption) => updateSetting("sortBy", value);
+  const sortBy = settings.sortBy
+  const setSortBy = (value: SortOption) => updateSetting('sortBy', value)
 
   // Sort function for tasks
   const sortTasks = useCallback(
     (theseTasks: TaskWithSubtasks[], sort: SortOption): TaskWithSubtasks[] => {
-      const sorted = [...theseTasks];
+      const sorted = [...theseTasks]
       if (sort === SortOption.DATE) {
         sorted.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA;
-        });
+          const dateA = new Date(a.createdAt).getTime()
+          const dateB = new Date(b.createdAt).getTime()
+          return dateB - dateA
+        })
       } else {
         sorted.sort((a, b) => {
-          const direction = SORT_DIRECTIONS[sort] || SortDirection.DESC;
-          const valA = getLevelWeight(a[sort]);
-          const valB = getLevelWeight(b[sort]);
+          const direction = SORT_DIRECTIONS[sort] || SortDirection.DESC
+          const valA = getLevelWeight(a[sort])
+          const valB = getLevelWeight(b[sort])
 
           if (valA !== valB) {
-            return direction === SortDirection.DESC ? valB - valA : valA - valB;
+            return direction === SortDirection.DESC ? valB - valA : valA - valB
           }
 
-          const pA = getLevelWeight(a.priority);
-          const pB = getLevelWeight(b.priority);
-          const eA = getLevelWeight(a.ease);
-          const eB = getLevelWeight(b.ease);
-          const jA = getLevelWeight(a.enjoyment);
-          const jB = getLevelWeight(b.enjoyment);
+          const pA = getLevelWeight(a.priority)
+          const pB = getLevelWeight(b.priority)
+          const eA = getLevelWeight(a.ease)
+          const eB = getLevelWeight(b.ease)
+          const jA = getLevelWeight(a.enjoyment)
+          const jB = getLevelWeight(b.enjoyment)
 
           if (sort === SortOption.PRIORITY) {
-            if (eA !== eB) return eA - eB;
-            return jB - jA;
+            if (eA !== eB) return eA - eB
+            return jB - jA
           }
           if (sort === SortOption.EASE) {
-            if (pA !== pB) return pB - pA;
-            return jB - jA;
+            if (pA !== pB) return pB - pA
+            return jB - jA
           }
           if (sort === SortOption.ENJOYMENT) {
-            if (pA !== pB) return pB - pA;
-            return eA - eB;
+            if (pA !== pB) return pB - pA
+            return eA - eB
           }
           if (sort === SortOption.TIME) {
-            if (pA !== pB) return pB - pA;
-            if (eA !== eB) return eA - eB;
-            return pB - pA;
+            if (pA !== pB) return pB - pA
+            if (eA !== eB) return eA - eB
+            return pB - pA
           }
-          return 0;
-        });
+          return 0
+        })
       }
-      return sorted;
+      return sorted
     },
     [],
-  );
+  )
 
   // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
@@ -247,128 +246,128 @@ const Home = () => {
       parentSubtaskOrder?: number[],
     ): TaskWithSubtasks[] => {
       const result = nodes.reduce((acc: TaskWithSubtasks[], node) => {
-        const matches = node.name.toLowerCase().includes(term.toLowerCase());
+        const matches = node.name.toLowerCase().includes(term.toLowerCase())
         const filteredSubtasks = filterAndSortTree(
           node.subtasks,
           term,
           sort,
           node.subtaskSortMode,
           node.subtaskOrder,
-        );
+        )
 
         if (matches || filteredSubtasks.length > 0) {
-          acc.push({ ...node, subtasks: filteredSubtasks });
+          acc.push({ ...node, subtasks: filteredSubtasks })
         }
-        return acc;
-      }, []);
+        return acc
+      }, [])
 
       if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
-        return sortTasksByOrder(result, parentSubtaskOrder);
+        return sortTasksByOrder(result, parentSubtaskOrder)
       }
 
-      return sortTasks(result, sort);
+      return sortTasks(result, sort)
     },
     [sortTasks],
-  );
+  )
 
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pinned tasks to be hoisted to top
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, pinnedTasks } = useMemo(() => {
-    if (!tasks) return { taskTree: [], pinnedTasks: [] };
+    if (!tasks) return { taskTree: [], pinnedTasks: [] }
 
     // Filter out completed ROOT tasks (completed subtasks stay under their parent)
     const activeTasks = tasks.filter(
       (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
-    );
+    )
 
     // Collect tasks to hoist:
     // - All in_progress tasks (both top-level and subtasks)
     // - All pinned tasks (both top-level and subtasks)
     // Subtasks also remain visible under their parent (with minimal styling)
-    const inProgressList: TaskWithSubtasks[] = [];
-    const pinnedList: TaskWithSubtasks[] = [];
-    const hoistedIds = new Set<number>();
+    const inProgressList: TaskWithSubtasks[] = []
+    const pinnedList: TaskWithSubtasks[] = []
+    const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
       if (task.status === TaskStatus.IN_PROGRESS) {
-        inProgressList.push({ ...task, subtasks: [] });
-        hoistedIds.add(task.id);
+        inProgressList.push({ ...task, subtasks: [] })
+        hoistedIds.add(task.id)
       } else if (task.status === TaskStatus.PINNED) {
-        pinnedList.push({ ...task, subtasks: [] });
-        hoistedIds.add(task.id);
+        pinnedList.push({ ...task, subtasks: [] })
+        hoistedIds.add(task.id)
       }
-    });
+    })
 
     // Hoisted order: in_progress first, then pinned
-    const hoistedList = [...inProgressList, ...pinnedList];
+    const hoistedList = [...inProgressList, ...pinnedList]
 
     // Build full tree
     // - Subtasks with pinned/in_progress status stay under parent (also shown hoisted)
     // - Top-level pinned/in_progress are excluded from tree (only shown hoisted)
-    const nodes: Record<number, TaskWithSubtasks> = {};
-    const roots: TaskWithSubtasks[] = [];
+    const nodes: Record<number, TaskWithSubtasks> = {}
+    const roots: TaskWithSubtasks[] = []
 
     activeTasks.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] };
-    });
+      nodes[task.id] = { ...task, subtasks: [] }
+    })
 
     activeTasks.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
         // Subtasks always go under their parent (even if pinned/in_progress)
-        nodes[task.parentId].subtasks.push(nodes[task.id]);
+        nodes[task.parentId].subtasks.push(nodes[task.id])
       } else if (!task.parentId && !hoistedIds.has(task.id)) {
         // Top-level tasks go to roots unless they're hoisted
-        roots.push(nodes[task.id]);
+        roots.push(nodes[task.id])
       }
-    });
+    })
 
-    return { taskTree: roots, pinnedTasks: hoistedList };
-  }, [tasks]);
+    return { taskTree: roots, pinnedTasks: hoistedList }
+  }, [tasks])
 
   const displayedTasks = useMemo(() => {
-    if (!taskTree) return [];
-    const sortedTree = filterAndSortTree(taskTree, search, sortBy);
+    if (!taskTree) return []
+    const sortedTree = filterAndSortTree(taskTree, search, sortBy)
 
     // Filter pinned tasks by search term
     const filteredPinned = pinnedTasks.filter((task) =>
       task.name.toLowerCase().includes(search.toLowerCase()),
-    );
+    )
 
     // Separate in_progress (always first) from pinned, then sort pinned
     const inProgressTask = filteredPinned.filter(
       (t) => t.status === TaskStatus.IN_PROGRESS,
-    );
+    )
     const pinnedOnly = filteredPinned.filter(
       (t) => t.status === TaskStatus.PINNED,
-    );
+    )
 
     // Sort pinned: by priority first if setting enabled, then by current sort as secondary
-    let sortedPinned: TaskWithSubtasks[];
+    let sortedPinned: TaskWithSubtasks[]
     if (settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY) {
       // Sort by priority first, with current sortBy as secondary
       sortedPinned = [...pinnedOnly].sort((a, b) => {
-        const pA = getLevelWeight(a.priority);
-        const pB = getLevelWeight(b.priority);
-        if (pA !== pB) return pB - pA; // Priority descending
+        const pA = getLevelWeight(a.priority)
+        const pB = getLevelWeight(b.priority)
+        if (pA !== pB) return pB - pA // Priority descending
 
         // Secondary sort by current sortBy
         if (sortBy === SortOption.DATE) {
           return (
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
+          )
         }
-        const direction = SORT_DIRECTIONS[sortBy] || SortDirection.DESC;
-        const valA = getLevelWeight(a[sortBy]);
-        const valB = getLevelWeight(b[sortBy]);
-        return direction === SortDirection.DESC ? valB - valA : valA - valB;
-      });
+        const direction = SORT_DIRECTIONS[sortBy] || SortDirection.DESC
+        const valA = getLevelWeight(a[sortBy])
+        const valB = getLevelWeight(b[sortBy])
+        return direction === SortDirection.DESC ? valB - valA : valA - valB
+      })
     } else {
-      sortedPinned = sortTasks(pinnedOnly, sortBy);
+      sortedPinned = sortTasks(pinnedOnly, sortBy)
     }
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
-    return [...inProgressTask, ...sortedPinned, ...sortedTree];
+    return [...inProgressTask, ...sortedPinned, ...sortedTree]
   }, [
     taskTree,
     pinnedTasks,
@@ -377,10 +376,10 @@ const Home = () => {
     sortTasks,
     filterAndSortTree,
     settings,
-  ]);
+  ])
 
-  if (isLoading) return <PageLoading />;
-  if (error) return <PageError />;
+  if (isLoading) return <PageLoading />
+  if (error) return <PageError />
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
@@ -409,7 +408,7 @@ const Home = () => {
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                   data-testid="menu-item-search"
                 >
-                  <Search className={cn(IconSizeStyle.HW4, "mr-2")} />
+                  <Search className={cn(IconSizeStyle.HW4, 'mr-2')} />
                   Search
                 </DropdownMenuItem>
                 <Link href="/completed">
@@ -417,7 +416,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-completed"
                   >
-                    <CheckCircle2 className={cn(IconSizeStyle.HW4, "mr-2")} />
+                    <CheckCircle2 className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     Completed Tasks
                   </DropdownMenuItem>
                 </Link>
@@ -426,7 +425,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-settings"
                   >
-                    <Settings className={cn(IconSizeStyle.HW4, "mr-2")} />
+                    <Settings className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     Settings
                   </DropdownMenuItem>
                 </Link>
@@ -435,7 +434,7 @@ const Home = () => {
                     className="cursor-pointer"
                     data-testid="menu-item-how-to-use"
                   >
-                    <HelpCircle className={cn(IconSizeStyle.HW4, "mr-2")} />
+                    <HelpCircle className={cn(IconSizeStyle.HW4, 'mr-2')} />
                     How To Use
                   </DropdownMenuItem>
                 </Link>
@@ -447,7 +446,7 @@ const Home = () => {
                         className="cursor-pointer"
                         data-testid="menu-item-signup"
                       >
-                        <LogIn className={cn(IconSizeStyle.HW4, "mr-2")} />
+                        <LogIn className={cn(IconSizeStyle.HW4, 'mr-2')} />
                         Sign Up
                       </DropdownMenuItem>
                     </a>
@@ -456,7 +455,7 @@ const Home = () => {
                       onClick={exitGuestMode}
                       data-testid="menu-item-exit-guest"
                     >
-                      <LogOut className={cn(IconSizeStyle.HW4, "mr-2")} />
+                      <LogOut className={cn(IconSizeStyle.HW4, 'mr-2')} />
                       Exit Guest Mode
                     </DropdownMenuItem>
                   </>
@@ -467,7 +466,7 @@ const Home = () => {
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
                 <Search
-                  className={cn(IconSizeStyle.HW4, "shrink-0 text-primary")}
+                  className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
                 />
                 <Input
                   placeholder="Search..."
@@ -495,7 +494,7 @@ const Home = () => {
               getIsVisible(field.name, settings) ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}
-                  label={"labelShort" in field ? field.labelShort : field.label}
+                  label={'labelShort' in field ? field.labelShort : field.label}
                   value={field.name}
                   className="w-16"
                   current={sortBy}
@@ -512,14 +511,14 @@ const Home = () => {
               icon={
                 <Icon
                   icon={search ? Search : LayoutList}
-                  className={cn(IconSizeStyle.HW8, "text-muted-foreground")}
+                  className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
                 />
               }
-              title={search ? "No matching tasks found" : "Your list is empty"}
+              title={search ? 'No matching tasks found' : 'Your list is empty'}
               description={
                 search
-                  ? "Try adjusting your search terms."
-                  : "Start by adding your first task to get organized."
+                  ? 'Try adjusting your search terms.'
+                  : 'Start by adding your first task to get organized.'
               }
               action={
                 !search && (
@@ -562,7 +561,7 @@ const Home = () => {
         <Plus className={IconSizeStyle.HW6} />
       </Button>
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
