@@ -31,7 +31,7 @@ import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
-interface MainDropdownMenuProps {
+interface DropdownMenuHeaderProps {
   currentPage?: 'home' | 'completed'
   search: string
   onSearchChange: (value: string) => void
@@ -39,13 +39,13 @@ interface MainDropdownMenuProps {
   children?: React.ReactNode
 }
 
-export const MainDropdownMenu = ({
+export const DropdownMenuHeader = ({
   currentPage = 'home',
   search,
   onSearchChange,
   searchTestId = 'input-search',
   children,
-}: MainDropdownMenuProps) => {
+}: DropdownMenuHeaderProps) => {
   const { isGuestMode, exitGuestMode } = useGuestModeState()
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 

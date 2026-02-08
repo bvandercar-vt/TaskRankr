@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { CheckCircle2, Search } from 'lucide-react'
 
 import { HowToUseBanner } from '@/components/HowToUseBanner'
-import { MainDropdownMenu } from '@/components/MainDropdownMenu'
+import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
@@ -75,7 +75,7 @@ const Completed = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
-        <MainDropdownMenu
+        <DropdownMenuHeader
           currentPage="completed"
           search={search}
           onSearchChange={setSearch}
@@ -84,7 +84,7 @@ const Completed = () => {
           <h1 className="text-2xl font-bold tracking-tight">
             Completed Tasks
           </h1>
-        </MainDropdownMenu>
+        </DropdownMenuHeader>
 
         {displayedTasks.length > 0 && (
           <div className="flex items-center gap-2 px-2 mb-2">
