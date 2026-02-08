@@ -5,6 +5,7 @@
 import {
   CheckCircle2,
   HelpCircle,
+  Home,
   LogIn,
   LogOut,
   Menu,
@@ -28,12 +29,14 @@ interface MainDropdownMenuProps {
   isGuestMode: boolean
   exitGuestMode: () => void
   onSearchToggle: () => void
+  currentPage?: 'home' | 'completed'
 }
 
 export const MainDropdownMenu = ({
   isGuestMode,
   exitGuestMode,
   onSearchToggle,
+  currentPage = 'home',
 }: MainDropdownMenuProps) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
@@ -53,13 +56,23 @@ export const MainDropdownMenu = ({
         onClick={onSearchToggle}
         data-testid="menu-item-search"
       />
-      <Link href={Routes.COMPLETED}>
-        <DropdownMenuItem
-          icon={CheckCircle2}
-          label="Completed Tasks"
-          data-testid="menu-item-completed"
-        />
-      </Link>
+      {currentPage === 'home' ? (
+        <Link href={Routes.COMPLETED}>
+          <DropdownMenuItem
+            icon={CheckCircle2}
+            label="Completed Tasks"
+            data-testid="menu-item-completed"
+          />
+        </Link>
+      ) : (
+        <Link href={Routes.HOME}>
+          <DropdownMenuItem
+            icon={Home}
+            label="Home"
+            data-testid="menu-item-home"
+          />
+        </Link>
+      )}
       <Link href={Routes.SETTINGS}>
         <DropdownMenuItem
           icon={Settings}
