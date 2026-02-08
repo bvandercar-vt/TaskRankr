@@ -5,29 +5,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  CheckCircle2,
-  HelpCircle,
-  LayoutList,
-  LogIn,
-  LogOut,
-  Menu,
-  Plus,
-  Search,
-  Settings,
-  X,
-} from 'lucide-react'
+import { LayoutList, Plus, Search, X } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { MainMenu } from '@/components/MainMenu'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/primitives/DropdownMenu'
 import { Input } from '@/components/primitives/forms/Input'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
@@ -37,7 +20,6 @@ import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { authPaths } from '~/shared/constants'
 import {
   type Ease,
   type Enjoyment,
@@ -171,6 +153,57 @@ const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
   time: SortDirection.ASC,
 }
 
+const sortTasks = (
+  theseTasks: TaskWithSubtasks[],
+  sort: SortOption,
+): TaskWithSubtasks[] => {
+  const sorted = [...theseTasks]
+  if (sort === SortOption.DATE) {
+    sorted.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
+      return dateB - dateA
+    })
+  } else {
+    sorted.sort((a, b) => {
+      const direction: SortDirection = SORT_DIRECTIONS[sort]
+      const valA = getLevelWeight(a[sort])
+      const valB = getLevelWeight(b[sort])
+
+      if (valA !== valB) {
+        return direction === SortDirection.DESC ? valB - valA : valA - valB
+      }
+
+      const pA = getLevelWeight(a.priority)
+      const pB = getLevelWeight(b.priority)
+      const eA = getLevelWeight(a.ease)
+      const eB = getLevelWeight(b.ease)
+      const jA = getLevelWeight(a.enjoyment)
+      const jB = getLevelWeight(b.enjoyment)
+
+      if (sort === SortOption.PRIORITY) {
+        if (eA !== eB) return eA - eB
+        return jB - jA
+      }
+      if (sort === SortOption.EASE) {
+        if (pA !== pB) return pB - pA
+        return jB - jA
+      }
+      if (sort === SortOption.ENJOYMENT) {
+        if (pA !== pB) return pB - pA
+        return eA - eB
+      }
+      if (sort === SortOption.TIME) {
+        if (pA !== pB) return pB - pA
+        if (eA !== eB) return eA - eB
+        return pB - pA
+      }
+      return 0
+    })
+  }
+  return sorted
+}
+
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
@@ -182,58 +215,6 @@ const Home = () => {
 
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
-
-  // Sort function for tasks
-  const sortTasks = useCallback(
-    (theseTasks: TaskWithSubtasks[], sort: SortOption): TaskWithSubtasks[] => {
-      const sorted = [...theseTasks]
-      if (sort === SortOption.DATE) {
-        sorted.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime()
-          const dateB = new Date(b.createdAt).getTime()
-          return dateB - dateA
-        })
-      } else {
-        sorted.sort((a, b) => {
-          const direction: SortDirection = SORT_DIRECTIONS[sort]
-          const valA = getLevelWeight(a[sort])
-          const valB = getLevelWeight(b[sort])
-
-          if (valA !== valB) {
-            return direction === SortDirection.DESC ? valB - valA : valA - valB
-          }
-
-          const pA = getLevelWeight(a.priority)
-          const pB = getLevelWeight(b.priority)
-          const eA = getLevelWeight(a.ease)
-          const eB = getLevelWeight(b.ease)
-          const jA = getLevelWeight(a.enjoyment)
-          const jB = getLevelWeight(b.enjoyment)
-
-          if (sort === SortOption.PRIORITY) {
-            if (eA !== eB) return eA - eB
-            return jB - jA
-          }
-          if (sort === SortOption.EASE) {
-            if (pA !== pB) return pB - pA
-            return jB - jA
-          }
-          if (sort === SortOption.ENJOYMENT) {
-            if (pA !== pB) return pB - pA
-            return eA - eB
-          }
-          if (sort === SortOption.TIME) {
-            if (pA !== pB) return pB - pA
-            if (eA !== eB) return eA - eB
-            return pB - pA
-          }
-          return 0
-        })
-      }
-      return sorted
-    },
-    [],
-  )
 
   // Recursive function to filter task tree, respecting manual sort mode for subtasks
   const filterAndSortTree = useCallback(
@@ -266,7 +247,7 @@ const Home = () => {
 
       return sortTasks(result, sort)
     },
-    [sortTasks],
+    [],
   )
 
   // Build tree from flat list, excluding completed tasks
@@ -372,7 +353,6 @@ const Home = () => {
     pinnedTasks,
     search,
     sortBy,
-    sortTasks,
     filterAndSortTree,
     settings,
   ])
@@ -385,70 +365,12 @@ const Home = () => {
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
         <div className="flex items-center justify-between mb-4 pr-2">
-          {/* Hamburger Menu */}
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10"
-                  data-testid="button-menu"
-                >
-                  <Menu className={IconSizeStyle.HW5} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="bg-card border-white/10 w-48"
-              >
-                <DropdownMenuItem
-                  icon={Search}
-                  label="Search"
-                  onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-                  data-testid="menu-item-search"
-                />
-                <Link href={Routes.COMPLETED}>
-                  <DropdownMenuItem
-                    icon={CheckCircle2}
-                    label="Completed Tasks"
-                    data-testid="menu-item-completed"
-                  />
-                </Link>
-                <Link href={Routes.SETTINGS}>
-                  <DropdownMenuItem
-                    icon={Settings}
-                    label="Settings"
-                    data-testid="menu-item-settings"
-                  />
-                </Link>
-                <Link href={Routes.HOW_TO_USE}>
-                  <DropdownMenuItem
-                    icon={HelpCircle}
-                    label="How To Use"
-                    data-testid="menu-item-how-to-use"
-                  />
-                </Link>
-                {isGuestMode && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <a href={authPaths.login}>
-                      <DropdownMenuItem
-                        icon={LogIn}
-                        label="Sign Up"
-                        data-testid="menu-item-signup"
-                      />
-                    </a>
-                    <DropdownMenuItem
-                      icon={LogOut}
-                      label="Exit Guest Mode"
-                      onClick={exitGuestMode}
-                      data-testid="menu-item-exit-guest"
-                    />
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <MainMenu
+              isGuestMode={isGuestMode}
+              exitGuestMode={exitGuestMode}
+              onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
+            />
 
             {isSearchExpanded && (
               <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">

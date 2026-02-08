@@ -80,24 +80,30 @@ const SwitchCard = (props: SwitchSettingProps) => (
   </Card>
 )
 
-const Settings = () => {
-  const { settings, updateSettings, updateFieldFlags } = useSettings()
-  const { user } = useAuth()
-  const { isGuestMode } = useGuestMode()
-  const { toast } = useToast()
+const ExportButton = () => {
   const { data: tasks } = useTasks()
-  const setTaskStatus = useSetTaskStatus()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isImporting, setIsImporting] = useState(false)
   const hasNoTasks = !tasks || tasks.length === 0
 
-  const handleExport = () => {
-    window.location.href = contract.tasks.export.path
-  }
+  return (
+    <Button
+      variant="outline"
+      className="gap-2"
+      onClick={() => {
+        window.location.href = contract.tasks.export.path
+      }}
+      disabled={hasNoTasks}
+      data-testid="button-export"
+    >
+      <Download className={IconSizeStyle.HW4} />
+      Export Tasks
+    </Button>
+  )
+}
 
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
+const ImportButton = () => {
+  const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isImporting, setIsImporting] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -126,6 +132,38 @@ const Settings = () => {
       }
     }
   }
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        className="gap-2"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isImporting}
+        data-testid="button-import"
+      >
+        <Upload className={IconSizeStyle.HW4} />
+        {isImporting ? 'Importing...' : 'Import Tasks'}
+      </Button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileChange}
+        className="hidden"
+        data-testid="input-import-file"
+      />
+    </>
+  )
+}
+
+const Settings = () => {
+  const { settings, updateSettings, updateFieldFlags } = useSettings()
+  const { user } = useAuth()
+  const { isGuestMode } = useGuestMode()
+  const { toast } = useToast()
+  const { data: tasks } = useTasks()
+  const setTaskStatus = useSetTaskStatus()
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -307,34 +345,8 @@ const Settings = () => {
           data-testid="collapsible-import-export"
         >
           <div className="flex flex-wrap justify-center gap-3">
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={handleExport}
-              disabled={hasNoTasks}
-              data-testid="button-export"
-            >
-              <Download className={IconSizeStyle.HW4} />
-              Export Tasks
-            </Button>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={handleImportClick}
-              disabled={isImporting}
-              data-testid="button-import"
-            >
-              <Upload className={IconSizeStyle.HW4} />
-              {isImporting ? 'Importing...' : 'Import Tasks'}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleFileChange}
-              className="hidden"
-              data-testid="input-import-file"
-            />
+            <ExportButton />
+            <ImportButton />
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Export your tasks as JSON or import from a previously exported file.

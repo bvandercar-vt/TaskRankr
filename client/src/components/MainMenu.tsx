@@ -1,0 +1,102 @@
+/**
+ * @fileoverview Hamburger dropdown menu for the main task list page.
+ */
+
+import {
+  CheckCircle2,
+  HelpCircle,
+  LogIn,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+} from 'lucide-react'
+import { Link } from 'wouter'
+
+import { Button } from '@/components/primitives/Button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/primitives/DropdownMenu'
+import { IconSizeStyle, Routes } from '@/lib/constants'
+import { authPaths } from '~/shared/constants'
+
+interface MainMenuProps {
+  isGuestMode: boolean
+  exitGuestMode: () => void
+  onSearchToggle: () => void
+}
+
+export const MainMenu = ({
+  isGuestMode,
+  exitGuestMode,
+  onSearchToggle,
+}: MainMenuProps) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-10 w-10"
+          data-testid="button-menu"
+        >
+          <Menu className={IconSizeStyle.HW5} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="bg-card border-white/10 w-48"
+      >
+        <DropdownMenuItem
+          icon={Search}
+          label="Search"
+          onClick={onSearchToggle}
+          data-testid="menu-item-search"
+        />
+        <Link href={Routes.COMPLETED}>
+          <DropdownMenuItem
+            icon={CheckCircle2}
+            label="Completed Tasks"
+            data-testid="menu-item-completed"
+          />
+        </Link>
+        <Link href={Routes.SETTINGS}>
+          <DropdownMenuItem
+            icon={Settings}
+            label="Settings"
+            data-testid="menu-item-settings"
+          />
+        </Link>
+        <Link href={Routes.HOW_TO_USE}>
+          <DropdownMenuItem
+            icon={HelpCircle}
+            label="How To Use"
+            data-testid="menu-item-how-to-use"
+          />
+        </Link>
+        {isGuestMode && (
+          <>
+            <DropdownMenuSeparator />
+            <a href={authPaths.login}>
+              <DropdownMenuItem
+                icon={LogIn}
+                label="Sign Up"
+                data-testid="menu-item-signup"
+              />
+            </a>
+            <DropdownMenuItem
+              icon={LogOut}
+              label="Exit Guest Mode"
+              onClick={exitGuestMode}
+              data-testid="menu-item-exit-guest"
+            />
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
