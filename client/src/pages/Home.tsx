@@ -168,28 +168,9 @@ const Home = () => {
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
         <div className="flex items-center justify-between mb-4 pr-2">
-          <div className="flex items-center gap-2">
-            <MainDropdownMenu
-              onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
-            />
-
-            {isSearchExpanded && (
-              <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
-                <Search
-                  className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
-                />
-                <Input
-                  placeholder="Search..."
-                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
-                  autoFocus
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onBlur={() => !search && setIsSearchExpanded(false)}
-                  data-testid="input-search"
-                />
-              </div>
-            )}
-          </div>
+          <MainDropdownMenu
+            onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
+          />
 
           {/* Sort Buttons */}
           <div className="flex items-center gap-1">
@@ -214,6 +195,23 @@ const Home = () => {
             )}
           </div>
         </div>
+
+        {isSearchExpanded && (
+          <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
+            <Search
+              className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
+            />
+            <Input
+              placeholder="Search..."
+              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onBlur={() => !search && setIsSearchExpanded(false)}
+              data-testid="input-search"
+            />
+          </div>
+        )}
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (

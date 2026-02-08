@@ -83,29 +83,28 @@ const Completed = () => {
               onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
               currentPage="completed"
             />
-
-            {isSearchExpanded ? (
-              <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 w-64">
-                <Search
-                  className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
-                />
-                <Input
-                  placeholder="Search..."
-                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
-                  autoFocus
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onBlur={() => !search && setIsSearchExpanded(false)}
-                  data-testid="input-search-completed"
-                />
-              </div>
-            ) : (
-              <h1 className="text-2xl font-bold tracking-tight">
-                Completed Tasks
-              </h1>
-            )}
+            <h1 className="text-2xl font-bold tracking-tight">
+              Completed Tasks
+            </h1>
           </div>
         </div>
+
+        {isSearchExpanded && (
+          <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
+            <Search
+              className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
+            />
+            <Input
+              placeholder="Search..."
+              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onBlur={() => !search && setIsSearchExpanded(false)}
+              data-testid="input-search-completed"
+            />
+          </div>
+        )}
 
         {displayedTasks.length > 0 && (
           <div className="flex items-center gap-2 px-2 mb-2">
