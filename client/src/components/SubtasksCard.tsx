@@ -153,6 +153,83 @@ const SubtaskItem = ({
   )
 }
 
+interface SortModeToggleProps {
+  isManualSortMode: boolean
+  onToggle: () => void
+  disabled: boolean
+}
+
+const SortModeToggle = ({
+  isManualSortMode,
+  onToggle,
+  disabled,
+}: SortModeToggleProps) => (
+  <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
+    <span
+      className="text-xs font-medium text-muted-foreground"
+      data-testid="label-sorting-method"
+    >
+      Sorting Method
+    </span>
+    <div
+      className={cn(
+        'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
+        disabled && 'opacity-50 pointer-events-none',
+      )}
+      role="radiogroup"
+      aria-label="Subtask sort order"
+      data-testid="toggle-sort-mode"
+    >
+      <label
+        className={cn(
+          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+          isManualSortMode
+            ? 'bg-transparent text-muted-foreground'
+            : 'bg-secondary text-foreground',
+        )}
+        data-testid="toggle-sort-inherit"
+      >
+        <input
+          type="radio"
+          name="subtask-sort-mode"
+          value={SubtaskSortMode.INHERIT}
+          checked={!isManualSortMode}
+          onChange={() => isManualSortMode && onToggle()}
+          className="sr-only"
+        />
+        Inherit
+      </label>
+      <label
+        className={cn(
+          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+          isManualSortMode
+            ? 'bg-secondary text-foreground'
+            : 'bg-transparent text-muted-foreground',
+        )}
+        data-testid="toggle-sort-manual"
+      >
+        <input
+          type="radio"
+          name="subtask-sort-mode"
+          value={SubtaskSortMode.MANUAL}
+          checked={isManualSortMode}
+          onChange={() => !isManualSortMode && onToggle()}
+          className="sr-only"
+        />
+        Manual
+      </label>
+    </div>
+    <span
+      className="text-[11px] text-muted-foreground/70 leading-snug"
+      data-testid="text-sort-caption"
+    >
+      {isManualSortMode
+        ? 'Drag subtasks into your preferred order using the grip handles.'
+        : 'Subtasks follow the same sort order as the main task list.'}
+    </span>
+  </div>
+)
+
 interface SubtasksCardProps {
   task: Task
   onAddChild: (parentId: number) => void
@@ -301,70 +378,11 @@ export const SubtasksCard = ({
           contentClassName="mt-0"
           data-testid="button-toggle-subtasks"
         >
-          <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
-            <span
-              className="text-xs font-medium text-muted-foreground"
-              data-testid="label-sorting-method"
-            >
-              Sorting Method
-            </span>
-            <div
-              className={cn(
-                'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-                isMutating && 'opacity-50 pointer-events-none',
-              )}
-              role="radiogroup"
-              aria-label="Subtask sort order"
-              data-testid="toggle-sort-mode"
-            >
-              <label
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  isManualSortMode
-                    ? 'bg-transparent text-muted-foreground'
-                    : 'bg-secondary text-foreground',
-                )}
-                data-testid="toggle-sort-inherit"
-              >
-                <input
-                  type="radio"
-                  name="subtask-sort-mode"
-                  value={SubtaskSortMode.INHERIT}
-                  checked={!isManualSortMode}
-                  onChange={() => isManualSortMode && handleSortModeToggle()}
-                  className="sr-only"
-                />
-                Inherit
-              </label>
-              <label
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  isManualSortMode
-                    ? 'bg-secondary text-foreground'
-                    : 'bg-transparent text-muted-foreground',
-                )}
-                data-testid="toggle-sort-manual"
-              >
-                <input
-                  type="radio"
-                  name="subtask-sort-mode"
-                  value={SubtaskSortMode.MANUAL}
-                  checked={isManualSortMode}
-                  onChange={() => !isManualSortMode && handleSortModeToggle()}
-                  className="sr-only"
-                />
-                Manual
-              </label>
-            </div>
-            <span
-              className="text-[11px] text-muted-foreground/70 leading-snug"
-              data-testid="text-sort-caption"
-            >
-              {isManualSortMode
-                ? 'Drag subtasks into your preferred order using the grip handles.'
-                : 'Subtasks follow the same sort order as the main task list.'}
-            </span>
-          </div>
+          <SortModeToggle
+            isManualSortMode={isManualSortMode}
+            onToggle={handleSortModeToggle}
+            disabled={isMutating}
+          />
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
