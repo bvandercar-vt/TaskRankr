@@ -404,60 +404,48 @@ const Home = () => {
                 className="bg-card border-white/10 w-48"
               >
                 <DropdownMenuItem
-                  className="cursor-pointer"
+                  icon={Search}
+                  label="Search"
                   onClick={() => setIsSearchExpanded(!isSearchExpanded)}
                   data-testid="menu-item-search"
-                >
-                  <Search className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                  Search
-                </DropdownMenuItem>
+                />
                 <Link href={Routes.COMPLETED}>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    icon={CheckCircle2}
+                    label="Completed Tasks"
                     data-testid="menu-item-completed"
-                  >
-                    <CheckCircle2 className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                    Completed Tasks
-                  </DropdownMenuItem>
+                  />
                 </Link>
                 <Link href={Routes.SETTINGS}>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    icon={Settings}
+                    label="Settings"
                     data-testid="menu-item-settings"
-                  >
-                    <Settings className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                    Settings
-                  </DropdownMenuItem>
+                  />
                 </Link>
                 <Link href={Routes.HOW_TO_USE}>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    icon={HelpCircle}
+                    label="How To Use"
                     data-testid="menu-item-how-to-use"
-                  >
-                    <HelpCircle className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                    How To Use
-                  </DropdownMenuItem>
+                  />
                 </Link>
                 {isGuestMode && (
                   <>
                     <DropdownMenuSeparator />
                     <a href={authPaths.login}>
                       <DropdownMenuItem
-                        className="cursor-pointer"
+                        icon={LogIn}
+                        label="Sign Up"
                         data-testid="menu-item-signup"
-                      >
-                        <LogIn className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                        Sign Up
-                      </DropdownMenuItem>
+                      />
                     </a>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      icon={LogOut}
+                      label="Exit Guest Mode"
                       onClick={exitGuestMode}
                       data-testid="menu-item-exit-guest"
-                    >
-                      <LogOut className={cn(IconSizeStyle.HW4, 'mr-2')} />
-                      Exit Guest Mode
-                    </DropdownMenuItem>
+                    />
                   </>
                 )}
               </DropdownMenuContent>
