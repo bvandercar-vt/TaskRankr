@@ -18,32 +18,31 @@ import {
 } from '@/components/primitives/forms/Select'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { cn } from '@/lib/utils'
-import type {
-  MutateTask,
-  RANK_FIELDS_CRITERIA,
-  RankField,
-} from '~/shared/schema'
-
-const NONE_VALUE = 'none'
+import type { MutateTask, RankField, RankFieldValueMap } from '~/shared/schema'
 
 interface RankFieldSelectProps {
-  attr: (typeof RANK_FIELDS_CRITERIA)[number]
+  name: RankField
+  label: string
   field: ControllerRenderProps<MutateTask, RankField>
   isRequired: boolean
+  levels: string[]
 }
 
 export const RankFieldSelect = ({
-  attr,
+  name,
+  label,
+  levels,
   field,
   isRequired,
 }: RankFieldSelectProps) => {
   const hasError = isRequired && !field.value
   const showNoneOption = !isRequired
+  const NONE_VALUE = 'none'
 
   return (
     <FormItem>
       <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-        {attr.label}
+        {label}
         {isRequired && <span className="text-destructive ml-1">*</span>}
       </FormLabel>
       <Select
@@ -55,11 +54,7 @@ export const RankFieldSelect = ({
             className={cn(
               'bg-secondary/20 capitalize font-semibold h-10',
               hasError ? 'border-destructive/50' : 'border-white/5',
-              getRankFieldStyle(
-                attr.name,
-                field.value,
-                'text-muted-foreground',
-              ),
+              getRankFieldStyle(name, field.value, 'text-muted-foreground'),
             )}
           >
             <SelectValue placeholder="Select..." />
@@ -74,13 +69,16 @@ export const RankFieldSelect = ({
               None
             </SelectItem>
           )}
-          {attr.levels.filter(Boolean).map((level) => (
+          {levels.map((level) => (
             <SelectItem
               key={level}
               value={level}
               className={cn(
                 'capitalize font-semibold',
-                getRankFieldStyle(attr.name, level),
+                getRankFieldStyle(
+                  name,
+                  level satisfies string as RankFieldValueMap[typeof name],
+                ),
               )}
             >
               {level}

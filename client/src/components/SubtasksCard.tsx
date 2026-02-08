@@ -40,24 +40,25 @@ import {
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
+import type { DeleteTaskArgs } from './providers/LocalStateProvider'
 
-interface SortableSubtaskItemProps {
+interface SubtaskItemProps {
   task: Task & { depth: number }
   onEdit?: (task: Task) => void
-  onDelete: (task: { id: number; name: string }) => void
+  onDelete: (task: DeleteTaskArgs) => void
   onToggleComplete: (task: Task) => void
-  isManualMode: boolean
+  isManualSortMode: boolean
   isDragDisabled?: boolean
 }
 
-const SortableSubtaskItem = ({
+const SubtaskItem = ({
   task,
   onEdit,
   onDelete,
   onToggleComplete,
-  isManualMode,
+  isManualSortMode,
   isDragDisabled,
-}: SortableSubtaskItemProps) => {
+}: SubtaskItemProps) => {
   const {
     attributes,
     listeners,
@@ -74,7 +75,7 @@ const SortableSubtaskItem = ({
   }
 
   const isDirect = task.depth === 0
-  const showDragHandle = isManualMode && isDirect
+  const showDragHandle = isManualSortMode && isDirect
   const isCompleted = task.status === TaskStatus.COMPLETED
 
   return (
@@ -142,7 +143,7 @@ const SortableSubtaskItem = ({
           type="button"
           variant="ghost"
           size="icon"
-          onClick={() => onDelete({ id: task.id, name: task.name })}
+          onClick={() => onDelete(task)}
           data-testid={`button-delete-subtask-${task.id}`}
         >
           <Trash2 className={cn(IconSizeStyle.HW4, 'text-destructive')} />
@@ -156,7 +157,7 @@ interface SubtasksCardProps {
   task: Task
   onAddChild: (parentId: number) => void
   onEditChild?: (task: Task) => void
-  onSubtaskDelete?: (task: { id: number; name: string }) => void
+  onSubtaskDelete?: (task: DeleteTaskArgs) => void
 }
 
 export const SubtasksCard = ({
@@ -165,16 +166,18 @@ export const SubtasksCard = ({
   onEditChild,
   onSubtaskDelete,
 }: SubtasksCardProps) => {
-  const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
-    null,
-  )
   const { data: allTasks } = useTasks()
   const updateTask = useUpdateTask()
   const setTaskStatus = useSetTaskStatus()
   const reorderSubtasks = useReorderSubtasks()
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
-    task.subtaskSortMode || SubtaskSortMode.INHERIT,
+    task.subtaskSortMode,
+  )
+  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
+
+  const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
+    null,
   )
 
   const sensors = useSensors(
@@ -261,10 +264,9 @@ export const SubtasksCard = ({
 
   const handleSortModeToggle = () => {
     if (updateTask.isPending || reorderSubtasks.isPending) return
-    const newMode: SubtaskSortMode =
-      sortMode === SubtaskSortMode.INHERIT
-        ? SubtaskSortMode.MANUAL
-        : SubtaskSortMode.INHERIT
+    const newMode: SubtaskSortMode = isManualSortMode
+      ? SubtaskSortMode.INHERIT
+      : SubtaskSortMode.MANUAL
 
     setSortMode(newMode)
 
@@ -318,9 +320,9 @@ export const SubtasksCard = ({
               <label
                 className={cn(
                   'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  sortMode === SubtaskSortMode.INHERIT
-                    ? 'bg-secondary text-foreground'
-                    : 'bg-transparent text-muted-foreground',
+                  isManualSortMode
+                    ? 'bg-transparent text-muted-foreground'
+                    : 'bg-secondary text-foreground',
                 )}
                 data-testid="toggle-sort-inherit"
               >
@@ -328,11 +330,8 @@ export const SubtasksCard = ({
                   type="radio"
                   name="subtask-sort-mode"
                   value={SubtaskSortMode.INHERIT}
-                  checked={sortMode === SubtaskSortMode.INHERIT}
-                  onChange={() =>
-                    sortMode !== SubtaskSortMode.INHERIT &&
-                    handleSortModeToggle()
-                  }
+                  checked={!isManualSortMode}
+                  onChange={() => isManualSortMode && handleSortModeToggle()}
                   className="sr-only"
                 />
                 Inherit
@@ -340,7 +339,7 @@ export const SubtasksCard = ({
               <label
                 className={cn(
                   'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  sortMode === SubtaskSortMode.MANUAL
+                  isManualSortMode
                     ? 'bg-secondary text-foreground'
                     : 'bg-transparent text-muted-foreground',
                 )}
@@ -350,11 +349,8 @@ export const SubtasksCard = ({
                   type="radio"
                   name="subtask-sort-mode"
                   value={SubtaskSortMode.MANUAL}
-                  checked={sortMode === SubtaskSortMode.MANUAL}
-                  onChange={() =>
-                    sortMode !== SubtaskSortMode.MANUAL &&
-                    handleSortModeToggle()
-                  }
+                  checked={isManualSortMode}
+                  onChange={() => !isManualSortMode && handleSortModeToggle()}
                   className="sr-only"
                 />
                 Manual
@@ -364,9 +360,9 @@ export const SubtasksCard = ({
               className="text-[11px] text-muted-foreground/70 leading-snug"
               data-testid="text-sort-caption"
             >
-              {sortMode === SubtaskSortMode.INHERIT
-                ? 'Subtasks follow the same sort order as the main task list.'
-                : 'Drag subtasks into your preferred order using the grip handles.'}
+              {isManualSortMode
+                ? 'Drag subtasks into your preferred order using the grip handles.'
+                : 'Subtasks follow the same sort order as the main task list.'}
             </span>
           </div>
           <DndContext
@@ -380,7 +376,7 @@ export const SubtasksCard = ({
             >
               <div className="divide-y divide-white/5">
                 {subtasks.map((subtask) => (
-                  <SortableSubtaskItem
+                  <SubtaskItem
                     key={subtask.id}
                     task={subtask}
                     onEdit={onEditChild}
@@ -395,7 +391,7 @@ export const SubtasksCard = ({
                         status: newStatus,
                       })
                     }}
-                    isManualMode={sortMode === SubtaskSortMode.MANUAL}
+                    isManualSortMode={isManualSortMode}
                     isDragDisabled={isMutating}
                   />
                 ))}

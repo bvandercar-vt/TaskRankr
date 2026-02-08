@@ -30,7 +30,7 @@ import {
 } from '@/components/primitives/DropdownMenu'
 import { Input } from '@/components/primitives/forms/Input'
 import { Icon } from '@/components/primitives/LucideIcon'
-import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
+import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useSettings } from '@/hooks/useSettings'

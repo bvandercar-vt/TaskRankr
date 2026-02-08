@@ -20,6 +20,7 @@ import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
   SubtaskSortMode,
+  type Task,
   TaskStatus,
   type TaskWithSubtasks,
   type UpdateTask,
@@ -29,6 +30,7 @@ import {
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
+export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 
 export type SyncOperation =
   | {

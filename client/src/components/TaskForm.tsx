@@ -42,7 +42,10 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
-import type { MutateTaskContent } from './providers/LocalStateProvider'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
+} from './providers/LocalStateProvider'
 
 export interface TaskFormProps {
   onSubmit: (data: MutateTaskContent) => void
@@ -52,7 +55,7 @@ export interface TaskFormProps {
   onCancel: () => void
   onAddChild?: (parentId: number) => void
   onEditChild?: (task: Task) => void
-  onSubtaskDelete?: (task: { id: number; name: string }) => void
+  onSubtaskDelete?: (task: DeleteTaskArgs) => void
 }
 
 export const TaskForm = ({
@@ -182,18 +185,18 @@ export const TaskForm = ({
 
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              {visibleRankFields.map((attr) => (
+              {visibleRankFields.map(({ name, label, levels }) => (
                 <FormField
-                  key={attr.name}
+                  key={name}
                   control={form.control}
-                  name={attr.name}
+                  name={name}
                   render={({ field }) => (
                     <RankFieldSelect
-                      attr={attr}
+                      name={name}
+                      label={label}
+                      levels={levels}
                       field={field}
-                      isRequired={Boolean(
-                        rankFieldConfig.get(attr.name)?.required,
-                      )}
+                      isRequired={Boolean(rankFieldConfig.get(name)?.required)}
                     />
                   )}
                 />
@@ -282,29 +285,31 @@ export const TaskForm = ({
               )}
             />
 
-            {initialData?.status === TaskStatus.COMPLETED &&
-              initialData?.completedAt && (
+            {initialData?.status === TaskStatus.COMPLETED && (
+              <>
+                {initialData?.completedAt && (
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Date Completed
+                    </div>
+                    <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                      {format(new Date(initialData.completedAt), 'PPP p')}
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-4">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Date Completed
+                    Time Spent
                   </div>
-                  <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                    {format(new Date(initialData.completedAt), 'PPP p')}
-                  </div>
+                  <TimeInput
+                    durationMs={form.watch('inProgressTime') || 0}
+                    onDurationChange={(ms) =>
+                      form.setValue('inProgressTime', ms)
+                    }
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                  />
                 </div>
-              )}
-
-            {initialData?.status === TaskStatus.COMPLETED && (
-              <div className="flex items-center justify-between gap-4">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Time Spent
-                </div>
-                <TimeInput
-                  durationMs={form.watch('inProgressTime') || 0}
-                  onDurationChange={(ms) => form.setValue('inProgressTime', ms)}
-                  className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                />
-              </div>
+              </>
             )}
           </div>
         </div>
