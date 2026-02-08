@@ -5,7 +5,7 @@
  * priority, etc.).
  */
 
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
   integer,
@@ -34,6 +34,11 @@ export const TASK_STATUSES = [
 ] as const
 export type TaskStatus = (typeof TASK_STATUSES)[number]
 export const taskStatusEnum = z.enum(TASK_STATUSES)
+
+// Subtask sort mode constants
+export const SUBTASK_SORT_MODES = ['inherit', 'manual'] as const
+export type SubtaskSortMode = (typeof SUBTASK_SORT_MODES)[number]
+export const subtaskSortModeEnum = z.enum(SUBTASK_SORT_MODES)
 
 // Attribute level constants and types
 export const PRIORITY_LEVELS = [
@@ -143,6 +148,11 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   parentId: integer('parent_id'),
+  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
+  subtaskOrder: integer('subtask_order')
+    .array()
+    .default(sql`'{}'::integer[]`)
+    .notNull(),
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -164,6 +174,8 @@ const taskSchemaCommon = {
   ease: easeEnum.nullable(),
   enjoyment: enjoymentEnum.nullable(),
   time: timeEnum.nullable(),
+  subtaskSortMode: subtaskSortModeEnum.default('inherit'),
+  subtaskOrder: z.array(z.number()).default([]),
   createdAt: z.coerce.date(),
   completedAt: z.coerce.date().nullish(),
   inProgressStartedAt: z.coerce.date().nullish(),

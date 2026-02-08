@@ -6,7 +6,9 @@ import {
   ArrowLeft,
   ArrowUpDown,
   CheckCircle2,
+  GripVertical,
   Hand,
+  Layers,
   MousePointer2,
   Pin,
   PlayCircle,
@@ -64,13 +66,13 @@ const HowToUse = () => {
               <InstructionCard
                 icon={<MousePointer2 className={IconSizeStyle.HW5} />}
                 title="Tap to Edit"
-                description="Tap any task card to open the edit form where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down big projects."
+                description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
                 testId="card-tap-to-edit"
               />
               <InstructionCard
                 icon={<Hand className={IconSizeStyle.HW5} />}
                 title="Hold to Change Status"
-                description="Press and hold a task card for about a second to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), or Completed."
+                description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
                 testId="card-hold-to-change-status"
               />
             </div>
@@ -96,6 +98,26 @@ const HowToUse = () => {
                   </>
                 }
                 testId="card-sorting"
+              />
+            </div>
+          </section>
+
+          <section data-testid="section-subtasks">
+            <h2 className="text-lg font-semibold mb-3 text-primary">
+              Subtasks
+            </h2>
+            <div className="space-y-3">
+              <InstructionCard
+                icon={<Layers className={IconSizeStyle.HW5} />}
+                title="Nested Tasks"
+                description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
+                testId="card-nested-tasks"
+              />
+              <InstructionCard
+                icon={<GripVertical className={IconSizeStyle.HW5} />}
+                title="Manual Ordering"
+                description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
+                testId="card-manual-ordering"
               />
             </div>
           </section>

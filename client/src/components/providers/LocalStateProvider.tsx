@@ -37,6 +37,7 @@ export type SyncOperation =
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
   | { type: 'update_settings'; data: Partial<UserSettings> }
+  | { type: 'reorder_subtasks'; parentId: number; orderedIds: number[] }
 
 interface LocalStateContextValue {
   tasks: TaskWithSubtasks[]
@@ -48,6 +49,7 @@ interface LocalStateContextValue {
   updateTask: (id: number, updates: UpdateTaskArg) => TaskWithSubtasks
   setTaskStatus: (id: number, status: TaskStatus) => TaskWithSubtasks
   deleteTask: (id: number) => void
+  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   updateSettings: (updates: Partial<UserSettings>) => void
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
@@ -257,9 +259,21 @@ export const LocalStateProvider = ({
   }, [])
 
   const replaceTaskId = useCallback((tempId: number, realId: number) => {
-    setTasks((prev) =>
-      updateTaskInTree(prev, tempId, (task) => ({ ...task, id: realId })),
-    )
+    setTasks((prev) => {
+      const updated = updateTaskInTree(prev, tempId, (task) => ({
+        ...task,
+        id: realId,
+      }))
+      const replaceInOrder = (tasks_: TaskWithSubtasks[]): TaskWithSubtasks[] =>
+        tasks_.map((t) => ({
+          ...t,
+          subtaskOrder: t.subtaskOrder.map((id) =>
+            id === tempId ? realId : id,
+          ),
+          subtasks: replaceInOrder(t.subtasks),
+        }))
+      return replaceInOrder(updated)
+    })
     setSyncQueue((prev) =>
       prev.map((op) => {
         if ('id' in op && op.id === tempId) {
@@ -293,10 +307,26 @@ export const LocalStateProvider = ({
         inProgressStartedAt: null,
         createdAt: new Date(),
         completedAt: null,
+        subtaskSortMode: data.subtaskSortMode ?? 'inherit',
+        subtaskOrder: data.subtaskOrder ?? [],
         subtasks: [],
       }
 
-      setTasks((prev) => addTaskToTree(prev, newTask, data.parentId ?? null))
+      setTasks((prev) => {
+        let updated = addTaskToTree(prev, newTask, data.parentId ?? null)
+        if (data.parentId) {
+          updated = updateTaskInTree(updated, data.parentId, (parent) => {
+            if (parent.subtaskSortMode === 'manual') {
+              return {
+                ...parent,
+                subtaskOrder: [...parent.subtaskOrder, tempId],
+              }
+            }
+            return parent
+          })
+        }
+        return updated
+      })
       enqueue({ type: 'create_task', tempId, data })
 
       return newTask
@@ -385,21 +415,38 @@ export const LocalStateProvider = ({
 
         if (taskToDelete.parentId) {
           const timeToAccumulate = getTotalTimeFromTask(taskToDelete)
-          if (timeToAccumulate > 0) {
-            updated = updateTaskInTree(
-              updated,
-              taskToDelete.parentId,
-              (parent) => ({
-                ...parent,
-                inProgressTime: (parent.inProgressTime ?? 0) + timeToAccumulate,
-              }),
-            )
-          }
+          updated = updateTaskInTree(
+            updated,
+            taskToDelete.parentId,
+            (parent) => ({
+              ...parent,
+              ...(timeToAccumulate > 0
+                ? {
+                    inProgressTime:
+                      (parent.inProgressTime ?? 0) + timeToAccumulate,
+                  }
+                : {}),
+              subtaskOrder: parent.subtaskOrder.filter((sid) => sid !== id),
+            }),
+          )
         }
 
         return deleteTaskFromTree(updated, id)
       })
       enqueue({ type: 'delete_task', id })
+    },
+    [enqueue],
+  )
+
+  const reorderSubtasks = useCallback(
+    (parentId: number, orderedIds: number[]) => {
+      setTasks((prev) =>
+        updateTaskInTree(prev, parentId, (parent) => ({
+          ...parent,
+          subtaskOrder: orderedIds,
+        })),
+      )
+      enqueue({ type: 'reorder_subtasks', parentId, orderedIds })
     },
     [enqueue],
   )
@@ -481,6 +528,7 @@ export const LocalStateProvider = ({
       updateTask,
       setTaskStatus,
       deleteTask,
+      reorderSubtasks,
       updateSettings,
       clearSyncQueue,
       removeSyncOperation,
@@ -501,6 +549,7 @@ export const LocalStateProvider = ({
       updateTask,
       setTaskStatus,
       deleteTask,
+      reorderSubtasks,
       updateSettings,
       clearSyncQueue,
       removeSyncOperation,

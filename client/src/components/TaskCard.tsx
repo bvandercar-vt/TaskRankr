@@ -76,14 +76,14 @@ const formatDuration = (ms: number) => {
 
 // Calculate total accumulated time including all subtasks recursively
 const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
-  // Calculate for this task
+  // calculate own time
   let total = task.inProgressTime
   if (task.status === 'in_progress' && task.inProgressStartedAt) {
     const elapsed = Date.now() - task.inProgressStartedAt.getTime()
     total += elapsed
   }
 
-  // Add cumulative time from subtasks recursively
+  // add subtasks time
   for (const subtask of task.subtasks) {
     total += getTotalAccumulatedTime(subtask)
   }
