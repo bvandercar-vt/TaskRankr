@@ -304,6 +304,35 @@ const Settings = () => {
           <SortInfo testIdPrefix="settings" />
         </div>
 
+        {!isGuestMode && (
+          <Card className="mt-8 flex items-center justify-between">
+            <div>
+              <p
+                className="font-semibold text-foreground"
+                data-testid="text-user-name"
+              >
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="text-user-email"
+              >
+                {user?.email}
+              </p>
+            </div>
+            <a href={authPaths.logout}>
+              <Button
+                variant="outline"
+                className="gap-2"
+                data-testid="button-logout"
+              >
+                <LogOut className={IconSizeStyle.HW4} />
+                Log Out
+              </Button>
+            </a>
+          </Card>
+        )}
+
         <CollapsibleCard
           title="Import/Export Data"
           className="mt-8"
@@ -343,35 +372,6 @@ const Settings = () => {
             Export your tasks as JSON or import from a previously exported file.
           </p>
         </CollapsibleCard>
-
-        {!isGuestMode && (
-          <Card className="mt-4 flex items-center justify-between">
-            <div>
-              <p
-                className="font-semibold text-foreground"
-                data-testid="text-user-name"
-              >
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="text-user-email"
-              >
-                {user?.email}
-              </p>
-            </div>
-            <a href={authPaths.logout}>
-              <Button
-                variant="outline"
-                className="gap-2"
-                data-testid="button-logout"
-              >
-                <LogOut className={IconSizeStyle.HW4} />
-                Log Out
-              </Button>
-            </a>
-          </Card>
-        )}
 
         <CollapsibleCard
           title="Clear Local Data"
