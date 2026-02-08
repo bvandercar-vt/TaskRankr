@@ -75,35 +75,28 @@ const Completed = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
+        <h1 className="text-2xl font-bold tracking-tight mb-4 px-2">
+          Completed Tasks
+        </h1>
+
         <DropdownMenuHeader
-          currentPage="completed"
           search={search}
           onSearchChange={setSearch}
           searchTestId="input-search-completed"
         >
-          <h1 className="text-2xl font-bold tracking-tight">
-            Completed Tasks
-          </h1>
-        </DropdownMenuHeader>
-
-        {displayedTasks.length > 0 && (
-          <div className="flex items-center gap-2 px-2 mb-2">
-            <div className="w-5 shrink-0" />
-            <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
-              <div className="flex-1 hidden md:block" />
-              <div className="flex items-center gap-1 shrink-0 justify-end md:w-[268px] pr-1.5 md:pr-0">
-                {RANK_FIELDS_COLUMNS.map((field) => (
-                  <span
-                    key={`${field.name}-col-header`}
-                    className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
-                  >
-                    {'labelShort' in field ? field.labelShort : field.label}
-                  </span>
-                ))}
-              </div>
+          {displayedTasks.length > 0 && (
+            <div className="flex items-center gap-1 shrink-0 justify-end">
+              {RANK_FIELDS_COLUMNS.map((field) => (
+                <span
+                  key={`${field.name}-col-header`}
+                  className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
+                >
+                  {'labelShort' in field ? field.labelShort : field.label}
+                </span>
+              ))}
             </div>
-          </div>
-        )}
+          )}
+        </DropdownMenuHeader>
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (

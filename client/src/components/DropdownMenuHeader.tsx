@@ -15,7 +15,7 @@ import {
   Search,
   Settings,
 } from 'lucide-react'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import {
@@ -32,7 +32,6 @@ import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
 interface DropdownMenuHeaderProps {
-  currentPage?: 'home' | 'completed'
   search: string
   onSearchChange: (value: string) => void
   searchTestId?: string
@@ -40,7 +39,6 @@ interface DropdownMenuHeaderProps {
 }
 
 export const DropdownMenuHeader = ({
-  currentPage = 'home',
   search,
   onSearchChange,
   searchTestId = 'input-search',
@@ -48,6 +46,8 @@ export const DropdownMenuHeader = ({
 }: DropdownMenuHeaderProps) => {
   const { isGuestMode, exitGuestMode } = useGuestModeState()
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [location] = useLocation()
+  const isHome = location === Routes.HOME
 
   const toggleSearch = () => {
     setIsSearchExpanded((prev) => {
@@ -80,7 +80,7 @@ export const DropdownMenuHeader = ({
               onClick={toggleSearch}
               data-testid="menu-item-search"
             />
-            {currentPage === 'home' ? (
+            {isHome ? (
               <Link href={Routes.COMPLETED}>
                 <DropdownMenuItem
                   icon={CheckCircle2}
