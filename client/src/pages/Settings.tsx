@@ -98,7 +98,7 @@ const CollapsibleCard = ({
         onClick={() => setOpen(!open)}
         data-testid={testId}
       >
-        <h3 className="font-semibold text-foreground">{title}</h3>
+        <h3 className="font-semibold text-muted-foreground">{title}</h3>
         <ChevronDown
           className={cn(
             IconSizeStyle.HW4,
@@ -375,7 +375,7 @@ const Settings = () => {
 
         <CollapsibleCard
           title="Clear Local Data"
-          className="mt-8 bg-card/50"
+          className="mt-3 bg-card/50"
           data-testid="collapsible-clear-local-data"
         >
           <p className="text-sm text-muted-foreground mb-3">
