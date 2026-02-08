@@ -101,8 +101,7 @@ export class DatabaseStorage implements IStorage {
           .update(tasks)
           .set({
             status: TaskStatus.PINNED,
-            inProgressTime:
-              (currentInProgressTask.inProgressTime || 0) + elapsed,
+            inProgressTime: currentInProgressTask.inProgressTime + elapsed,
             inProgressStartedAt: null,
           })
           .where(eq(tasks.id, currentInProgressTask.id))
@@ -118,7 +117,7 @@ export class DatabaseStorage implements IStorage {
     ) {
       // Leaving in-progress: accumulate time
       const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
-      updates.inProgressTime = (currentTask.inProgressTime || 0) + elapsed
+      updates.inProgressTime = currentTask.inProgressTime + elapsed
       updates.inProgressStartedAt = null
     }
 

@@ -13,32 +13,33 @@ import {
   useRef,
   useState,
 } from 'react'
+import { pick } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
-  Ease,
-  Enjoyment,
-  Priority,
+  DEFAULT_FIELD_CONFIG,
+  type FieldConfig,
+  RANK_FIELDS_CRITERIA,
   SubtaskSortMode,
   TaskStatus,
   type TaskWithSubtasks,
-  Time,
   type UpdateTask,
   type UserSettings,
 } from '~/shared/schema'
 
-type CreateTaskArg = Omit<CreateTask, 'userId'>
-type UpdateTaskArg = Omit<UpdateTask, 'id'>
+export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
+export type UpdateTaskContent = Omit<UpdateTask, 'id'>
+export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 
 export type SyncOperation =
   | {
       type: 'create_task'
       tempId: number
-      data: CreateTaskArg
+      data: CreateTaskContent
     }
-  | { type: 'update_task'; id: number; data: UpdateTaskArg }
+  | { type: 'update_task'; id: number; data: UpdateTaskContent }
   | { type: 'set_status'; id: number; status: TaskStatus }
   | { type: 'delete_task'; id: number }
   | { type: 'update_settings'; data: Partial<UserSettings> }
@@ -50,8 +51,8 @@ interface LocalStateContextValue {
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
-  createTask: (data: CreateTaskArg) => TaskWithSubtasks
-  updateTask: (id: number, updates: UpdateTaskArg) => TaskWithSubtasks
+  createTask: (data: CreateTaskContent) => TaskWithSubtasks
+  updateTask: (id: number, updates: UpdateTaskContent) => TaskWithSubtasks
   setTaskStatus: (id: number, status: TaskStatus) => TaskWithSubtasks
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
@@ -105,6 +106,25 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
   } catch {
     return fallback
   }
+}
+
+const migrateSettings = (raw: Record<string, unknown>): UserSettings => {
+  const base = { ...DEFAULT_SETTINGS, ...raw }
+
+  if (!raw.fieldConfig) {
+    const migrated = { ...DEFAULT_FIELD_CONFIG } as FieldConfig
+    for (const { name } of RANK_FIELDS_CRITERIA) {
+      const vis = raw[`${name}Visible`]
+      const req = raw[`${name}Required`]
+      migrated[name] = {
+        visible: typeof vis === 'boolean' ? vis : true,
+        required: typeof req === 'boolean' ? req : true,
+      }
+    }
+    base.fieldConfig = migrated
+  }
+
+  return base as UserSettings
 }
 
 const updateTaskInTree = (
@@ -199,9 +219,8 @@ export const LocalStateProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   useEffect(() => {
-    const loadedSettings = loadFromStorage(
-      storageKeys.settings,
-      DEFAULT_SETTINGS,
+    const loadedSettings = migrateSettings(
+      loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS),
     )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
@@ -293,7 +312,7 @@ export const LocalStateProvider = ({
   }, [])
 
   const createTask = useCallback(
-    (data: CreateTaskArg): TaskWithSubtasks => {
+    (data: CreateTaskContent): TaskWithSubtasks => {
       const tempId = nextIdRef.current--
       localStorage.setItem(
         storageKeys.nextId,
@@ -303,21 +322,31 @@ export const LocalStateProvider = ({
       const newTask: TaskWithSubtasks = {
         id: tempId,
         userId: 'local',
-        name: data.name,
-        description: data.description ?? null,
-        priority: data.priority ?? Priority.NONE,
-        ease: data.ease ?? Ease.NONE,
-        enjoyment: data.enjoyment ?? Enjoyment.NONE,
-        time: data.time ?? Time.NONE,
-        parentId: data.parentId ?? null,
+        description: null,
+        priority: null,
+        ease: null,
+        enjoyment: null,
+        time: null,
+        parentId: null,
         status: settings.autoPinNewTasks ? TaskStatus.PINNED : TaskStatus.OPEN,
         inProgressTime: 0,
         inProgressStartedAt: null,
         createdAt: new Date(),
         completedAt: null,
-        subtaskSortMode: data.subtaskSortMode ?? SubtaskSortMode.INHERIT,
-        subtaskOrder: data.subtaskOrder ?? [],
+        subtaskSortMode: SubtaskSortMode.INHERIT,
+        subtaskOrder: [],
         subtasks: [],
+        ...pick(data, [
+          'name',
+          'description',
+          'priority',
+          'ease',
+          'enjoyment',
+          'time',
+          'parentId',
+          'subtaskSortMode',
+          'subtaskOrder',
+        ]),
       }
 
       setTasks((prev) => {
@@ -343,7 +372,7 @@ export const LocalStateProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskArg): TaskWithSubtasks => {
+    (id: number, updates: UpdateTaskContent): TaskWithSubtasks => {
       let updatedTask: TaskWithSubtasks | undefined
       setTasks((prev) =>
         updateTaskInTree(prev, id, (task) => {

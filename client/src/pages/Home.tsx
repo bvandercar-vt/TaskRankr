@@ -33,7 +33,7 @@ import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
-import { getIsVisible, useSettings } from '@/hooks/useSettings'
+import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -152,7 +152,6 @@ const LEVEL_WEIGHTS = {
   easy: 2,
   lowest: 1,
   easiest: 1,
-  none: 0,
 } as const satisfies Record<Priority | Ease | Enjoyment | Time, number>
 
 const getLevelWeight = (
@@ -196,7 +195,7 @@ const Home = () => {
         })
       } else {
         sorted.sort((a, b) => {
-          const direction = SORT_DIRECTIONS[sort] || SortDirection.DESC
+          const direction: SortDirection = SORT_DIRECTIONS[sort]
           const valA = getLevelWeight(a[sort])
           const valB = getLevelWeight(b[sort])
 
@@ -357,7 +356,7 @@ const Home = () => {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )
         }
-        const direction = SORT_DIRECTIONS[sortBy] || SortDirection.DESC
+        const direction: SortDirection = SORT_DIRECTIONS[sortBy]
         const valA = getLevelWeight(a[sortBy])
         const valB = getLevelWeight(b[sortBy])
         return direction === SortDirection.DESC ? valB - valA : valA - valB
@@ -479,7 +478,7 @@ const Home = () => {
               onSelect={setSortBy}
             />
             {RANK_FIELDS_CRITERIA.map((field) =>
-              getIsVisible(field.name, settings) ? (
+              settings.fieldConfig[field.name].visible ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}
                   label={'labelShort' in field ? field.labelShort : field.label}
