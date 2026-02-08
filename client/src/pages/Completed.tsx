@@ -10,7 +10,7 @@ import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import {
   RANK_FIELDS_CRITERIA,
   TaskStatus,
@@ -61,7 +61,7 @@ const Completed = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <div className="flex items-center gap-4 mb-8 px-2">
-          <Link href="/">
+          <Link href={Routes.HOME}>
             <Button
               variant="ghost"
               size="icon"
