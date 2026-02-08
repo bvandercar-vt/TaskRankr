@@ -759,30 +759,10 @@ export const TaskForm = ({
                   Time Spent
                 </div>
                 <TimeInput
-                  hours={Math.floor(
-                    (form.watch('inProgressTime') || 0) / 3_600_000,
-                  )}
-                  minutes={Math.floor(
-                    ((form.watch('inProgressTime') || 0) % 3_600_000) / 60_000,
-                  )}
-                  onHoursChange={(hours) => {
-                    const currentMs = form.getValues('inProgressTime') || 0
-                    const currentMinutes = Math.floor(
-                      (currentMs % 3_600_000) / 60_000,
-                    )
-                    form.setValue(
-                      'inProgressTime',
-                      hours * 3_600_000 + currentMinutes * 60_000,
-                    )
-                  }}
-                  onMinutesChange={(minutes) => {
-                    const currentMs = form.getValues('inProgressTime') || 0
-                    const currentHours = Math.floor(currentMs / 3_600_000)
-                    form.setValue(
-                      'inProgressTime',
-                      currentHours * 3_600_000 + minutes * 60_000,
-                    )
-                  }}
+                  durationMs={form.watch('inProgressTime') || 0}
+                  onDurationChange={(ms) =>
+                    form.setValue('inProgressTime', ms)
+                  }
                   className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
                 />
               </div>

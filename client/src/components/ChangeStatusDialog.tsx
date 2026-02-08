@@ -27,7 +27,7 @@ import {
 } from '@/components/primitives/overlays/AlertDialog'
 import { useSettings } from '@/hooks/useSettings'
 import { IconSizeStyle } from '@/lib/constants'
-import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
 
 interface StatusButtonProps {
@@ -88,23 +88,17 @@ export const ChangeStatusDialog = ({
     },
   } = useSettings()
 
-  const { hours: initialHours, minutes: initialMinutes } =
-    msToHoursMinutes(inProgressTime)
-  const [hours, setHours] = useState(initialHours)
-  const [minutes, setMinutes] = useState(initialMinutes)
+  const [localTimeMs, setLocalTimeMs] = useState(inProgressTime)
 
   useEffect(() => {
     if (open) {
-      const { hours: h, minutes: m } = msToHoursMinutes(inProgressTime)
-      setHours(h)
-      setMinutes(m)
+      setLocalTimeMs(inProgressTime)
     }
   }, [open, inProgressTime])
 
-  const handleTimeChange = () => {
-    const newTimeMs = hoursMinutesToMs(hours, minutes)
-    if (newTimeMs !== inProgressTime) {
-      onUpdateTime(newTimeMs)
+  const handleTimeBlur = () => {
+    if (localTimeMs !== inProgressTime) {
+      onUpdateTime(localTimeMs)
     }
   }
 
@@ -192,11 +186,9 @@ export const ChangeStatusDialog = ({
                   Time Spent
                 </span>
                 <TimeInput
-                  hours={hours}
-                  minutes={minutes}
-                  onHoursChange={setHours}
-                  onMinutesChange={setMinutes}
-                  onBlur={handleTimeChange}
+                  durationMs={localTimeMs}
+                  onDurationChange={setLocalTimeMs}
+                  onBlur={handleTimeBlur}
                   className="w-16 h-8 text-center text-sm bg-secondary/30"
                 />
               </div>
