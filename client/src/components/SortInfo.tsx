@@ -5,18 +5,26 @@
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
-  SORT_BEST_VALUES,
-  SORT_CHAINS,
+  RANK_FIELD_ENUMS,
+  type RankFieldValueMap,
+  SORT_DIRECTIONS,
   SORT_LABELS,
+  SORT_ORDER_MAP,
+  SortDirection,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import { type RankFieldValueMap, SortOption } from '~/shared/schema'
+import { SortOption } from '~/shared/schema'
 
 const SORT_INFO_CONFIG = Object.values(SortOption).map((key) => ({
   name: SORT_LABELS[key],
-  criteria: SORT_CHAINS[key].map((field) => ({
+  sortOrderInfo: SORT_ORDER_MAP[key].map((field) => ({
     attr: field,
-    value: SORT_BEST_VALUES[field],
+    value:
+      field === SortOption.DATE
+        ? 'newest'
+        : Object.values(RANK_FIELD_ENUMS[field]).at(
+            SORT_DIRECTIONS[field] === SortDirection.DESC ? -1 : 0,
+          ),
   })),
 }))
 
@@ -48,10 +56,10 @@ export const SortInfo = ({ defaultExpanded = false }: SortInfoProps) => (
           <ol
             className={cn(
               'text-xs list-decimal list-inside',
-              item.criteria.length > 1 && 'space-y-0.5',
+              item.sortOrderInfo.length > 1 && 'space-y-0.5',
             )}
           >
-            {item.criteria.map((c) => {
+            {item.sortOrderInfo.map((c) => {
               const style =
                 c.attr !== SortOption.DATE
                   ? getRankFieldStyle(

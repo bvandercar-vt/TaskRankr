@@ -19,10 +19,13 @@ import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { SORT_CHAINS, sortTasks } from '@/lib/sort-tasks'
+import {
+  RANK_FIELDS_COLUMMS,
+  SORT_ORDER_MAP,
+  sortTasks,
+} from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
-  RANK_FIELDS_CRITERIA,
   SortOption,
   SubtaskSortMode,
   TaskStatus,
@@ -100,7 +103,7 @@ const Home = () => {
         return sortTasksByOrder(result, parentSubtaskOrder)
       }
 
-      return sortTasks(result, SORT_CHAINS[sort])
+      return sortTasks(result, SORT_ORDER_MAP[sort])
     },
     [],
   )
@@ -179,8 +182,8 @@ const Home = () => {
 
     const pinnedSortChain =
       settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
-        ? [SortOption.PRIORITY, ...SORT_CHAINS[sortBy]]
-        : SORT_CHAINS[sortBy]
+        ? [SortOption.PRIORITY, ...SORT_ORDER_MAP[sortBy]]
+        : SORT_ORDER_MAP[sortBy]
     const sortedPinned = sortTasks(pinnedOnly, pinnedSortChain)
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
@@ -229,7 +232,7 @@ const Home = () => {
               current={sortBy}
               onSelect={setSortBy}
             />
-            {RANK_FIELDS_CRITERIA.map((field) =>
+            {RANK_FIELDS_COLUMMS.map((field) =>
               settings.fieldConfig[field.name].visible ? (
                 <SortButton
                   key={`${field.name}-sort-btn`}

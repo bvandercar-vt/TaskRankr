@@ -75,43 +75,6 @@ export enum SortOption {
 
 export type RankField = Exclude<SortOption, SortOption.DATE>
 
-/** Are in display order. */
-export const RANK_FIELDS_CRITERIA = [
-  {
-    name: SortOption.PRIORITY,
-    label: 'Priority',
-    levels: Object.values(Priority),
-  },
-  {
-    name: SortOption.EASE,
-    label: 'Ease',
-    levels: Object.values(Ease),
-  },
-  {
-    name: SortOption.ENJOYMENT,
-    label: 'Enjoyment',
-    labelShort: 'Enjoy',
-    levels: Object.values(Enjoyment),
-  },
-  {
-    name: SortOption.TIME,
-    label: 'Time',
-    levels: Object.values(Time),
-  },
-] as const satisfies {
-  name: RankField
-  label: string
-  labelShort?: string
-  levels: readonly string[]
-}[]
-
-export type RankFieldValueMap = {
-  priority: Priority
-  ease: Ease
-  enjoyment: Enjoyment
-  time: Time
-}
-
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Owner of the task

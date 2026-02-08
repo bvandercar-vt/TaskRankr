@@ -1,3 +1,5 @@
+import type { ValueOf } from 'type-fest'
+
 import {
   Ease,
   Enjoyment,
@@ -7,6 +9,10 @@ import {
   type TaskWithSubtasks,
   Time,
 } from '~/shared/schema'
+
+// *****************************************************************************
+// Sorting
+// *****************************************************************************
 
 export enum SortDirection {
   ASC = 'asc',
@@ -51,44 +57,6 @@ const compareByField = (
   return direction === SortDirection.DESC ? valB - valA : valA - valB
 }
 
-export const SORT_LABELS: Record<SortOption, string> = {
-  date: 'Date Created',
-  priority: 'Priority',
-  ease: 'Ease',
-  enjoyment: 'Enjoyment',
-  time: 'Time',
-}
-
-const RANK_FIELD_ENUMS: Record<RankField, Record<string, string>> = {
-  priority: Priority,
-  ease: Ease,
-  enjoyment: Enjoyment,
-  time: Time,
-}
-
-export const SORT_BEST_VALUES: Record<SortOption, string> = {
-  date: 'newest',
-  ...Object.fromEntries(
-    (Object.keys(RANK_FIELD_ENUMS) as RankField[]).map((field) => {
-      const values = Object.values(RANK_FIELD_ENUMS[field])
-      return [
-        field,
-        SORT_DIRECTIONS[field] === SortDirection.DESC
-          ? values.at(-1)!
-          : values.at(0)!,
-      ]
-    }),
-  ),
-} as Record<SortOption, string>
-
-export const SORT_CHAINS: Record<SortOption, SortOption[]> = {
-  date: [SortOption.DATE],
-  priority: [SortOption.PRIORITY, SortOption.EASE, SortOption.ENJOYMENT],
-  ease: [SortOption.EASE, SortOption.PRIORITY, SortOption.ENJOYMENT],
-  enjoyment: [SortOption.ENJOYMENT, SortOption.PRIORITY, SortOption.EASE],
-  time: [SortOption.TIME, SortOption.PRIORITY, SortOption.EASE],
-} satisfies { [K in SortOption]: [K, ...SortOption[]] }
-
 export const sortTasks = (
   tasks: TaskWithSubtasks[],
   fields: SortOption[],
@@ -103,3 +71,64 @@ export const sortTasks = (
   })
   return sorted
 }
+
+export const SORT_ORDER_MAP = {
+  date: [SortOption.DATE],
+  priority: [SortOption.PRIORITY, SortOption.EASE, SortOption.ENJOYMENT],
+  ease: [SortOption.EASE, SortOption.PRIORITY, SortOption.ENJOYMENT],
+  enjoyment: [SortOption.ENJOYMENT, SortOption.PRIORITY, SortOption.EASE],
+  time: [SortOption.TIME, SortOption.PRIORITY, SortOption.EASE],
+} as const satisfies { [K in SortOption]: [K, ...SortOption[]] }
+
+// *****************************************************************************
+// Column criteria
+// *****************************************************************************
+
+export const RANK_FIELD_ENUMS = {
+  priority: Priority,
+  ease: Ease,
+  enjoyment: Enjoyment,
+  time: Time,
+} as const satisfies Record<RankField, Record<string, string>>
+
+export type RankFieldValueMap = {
+  [K in RankField]: ValueOf<(typeof RANK_FIELD_ENUMS)[K]>
+}
+
+export const SORT_LABELS = {
+  date: 'Date Created',
+  priority: 'Priority',
+  ease: 'Ease',
+  enjoyment: 'Enjoyment',
+  time: 'Time',
+} as const satisfies Record<SortOption, string>
+
+/** Are in display order. */
+export const RANK_FIELDS_COLUMMS = [
+  {
+    name: SortOption.PRIORITY,
+    label: SORT_LABELS.priority,
+    levels: Object.values(Priority),
+  },
+  {
+    name: SortOption.EASE,
+    label: SORT_LABELS.ease,
+    levels: Object.values(Ease),
+  },
+  {
+    name: SortOption.ENJOYMENT,
+    label: SORT_LABELS.enjoyment,
+    labelShort: 'Enjoy',
+    levels: Object.values(Enjoyment),
+  },
+  {
+    name: SortOption.TIME,
+    label: SORT_LABELS.time,
+    levels: Object.values(Time),
+  },
+] as const satisfies {
+  name: RankField
+  label: string
+  labelShort?: string
+  levels: readonly string[]
+}[]

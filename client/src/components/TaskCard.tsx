@@ -19,12 +19,9 @@ import {
 } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
+import { RANK_FIELDS_COLUMMS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import {
-  RANK_FIELDS_CRITERIA,
-  TaskStatus,
-  type TaskWithSubtasks,
-} from '~/shared/schema'
+import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
 
 interface TaskBadgeProps {
@@ -264,7 +261,7 @@ export const TaskCard = ({
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {RANK_FIELDS_CRITERIA.map(({ name: field }) => {
+              {RANK_FIELDS_COLUMMS.map(({ name: field }) => {
                 if (!settings.fieldConfig[field].visible) return null
                 const value = task[field]
                 return (
