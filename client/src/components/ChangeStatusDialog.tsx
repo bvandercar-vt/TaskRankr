@@ -15,7 +15,8 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
-import { Input } from '@/components/primitives/forms/Input'
+import { TimeInput } from '@/components/primitives/forms/TimeInput'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -191,44 +192,14 @@ export const ChangeStatusDialog = ({
                 <span className="text-xs text-muted-foreground">
                   Time Spent
                 </span>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      value={hours}
-                      onChange={(e) =>
-                        setHours(
-                          Math.max(0, Number.parseInt(e.target.value) || 0),
-                        )
-                      }
-                      onBlur={handleTimeChange}
-                      className="w-16 h-8 text-center text-sm"
-                      data-testid="input-hours"
-                    />
-                    <span className="text-xs text-muted-foreground">h</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={59}
-                      value={minutes}
-                      onChange={(e) =>
-                        setMinutes(
-                          Math.min(
-                            59,
-                            Math.max(0, Number.parseInt(e.target.value) || 0),
-                          ),
-                        )
-                      }
-                      onBlur={handleTimeChange}
-                      className="w-16 h-8 text-center text-sm"
-                      data-testid="input-minutes"
-                    />
-                    <span className="text-xs text-muted-foreground">m</span>
-                  </div>
-                </div>
+                <TimeInput
+                  hours={hours}
+                  minutes={minutes}
+                  onHoursChange={setHours}
+                  onMinutesChange={setMinutes}
+                  onBlur={handleTimeChange}
+                  testIdPrefix="input"
+                />
               </div>
             )}
 

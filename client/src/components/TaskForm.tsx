@@ -47,6 +47,7 @@ import {
   FormMessage,
 } from '@/components/primitives/forms/Form'
 import { Input } from '@/components/primitives/forms/Input'
+import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   Select,
   SelectContent,
@@ -757,55 +758,34 @@ export const TaskForm = ({
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Time Spent
                 </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      (form.watch('inProgressTime') || 0) / 3_600_000,
-                    )}
-                    onChange={(e) => {
-                      const hours = Number.parseInt(e.target.value) || 0
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentMinutes = Math.floor(
-                        (currentMs % 3_600_000) / 60_000,
-                      )
-                      form.setValue(
-                        'inProgressTime',
-                        hours * 3_600_000 + currentMinutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-hours"
-                  />
-                  <span className="text-xs text-muted-foreground">h</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="0"
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      ((form.watch('inProgressTime') || 0) % 3_600_000) /
-                        60_000,
-                    )}
-                    onChange={(e) => {
-                      const minutes = Math.min(
-                        59,
-                        Number.parseInt(e.target.value) || 0,
-                      )
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentHours = Math.floor(currentMs / 3_600_000)
-                      form.setValue(
-                        'inProgressTime',
-                        currentHours * 3_600_000 + minutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-minutes"
-                  />
-                  <span className="text-xs text-muted-foreground">m</span>
-                </div>
+                <TimeInput
+                  hours={Math.floor(
+                    (form.watch('inProgressTime') || 0) / 3_600_000,
+                  )}
+                  minutes={Math.floor(
+                    ((form.watch('inProgressTime') || 0) % 3_600_000) / 60_000,
+                  )}
+                  onHoursChange={(hours) => {
+                    const currentMs = form.getValues('inProgressTime') || 0
+                    const currentMinutes = Math.floor(
+                      (currentMs % 3_600_000) / 60_000,
+                    )
+                    form.setValue(
+                      'inProgressTime',
+                      hours * 3_600_000 + currentMinutes * 60_000,
+                    )
+                  }}
+                  onMinutesChange={(minutes) => {
+                    const currentMs = form.getValues('inProgressTime') || 0
+                    const currentHours = Math.floor(currentMs / 3_600_000)
+                    form.setValue(
+                      'inProgressTime',
+                      currentHours * 3_600_000 + minutes * 60_000,
+                    )
+                  }}
+                  className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                  testIdPrefix="input-time"
+                />
               </div>
             )}
           </div>
