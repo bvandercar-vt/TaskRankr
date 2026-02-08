@@ -11,7 +11,6 @@ import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { MainDropdownMenu } from '@/components/MainDropdownMenu'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
-import { Input } from '@/components/primitives/forms/Input'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { SortButton } from '@/components/SortButton'
@@ -39,7 +38,6 @@ const Home = () => {
   const { settings, updateSettings } = useSettings()
   const { hasDemoData, deleteDemoData } = useGuestModeState()
   const [search, setSearch] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
@@ -167,12 +165,7 @@ const Home = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
-        <div className="flex items-center justify-between mb-4 pr-2">
-          <MainDropdownMenu
-            onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
-          />
-
-          {/* Sort Buttons */}
+        <MainDropdownMenu search={search} onSearchChange={setSearch}>
           <div className="flex items-center gap-1">
             <SortButton
               label="Date"
@@ -194,24 +187,7 @@ const Home = () => {
               ) : null,
             )}
           </div>
-        </div>
-
-        {isSearchExpanded && (
-          <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
-            <Search
-              className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
-            />
-            <Input
-              placeholder="Search..."
-              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
-              autoFocus
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onBlur={() => !search && setIsSearchExpanded(false)}
-              data-testid="input-search"
-            />
-          </div>
-        )}
+        </MainDropdownMenu>
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (

@@ -8,7 +8,6 @@ import { CheckCircle2, Search } from 'lucide-react'
 import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { MainDropdownMenu } from '@/components/MainDropdownMenu'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
-import { Input } from '@/components/primitives/forms/Input'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
@@ -19,7 +18,6 @@ import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
   const [search, setSearch] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
   const completedTasks = useMemo(() => {
     if (!tasks) return []
@@ -77,34 +75,16 @@ const Completed = () => {
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
-        <div className="flex items-center justify-between mb-4 pr-2">
-          <div className="flex items-center gap-2">
-            <MainDropdownMenu
-              onSearchToggle={() => setIsSearchExpanded(!isSearchExpanded)}
-              currentPage="completed"
-            />
-            <h1 className="text-2xl font-bold tracking-tight">
-              Completed Tasks
-            </h1>
-          </div>
-        </div>
-
-        {isSearchExpanded && (
-          <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
-            <Search
-              className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
-            />
-            <Input
-              placeholder="Search..."
-              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
-              autoFocus
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onBlur={() => !search && setIsSearchExpanded(false)}
-              data-testid="input-search-completed"
-            />
-          </div>
-        )}
+        <MainDropdownMenu
+          currentPage="completed"
+          search={search}
+          onSearchChange={setSearch}
+          searchTestId="input-search-completed"
+        >
+          <h1 className="text-2xl font-bold tracking-tight">
+            Completed Tasks
+          </h1>
+        </MainDropdownMenu>
 
         {displayedTasks.length > 0 && (
           <div className="flex items-center gap-2 px-2 mb-2">

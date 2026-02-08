@@ -1,7 +1,10 @@
 /**
- * @fileoverview Hamburger dropdown menu for the main task list page.
+ * @fileoverview Page header with hamburger dropdown menu and collapsible search.
+ * Accepts `children` rendered to the right of the menu trigger, and an
+ * optional search bar that slides in below the header row.
  */
 
+import { useState } from 'react'
 import {
   CheckCircle2,
   HelpCircle,
@@ -22,93 +25,132 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/primitives/DropdownMenu'
+import { Input } from '@/components/primitives/forms/Input'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { IconSizeStyle, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
 interface MainDropdownMenuProps {
-  onSearchToggle: () => void
   currentPage?: 'home' | 'completed'
+  search: string
+  onSearchChange: (value: string) => void
+  searchTestId?: string
+  children?: React.ReactNode
 }
 
 export const MainDropdownMenu = ({
-  onSearchToggle,
   currentPage = 'home',
+  search,
+  onSearchChange,
+  searchTestId = 'input-search',
+  children,
 }: MainDropdownMenuProps) => {
   const { isGuestMode, exitGuestMode } = useGuestModeState()
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+
+  const toggleSearch = () => {
+    setIsSearchExpanded((prev) => {
+      if (prev) onSearchChange('')
+      return !prev
+    })
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10"
-          data-testid="button-menu"
-        >
-          <Menu className={IconSizeStyle.HW5} />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="bg-card border-white/10 w-48"
-      >
-        <DropdownMenuItem
-          icon={Search}
-          label="Search"
-          onClick={onSearchToggle}
-          data-testid="menu-item-search"
-        />
-        {currentPage === 'home' ? (
-          <Link href={Routes.COMPLETED}>
+    <>
+      <div className="flex items-center justify-between mb-4 pr-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              data-testid="button-menu"
+            >
+              <Menu className={IconSizeStyle.HW5} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="bg-card border-white/10 w-48"
+          >
             <DropdownMenuItem
-              icon={CheckCircle2}
-              label="Completed Tasks"
-              data-testid="menu-item-completed"
+              icon={Search}
+              label="Search"
+              onClick={toggleSearch}
+              data-testid="menu-item-search"
             />
-          </Link>
-        ) : (
-          <Link href={Routes.HOME}>
-            <DropdownMenuItem
-              icon={Home}
-              label="Home"
-              data-testid="menu-item-home"
-            />
-          </Link>
-        )}
-        <Link href={Routes.SETTINGS}>
-          <DropdownMenuItem
-            icon={Settings}
-            label="Settings"
-            data-testid="menu-item-settings"
-          />
-        </Link>
-        <Link href={Routes.HOW_TO_USE}>
-          <DropdownMenuItem
-            icon={HelpCircle}
-            label="How To Use"
-            data-testid="menu-item-how-to-use"
-          />
-        </Link>
-        {isGuestMode && (
-          <>
-            <DropdownMenuSeparator />
-            <a href={authPaths.login}>
+            {currentPage === 'home' ? (
+              <Link href={Routes.COMPLETED}>
+                <DropdownMenuItem
+                  icon={CheckCircle2}
+                  label="Completed Tasks"
+                  data-testid="menu-item-completed"
+                />
+              </Link>
+            ) : (
+              <Link href={Routes.HOME}>
+                <DropdownMenuItem
+                  icon={Home}
+                  label="Home"
+                  data-testid="menu-item-home"
+                />
+              </Link>
+            )}
+            <Link href={Routes.SETTINGS}>
               <DropdownMenuItem
-                icon={LogIn}
-                label="Sign Up"
-                data-testid="menu-item-signup"
+                icon={Settings}
+                label="Settings"
+                data-testid="menu-item-settings"
               />
-            </a>
-            <DropdownMenuItem
-              icon={LogOut}
-              label="Exit Guest Mode"
-              onClick={exitGuestMode}
-              data-testid="menu-item-exit-guest"
-            />
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            </Link>
+            <Link href={Routes.HOW_TO_USE}>
+              <DropdownMenuItem
+                icon={HelpCircle}
+                label="How To Use"
+                data-testid="menu-item-how-to-use"
+              />
+            </Link>
+            {isGuestMode && (
+              <>
+                <DropdownMenuSeparator />
+                <a href={authPaths.login}>
+                  <DropdownMenuItem
+                    icon={LogIn}
+                    label="Sign Up"
+                    data-testid="menu-item-signup"
+                  />
+                </a>
+                <DropdownMenuItem
+                  icon={LogOut}
+                  label="Exit Guest Mode"
+                  onClick={exitGuestMode}
+                  data-testid="menu-item-exit-guest"
+                />
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {children}
+      </div>
+
+      {isSearchExpanded && (
+        <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
+          <Search
+            className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')}
+          />
+          <Input
+            placeholder="Search..."
+            className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"
+            autoFocus
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onBlur={() => !search && setIsSearchExpanded(false)}
+            data-testid={searchTestId}
+          />
+        </div>
+      )}
+    </>
   )
 }
