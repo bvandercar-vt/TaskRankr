@@ -195,14 +195,14 @@ export const TaskCard = ({
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        <div className="w-5 flex justify-center shrink-0">
+        <div className="w-5 flex justify-center shrink-0 self-stretch">
           {hasSubtasks ? (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 toggleExpanded(task.id)
               }}
-              className="group/expand p-0.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              className="group/expand flex items-center justify-center w-full rounded-md hover:bg-white/10 transition-colors cursor-pointer"
               type="button"
               data-testid={`button-expand-${task.id}`}
             >
