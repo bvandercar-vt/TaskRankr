@@ -69,7 +69,7 @@ const SwitchCard = (props: SwitchSettingProps) => (
 )
 
 const Settings = () => {
-  const { settings, updateSetting, updateFieldFlags } = useSettings()
+  const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { user } = useAuth()
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
@@ -135,7 +135,7 @@ const Settings = () => {
             description="When enabled, new tasks will be pinned to the top of your list automatically."
             checked={settings.autoPinNewTasks}
             onCheckedChange={(checked) =>
-              updateSetting('autoPinNewTasks', checked)
+              updateSettings({ autoPinNewTasks: checked })
             }
             data-testid="switch-auto-pin"
           />
@@ -148,7 +148,7 @@ const Settings = () => {
             }
             checked={settings.alwaysSortPinnedByPriority}
             onCheckedChange={(checked) =>
-              updateSetting('alwaysSortPinnedByPriority', checked)
+              updateSettings({ alwaysSortPinnedByPriority: checked })
             }
             data-testid="switch-sort-pinned-priority"
           />
@@ -161,9 +161,9 @@ const Settings = () => {
                 }
                 checked={settings.enableInProgressStatus}
                 onCheckedChange={(checked) => {
-                  updateSetting('enableInProgressStatus', checked)
+                  updateSettings({ enableInProgressStatus: checked })
                   if (!checked) {
-                    updateSetting('enableInProgressTime', false)
+                    updateSettings({ enableInProgressTime: false })
                     // Demote any in_progress task to pinned
                     const inProgressTask = tasks?.find(
                       (t) => t.status === TaskStatus.IN_PROGRESS,
@@ -186,7 +186,7 @@ const Settings = () => {
                   description="Track and display time spent In Progress."
                   checked={settings.enableInProgressTime}
                   onCheckedChange={(checked) =>
-                    updateSetting('enableInProgressTime', checked)
+                    updateSettings({ enableInProgressTime: checked })
                   }
                   data-testid="switch-enable-time"
                 />

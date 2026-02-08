@@ -9,8 +9,7 @@ import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import type { FieldFlags, RankField, UserSettings } from '~/shared/schema'
 
-export type { UserSettings }
-export { DEFAULT_SETTINGS }
+export type UserSettingsContent = Omit<UserSettings, 'userId'>
 
 export const useSettings = () => {
   const localState = useLocalStateSafe()
@@ -18,12 +17,9 @@ export const useSettings = () => {
   const settings: UserSettings = localState?.settings ?? DEFAULT_SETTINGS
   const isLoading = !localState?.isInitialized
 
-  const updateSetting = <K extends keyof Omit<UserSettings, 'userId'>>(
-    key: K,
-    value: UserSettings[K],
-  ) => {
+  const updateSettings = (value: Partial<UserSettings>) => {
     if (!localState) return
-    localState.updateSettings({ [key]: value })
+    localState.updateSettings(value)
   }
 
   const updateFieldFlags = (field: RankField, flags: Partial<FieldFlags>) => {
@@ -36,7 +32,7 @@ export const useSettings = () => {
   return {
     settings,
     isLoading,
-    updateSetting,
+    updateSettings,
     updateFieldFlags,
   }
 }
