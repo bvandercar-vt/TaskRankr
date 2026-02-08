@@ -154,16 +154,48 @@ const SubtaskItem = ({
 }
 
 interface SortModeToggleProps {
-  isManualSortMode: boolean
-  onToggle: () => void
-  disabled: boolean
+  taskId: number
+  initialSortMode: SubtaskSortMode
+  directChildIds: number[]
+  onSortModeChange: (mode: SubtaskSortMode) => void
 }
 
 const SortModeToggle = ({
-  isManualSortMode,
-  onToggle,
-  disabled,
-}: SortModeToggleProps) => (
+  taskId,
+  initialSortMode,
+  directChildIds,
+  onSortModeChange,
+}: SortModeToggleProps) => {
+  const updateTask = useUpdateTask()
+  const reorderSubtasks = useReorderSubtasks()
+
+  const [sortMode, setSortMode] = useState<SubtaskSortMode>(initialSortMode)
+  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
+  const isMutating = updateTask.isPending || reorderSubtasks.isPending
+
+  const handleToggle = () => {
+    if (isMutating) return
+    const newMode: SubtaskSortMode = isManualSortMode
+      ? SubtaskSortMode.INHERIT
+      : SubtaskSortMode.MANUAL
+
+    setSortMode(newMode)
+    onSortModeChange(newMode)
+
+    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
+      reorderSubtasks.mutate({
+        parentId: taskId,
+        orderedIds: directChildIds,
+      })
+    }
+
+    updateTask.mutate({
+      id: taskId,
+      subtaskSortMode: newMode,
+    })
+  }
+
+  return (
   <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
     <span
       className="text-xs font-medium text-muted-foreground"
@@ -174,7 +206,7 @@ const SortModeToggle = ({
     <div
       className={cn(
         'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-        disabled && 'opacity-50 pointer-events-none',
+        isMutating && 'opacity-50 pointer-events-none',
       )}
       role="radiogroup"
       aria-label="Subtask sort order"
@@ -194,7 +226,7 @@ const SortModeToggle = ({
           name="subtask-sort-mode"
           value={SubtaskSortMode.INHERIT}
           checked={!isManualSortMode}
-          onChange={() => isManualSortMode && onToggle()}
+          onChange={() => isManualSortMode && handleToggle()}
           className="sr-only"
         />
         Inherit
@@ -213,7 +245,7 @@ const SortModeToggle = ({
           name="subtask-sort-mode"
           value={SubtaskSortMode.MANUAL}
           checked={isManualSortMode}
-          onChange={() => !isManualSortMode && onToggle()}
+          onChange={() => !isManualSortMode && handleToggle()}
           className="sr-only"
         />
         Manual
@@ -228,7 +260,8 @@ const SortModeToggle = ({
         : 'Subtasks follow the same sort order as the main task list.'}
     </span>
   </div>
-)
+  )
+}
 
 interface SubtasksCardProps {
   task: Task
@@ -244,7 +277,6 @@ export const SubtasksCard = ({
   onSubtaskDelete,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
-  const updateTask = useUpdateTask()
   const setTaskStatus = useSetTaskStatus()
   const reorderSubtasks = useReorderSubtasks()
 
@@ -339,29 +371,10 @@ export const SubtasksCard = ({
     }
   }
 
-  const handleSortModeToggle = () => {
-    if (updateTask.isPending || reorderSubtasks.isPending) return
-    const newMode: SubtaskSortMode = isManualSortMode
-      ? SubtaskSortMode.INHERIT
-      : SubtaskSortMode.MANUAL
-
+  const handleSortModeChange = (newMode: SubtaskSortMode) => {
     setSortMode(newMode)
-
-    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks.mutate({
-        parentId: task.id,
-        orderedIds: directChildIds,
-      })
-    }
-
     setLocalSubtaskOrder(null)
-    updateTask.mutate({
-      id: task.id,
-      subtaskSortMode: newMode,
-    })
   }
-
-  const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
   return (
     <div className="border border-white/10 rounded-lg overflow-hidden">
@@ -379,9 +392,10 @@ export const SubtasksCard = ({
           data-testid="button-toggle-subtasks"
         >
           <SortModeToggle
-            isManualSortMode={isManualSortMode}
-            onToggle={handleSortModeToggle}
-            disabled={isMutating}
+            taskId={task.id}
+            initialSortMode={task.subtaskSortMode}
+            directChildIds={directChildIds}
+            onSortModeChange={handleSortModeChange}
           />
           <DndContext
             sensors={sensors}
@@ -410,7 +424,7 @@ export const SubtasksCard = ({
                       })
                     }}
                     isManualSortMode={isManualSortMode}
-                    isDragDisabled={isMutating}
+                    isDragDisabled={reorderSubtasks.isPending}
                   />
                 ))}
               </div>
