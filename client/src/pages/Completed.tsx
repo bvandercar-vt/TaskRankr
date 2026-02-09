@@ -8,6 +8,7 @@ import { CheckCircle2, Search } from 'lucide-react'
 import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
 import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
+import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
@@ -71,42 +72,40 @@ const Completed = () => {
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
 
+  const ColumnHeaders = displayedTasks.length > 0 && (
+    <div className="flex items-center gap-1 shrink-0 justify-end">
+      {RANK_FIELDS_COLUMNS.map((field) => (
+        <span
+          key={`${field.name}-col-header`}
+          className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
+        >
+          {'labelShort' in field ? field.labelShort : field.label}
+        </span>
+      ))}
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-5">
         <HowToUseBanner />
+
         <h1 className="text-2xl font-bold tracking-tight mb-2 px-2">
           Completed Tasks
         </h1>
 
         <DropdownMenuHeader search={search} onSearchChange={setSearch}>
-          {displayedTasks.length > 0 && (
-            <div className="flex items-center gap-1 shrink-0 justify-end">
-              {RANK_FIELDS_COLUMNS.map((field) => (
-                <span
-                  key={`${field.name}-col-header`}
-                  className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
-                >
-                  {'labelShort' in field ? field.labelShort : field.label}
-                </span>
-              ))}
-            </div>
-          )}
+          {ColumnHeaders}
         </DropdownMenuHeader>
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (
             <EmptyState
               icon={
-                search ? (
-                  <Search
-                    className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
-                  />
-                ) : (
-                  <CheckCircle2
-                    className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
-                  />
-                )
+                <Icon
+                  icon={search ? Search : CheckCircle2}
+                  className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
+                />
               }
               title={
                 search ? 'No matching tasks found' : 'No completed tasks yet'

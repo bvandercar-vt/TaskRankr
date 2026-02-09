@@ -160,33 +160,38 @@ const Home = () => {
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
+  
+  const SortButtons = (
+    <div className="flex items-center gap-1">
+      <SortButton
+        label="Date"
+        value={SortOption.DATE}
+        className="min-w-12 max-w-16"
+        current={sortBy}
+        onSelect={setSortBy}
+      />
+      {RANK_FIELDS_COLUMNS.map((field) =>
+        settings.fieldConfig[field.name].visible ? (
+          <SortButton
+            key={`${field.name}-sort-btn`}
+            label={'labelShort' in field ? field.labelShort : field.label}
+            value={field.name}
+            className="w-16"
+            current={sortBy}
+            onSelect={setSortBy}
+          />
+        ) : null,
+      )}
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
       <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
         <HowToUseBanner />
+
         <DropdownMenuHeader search={search} onSearchChange={setSearch}>
-          <div className="flex items-center gap-1">
-            <SortButton
-              label="Date"
-              value={SortOption.DATE}
-              className="min-w-12 max-w-16"
-              current={sortBy}
-              onSelect={setSortBy}
-            />
-            {RANK_FIELDS_COLUMNS.map((field) =>
-              settings.fieldConfig[field.name].visible ? (
-                <SortButton
-                  key={`${field.name}-sort-btn`}
-                  label={'labelShort' in field ? field.labelShort : field.label}
-                  value={field.name}
-                  className="w-16"
-                  current={sortBy}
-                  onSelect={setSortBy}
-                />
-              ) : null,
-            )}
-          </div>
+          {SortButtons}
         </DropdownMenuHeader>
 
         <div className="space-y-1">
