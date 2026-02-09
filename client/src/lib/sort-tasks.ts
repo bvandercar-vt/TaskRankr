@@ -141,3 +141,19 @@ export const RANK_FIELDS_COLUMNS = [
   labelShort?: string
   levels: readonly string[]
 }[]
+
+export const filterTaskTree = (
+  nodes: TaskWithSubtasks[],
+  term: string,
+): TaskWithSubtasks[] => {
+  if (!term) return nodes
+  const lower = term.toLowerCase()
+  return nodes.reduce((acc: TaskWithSubtasks[], node) => {
+    const matches = node.name.toLowerCase().includes(lower)
+    const filteredSubtasks = filterTaskTree(node.subtasks, term)
+    if (matches || filteredSubtasks.length > 0) {
+      acc.push({ ...node, subtasks: filteredSubtasks })
+    }
+    return acc
+  }, [])
+}

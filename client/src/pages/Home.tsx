@@ -20,6 +20,7 @@ import { useSettings } from '@/hooks/useSettings'
 import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import {
+  filterTaskTree,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
   sortTasks,
@@ -42,7 +43,32 @@ const Home = () => {
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
 
-  // Recursive function to filter task tree, respecting manual sort mode for subtasks
+  const sortTree = useCallback(
+    (
+      nodes: TaskWithSubtasks[],
+      sort: SortOption,
+      parentSortMode?: SubtaskSortMode,
+      parentSubtaskOrder?: number[],
+    ): TaskWithSubtasks[] => {
+      const withSortedChildren = nodes.map((node) => ({
+        ...node,
+        subtasks: sortTree(
+          node.subtasks,
+          sort,
+          node.subtaskSortMode,
+          node.subtaskOrder,
+        ),
+      }))
+
+      if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
+        return sortTasksByOrder(withSortedChildren, parentSubtaskOrder)
+      }
+
+      return sortTasks(withSortedChildren, SORT_ORDER_MAP[sort])
+    },
+    [],
+  )
+
   const filterAndSortTree = useCallback(
     (
       nodes: TaskWithSubtasks[],
@@ -50,30 +76,9 @@ const Home = () => {
       sort: SortOption,
       parentSortMode?: SubtaskSortMode,
       parentSubtaskOrder?: number[],
-    ): TaskWithSubtasks[] => {
-      const result = nodes.reduce((acc: TaskWithSubtasks[], node) => {
-        const matches = node.name.toLowerCase().includes(term.toLowerCase())
-        const filteredSubtasks = filterAndSortTree(
-          node.subtasks,
-          term,
-          sort,
-          node.subtaskSortMode,
-          node.subtaskOrder,
-        )
-
-        if (matches || filteredSubtasks.length > 0) {
-          acc.push({ ...node, subtasks: filteredSubtasks })
-        }
-        return acc
-      }, [])
-
-      if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
-        return sortTasksByOrder(result, parentSubtaskOrder)
-      }
-
-      return sortTasks(result, SORT_ORDER_MAP[sort])
-    },
-    [],
+    ): TaskWithSubtasks[] =>
+      sortTree(filterTaskTree(nodes, term), sort, parentSortMode, parentSubtaskOrder),
+    [sortTree],
   )
 
   // Build tree from flat list, excluding completed tasks

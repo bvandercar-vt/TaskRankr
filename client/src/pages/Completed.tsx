@@ -12,7 +12,7 @@ import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { filterTaskTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
@@ -52,22 +52,10 @@ const Completed = () => {
     return roots
   }, [tasks])
 
-  const displayedTasks = useMemo(() => {
-    if (!search) return completedTasks
-    const term = search.toLowerCase()
-
-    const filterTree = (nodes: TaskWithSubtasks[]): TaskWithSubtasks[] =>
-      nodes.reduce((acc: TaskWithSubtasks[], node) => {
-        const matches = node.name.toLowerCase().includes(term)
-        const filteredSubtasks = filterTree(node.subtasks)
-        if (matches || filteredSubtasks.length > 0) {
-          acc.push({ ...node, subtasks: filteredSubtasks })
-        }
-        return acc
-      }, [])
-
-    return filterTree(completedTasks)
-  }, [completedTasks, search])
+  const displayedTasks = useMemo(
+    () => filterTaskTree(completedTasks, search),
+    [completedTasks, search],
+  )
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
