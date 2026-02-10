@@ -14,6 +14,7 @@ import {
   SortOption,
   SubtaskSortMode,
   type Task,
+  TaskStatus,
   type TaskWithSubtasks,
   Time,
 } from '~/shared/schema'
@@ -73,12 +74,17 @@ const compareByField = (a: Task, b: Task, field: SortBy): number => {
   return direction === SortDirection.DESC ? valB - valA : valA - valB
 }
 
-/** Sorts tasks by a passed sort order of fields; earlier fields take priority. */
+/** Sorts tasks by a passed sort order of fields; earlier fields take priority.
+ *  Completed tasks always sort to the bottom. */
 export const sortTasksByField = <T extends Task>(
   tasks: T[],
   fields: SortBy[],
 ): T[] =>
   [...tasks].sort((a, b) => {
+    const aCompleted = a.status === TaskStatus.COMPLETED ? 1 : 0
+    const bCompleted = b.status === TaskStatus.COMPLETED ? 1 : 0
+    if (aCompleted !== bCompleted) return aCompleted - bCompleted
+
     for (const field of fields) {
       const cmp = compareByField(a, b, field)
       if (cmp !== 0) return cmp
