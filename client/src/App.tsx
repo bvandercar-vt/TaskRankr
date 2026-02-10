@@ -112,17 +112,6 @@ const StatusBanner = () => {
     )
   }
 
-  if (sync && sync.pendingCount > 0 && sync.isSyncing) {
-    return (
-      <div
-        className="sticky top-0 z-50 bg-blue-600/90 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm"
-        data-testid="banner-syncing"
-      >
-        <span>Syncing changes...</span>
-      </div>
-    )
-  }
-
   return null
 }
 
