@@ -26,13 +26,13 @@ import { Check, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import {
-  sortTasksByOrder,
   useReorderSubtasks,
   useSetTaskStatus,
   useTasks,
   useUpdateTask,
 } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
+import { sortTasksByOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   SubtaskSortMode,

@@ -17,13 +17,14 @@ import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
 import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useSettings } from '@/hooks/useSettings'
-import { sortTasksByOrder, useTasks } from '@/hooks/useTasks'
+import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import {
-  filterTaskTree,
+  filterTasksDeep,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
   sortTasks,
+  sortTasksByOrder,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
@@ -77,7 +78,12 @@ const Home = () => {
       parentSortMode?: SubtaskSortMode,
       parentSubtaskOrder?: number[],
     ): TaskWithSubtasks[] =>
-      sortTree(filterTaskTree(nodes, term), sort, parentSortMode, parentSubtaskOrder),
+      sortTree(
+        filterTasksDeep(nodes, term),
+        sort,
+        parentSortMode,
+        parentSubtaskOrder,
+      ),
     [sortTree],
   )
 
@@ -165,7 +171,7 @@ const Home = () => {
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
-  
+
   const SortButtons = (
     <div className="flex items-center gap-1">
       <SortButton

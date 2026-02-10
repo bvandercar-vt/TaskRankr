@@ -69,17 +69,27 @@ const compareByField = (
 export const sortTasks = (
   tasks: TaskWithSubtasks[],
   fields: SortOption[],
-): TaskWithSubtasks[] => {
-  const sorted = [...tasks]
-  sorted.sort((a, b) => {
+): TaskWithSubtasks[] =>
+  [...tasks].sort((a, b) => {
     for (const field of fields) {
       const cmp = compareByField(a, b, field)
       if (cmp !== 0) return cmp
     }
     return 0
   })
-  return sorted
-}
+
+export const sortTasksByOrder = (
+  tasks: TaskWithSubtasks[],
+  order: number[],
+): TaskWithSubtasks[] =>
+  [...tasks].sort((a, b) => {
+    const indexA = order.indexOf(a.id)
+    const indexB = order.indexOf(b.id)
+    return (
+      (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
+      (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
+    )
+  })
 
 export const SORT_ORDER_MAP = {
   date: [SortOption.DATE],
@@ -142,7 +152,11 @@ export const RANK_FIELDS_COLUMNS = [
   levels: readonly string[]
 }[]
 
-export const filterTaskTree = (
+// *****************************************************************************
+// Filtering
+// *****************************************************************************
+
+export const filterTasksDeep = (
   nodes: TaskWithSubtasks[],
   term: string,
 ): TaskWithSubtasks[] => {
@@ -150,7 +164,7 @@ export const filterTaskTree = (
   const lower = term.toLowerCase()
   return nodes.reduce((acc: TaskWithSubtasks[], node) => {
     const matches = node.name.toLowerCase().includes(lower)
-    const filteredSubtasks = filterTaskTree(node.subtasks, term)
+    const filteredSubtasks = filterTasksDeep(node.subtasks, term)
     if (matches || filteredSubtasks.length > 0) {
       acc.push({ ...node, subtasks: filteredSubtasks })
     }
