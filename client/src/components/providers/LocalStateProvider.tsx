@@ -41,7 +41,7 @@ export enum SyncOperationType {
   REORDER_SUBTASKS = 'reorder_subtasks',
 }
 
-export type SyncOperationWithArgs =
+export type SyncOperation =
   | {
       type: SyncOperationType.CREATE_TASK
       tempId: number
@@ -60,7 +60,7 @@ export type SyncOperationWithArgs =
 interface LocalStateContextValue {
   tasks: TaskWithSubtasks[]
   settings: UserSettings
-  syncQueue: SyncOperationWithArgs[]
+  syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
   createTask: (data: CreateTaskContent) => TaskWithSubtasks
@@ -84,13 +84,15 @@ export enum StorageMode {
   GUEST = 'guest',
 }
 
-const getStorageKeys = (mode: StorageMode) => ({
-  tasks: `taskrankr-${mode}-tasks`,
-  settings: `taskrankr-${mode}-settings`,
-  nextId: `taskrankr-${mode}-next-id`,
-  syncQueue: `taskrankr-${mode}-sync-queue`,
-  demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
-})
+export const getStorageKeys = (mode: StorageMode) =>
+  ({
+    tasks: `taskrankr-${mode}-tasks`,
+    settings: `taskrankr-${mode}-settings`,
+    nextId: `taskrankr-${mode}-next-id`,
+    syncQueue: `taskrankr-${mode}-sync-queue`,
+    demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
+    expanded: `taskrankr-${mode}-expanded`,
+  }) as const
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -201,7 +203,7 @@ export const LocalStateProvider = ({
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
   const [tasks, setTasks] = useState<TaskWithSubtasks[]>([])
-  const [syncQueue, setSyncQueue] = useState<SyncOperationWithArgs[]>([])
+  const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
 
@@ -214,7 +216,7 @@ export const LocalStateProvider = ({
     )
     const loadedTasks = loadFromStorage(storageKeys.tasks, [])
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
-    const loadedQueue = loadFromStorage<SyncOperationWithArgs[]>(
+    const loadedQueue = loadFromStorage<SyncOperation[]>(
       storageKeys.syncQueue,
       [],
     )
@@ -231,11 +233,8 @@ export const LocalStateProvider = ({
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
-      if (storageMode === StorageMode.GUEST) {
-        localStorage.removeItem('taskrankr-guest-expanded')
-      } else {
-        localStorage.removeItem('taskrankr-auth-expanded')
-      }
+
+      localStorage.removeItem(getStorageKeys(storageMode).expanded)
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
@@ -264,7 +263,7 @@ export const LocalStateProvider = ({
   }, [syncQueue, isInitialized, storageKeys])
 
   const enqueue = useCallback(
-    (op: SyncOperationWithArgs) => {
+    (op: SyncOperation) => {
       if (shouldSync) {
         setSyncQueue((prev) => [...prev, op])
       }

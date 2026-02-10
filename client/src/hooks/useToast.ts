@@ -33,7 +33,7 @@ enum ToastActionType {
   REMOVE = 'REMOVE',
 }
 
-type ToastActionWithArgs =
+type ToastAction =
   | { type: ToastActionType.ADD; toast: ToasterToast }
   | { type: ToastActionType.UPDATE; toast: Partial<ToasterToast> }
   | { type: ToastActionType.DISMISS; toastId?: ToasterToast['id'] }
@@ -58,7 +58,7 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
-export const reducer = (state: State, action: ToastActionWithArgs): State => {
+export const reducer = (state: State, action: ToastAction): State => {
   // biome-ignore lint/style/useDefaultSwitchClause: is exhaustive for the type
   switch (action.type) {
     case ToastActionType.ADD:
@@ -118,7 +118,7 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
-const dispatch = (action: ToastActionWithArgs) => {
+const dispatch = (action: ToastAction) => {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
     listener(memoryState)
