@@ -22,14 +22,18 @@ import {
 // Sorting
 // *****************************************************************************
 
+const SortBy = { ...SortOption, DATE_COMPLETED: 'date_completed' } as const
+type SortBy = ValueOf<typeof SortBy>
+
 export enum SortDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
 
 /** Default sort direction per field (DESC = best-first). */
-export const SORT_DIRECTIONS: Record<SortOption, SortDirection> = {
-  date: SortDirection.DESC,
+export const SORT_DIRECTIONS: Record<SortBy, SortDirection> = {
+  date_created: SortDirection.DESC,
+  date_completed: SortDirection.DESC,
   priority: SortDirection.DESC,
   ease: SortDirection.ASC,
   enjoyment: SortDirection.DESC,
@@ -53,9 +57,15 @@ const getLevelWeight = (
 ): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
 
 /** Compares two tasks by a single field, respecting its sort direction. */
-const compareByField = (a: Task, b: Task, field: SortOption): number => {
-  if (field === SortOption.DATE) {
+const compareByField = (a: Task, b: Task, field: SortBy): number => {
+  if (field === SortBy.DATE_CREATED) {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  }
+  if (field === SortBy.DATE_COMPLETED) {
+    return (
+      new Date(b.completedAt ?? b.createdAt).getTime() -
+      new Date(a.completedAt ?? a.createdAt).getTime()
+    )
   }
   const direction = SORT_DIRECTIONS[field]
   const valA = getLevelWeight(a[field])
@@ -66,7 +76,7 @@ const compareByField = (a: Task, b: Task, field: SortOption): number => {
 /** Sorts tasks by a passed sort order of fields; earlier fields take priority. */
 export const sortTasksByField = <T extends Task>(
   tasks: T[],
-  fields: SortOption[],
+  fields: SortBy[],
 ): T[] =>
   [...tasks].sort((a, b) => {
     for (const field of fields) {
@@ -91,16 +101,16 @@ export const sortTasksByIdOrder = <T extends Task>(
   })
 
 export const SORT_ORDER_MAP = {
-  date: [SortOption.DATE],
-  priority: [SortOption.PRIORITY, SortOption.EASE, SortOption.ENJOYMENT],
-  ease: [SortOption.EASE, SortOption.PRIORITY, SortOption.ENJOYMENT],
-  enjoyment: [SortOption.ENJOYMENT, SortOption.PRIORITY, SortOption.EASE],
-  time: [SortOption.TIME, SortOption.PRIORITY, SortOption.EASE],
-} as const satisfies { [K in SortOption]: [K, ...SortOption[]] }
+  date_created: [SortBy.DATE_CREATED],
+  priority: [SortBy.PRIORITY, SortBy.EASE, SortBy.ENJOYMENT],
+  ease: [SortBy.EASE, SortBy.PRIORITY, SortBy.ENJOYMENT],
+  enjoyment: [SortBy.ENJOYMENT, SortBy.PRIORITY, SortBy.EASE],
+  time: [SortBy.TIME, SortBy.PRIORITY, SortBy.EASE],
+} as const satisfies { [K in SortOption]: [K, ...SortBy[]] }
 
 export const sortTaskTree = (
   tasks: TaskWithSubtasks[],
-  sort: SortOption,
+  sort: SortBy[],
   parentSortMode?: SubtaskSortMode,
   parentSubtaskOrder?: number[],
 ): TaskWithSubtasks[] => {
@@ -118,7 +128,7 @@ export const sortTaskTree = (
     return sortTasksByIdOrder(withSortedChildren, parentSubtaskOrder)
   }
 
-  return sortTasksByField(withSortedChildren, SORT_ORDER_MAP[sort])
+  return sortTasksByField(withSortedChildren, sort)
 }
 
 // *****************************************************************************
@@ -126,10 +136,10 @@ export const sortTaskTree = (
 // *****************************************************************************
 
 export const RANK_FIELD_ENUMS = {
-  priority: Priority,
-  ease: Ease,
-  enjoyment: Enjoyment,
-  time: Time,
+  [SortOption.PRIORITY]: Priority,
+  [SortOption.EASE]: Ease,
+  [SortOption.ENJOYMENT]: Enjoyment,
+  [SortOption.TIME]: Time,
 } as const satisfies Record<RankField, Record<string, string>>
 
 export type RankFieldValueMap = {
@@ -137,37 +147,27 @@ export type RankFieldValueMap = {
 }
 
 export const SORT_LABELS = {
-  date: 'Date Created',
-  priority: 'Priority',
-  ease: 'Ease',
-  enjoyment: 'Enjoyment',
-  time: 'Time',
+  [SortOption.DATE_CREATED]: 'Date Created',
+  [SortOption.PRIORITY]: 'Priority',
+  [SortOption.EASE]: 'Ease',
+  [SortOption.ENJOYMENT]: 'Enjoyment',
+  [SortOption.TIME]: 'Time',
 } as const satisfies Record<SortOption, string>
 
 /** Rank-field column metadata in display order (name, label, enum values). */
-export const RANK_FIELDS_COLUMNS = [
-  {
-    name: SortOption.PRIORITY,
-    label: SORT_LABELS.priority,
-    levels: Object.values(Priority),
-  },
-  {
-    name: SortOption.EASE,
-    label: SORT_LABELS.ease,
-    levels: Object.values(Ease),
-  },
-  {
-    name: SortOption.ENJOYMENT,
-    label: SORT_LABELS.enjoyment,
-    labelShort: 'Enjoy',
-    levels: Object.values(Enjoyment),
-  },
-  {
-    name: SortOption.TIME,
-    label: SORT_LABELS.time,
-    levels: Object.values(Time),
-  },
-] as const satisfies {
+export const RANK_FIELDS_COLUMNS = (
+  [
+    SortOption.PRIORITY,
+    SortOption.EASE,
+    SortOption.ENJOYMENT,
+    SortOption.TIME,
+  ] as const
+).map((name) => ({
+  name,
+  label: SORT_LABELS[name],
+  labelShort: name === SortOption.ENJOYMENT ? 'Enjoy' : undefined,
+  levels: Object.values(RANK_FIELD_ENUMS[name]),
+})) satisfies {
   name: RankField
   label: string
   labelShort?: string
@@ -197,5 +197,5 @@ export const filterTaskTree = (
 export const filterAndSortTree = (
   tasks: TaskWithSubtasks[],
   searchTerm: string,
-  sort: SortOption,
+  sort: SortBy[],
 ) => sortTaskTree(filterTaskTree(tasks, searchTerm), sort)

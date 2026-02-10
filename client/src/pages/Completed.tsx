@@ -14,7 +14,7 @@ import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
@@ -50,7 +50,7 @@ const Completed = () => {
   }, [tasks])
 
   const displayedTasks = useMemo(
-    () => filterAndSortTree(completedTasks, search, SortOption.DATE),
+    () => filterAndSortTree(completedTasks, search, ['date_completed']),
     [completedTasks, search],
   )
 
@@ -64,7 +64,7 @@ const Completed = () => {
           key={`${field.name}-col-header`}
           className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
         >
-          {'labelShort' in field ? field.labelShort : field.label}
+          {field.labelShort ?? field.label}
         </span>
       ))}
     </div>

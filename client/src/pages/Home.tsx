@@ -22,7 +22,7 @@ import { IconSizeStyle } from '@/lib/constants'
 import {
   filterAndSortTree,
   RANK_FIELDS_COLUMNS,
-  sortTaskTree,
+  SORT_ORDER_MAP,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
@@ -85,24 +85,21 @@ const Home = () => {
   }, [tasks])
 
   const displayedTasks = useMemo(() => {
-    const sortedTree = filterAndSortTree(taskTree, search, sortBy)
+    const sortOrder = SORT_ORDER_MAP[sortBy]
+    const sortedInProgress = inProgressTask
+      ? filterAndSortTree([inProgressTask], search, sortOrder)
+      : []
 
-    const filteredPinned = pinnedTasks.filter((task) =>
-      task.name.toLowerCase().includes(search.toLowerCase()),
+    const sortedPinned = filterAndSortTree(
+      pinnedTasks,
+      search,
+      settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
+        ? [SortOption.PRIORITY, ...sortOrder]
+        : sortOrder,
     )
 
-    const pinnedSort =
-      settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
-        ? SortOption.PRIORITY
-        : sortBy
-    const sortedPinned = sortTaskTree(filteredPinned, pinnedSort)
-
-    const matchesSearch =
-      !search ||
-      inProgressTask?.name.toLowerCase().includes(search.toLowerCase())
-    const hoisted = matchesSearch && inProgressTask ? [inProgressTask] : []
-
-    return [...hoisted, ...sortedPinned, ...sortedTree]
+    const sortedTree = filterAndSortTree(taskTree, search, sortOrder)
+    return [...sortedInProgress, ...sortedPinned, ...sortedTree]
   }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings])
 
   if (isLoading) return <PageLoading />
@@ -112,7 +109,7 @@ const Home = () => {
     <div className="flex items-center gap-1">
       <SortButton
         label="Date"
-        value={SortOption.DATE}
+        value={SortOption.DATE_CREATED}
         className="min-w-12 max-w-16"
         current={sortBy}
         onSelect={setSortBy}
@@ -121,7 +118,7 @@ const Home = () => {
         settings.fieldConfig[field.name].visible ? (
           <SortButton
             key={`${field.name}-sort-btn`}
-            label={'labelShort' in field ? field.labelShort : field.label}
+            label={field.labelShort ?? field.label}
             value={field.name}
             className="w-16"
             current={sortBy}

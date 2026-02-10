@@ -65,21 +65,11 @@ export enum Time {
   HIGHEST = 'highest',
 }
 
-export enum SortOption {
-  DATE = 'date',
-  PRIORITY = 'priority',
-  EASE = 'ease',
-  ENJOYMENT = 'enjoyment',
-  TIME = 'time',
-}
-
-export type RankField = Exclude<SortOption, SortOption.DATE>
-
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Owner of the task
   name: text('name').notNull(),
-  status: text('status').default('open').notNull(), // open, in_progress, pinned, completed
+  status: text('status').default(TaskStatus.OPEN).notNull(),
   description: text('description'),
   priority: text('priority'),
   ease: text('ease'),
@@ -90,7 +80,9 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   parentId: integer('parent_id'),
-  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
+  subtaskSortMode: text('subtask_sort_mode')
+    .default(SubtaskSortMode.INHERIT)
+    .notNull(),
   subtaskOrder: integer('subtask_order')
     .array()
     .default(sql`'{}'::integer[]`)
