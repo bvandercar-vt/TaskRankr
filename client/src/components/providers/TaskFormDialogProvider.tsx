@@ -64,39 +64,35 @@ const DesktopDialog = ({
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
       <DialogContent
-        className="w-full max-w-[600px] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
+        className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-hidden bg-card border-white/10 p-6 shadow-2xl rounded-xl flex flex-col [&>form]:min-h-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="flex flex-col">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl font-display tracking-tight">
-                {mode === 'create'
-                  ? parentId
-                    ? 'New Subtask'
-                    : 'New Task'
-                  : 'Edit Task'}
-              </DialogTitle>
-              <DialogDescription className="sr-only">
-                {mode === 'create'
-                  ? 'Add a new item to your list.'
-                  : 'Update task details and properties.'}
-              </DialogDescription>
-            </div>
-          </DialogHeader>
-          <div className="mt-4">
-            <TaskForm
-              key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
-              onSubmit={onSubmit}
-              initialData={activeTask}
-              parentId={parentId}
-              onCancel={onClose}
-              onAddChild={onAddChild}
-              onEditChild={onEditChild}
-              onSubtaskDelete={onSubtaskDelete}
-            />
+        <DialogHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+          <div className="flex-1">
+            <DialogTitle className="text-2xl font-display tracking-tight">
+              {mode === 'create'
+                ? parentId
+                  ? 'New Subtask'
+                  : 'New Task'
+                : 'Edit Task'}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {mode === 'create'
+                ? 'Add a new item to your list.'
+                : 'Update task details and properties.'}
+            </DialogDescription>
           </div>
-        </div>
+        </DialogHeader>
+        <TaskForm
+          key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
+          onSubmit={onSubmit}
+          initialData={activeTask}
+          parentId={parentId}
+          onCancel={onClose}
+          onAddChild={onAddChild}
+          onEditChild={onEditChild}
+          onSubtaskDelete={onSubtaskDelete}
+        />
       </DialogContent>
     </Dialog>
   </div>
@@ -121,7 +117,7 @@ const MobileDialog = ({
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
       >
-        <div className="flex-1 overflow-y-auto px-4 pt-10">
+        <div className="flex-1 overflow-y-auto p-4">
           <TaskForm
             key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
             onSubmit={onSubmit}
