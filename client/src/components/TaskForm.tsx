@@ -207,34 +207,34 @@ export const TaskForm = ({
         )}
         className="flex flex-col h-full"
       >
-        <div className="flex-1 space-y-5">
-          <div className="sticky top-0 z-10 pb-2 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:top-[-24px] sm:-mt-6 sm:pt-6">
-            <TagChain
-              items={parentChain}
-              label="Parent"
-              className="px-1 mb-2"
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    Task Name
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Task name"
-                      className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="pb-2">
+          <TagChain
+            items={parentChain}
+            label="Parent"
+            className="px-1 mb-2"
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Task Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Task name"
+                    className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        <div className="flex-1 overflow-y-auto space-y-5 py-2">
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {visibleRankFields.map(({ name, label, levels }) => (
@@ -327,7 +327,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="sticky bottom-0 pt-2 flex gap-3 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:bottom-[-24px] sm:-mb-6 sm:pb-6">
+        <div className="pt-2 flex gap-3">
           <Button
             type="button"
             variant="outline"
