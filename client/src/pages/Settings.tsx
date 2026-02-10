@@ -3,7 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { BookOpen, ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
@@ -318,9 +318,8 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
             <div>
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <h3 className="font-semibold text-foreground">
                 How To Use
-                <BookOpen className={cn(IconSizeStyle.HW4, 'text-muted-foreground')} />
               </h3>
               <p className="text-sm text-muted-foreground">
                 Learn how to get the most out of TaskRankr
