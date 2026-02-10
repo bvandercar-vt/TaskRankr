@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
-import { Input } from '@/components/primitives/forms/Input'
+import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +27,11 @@ import {
 } from '@/components/primitives/overlays/AlertDialog'
 import { useSettings } from '@/hooks/useSettings'
 import { IconSizeStyle } from '@/lib/constants'
-import { cn, hoursMinutesToMs, msToHoursMinutes } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
 
-interface StatusButtonProps {
+interface ChangeStatusButtonProps {
   icon: LucideIcon
   label: string
   onClick: () => void
@@ -38,13 +39,13 @@ interface StatusButtonProps {
   'data-testid': string
 }
 
-const StatusButton = ({
+const ChangeStatusButton = ({
   icon: Icon,
   label,
   onClick,
   colorClass = 'border-slate-400/50 text-slate-400 hover:bg-slate-500/10',
   'data-testid': testId,
-}: StatusButtonProps) => (
+}: ChangeStatusButtonProps) => (
   <Button
     onClick={onClick}
     variant="outline"
@@ -64,7 +65,7 @@ interface ChangeStatusDialogProps {
   inProgressTime: number
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
-  onDeleteClick: () => void
+  onDelete: () => void
 }
 
 export const ChangeStatusDialog = ({
@@ -75,7 +76,7 @@ export const ChangeStatusDialog = ({
   inProgressTime,
   onSetStatus,
   onUpdateTime,
-  onDeleteClick,
+  onDelete,
 }: ChangeStatusDialogProps) => {
   const isCompleted = status === TaskStatus.COMPLETED
   const isInProgress = status === TaskStatus.IN_PROGRESS
@@ -88,164 +89,144 @@ export const ChangeStatusDialog = ({
     },
   } = useSettings()
 
-  const { hours: initialHours, minutes: initialMinutes } =
-    msToHoursMinutes(inProgressTime)
-  const [hours, setHours] = useState(initialHours)
-  const [minutes, setMinutes] = useState(initialMinutes)
+  const [localTimeMs, setLocalTimeMs] = useState(inProgressTime)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (open) {
-      const { hours: h, minutes: m } = msToHoursMinutes(inProgressTime)
-      setHours(h)
-      setMinutes(m)
+      setLocalTimeMs(inProgressTime)
     }
   }, [open, inProgressTime])
 
-  const handleTimeChange = () => {
-    const newTimeMs = hoursMinutesToMs(hours, minutes)
-    if (newTimeMs !== inProgressTime) {
-      onUpdateTime(newTimeMs)
+  const handleTimeBlur = () => {
+    if (localTimeMs !== inProgressTime) {
+      onUpdateTime(localTimeMs)
     }
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-card border-white/10 pt-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
-          onClick={() => onOpenChange(false)}
-          data-testid="button-close-status-dialog"
-        >
-          <X className={IconSizeStyle.HW4} />
-        </Button>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {isCompleted ? 'Restore Task?' : 'Task Status'}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {isCompleted
-              ? `Move "${taskName}" back to your active task list.`
-              : `Choose an action for "${taskName}"`}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <div className="flex flex-col gap-3 w-full">
-            {!isCompleted && (
-              <>
-                {showInProgressOption &&
-                  (isInProgress ? (
-                    <StatusButton
-                      icon={StopCircle}
-                      label="Stop Progress"
+    <>
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent className="bg-card border-white/10 pt-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => onOpenChange(false)}
+            data-testid="button-close-status-dialog"
+          >
+            <X className={IconSizeStyle.HW4} />
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isCompleted ? 'Restore Task?' : 'Task Status'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isCompleted
+                ? `Move "${taskName}" back to your active task list.`
+                : `Choose an action for "${taskName}"`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <div className="flex flex-col gap-3 w-full">
+              {!isCompleted && (
+                <>
+                  {showInProgressOption &&
+                    (isInProgress ? (
+                      <ChangeStatusButton
+                        icon={StopCircle}
+                        label="Stop Progress"
+                        onClick={() => onSetStatus(TaskStatus.PINNED)}
+                        data-testid="button-stop-progress"
+                      />
+                    ) : (
+                      <ChangeStatusButton
+                        icon={Clock}
+                        label="In Progress"
+                        onClick={() => onSetStatus(TaskStatus.IN_PROGRESS)}
+                        data-testid="button-start-progress"
+                        colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                      />
+                    ))}
+                  {isInProgress || isPinned ? (
+                    <ChangeStatusButton
+                      icon={PinOff}
+                      label="Unpin"
                       onClick={() => onSetStatus(TaskStatus.OPEN)}
-                      data-testid="button-stop-progress"
+                      data-testid="button-unpin"
                     />
                   ) : (
-                    <StatusButton
-                      icon={Clock}
-                      label="In Progress"
-                      onClick={() => onSetStatus(TaskStatus.IN_PROGRESS)}
-                      data-testid="button-start-progress"
-                      colorClass="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                    <ChangeStatusButton
+                      icon={Pin}
+                      label="Pin to Top"
+                      onClick={() => onSetStatus(TaskStatus.PINNED)}
+                      data-testid="button-pin"
                     />
-                  ))}
-                {isInProgress || isPinned ? (
-                  <StatusButton
-                    icon={PinOff}
-                    label="Unpin"
-                    onClick={() => onSetStatus(TaskStatus.OPEN)}
-                    data-testid="button-unpin"
-                  />
-                ) : (
-                  <StatusButton
-                    icon={Pin}
-                    label="Pin to Top"
-                    onClick={() => onSetStatus(TaskStatus.PINNED)}
-                    data-testid="button-pin"
-                  />
-                )}
-              </>
-            )}
-
-            <AlertDialogAction
-              onClick={() =>
-                onSetStatus(
-                  isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
-                )
-              }
-              className={cn(
-                'w-full h-11 text-base font-semibold',
-                isCompleted
-                  ? 'bg-primary hover:bg-primary/90 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                  )}
+                </>
               )}
-              data-testid="button-complete-task"
-            >
-              {isCompleted ? 'Restore Task' : 'Complete Task'}
-            </AlertDialogAction>
 
-            {showTimeInputs && (
-              <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/10">
-                <span className="text-xs text-muted-foreground">
-                  Time Spent
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      value={hours}
-                      onChange={(e) =>
-                        setHours(
-                          Math.max(0, Number.parseInt(e.target.value) || 0),
-                        )
-                      }
-                      onBlur={handleTimeChange}
-                      className="w-16 h-8 text-center text-sm"
-                      data-testid="input-hours"
-                    />
-                    <span className="text-xs text-muted-foreground">h</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={59}
-                      value={minutes}
-                      onChange={(e) =>
-                        setMinutes(
-                          Math.min(
-                            59,
-                            Math.max(0, Number.parseInt(e.target.value) || 0),
-                          ),
-                        )
-                      }
-                      onBlur={handleTimeChange}
-                      className="w-16 h-8 text-center text-sm"
-                      data-testid="input-minutes"
-                    />
-                    <span className="text-xs text-muted-foreground">m</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 h-8"
-                onClick={onDeleteClick}
-                data-testid="button-delete-task"
+              <AlertDialogAction
+                onClick={() =>
+                  onSetStatus(
+                    isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
+                  )
+                }
+                className={cn(
+                  'w-full h-11 text-base font-semibold',
+                  isCompleted
+                    ? 'bg-primary hover:bg-primary/90 text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                )}
+                data-testid="button-complete-task"
               >
-                <span className="text-xs font-medium">Delete Permanently</span>
-              </Button>
+                {isCompleted ? 'Restore Task' : 'Complete Task'}
+              </AlertDialogAction>
+
+              {showTimeInputs && (
+                <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/10">
+                  <span className="text-xs text-muted-foreground">
+                    Time Spent
+                  </span>
+                  <TimeInput
+                    durationMs={localTimeMs}
+                    onDurationChange={setLocalTimeMs}
+                    onBlur={handleTimeBlur}
+                    className="w-16 h-8 text-center text-sm bg-secondary/30"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2 h-8"
+                  onClick={() => {
+                    onOpenChange(false)
+                    setTimeout(() => setShowDeleteConfirm(true), 100)
+                  }}
+                  data-testid="button-delete-task"
+                >
+                  <span className="text-xs font-medium">
+                    Delete Permanently
+                  </span>
+                </Button>
+              </div>
             </div>
-          </div>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <ConfirmDeleteDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        taskName={taskName}
+        onConfirm={() => {
+          onDelete()
+          setShowDeleteConfirm(false)
+        }}
+      />
+    </>
   )
 }

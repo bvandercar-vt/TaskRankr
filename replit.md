@@ -1,11 +1,9 @@
 # TaskRankr
 
 ## Overview
-
-TaskRankr is a multi-user task management application that lets you track tasks with priority, ease, enjoyment, and time ratings. Each rank field has 6 levels (including "none") with configurable visibility and required settings. Features hierarchical/nested task support, status-based workflow, a modern dark-themed mobile-first UI, per-user task isolation with Replit Auth, and a guest mode for trying the app without an account.
+TaskRankr is a multi-user task management application designed for tracking tasks with detailed priority, ease, enjoyment, and time ratings. It supports hierarchical tasks, a status-based workflow (open, in_progress, pinned, completed), and offers a modern, dark-themed, mobile-first user interface. The application ensures per-user task isolation using Replit Auth and includes a guest mode for new users to explore its functionalities without an account. The core vision is to provide an intuitive and efficient task management solution that adapts to user preferences and optimizes productivity through flexible task ranking and organization.
 
 ## User Preferences
-
 - Preferred communication style: Simple, everyday language.
 - File naming: kebab-case for utility/helper files (e.g., `auth-utils.ts`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useSettings.ts`, `useTasks.ts`)
 - Icon helper: Use `Icon` component from `LucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
@@ -15,62 +13,36 @@ TaskRankr is a multi-user task management application that lets you track tasks 
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend
 - **Framework**: React 18 with TypeScript
-- **Routing**: Wouter (lightweight React router)
-- **State Management**: Offline-first architecture with LocalStateProvider + SyncProvider
-- **Styling**: Tailwind CSS with custom theme configuration, CSS variables for theming
-- **UI Components**: shadcn/ui component library (Radix UI primitives + Tailwind)
-- **Animations**: Framer Motion for list reordering and transitions
-- **Build Tool**: Vite with React plugin
+- **Routing**: Wouter
+- **State Management**: Offline-first architecture using `LocalStateProvider` for immediate local updates and `SyncProvider` for background synchronization with the server. `GuestModeProvider` enables a full-featured guest experience with demo data.
+- **Styling**: Tailwind CSS with custom themes and CSS variables.
+- **UI Components**: shadcn/ui library (Radix UI primitives integrated with Tailwind).
+- **Animations**: Framer Motion for interactive elements and transitions.
 
-### Offline-First Architecture
-The app uses a local-first data model where all changes happen locally first, then sync to the server:
+### Backend
+- **Runtime**: Node.js with Express.
+- **Language**: TypeScript (ES modules).
+- **API**: RESTful API defined using ts-rest for end-to-end type safety with Zod schemas for validation.
+- **Authentication**: Replit Auth (OpenID Connect).
 
-- **LocalStateProvider** (`client/src/components/providers/LocalStateProvider.tsx`):
-  - Manages tasks and settings in localStorage
-  - Uses separate localStorage namespaces: `taskrankr-auth-*` for authenticated, `taskrankr-guest-*` for guest mode
-  - All CRUD operations update local state immediately
-  - Enqueues sync operations when `shouldSync` is true (authenticated mode)
-  - Uses negative temp IDs for locally-created tasks until synced
+### Data Management
+- **Database**: PostgreSQL (Neon-backed).
+- **ORM**: Drizzle ORM with drizzle-zod for schema definition and validation.
+- **Data Model**:
+    - **Tasks**: Include `name`, `description`, `priority`, `ease`, `enjoyment`, `time`, `parentId` (for nesting), `status` (open, in_progress, pinned, completed), `subtaskSortMode` (inherit, manual), `subtaskOrder`, and time tracking fields.
+    - **User Settings**: Stored per-user, including `autoPinNewTasks`, `enableInProgressStatus`, `enableInProgressTime`, `alwaysSortPinnedByPriority`, `sortBy`, and `fieldConfig` for customizable rank field visibility and requirements.
 
-- **SyncProvider** (`client/src/components/providers/SyncProvider.tsx`):
-  - Processes sync queue in background when online and authenticated
-  - Maintains idMap to resolve temp IDs to real server IDs during batch processing
-  - Fetches server data on auth (waits for queue to drain first)
-  - Shows offline/syncing status via StatusBanner
-
-- **GuestModeProvider** (`client/src/components/providers/GuestModeProvider.tsx`):
-  - Simple flag for guest mode (`isGuestMode`)
-  - When in guest mode: uses LocalStateProvider with `shouldSync=false`
-  - Demo data (sample tasks) created on first entry to help users learn the app
-  - "Delete Demo Data" button available to remove sample tasks
-  - All features work in guest mode, data persists in localStorage
-
-- **Guest Task Migration** (`client/src/lib/migrate-guest-tasks.ts`):
-  - On login, migrates guest tasks (excluding demo tasks) to authenticated storage
-  - Filters out demo tasks by tracking their IDs separately
-  - Clears guest storage after successful migration
-
-- **Data Flow**:
-  1. User action → LocalStateProvider updates local state + enqueues sync op
-  2. SyncProvider debounces (500ms) then processes queue
-  3. For creates: temp ID replaced with real ID in both local state and pending ops
-  4. UI always reads from local state (instant updates)
-
-### Backend Architecture
-- **Runtime**: Node.js with Express
-- **Language**: TypeScript (ES modules)
-- **API Pattern**: RESTful API using ts-rest for end-to-end type safety
-- **API Contract**: `shared/contract.ts` - defines all endpoints with Zod schemas
-- **Validation**: Automatic validation via ts-rest using Zod schemas
-- **Authentication**: Replit Auth (OpenID Connect)
-
-### Data Storage
-- **Database**: PostgreSQL (Neon-backed)
-- **ORM**: Drizzle ORM with drizzle-zod for schema-to-validation integration
-- **Schema Location**: `shared/schema/` - define tables for database as well as zod parsing schemas.
-- **Migrations**: Drizzle Kit for schema migrations (`drizzle-kit push`)
+### Key Features
+- **Offline-First**: All data changes are applied locally first for an instant UI experience, then synchronized to the server in the background.
+- **Guest Mode**: Allows users to try the app with persistent local storage and demo data without authentication. Guest task migration to user accounts upon login is supported.
+- **Hierarchical Tasks**: Tasks can have `parentId` to create nested structures.
+- **Configurable Rank Fields**: Priority, ease, enjoyment, and time fields have 6 levels and customizable visibility/required settings via `fieldConfig`.
+- **Task Status System**: A clear workflow with `open`, `in_progress`, `pinned`, and `completed` statuses, including automatic demotion of `in_progress` tasks and time tracking.
+- **Subtask Ordering**: Supports both inherited sorting from parent tasks and manual drag-and-drop reordering.
+- **Sorting & Filtering Architecture**: All sorting and filtering logic lives in `client/src/lib/sort-tasks.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
+- **Task Hooks Architecture**: `useTasks.ts` exports data hooks (`useTasks`, `useTask`, `useTaskParentChain`) and `useTaskActions()` which returns direct calls to `LocalStateProvider` methods. All mutations are synchronous local-first operations — no `useMutation` wrappers or `isPending` states.
 
 ### Project Structure
 ```
@@ -83,13 +55,15 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
+│       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
+│       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu + search
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
 │       │   ├── providers/        # Context providers
 │       │   │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
 │       │   │   ├── SyncProvider.tsx  # Background sync to API
 │       │   │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
 │       │   │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
-│       │   │   └── TaskDialogProvider.tsx  # Context for task dialog state
+│       │   │   └── TaskFormDialogProvider.tsx  # Context for task form dialog state
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
@@ -98,10 +72,9 @@ The app uses a local-first data model where all changes happen locally first, th
 │       ├── hooks/
 │       │   ├── useAuth.ts        # Authentication state hook
 │       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
-│       │   ├── useGuestModeState.ts  # Guest mode localStorage state
 │       │   ├── useMobile.tsx     # Mobile detection hook
 │       │   ├── useSettings.ts    # User settings with optimistic updates
-│       │   ├── useTasks.ts       # Task CRUD operations
+│       │   ├── useTasks.ts       # Task data hooks (useTasks, useTask, useTaskParentChain) + useTaskActions
 │       │   └── useToast.ts       # Toast notifications
 │       ├── pages/
 │       │   ├── Home.tsx          # Main task list with sorting
@@ -111,10 +84,11 @@ The app uses a local-first data model where all changes happen locally first, th
 │       │   ├── Landing.tsx       # Unauthenticated landing page
 │       │   └── NotFound.tsx
 │       ├── lib/
+│       │   ├── sort-tasks.ts     # Sorting + filtering logic, SORT_ORDER_MAP, RANK_FIELDS_COLUMNS
+│       │   ├── rank-field-styles.ts  # Rank field color mappings
 │       │   ├── ts-rest.ts        # ts-rest client + QueryKeys
 │       │   ├── query-client.ts   # @tanstack/react-query client
 │       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
-│       │   ├── rank-field-styles.ts  # Rank field color mappings
 │       │   ├── auth-utils.ts     # Authentication helpers
 │       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
@@ -142,98 +116,23 @@ The app uses a local-first data model where all changes happen locally first, th
 └── migrations/           # Database migrations
 ```
 
-### API Design (ts-rest)
-API is defined using ts-rest contract in `shared/contract.ts`:
-- Type-safe endpoints with automatic request/response validation
-- Client and server share the same contract for end-to-end type safety
-- Server implementation in `server/routes.ts` using `@ts-rest/express`
-- Client in `client/src/lib/ts-rest.ts` using `@ts-rest/react-query`
-- DELETE endpoints use `c.noBody()` not `z.undefined()` for empty request bodies
-
-Key endpoints:
-- `GET /api/tasks` - List all tasks (user-scoped)
-- `GET /api/tasks/:id` - Get single task
-- `POST /api/tasks` - Create task
-- `PUT /api/tasks/:id` - Update task
-- `PUT /api/tasks/:id/status` - Set task status (handles time tracking and auto-demotion)
-- `PUT /api/tasks/:id/reorder` - Persist manual subtask order
-- `DELETE /api/tasks/:id` - Delete task
-- `GET /api/settings` - Get user settings
-- `PUT /api/settings` - Update user settings
-
-### Task Data Model
-Tasks have:
-- `name`, `description` (text fields)
-- `priority` (enum: none/lowest/low/medium/high/highest)
-- `ease` (enum: none/easiest/easy/medium/hard/hardest)
-- `enjoyment` (enum: none/lowest/low/medium/high/highest)
-- `time` (enum: none/lowest/low/medium/high/highest)
-- `parentId` (nullable, for nested task hierarchy)
-- `status` (enum: open/in_progress/pinned/completed)
-- `subtaskSortMode` (enum: inherit/manual) - how direct children are sorted
-- `subtaskOrder` (integer[]) - ordered array of subtask IDs when using manual sort mode
-- `inProgressTime` (integer) - cumulative milliseconds spent in "in progress" state
-- `inProgressStartedAt` (timestamp) - when the current in-progress session started
-- `createdAt`, `completedAt` (timestamps)
-- `userId` (string) - owner of the task
-
-### Subtask Ordering
-Subtasks can be sorted two ways via `subtaskSortMode`:
-- **inherit** (default): Subtasks follow the same sort order as the global sortBy setting
-- **manual**: Subtasks are ordered by the parent's `subtaskOrder` array, allowing drag-and-drop reordering
-
-When switching to manual mode, the current order is persisted via `PUT /api/tasks/:id/reorder`.
-
-### User Settings Model
-Per-user settings stored in `user_settings` table:
-- `autoPinNewTasks` - Auto-pin newly created tasks
-- `enableInProgressStatus` - Allow tasks to be marked "In Progress" (when disabled, demotes any in_progress task to pinned)
-- `enableInProgressTime` - Track time spent on in-progress tasks (only visible when enableInProgressStatus is true)
-- `alwaysSortPinnedByPriority` - Sort pinned tasks by priority first
-- `sortBy` - Current sort preference (date/priority/ease/enjoyment/time)
-- `fieldConfig` - JSONB column: `Record<RankField, { visible: boolean; required: boolean }>` storing per-field visibility and required flags
-
-### Settings Hook Pattern
-Always use `useSettings()` hook for reading/updating settings in React components:
-- **`useSettings()`** - Reactive hook from LocalStateProvider. Works for both guest and authenticated modes. Re-renders on changes.
-- **`updateFieldFlags(field, flags)`** - Update visibility/required for a rank field
-- Access field flags directly via `settings.fieldConfig[field].visible` / `.required`
-
-### Task Status System
-- **open**: Default state for new tasks
-- **in_progress**: Task being actively worked on (only ONE task can be in_progress at a time)
-- **pinned**: Hoisted to top of list (multiple allowed, displayed below in_progress)
-- **completed**: Task finished
-
-Status behaviors:
-- Setting a task to in_progress auto-demotes the current in_progress task to pinned
-- Pinned tasks are hoisted at the top of the list, below the in_progress task
-- Time accumulates when in in_progress status, not when pinned
-- Long-press (800ms) opens the Task Status dialog for status changes
-- Visual indicators: blue border for in_progress, slate blue-gray border + pin icon for pinned
-
-### Shared Utilities
-- `RANK_FIELDS_CRITERIA` in `shared/schema/tasks.zod.ts` - Central config for rank fields (name, label, levels)
-- `DEFAULT_FIELD_CONFIG` / `fieldConfigSchema` in `shared/schema/settings.zod.ts` - Default field config and Zod schema for validation
-- `FieldConfig` / `FieldFlags` types in `shared/schema/settings.zod.ts` - TypeScript types for the fieldConfig structure
-
 ## External Dependencies
 
 ### Database
-- **PostgreSQL**: Primary database, connection via `DATABASE_URL` environment variable
+- **PostgreSQL**: Main database for persistent storage.
 
 ### UI Libraries
-- **Radix UI**: Headless UI primitives (dialogs, dropdowns, forms, etc.)
-- **Framer Motion**: Animation library
-- **Lucide React**: Icon library
-- **React Day Picker**: Calendar/date picker
-- **CMDK**: Command palette component
-- **Vaul**: Drawer component
+- **Radix UI**: Provides unstyled, accessible UI components.
+- **Framer Motion**: Used for declarative animations and gestures.
+- **Lucide React**: Icon library.
+- **React Day Picker**: Component for date selection.
+- **CMDK**: Command palette interface.
+- **Vaul**: Drawer component for React.
 
-### Development Tools
-- **Vite**: Frontend build tool with HMR
-- **esbuild**: Server bundling for production
-- **Drizzle Kit**: Database migration tool
-- **TypeScript**: Type checking across the stack
-- **ts-rest**: Type-safe REST API framework (@ts-rest/core, @ts-rest/express, @ts-rest/react-query)
-- **type-fest**: Advanced TypeScript utilities (Simplify, etc.)
+### Development Utilities
+- **Vite**: Fast frontend build tool.
+- **esbuild**: Used for server-side bundling.
+- **Drizzle Kit**: Tooling for database schema migrations.
+- **TypeScript**: Ensures type safety across the entire codebase.
+- **ts-rest**: Facilitates type-safe API contract definition and usage.
+- **type-fest**: Provides various utility types for TypeScript.
