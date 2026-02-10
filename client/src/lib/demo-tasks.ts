@@ -7,14 +7,12 @@ import {
   Enjoyment,
   Priority,
   SubtaskSortMode,
+  type Task,
   TaskStatus,
-  type TaskWithSubtasks,
   Time,
 } from '~/shared/schema'
 
-export const createDemoTasks = (nextIdRef: {
-  current: number
-}): TaskWithSubtasks[] => {
+export const createDemoTasks = (nextIdRef: { current: number }): Task[] => {
   const now = new Date()
 
   const getNextId = () => {
@@ -34,7 +32,7 @@ export const createDemoTasks = (nextIdRef: {
   const miscBuildPrototypeId = getNextId()
   const completedWithSubtaskId = getNextId()
 
-  const demoTasks: TaskWithSubtasks[] = [
+  const demoTasks: Task[] = [
     {
       id: getNextId(),
       userId: 'local',
@@ -54,7 +52,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -74,7 +71,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -94,7 +90,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -114,7 +109,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -134,7 +128,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: numberedParentId,
@@ -160,7 +153,6 @@ export const createDemoTasks = (nextIdRef: {
         numberedCompletedId,
       ],
       subtasksShowNumbers: true,
-      subtasks: [],
     },
     {
       id: numberedResearchId,
@@ -180,7 +172,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -200,7 +191,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -220,7 +210,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: numberedDraftId,
@@ -240,7 +229,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.MANUAL,
       subtaskOrder: [numberedDraftOutlineId, numberedDraftTimelineId],
       subtasksShowNumbers: true,
-      subtasks: [],
     },
     {
       id: numberedDraftOutlineId,
@@ -260,7 +248,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: numberedDraftTimelineId,
@@ -280,7 +267,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: numberedReviewId,
@@ -300,7 +286,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: numberedCompletedId,
@@ -321,7 +306,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: miscParentId,
@@ -342,7 +326,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -362,7 +345,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: miscBuildPrototypeId,
@@ -382,7 +364,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -402,7 +383,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -422,7 +402,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -442,7 +421,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -463,7 +441,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -483,7 +460,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: completedWithSubtaskId,
@@ -503,7 +479,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
     {
       id: getNextId(),
@@ -523,7 +498,6 @@ export const createDemoTasks = (nextIdRef: {
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
       subtasksShowNumbers: false,
-      subtasks: [],
     },
   ]
 

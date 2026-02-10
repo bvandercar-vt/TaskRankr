@@ -8,7 +8,7 @@ import {
   type CreateTaskContent,
   useLocalStateSafe,
 } from '@/components/providers/LocalStateProvider'
-import type { Task, TaskWithSubtasks, UpdateTask } from '~/shared/schema'
+import type { Task, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
@@ -45,30 +45,17 @@ export const useTaskParentChain = (parentId?: number) => {
 
 export const useTask = (id: number) => {
   const { data: tasks, isLoading } = useTasks()
-
-  const findTask = (
-    taskList: TaskWithSubtasks[],
-    targetId: number,
-  ): TaskWithSubtasks | undefined => {
-    for (const task of taskList) {
-      if (task.id === targetId) return task
-      const found = findTask(task.subtasks, targetId)
-      if (found) return found
-    }
-    return undefined
-  }
-
   return {
-    data: findTask(tasks, id),
+    data: tasks.find((t) => t.id === id),
     isLoading,
     error: null,
   }
 }
 
 export const useTaskActions = (): {
-  createTask: (data: CreateTaskContent) => TaskWithSubtasks
-  updateTask: (update: UpdateTask) => TaskWithSubtasks
-  setTaskStatus: (id: number, status: Task['status']) => TaskWithSubtasks
+  createTask: (data: CreateTaskContent) => Task
+  updateTask: (update: UpdateTask) => Task
+  setTaskStatus: (id: number, status: Task['status']) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
 } => {
