@@ -31,13 +31,13 @@ import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
 
 interface DropdownMenuHeaderProps {
-  search: string
+  searchVal: string
   onSearchChange: (value: string) => void
   children?: React.ReactNode
 }
 
 export const DropdownMenuHeader = ({
-  search,
+  searchVal,
   onSearchChange,
   children,
 }: DropdownMenuHeaderProps) => {
@@ -134,10 +134,10 @@ export const DropdownMenuHeader = ({
 
       {isSearchExpanded && (
         <SearchInput
-          value={search}
+          value={searchVal}
           onChange={onSearchChange}
           autoFocus
-          onBlur={() => !search && setIsSearchExpanded(false)}
+          onBlur={() => !searchVal && setIsSearchExpanded(false)}
           className="mb-3 mx-1"
         />
       )}

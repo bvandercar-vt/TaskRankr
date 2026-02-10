@@ -7,19 +7,18 @@
 import { useMemo, useState } from 'react'
 import { LayoutList, Plus, Search } from 'lucide-react'
 
-import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
-import { HowToUseBanner } from '@/components/HowToUseBanner'
-import {
-  EmptyState as EmptyStateBase,
-  PageError,
-  PageLoading,
-} from '@/components/PageStates'
+import { EmptyState as EmptyStateBase } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { useLocalState } from '@/components/providers/LocalStateProvider'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
+import {
+  TaskListPageHeader,
+  TaskListPageWrapper,
+  TaskListTreeLayout,
+} from '@/components/TaskListPage'
 import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSize } from '@/lib/constants'
@@ -124,7 +123,7 @@ const EmptyState = ({
 )
 
 const Home = () => {
-  const { data: allTasks, isLoading, error } = useTasks()
+  const { data: allTasks, isLoading } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSettings } = useSettings()
   const { hasDemoData, deleteDemoData } = useLocalState()
@@ -195,44 +194,39 @@ const Home = () => {
     return [...sortedInProgress, ...sortedPinned, ...sortedTree]
   }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings])
 
-  if (isLoading) return <PageLoading />
-  if (error) return <PageError />
-
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
-      <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-8">
-        <HowToUseBanner />
-
-        <h1 className="sr-only">Home (Open Tasks)</h1>
-
-        <DropdownMenuHeader search={search} onSearchChange={setSearch}>
+    <TaskListPageWrapper isLoading={isLoading}>
+      <TaskListPageHeader
+        title="Home (Open Tasks)"
+        showTitle={false}
+        ColumnHeaders={
           <SortButtons
             sortBy={sortBy}
             setSortBy={setSortBy}
             fieldConfig={settings.fieldConfig}
           />
-        </DropdownMenuHeader>
-      </div>
+        }
+        searchVal={search}
+        setSearchVal={setSearch}
+      />
 
-      <div className="flex-1 min-h-0 overflow-y-auto pb-32">
-        <div className="max-w-5xl mx-auto px-2 sm:px-4 space-y-1">
-          {displayedTasks.length === 0 ? (
-            <EmptyState
-              search={search}
-              onCreateClick={() => openCreateDialog()}
-            />
-          ) : (
-            displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
-          )}
+      <TaskListTreeLayout>
+        {displayedTasks.length === 0 ? (
+          <EmptyState
+            search={search}
+            onCreateClick={() => openCreateDialog()}
+          />
+        ) : (
+          displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
+        )}
 
-          {hasDemoData && displayedTasks.length > 0 && (
-            <DeleteDemoDataButton onClick={deleteDemoData} />
-          )}
-        </div>
-      </div>
+        {hasDemoData && displayedTasks.length > 0 && (
+          <DeleteDemoDataButton onClick={deleteDemoData} />
+        )}
+      </TaskListTreeLayout>
 
       <CreateTaskButton onClick={() => openCreateDialog()} />
-    </div>
+    </TaskListPageWrapper>
   )
 }
 
