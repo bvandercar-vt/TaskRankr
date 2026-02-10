@@ -26,10 +26,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/primitives/DropdownMenu'
 import { Input } from '@/components/primitives/forms/Input'
-import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { IconSizeStyle, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
+import { useGuestMode } from './providers/GuestModeProvider'
 
 interface DropdownMenuHeaderProps {
   search: string
@@ -42,7 +42,7 @@ export const DropdownMenuHeader = ({
   onSearchChange,
   children,
 }: DropdownMenuHeaderProps) => {
-  const { isGuestMode, exitGuestMode } = useGuestModeState()
+  const { isGuestMode, exitGuestMode } = useGuestMode()
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [location] = useLocation()
   const isHome = location === Routes.HOME

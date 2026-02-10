@@ -12,10 +12,10 @@ import { HowToUseBanner } from '@/components/HowToUseBanner'
 import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { Icon } from '@/components/primitives/LucideIcon'
+import { useLocalState } from '@/components/providers/LocalStateProvider'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
-import { useGuestModeState } from '@/hooks/useGuestModeState'
 import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
@@ -31,7 +31,7 @@ const Home = () => {
   const { data: allTasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSettings } = useSettings()
-  const { hasDemoData, deleteDemoData } = useGuestModeState()
+  const { hasDemoData, deleteDemoData } = useLocalState()
   const [search, setSearch] = useState('')
 
   const sortBy = settings.sortBy

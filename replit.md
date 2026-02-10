@@ -72,7 +72,6 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       ├── hooks/
 │       │   ├── useAuth.ts        # Authentication state hook
 │       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
-│       │   ├── useGuestModeState.ts  # Guest mode localStorage state
 │       │   ├── useMobile.tsx     # Mobile detection hook
 │       │   ├── useSettings.ts    # User settings with optimistic updates
 │       │   ├── useTasks.ts       # Task data hooks (useTasks, useTask, useTaskParentChain) + useTaskActions
