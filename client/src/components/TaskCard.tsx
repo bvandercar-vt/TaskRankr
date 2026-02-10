@@ -280,16 +280,9 @@ export const TaskCard = ({
     setIsHolding(false)
   }
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const checkMoveThreshold = (clientY: number) => {
     if (holdStartY.current === null) return
-    const dy = Math.abs(e.touches[0].clientY - holdStartY.current)
-    if (dy > SCROLL_THRESHOLD) cancelHold()
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (holdStartY.current === null) return
-    const dy = Math.abs(e.clientY - holdStartY.current)
-    if (dy > SCROLL_THRESHOLD) cancelHold()
+    if (Math.abs(clientY - holdStartY.current) > SCROLL_THRESHOLD) cancelHold()
   }
 
   useEffect(() => {
@@ -327,9 +320,9 @@ export const TaskCard = ({
         onMouseUp={cancelHold}
         onMouseLeave={cancelHold}
         onTouchStart={startHold}
-        onTouchMove={handleTouchMove}
+        onTouchMove={(e) => checkMoveThreshold(e.touches[0].clientY)}
         onTouchEnd={cancelHold}
-        onMouseMove={handleMouseMove}
+        onMouseMove={(e) => checkMoveThreshold(e.clientY)}
       >
         <div className="w-5 flex justify-center shrink-0 self-stretch">
           {hasSubtasks ? (
