@@ -200,6 +200,12 @@ export const filterTaskTree = (
   }, [])
 }
 
+export const filterRootTasks = (tasks: Task[], searchTerm: string): Task[] => {
+  if (!searchTerm.trim()) return tasks
+  const q = searchTerm.toLowerCase()
+  return tasks.filter((task) => task.name.toLowerCase().includes(q))
+}
+
 export const filterAndSortTree = (
   tasks: TaskWithSubtasks[],
   searchTerm: string,

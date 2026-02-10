@@ -21,8 +21,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Check, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Check, GripVertical, Link, Pencil, Plus, Trash2 } from 'lucide-react'
 
+import { AssignSubtaskDialog } from '@/components/AssignSubtaskDialog'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
@@ -269,6 +270,9 @@ const SubtaskItem = ({
   )
 }
 
+const SUBTASK_ACTION_BTN_STYLE =
+  'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground'
+
 interface SubtasksCardProps {
   task: Task
   onAddChild: (parentId: number) => void
@@ -284,6 +288,7 @@ export const SubtasksCard = ({
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
   const { setTaskStatus, reorderSubtasks } = useTaskActions()
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
@@ -442,15 +447,34 @@ export const SubtasksCard = ({
           </DndContext>
         </CollapsibleCard>
       )}
-      <button
-        type="button"
-        onClick={() => onAddChild(task.id)}
-        className="w-full flex items-center justify-center gap-2 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground border-t border-white/5"
-        data-testid="button-add-subtask"
-      >
-        <Plus className={IconSize.HW4} />
-        Add Subtask
-      </button>
+      <div className="flex border-t border-white/5">
+        <button
+          type="button"
+          onClick={() => onAddChild(task.id)}
+          className={cn(SUBTASK_ACTION_BTN_STYLE, 'flex-[4] gap-2')}
+          data-testid="button-add-subtask"
+        >
+          <Plus className={IconSize.HW4} />
+          Add Subtask
+        </button>
+        <button
+          type="button"
+          onClick={() => setAssignDialogOpen(true)}
+          className={cn(
+            SUBTASK_ACTION_BTN_STYLE,
+            'flex-1 gap-1.5 border-l border-white/5',
+          )}
+          data-testid="button-assign-subtask"
+        >
+          <Link className={IconSize.HW4} />
+          Assign
+        </button>
+      </div>
+      <AssignSubtaskDialog
+        open={assignDialogOpen}
+        onOpenChange={setAssignDialogOpen}
+        parentTask={task}
+      />
     </div>
   )
 }
