@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils'
 import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Home = () => {
-  const { data: tasks, isLoading, error } = useTasks()
+  const { data: allTasks, isLoading, error } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSettings } = useSettings()
   const { hasDemoData, deleteDemoData } = useGuestModeState()
@@ -41,10 +41,7 @@ const Home = () => {
   // Also extract in-progress and pinned tasks to be hoisted to top
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
-    if (!tasks)
-      return { taskTree: [], inProgressTask: undefined, pinnedTasks: [] }
-
-    const activeTasks = tasks.filter(
+    const activeTasks = allTasks.filter(
       (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
     )
 
@@ -82,7 +79,7 @@ const Home = () => {
       inProgressTask: inProgress,
       pinnedTasks: pinnedList,
     }
-  }, [tasks])
+  }, [allTasks])
 
   const displayedTasks = useMemo(() => {
     const sortOrder = SORT_ORDER_MAP[sortBy]

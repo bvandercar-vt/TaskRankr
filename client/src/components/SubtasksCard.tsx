@@ -289,7 +289,6 @@ export const SubtasksCard = ({
   )
 
   const subtasks = useMemo(() => {
-    if (!allTasks) return []
     const flattenTasks = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] => {
       const result: TaskWithSubtasks[] = []
       for (const t of tasks) {

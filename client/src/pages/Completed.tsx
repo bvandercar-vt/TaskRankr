@@ -17,28 +17,24 @@ import { cn } from '@/lib/utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Completed = () => {
-  const { data: tasks, isLoading, error } = useTasks()
+  const { data: allTasks, isLoading, error } = useTasks()
   const [search, setSearch] = useState('')
 
   const completedTasks = useMemo(() => {
-    if (!tasks) return []
-
-    const completedRoots = tasks.filter(
-      (task) => task.status === TaskStatus.COMPLETED && !task.parentId,
-    )
-
     const buildSubtaskTree = (parentId: number): TaskWithSubtasks[] => {
-      const children = tasks.filter((t) => t.parentId === parentId)
+      const children = allTasks.filter((t) => t.parentId === parentId)
       return children.map((child) => ({
         ...child,
         subtasks: buildSubtaskTree(child.id),
       }))
     }
 
-    const roots: TaskWithSubtasks[] = completedRoots.map((task) => ({
-      ...task,
-      subtasks: buildSubtaskTree(task.id),
-    }))
+    const roots: TaskWithSubtasks[] = allTasks
+      .filter((task) => task.status === TaskStatus.COMPLETED && !task.parentId)
+      .map((task) => ({
+        ...task,
+        subtasks: buildSubtaskTree(task.id),
+      }))
 
     roots.sort((a, b) => {
       const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0
@@ -47,7 +43,7 @@ const Completed = () => {
     })
 
     return roots
-  }, [tasks])
+  }, [allTasks])
 
   const displayedTasks = useMemo(
     () => filterAndSortTree(completedTasks, search, ['date_completed']),

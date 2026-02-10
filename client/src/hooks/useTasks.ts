@@ -13,7 +13,7 @@ import type { Task, TaskWithSubtasks, UpdateTask } from '~/shared/schema'
 export const useTasks = () => {
   const localState = useLocalStateSafe()
   return {
-    data: localState?.tasks ?? undefined,
+    data: localState?.tasks ?? [],
     isLoading: localState ? !localState.isInitialized : true,
     error: null,
     refetch: () => Promise.resolve(),
@@ -23,7 +23,7 @@ export const useTasks = () => {
 export const useTaskParentChain = (parentId?: number) => {
   const { data: tasks } = useTasks()
 
-  if (!parentId || !tasks) return []
+  if (!parentId) return []
 
   const chain: Pick<Task, 'id' | 'name'>[] = []
   let currentId: number | null | undefined = parentId
@@ -57,7 +57,7 @@ export const useTask = (id: number) => {
   }
 
   return {
-    data: tasks ? findTask(tasks, id) : undefined,
+    data: findTask(tasks, id),
     isLoading,
     error: null,
   }

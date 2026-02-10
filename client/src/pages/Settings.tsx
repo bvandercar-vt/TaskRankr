@@ -83,7 +83,7 @@ const SwitchCard = (props: SwitchSettingProps) => (
 
 const ExportButton = () => {
   const { data: tasks } = useTasks()
-  const hasNoTasks = !tasks || tasks.length === 0
+  const hasNoTasks = tasks.length === 0
 
   return (
     <Button
@@ -230,7 +230,7 @@ const Settings = () => {
   const { user } = useAuth()
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
-  const { data: tasks } = useTasks()
+  const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
 
   return (
@@ -279,7 +279,7 @@ const Settings = () => {
                   if (!checked) {
                     updateSettings({ enableInProgressTime: false })
                     // Demote any in_progress task to pinned
-                    const inProgressTask = tasks?.find(
+                    const inProgressTask = allTasks.find(
                       (t) => t.status === TaskStatus.IN_PROGRESS,
                     )
                     if (inProgressTask) {
