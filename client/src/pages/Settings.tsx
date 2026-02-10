@@ -34,7 +34,7 @@ import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { TaskStatus } from '~/shared/schema'
+import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
@@ -78,6 +78,71 @@ const SwitchSetting = ({
 const SwitchCard = (props: SwitchSettingProps) => (
   <Card className="flex items-center justify-between">
     <SwitchSetting {...props} />
+  </Card>
+)
+
+const AttributeSettingsCard = ({
+  fieldConfig,
+  updateFieldFlags,
+}: {
+  fieldConfig: FieldConfig
+  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
+}) => (
+  <Card className="mt-4">
+    <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
+    <p className="text-sm text-muted-foreground mb-4">
+      Control which attributes appear in forms and task cards.
+    </p>
+    <table className="w-full" data-testid="table-attribute-settings">
+      <thead>
+        <tr className="border-b border-white/10">
+          <th className="text-left py-2 font-medium text-sm text-muted-foreground">
+            Attribute
+          </th>
+          <th className="text-center py-2 font-medium text-sm text-muted-foreground">
+            Visible
+          </th>
+          <th className="text-center py-2 font-medium text-sm text-muted-foreground">
+            Required
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
+          const { visible, required } = fieldConfig[name]
+
+          return (
+            <tr key={name} className="border-b border-white/5">
+              <td className="py-3 text-foreground">{label}</td>
+              <td className="py-3 text-center">
+                <Checkbox
+                  checked={visible}
+                  onCheckedChange={(checked) => {
+                    const newVisible = !!checked
+                    updateFieldFlags(name, {
+                      visible: newVisible,
+                      ...(!newVisible && required ? { required: false } : {}),
+                    })
+                  }}
+                  data-testid={`checkbox-${name}-visible`}
+                />
+              </td>
+              <td className="py-3 text-center">
+                <Checkbox
+                  checked={required}
+                  onCheckedChange={(checked) =>
+                    updateFieldFlags(name, { required: !!checked })
+                  }
+                  disabled={!visible}
+                  className={!visible ? 'opacity-50' : ''}
+                  data-testid={`checkbox-${name}-required`}
+                />
+              </td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   </Card>
 )
 
@@ -157,73 +222,6 @@ const ImportButton = () => {
     </>
   )
 }
-
-interface AttributeSettingsCardProps {
-  fieldConfig: ReturnType<typeof useSettings>['settings']['fieldConfig']
-  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
-}
-
-const AttributeSettingsCard = ({
-  fieldConfig,
-  updateFieldFlags,
-}: AttributeSettingsCardProps) => (
-  <Card className="mt-4">
-    <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
-    <p className="text-sm text-muted-foreground mb-4">
-      Control which attributes appear in forms and task cards.
-    </p>
-    <table className="w-full" data-testid="table-attribute-settings">
-      <thead>
-        <tr className="border-b border-white/10">
-          <th className="text-left py-2 font-medium text-sm text-muted-foreground">
-            Attribute
-          </th>
-          <th className="text-center py-2 font-medium text-sm text-muted-foreground">
-            Visible
-          </th>
-          <th className="text-center py-2 font-medium text-sm text-muted-foreground">
-            Required
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
-          const { visible, required } = fieldConfig[name]
-
-          return (
-            <tr key={name} className="border-b border-white/5">
-              <td className="py-3 text-foreground">{label}</td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={visible}
-                  onCheckedChange={(checked) => {
-                    const newVisible = !!checked
-                    updateFieldFlags(name, {
-                      visible: newVisible,
-                      ...(!newVisible && required ? { required: false } : {}),
-                    })
-                  }}
-                  data-testid={`checkbox-${name}-visible`}
-                />
-              </td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={required}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags(name, { required: !!checked })
-                  }
-                  disabled={!visible}
-                  className={!visible ? 'opacity-50' : ''}
-                  data-testid={`checkbox-${name}-required`}
-                />
-              </td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
-  </Card>
-)
 
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()

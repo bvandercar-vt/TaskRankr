@@ -36,12 +36,6 @@ const Completed = () => {
         subtasks: buildSubtaskTree(task.id),
       }))
 
-    roots.sort((a, b) => {
-      const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0
-      const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0
-      return dateB - dateA
-    })
-
     return roots
   }, [allTasks])
 
