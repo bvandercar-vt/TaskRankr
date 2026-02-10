@@ -3,7 +3,6 @@
  */
 
 import {
-  ArrowLeft,
   ArrowUpDown,
   CheckCircle2,
   GripVertical,
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { Button } from '@/components/primitives/Button'
+import { BackButton } from '@/components/BackButton'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSizeStyle, Routes } from '@/lib/constants'
@@ -50,11 +49,7 @@ const HowToUse = () => {
     <div className="min-h-screen bg-background text-foreground pb-16">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link href={Routes.HOME}>
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ArrowLeft className={IconSizeStyle.HW5} />
-            </Button>
-          </Link>
+          <BackButton />
           <h1 className="text-2xl font-bold">How To Use</h1>
         </div>
 
@@ -95,7 +90,7 @@ const HowToUse = () => {
                       You can customize which rank fields are visible in
                       Settings.
                     </div>
-                    <SortInfo defaultExpanded={false} testIdPrefix="howto" />
+                    <SortInfo defaultExpanded={false} />
                   </>
                 }
                 testId="card-sorting"
