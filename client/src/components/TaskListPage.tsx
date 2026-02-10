@@ -50,7 +50,7 @@ export const TaskListPageWrapper = ({
   if (isLoading) return <PageLoading />
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
+    <div className="flex-1 flex flex-col min-h-0 bg-background text-foreground">
       {children}
     </div>
   )

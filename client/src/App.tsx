@@ -45,7 +45,7 @@ const ScrollToTop = () => {
 }
 
 const Router = () => (
-  <>
+  <div className="flex-1 flex flex-col min-h-0">
     <ScrollToTop />
     <Switch>
       <Route path={Routes.HOME} component={Home} />
@@ -54,7 +54,7 @@ const Router = () => (
       <Route path={Routes.HOW_TO_USE} component={HowToUse} />
       <Route component={NotFound} />
     </Switch>
-  </>
+  </div>
 )
 
 const AuthenticatedApp = () => {
@@ -97,8 +97,10 @@ const AuthenticatedApp = () => {
       <SyncProvider isAuthenticated={shouldSync}>
         <ExpandedTasksProvider>
           <TaskFormDialogProvider>
-            <StatusBanner />
-            <Router />
+            <div className="h-dvh flex flex-col overflow-hidden">
+              <StatusBanner />
+              <Router />
+            </div>
           </TaskFormDialogProvider>
         </ExpandedTasksProvider>
       </SyncProvider>
