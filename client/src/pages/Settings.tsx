@@ -35,6 +35,7 @@ import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { useIsStandalone } from '@/hooks/useIsStandalone'
 import { useToast } from '@/hooks/useToast'
 import { IconSize, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
@@ -307,6 +308,7 @@ const ClearLocalStorageConfirmDialog = () => {
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
+  const isStandalone = useIsStandalone()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
 
@@ -400,19 +402,21 @@ const Settings = () => {
         </Card>
       </Link>
 
-      <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-        <Card className="mt-3 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
-          <div>
-            <h3 className="font-semibold text-foreground">Install as App</h3>
-            <p className="text-sm text-muted-foreground">
-              Add to your home screen for offline access
-            </p>
-          </div>
-          <ChevronRight
-            className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
-          />
-        </Card>
-      </Link>
+      {!isStandalone && (
+        <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+          <Card className="mt-3 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
+            <div>
+              <h3 className="font-semibold text-foreground">Install as App</h3>
+              <p className="text-sm text-muted-foreground">
+                Add to your home screen for offline access
+              </p>
+            </div>
+            <ChevronRight
+              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
+            />
+          </Card>
+        </Link>
+      )}
 
       {!isGuestMode && <UserInfoCard />}
 

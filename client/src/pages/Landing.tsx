@@ -8,12 +8,14 @@ import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
+import { useIsStandalone } from '@/hooks/useIsStandalone'
 import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
 const Landing = () => {
   const { enterGuestMode } = useGuestMode()
+  const isStandalone = useIsStandalone()
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -79,21 +81,27 @@ const Landing = () => {
         </div>
       </main>
 
+      {!isStandalone && (
+        <div className="flex justify-center px-6 pb-4">
+          <Link href={Routes.HOW_TO_INSTALL}>
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2 text-lg px-8 min-w-[200px]"
+              data-testid="button-how-to-install"
+            >
+              <Download className={IconSize.HW5} />
+              Install as App
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <footer
         className="p-6 text-center text-sm text-muted-foreground"
         data-testid="footer"
       >
-        <Link href={Routes.HOW_TO_INSTALL}>
-          <Button
-            variant="ghost"
-            className="gap-2 text-muted-foreground"
-            data-testid="button-how-to-install"
-          >
-            <Download className={IconSize.HW4} />
-            Install as App
-          </Button>
-        </Link>
-        <p className="mt-2" data-testid="text-footer-brand">TaskRankr</p>
+        <p data-testid="text-footer-brand">TaskRankr</p>
       </footer>
     </div>
   )

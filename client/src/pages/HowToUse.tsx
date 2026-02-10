@@ -21,6 +21,7 @@ import { ContactCard } from '@/components/ContactCard'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { SortInfo } from '@/components/SortInfo'
+import { useIsStandalone } from '@/hooks/useIsStandalone'
 import { IconSize, Routes } from '@/lib/constants'
 
 const InstructionCard = ({
@@ -47,7 +48,10 @@ const InstructionCard = ({
   </Card>
 )
 
-const HowToUse = () => (
+const HowToUse = () => {
+  const isStandalone = useIsStandalone()
+
+  return (
   <ScrollablePage className="pb-16">
     <BackButtonHeader title="How To Use" />
 
@@ -165,28 +169,31 @@ const HowToUse = () => (
       </section>
     </div>
 
-    <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-      <Card
-        className="mt-8 bg-card/50 border-white/10 hover-elevate cursor-pointer"
-        data-testid="card-how-to-install"
-      >
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-            <Download className={IconSize.HW5} />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Install as App</h3>
-            <p className="text-sm text-muted-foreground">
-              Add TaskRankr to your home screen for offline access and a
-              full-screen experience.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    {!isStandalone && (
+      <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+        <Card
+          className="mt-8 bg-card/50 border-white/10 hover-elevate cursor-pointer"
+          data-testid="card-how-to-install"
+        >
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+              <Download className={IconSize.HW5} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Install as App</h3>
+              <p className="text-sm text-muted-foreground">
+                Add TaskRankr to your home screen for offline access and a
+                full-screen experience.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    )}
 
     <ContactCard className="mt-4" />
   </ScrollablePage>
-)
+  )
+}
 
 export default HowToUse
