@@ -208,7 +208,7 @@ export const TaskForm = ({
         className="flex flex-col h-full"
       >
         <div className="flex-1 space-y-5">
-          <div className="sticky top-0 z-10 pb-2 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:-mt-6 sm:pt-6">
+          <div className="sticky top-0 z-10 pb-2 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:top-[-24px] sm:-mt-6 sm:pt-6">
             <TagChain
               items={parentChain}
               label="Parent"
@@ -327,7 +327,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="sticky bottom-0 pt-2 flex gap-3 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:-mb-6 sm:pb-6">
+        <div className="sticky bottom-0 pt-2 flex gap-3 bg-background sm:bg-card sm:-mx-6 sm:px-6 sm:bottom-[-24px] sm:-mb-6 sm:pb-6">
           <Button
             type="button"
             variant="outline"
