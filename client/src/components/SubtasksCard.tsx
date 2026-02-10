@@ -270,6 +270,9 @@ const SubtaskItem = ({
   )
 }
 
+const SUBTASK_ACTION_BTN =
+  'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground'
+
 interface SubtasksCardProps {
   task: Task
   onAddChild: (parentId: number) => void
@@ -448,7 +451,7 @@ export const SubtasksCard = ({
         <button
           type="button"
           onClick={() => onAddChild(task.id)}
-          className="flex-[4] flex items-center justify-center gap-2 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground"
+          className={cn(SUBTASK_ACTION_BTN, 'flex-[4] gap-2')}
           data-testid="button-add-subtask"
         >
           <Plus className={IconSizeStyle.HW4} />
@@ -457,7 +460,7 @@ export const SubtasksCard = ({
         <button
           type="button"
           onClick={() => setAssignDialogOpen(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground border-l border-white/5"
+          className={cn(SUBTASK_ACTION_BTN, 'flex-1 gap-1.5 border-l border-white/5')}
           data-testid="button-assign-subtask"
         >
           <Link className={IconSizeStyle.HW4} />
