@@ -14,6 +14,7 @@ import {
 } from '@/components/primitives/overlays/Dialog'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { filterRootTasks } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
@@ -59,11 +60,10 @@ export const AssignSubtaskDialog = ({
     )
   }, [allTasks, parentTask.id, collectDescendantIds])
 
-  const filteredTasks = useMemo(() => {
-    if (!search.trim()) return orphanTasks
-    const q = search.toLowerCase()
-    return orphanTasks.filter((t) => t.name.toLowerCase().includes(q))
-  }, [orphanTasks, search])
+  const filteredTasks = useMemo(
+    () => filterRootTasks(orphanTasks, search),
+    [orphanTasks, search],
+  )
 
   const handleConfirm = () => {
     if (selectedId === null) return
