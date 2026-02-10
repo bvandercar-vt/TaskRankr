@@ -265,6 +265,7 @@ export const TaskForm = ({
                   <Textarea
                     placeholder="Additional details..."
                     className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
+                    style={{ fieldSizing: 'content' } as React.CSSProperties}
                     {...field}
                     value={field.value ?? ""}
                   />
