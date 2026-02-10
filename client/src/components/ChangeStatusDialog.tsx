@@ -136,7 +136,7 @@ export const ChangeStatusDialog = ({
                       <ChangeStatusButton
                         icon={StopCircle}
                         label="Stop Progress"
-                        onClick={() => onSetStatus(TaskStatus.OPEN)}
+                        onClick={() => onSetStatus(TaskStatus.PINNED)}
                         data-testid="button-stop-progress"
                       />
                     ) : (
