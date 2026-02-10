@@ -29,7 +29,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
@@ -318,7 +318,9 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="mt-4 flex items-center justify-between hover-elevate cursor-pointer">
             <div className="flex items-center gap-3">
-              <BookOpen className={IconSizeStyle.HW5 + ' text-muted-foreground'} />
+              <BookOpen
+                className={cn(IconSizeStyle.HW5, 'text-muted-foreground')}
+              />
               <div>
                 <h3 className="font-semibold text-foreground">How To Use</h3>
                 <p className="text-sm text-muted-foreground">
