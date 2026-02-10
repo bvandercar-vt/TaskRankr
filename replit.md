@@ -52,13 +52,14 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── primitives/       # Base UI components (shadcn/ui)
 │       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea, TimeInput)
 │       │   │   ├── overlays/     # AlertDialog, Dialog, Popover, Toast, Toaster, Tooltip
-│       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
+│       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, CollapsibleCard.tsx, Toggle.tsx
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
+│       │   │   ├── ScrollablePage.tsx  # Scrollable page wrapper for non-task-list pages
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
 │       │   ├── BackButton.tsx    # Back navigation button to home
 │       │   ├── ContactCard.tsx   # Contact/email card
 │       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
-│       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu + search
+│       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu, title + search
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
 │       │   ├── providers/        # Context providers
 │       │   │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
@@ -72,8 +73,10 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── SubtasksCard.tsx  # Subtask list with drag-and-drop and assign
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
+│       │   ├── TaskListPage.tsx  # TaskListPageWrapper, TaskListPageHeader, TaskListTreeLayout
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
-│       │   ├── ConfirmDeleteDialog.tsx  # ConfirmDeleteDialog (permanent delete) + SubtaskActionDialog (Cancel/Delete/Remove as Subtask)
+│       │   ├── ConfirmDeleteDialog.tsx  # Permanent delete confirmation dialog
+│       │   ├── SubtaskActionDialog.tsx  # Cancel/Delete/Remove as Subtask dialog
 │       │   ├── AssignSubtaskDialog.tsx  # Dialog to assign existing task as subtask
 │       │   ├── SearchInput.tsx   # Reusable search input with icon
 │       │   └── SortInfo.tsx      # Reusable sort explanation component

@@ -17,7 +17,6 @@ export const useTasks = () => {
   return {
     data: tasks,
     isLoading,
-    error: null,
     refetch: () => Promise.resolve(),
   }
 }
