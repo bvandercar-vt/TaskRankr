@@ -73,7 +73,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
-│       │   ├── ConfirmDeleteDialog.tsx  # Delete confirmation with optional "Remove as Subtask"
+│       │   ├── ConfirmDeleteDialog.tsx  # ConfirmDeleteDialog (permanent delete) + SubtaskActionDialog (Cancel/Delete/Remove as Subtask)
 │       │   ├── AssignSubtaskDialog.tsx  # Dialog to assign existing task as subtask
 │       │   ├── SearchInput.tsx   # Reusable search input with icon
 │       │   └── SortInfo.tsx      # Reusable sort explanation component

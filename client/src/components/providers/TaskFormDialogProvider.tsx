@@ -6,7 +6,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
+import {
+  ConfirmDeleteDialog,
+  SubtaskActionDialog,
+} from '@/components/ConfirmDeleteDialog'
 import {
   Dialog,
   DialogContent,
@@ -147,6 +150,7 @@ export const TaskFormDialogProvider = ({
   const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
     null,
   )
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
 
@@ -245,32 +249,43 @@ export const TaskFormDialogProvider = ({
         onSubtaskDelete={setSubtaskToDelete}
       />
 
-      <ConfirmDeleteDialog
-        open={!!subtaskToDelete}
+      <SubtaskActionDialog
+        open={!!subtaskToDelete && !showDeleteConfirm}
         onOpenChange={(open) => !open && setSubtaskToDelete(null)}
+        taskName={subtaskToDelete?.name ?? ''}
+        onDelete={() => setShowDeleteConfirm(true)}
+        onRemoveAsSubtask={() => {
+          if (subtaskToDelete) {
+            updateTask({ id: subtaskToDelete.id, parentId: null })
+            if (activeTask) {
+              updateTask({
+                id: activeTask.id,
+                subtaskOrder: activeTask.subtaskOrder.filter(
+                  (sid) => sid !== subtaskToDelete.id,
+                ),
+              })
+            }
+            setSubtaskToDelete(null)
+          }
+        }}
+      />
+
+      <ConfirmDeleteDialog
+        open={showDeleteConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowDeleteConfirm(false)
+            setSubtaskToDelete(null)
+          }
+        }}
         taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
           if (subtaskToDelete) {
             deleteTask(subtaskToDelete.id)
+            setShowDeleteConfirm(false)
             setSubtaskToDelete(null)
           }
         }}
-        onRemoveAsSubtask={
-          subtaskToDelete
-            ? () => {
-                updateTask({ id: subtaskToDelete.id, parentId: null })
-                if (activeTask) {
-                  updateTask({
-                    id: activeTask.id,
-                    subtaskOrder: activeTask.subtaskOrder.filter(
-                      (sid) => sid !== subtaskToDelete.id,
-                    ),
-                  })
-                }
-                setSubtaskToDelete(null)
-              }
-            : undefined
-        }
       />
     </TaskFormDialogContext.Provider>
   )
