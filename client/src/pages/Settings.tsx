@@ -3,7 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { ArrowLeft, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, Download, LogOut, Mail, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -387,6 +387,21 @@ const Settings = () => {
             </AlertDialogContent>
           </AlertDialog>
         </CollapsibleCard>
+
+        <Card className="mt-8" data-testid="card-contact">
+          <h3 className="font-semibold text-foreground">Contact</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Support / Bug Report / Feature Suggestions
+          </p>
+          <a
+            href="mailto:taskrankr@gmail.com"
+            className="inline-flex items-center gap-2 text-sm text-primary mt-3 hover-elevate rounded-md px-1 -ml-1"
+            data-testid="link-contact-email"
+          >
+            <Mail className={IconSizeStyle.HW4} />
+            taskrankr@gmail.com
+          </a>
+        </Card>
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
