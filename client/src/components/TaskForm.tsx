@@ -317,7 +317,7 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="pt-2 pb-4 mt-auto flex gap-3">
+        <div className="sticky bottom-0 pt-2 pb-4 flex gap-3 bg-background sm:bg-card">
           <Button
             type="button"
             variant="outline"
