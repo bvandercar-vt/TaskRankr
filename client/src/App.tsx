@@ -36,14 +36,26 @@ import { authPaths } from '~/shared/constants'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 
+const ScrollToTop = () => {
+  const [location] = useLocation()
+  // biome-ignore lint/correctness/useExhaustiveDependencies: needs it
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+  return null
+}
+
 const Router = () => (
-  <Switch>
-    <Route path={Routes.HOME} component={Home} />
-    <Route path={Routes.COMPLETED} component={Completed} />
-    <Route path={Routes.SETTINGS} component={Settings} />
-    <Route path={Routes.HOW_TO_USE} component={HowToUse} />
-    <Route component={NotFound} />
-  </Switch>
+  <>
+    <ScrollToTop />
+    <Switch>
+      <Route path={Routes.HOME} component={Home} />
+      <Route path={Routes.COMPLETED} component={Completed} />
+      <Route path={Routes.SETTINGS} component={Settings} />
+      <Route path={Routes.HOW_TO_USE} component={HowToUse} />
+      <Route component={NotFound} />
+    </Switch>
+  </>
 )
 
 const StatusBanner = () => {
