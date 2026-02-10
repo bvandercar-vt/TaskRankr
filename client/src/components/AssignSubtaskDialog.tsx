@@ -4,14 +4,16 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { X } from 'lucide-react'
+
 import { Button } from '@/components/primitives/Button'
 import {
-  Dialog,
-  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
+import { IconSize } from '@/lib/constants'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { filterRootTasks } from '@/lib/sort-tasks'
@@ -86,7 +88,7 @@ export const AssignSubtaskDialog = ({
   }
 
   return (
-    <Dialog
+    <DialogPrimitive.Root
       open={open}
       onOpenChange={(v) => {
         if (!v) {
@@ -96,65 +98,72 @@ export const AssignSubtaskDialog = ({
         onOpenChange(v)
       }}
     >
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle data-testid="title-assign-subtask">
-            Assign Subtask
-          </DialogTitle>
-        </DialogHeader>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Filter tasks..."
-          autoFocus
-          data-testid="search-assign-tasks"
-        />
-        <div
-          className="max-h-64 overflow-y-auto divide-y divide-white/5"
-          data-testid="list-orphan-tasks"
-        >
-          {filteredTasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">
-              {search.trim()
-                ? 'No matching tasks'
-                : 'No available tasks to assign'}
-            </p>
-          ) : (
-            filteredTasks.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelectedId(t.id)}
-                className={cn(
-                  'w-full text-left px-3 py-2.5 text-sm transition-colors',
-                  selectedId === t.id
-                    ? 'bg-primary/20 text-foreground'
-                    : 'hover-elevate text-muted-foreground',
-                )}
-                data-testid={`button-assign-task-${t.id}`}
-              >
-                {t.name}
-              </button>
-            ))
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            data-testid="button-cancel-assign"
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-[200] grid w-full max-w-sm translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg">
+          <DialogHeader>
+            <DialogTitle data-testid="title-assign-subtask">
+              Assign Subtask
+            </DialogTitle>
+          </DialogHeader>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Filter tasks..."
+            autoFocus
+            data-testid="search-assign-tasks"
+          />
+          <div
+            className="max-h-64 overflow-y-auto divide-y divide-white/5"
+            data-testid="list-orphan-tasks"
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={selectedId === null}
-            data-testid="button-confirm-assign"
-          >
-            Confirm
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {filteredTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                {search.trim()
+                  ? 'No matching tasks'
+                  : 'No available tasks to assign'}
+              </p>
+            ) : (
+              filteredTasks.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setSelectedId(t.id)}
+                  className={cn(
+                    'w-full text-left px-3 py-2.5 text-sm transition-colors',
+                    selectedId === t.id
+                      ? 'bg-primary/20 text-foreground'
+                      : 'hover-elevate text-muted-foreground',
+                  )}
+                  data-testid={`button-assign-task-${t.id}`}
+                >
+                  {t.name}
+                </button>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              data-testid="button-cancel-assign"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={selectedId === null}
+              data-testid="button-confirm-assign"
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className={IconSize.HW4} />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
