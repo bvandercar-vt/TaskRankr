@@ -100,6 +100,7 @@ export interface TaskFormProps {
   onAddChild?: (parentId: number) => void;
   onEditChild?: (task: Task) => void;
   onSubtaskDelete?: (task: DeleteTaskArgs) => void;
+  onAssignSubtask?: (task: Task) => void;
 }
 
 export const TaskForm = ({
@@ -110,6 +111,7 @@ export const TaskForm = ({
   onAddChild,
   onEditChild,
   onSubtaskDelete,
+  onAssignSubtask,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined);
   const { settings } = useSettings();
@@ -279,6 +281,7 @@ export const TaskForm = ({
                 onAddChild={onAddChild}
                 onEditChild={onEditChild}
                 onSubtaskDelete={onSubtaskDelete}
+                onAssignSubtask={onAssignSubtask}
               />
             )}
 
