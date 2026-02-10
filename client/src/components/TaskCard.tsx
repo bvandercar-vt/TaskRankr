@@ -70,7 +70,7 @@ const getTotalAccumulatedTime = (
 ): number => {
   let total = task.inProgressTime
   if (task.status === TaskStatus.IN_PROGRESS && task.inProgressStartedAt) {
-    const elapsed = Date.now() - task.inProgressStartedAt.getTime()
+    const elapsed = Date.now() - new Date(task.inProgressStartedAt).getTime()
     total += elapsed
   }
 
@@ -86,7 +86,7 @@ const CompletedTimeDisplay = ({
   completedAt && (
     <span className="text-[10px] text-muted-foreground">
       Completed:{' '}
-      {completedAt.toLocaleDateString('en-US', {
+      {new Date(completedAt).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
