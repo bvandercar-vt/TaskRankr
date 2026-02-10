@@ -5,6 +5,7 @@
 import {
   ArrowUpDown,
   CheckCircle2,
+  Download,
   GripVertical,
   Hand,
   Layers,
@@ -164,7 +165,27 @@ const HowToUse = () => (
       </section>
     </div>
 
-    <ContactCard className="mt-8" />
+    <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+      <Card
+        className="mt-8 bg-card/50 border-white/10 hover-elevate cursor-pointer"
+        data-testid="card-how-to-install"
+      >
+        <CardContent className="p-4 flex items-center gap-4">
+          <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+            <Download className={IconSize.HW5} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Install as App</h3>
+            <p className="text-sm text-muted-foreground">
+              Add TaskRankr to your home screen for offline access and a
+              full-screen experience.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+
+    <ContactCard className="mt-4" />
   </ScrollablePage>
 )
 

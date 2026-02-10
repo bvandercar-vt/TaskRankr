@@ -3,7 +3,13 @@
  */
 
 import { useRef, useState } from 'react'
-import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  LogOut,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { BackButtonHeader } from '@/components/BackButton'
@@ -386,6 +392,20 @@ const Settings = () => {
             <h3 className="font-semibold text-foreground">How To Use</h3>
             <p className="text-sm text-muted-foreground">
               Learn how to get the most out of TaskRankr
+            </p>
+          </div>
+          <ChevronRight
+            className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
+          />
+        </Card>
+      </Link>
+
+      <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+        <Card className="mt-3 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
+          <div>
+            <h3 className="font-semibold text-foreground">Install as App</h3>
+            <p className="text-sm text-muted-foreground">
+              Add to your home screen for offline access
             </p>
           </div>
           <ChevronRight

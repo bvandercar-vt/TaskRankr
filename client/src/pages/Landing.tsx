@@ -3,11 +3,12 @@
  * Provides login/signup call-to-action for new users.
  */
 
-import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
+import { CheckCircle, Clock, Download, ListTodo, Star } from 'lucide-react'
+import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { IconSize } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
@@ -82,7 +83,17 @@ const Landing = () => {
         className="p-6 text-center text-sm text-muted-foreground"
         data-testid="footer"
       >
-        <p data-testid="text-footer-brand">TaskRankr</p>
+        <Link href={Routes.HOW_TO_INSTALL}>
+          <Button
+            variant="ghost"
+            className="gap-2 text-muted-foreground"
+            data-testid="button-how-to-install"
+          >
+            <Download className={IconSize.HW4} />
+            Install as App
+          </Button>
+        </Link>
+        <p className="mt-2" data-testid="text-footer-brand">TaskRankr</p>
       </footer>
     </div>
   )
