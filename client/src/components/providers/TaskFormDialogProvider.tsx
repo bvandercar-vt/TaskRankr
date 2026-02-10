@@ -67,16 +67,16 @@ const DesktopDialog = ({
         className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-hidden bg-card border-white/10 p-6 shadow-2xl rounded-xl flex flex-col [&>form]:min-h-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="sr-only">
+        <DialogHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <div className="flex-1">
-            <DialogTitle>
+            <DialogTitle className="text-2xl font-display tracking-tight">
               {mode === 'create'
                 ? parentId
                   ? 'New Subtask'
                   : 'New Task'
                 : 'Edit Task'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="sr-only">
               {mode === 'create'
                 ? 'Add a new item to your list.'
                 : 'Update task details and properties.'}
