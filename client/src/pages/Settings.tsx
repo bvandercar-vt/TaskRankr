@@ -358,6 +358,8 @@ const Settings = () => {
           </Card>
         )}
 
+        <ContactCard className="mt-4" />
+
         <CollapsibleCard
           title="Import/Export Data"
           className="mt-8 bg-card/50"
@@ -418,8 +420,6 @@ const Settings = () => {
             </AlertDialogContent>
           </AlertDialog>
         </CollapsibleCard>
-
-        <ContactCard className="mt-8" />
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
