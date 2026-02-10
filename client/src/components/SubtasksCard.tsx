@@ -406,6 +406,7 @@ export const SubtasksCard = ({
               Subtasks ({subtasks.length})
             </span>
           }
+          defaultOpen
           noCard
           className="bg-secondary/10"
           triggerClassName="p-3 hover:bg-secondary/20 transition-colors"
