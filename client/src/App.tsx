@@ -71,7 +71,7 @@ const AuthenticatedApp = () => {
         clearGuestStorage()
         toast({
           title: 'Tasks imported',
-          description: `${result.migratedCount} task${result.migratedCount === 1 ? '' : 's'} from guest mode ${result.migratedCount === 1 ? 'has' : 'have'} been added to your account.`,
+          description: `${result.migratedCount} tasks from guest mode have been added to your account.`,
         })
       }
     }
