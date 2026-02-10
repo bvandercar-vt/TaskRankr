@@ -3,7 +3,8 @@
  */
 
 import { useRef, useState } from 'react'
-import { Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { BookOpen, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
@@ -313,6 +314,20 @@ const Settings = () => {
         <div className="mt-8">
           <SortInfo />
         </div>
+
+        <Link href={Routes.HOW_TO_USE}>
+          <Card className="mt-4 flex items-center justify-between hover-elevate cursor-pointer">
+            <div className="flex items-center gap-3">
+              <BookOpen className={IconSizeStyle.HW5 + ' text-muted-foreground'} />
+              <div>
+                <h3 className="font-semibold text-foreground">How To Use</h3>
+                <p className="text-sm text-muted-foreground">
+                  Learn how to get the most out of TaskRankr
+                </p>
+              </div>
+            </div>
+          </Card>
+        </Link>
 
         {!isGuestMode && (
           <Card className="mt-8 flex items-center justify-between">
