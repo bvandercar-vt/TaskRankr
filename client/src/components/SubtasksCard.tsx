@@ -344,6 +344,12 @@ export const SubtasksCard = ({
             ? localSubtaskOrder
             : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
         children = sortTasksByIdOrder(children, order)
+      } else {
+        children = [...children].sort((a, b) => {
+          const ac = a.status === TaskStatus.COMPLETED ? 1 : 0
+          const bc = b.status === TaskStatus.COMPLETED ? 1 : 0
+          return ac - bc
+        })
       }
 
       const result: Subtask[] = []

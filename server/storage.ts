@@ -46,12 +46,37 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getTasks(userId: string): Promise<Task[]> {
-    const result = await db
+    const result = (await db
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId))
-      .orderBy(tasks.id)
-    return result as Task[]
+      .orderBy(tasks.id)) as Task[]
+
+    const byId = new Map(result.map((t) => [t.id, t]))
+    const fixes: { id: number; subtaskOrder: number[] }[] = []
+
+    for (const task of result) {
+      if (task.parentId == null) continue
+      const parent = byId.get(task.parentId)
+      if (!parent) continue
+      if (!parent.subtaskOrder.includes(task.id)) {
+        parent.subtaskOrder = [...parent.subtaskOrder, task.id]
+        fixes.push({ id: parent.id, subtaskOrder: parent.subtaskOrder })
+      }
+    }
+
+    if (fixes.length > 0) {
+      await Promise.all(
+        fixes.map(({ id, subtaskOrder }) =>
+          db
+            .update(tasks)
+            .set({ subtaskOrder })
+            .where(and(eq(tasks.id, id), eq(tasks.userId, userId))),
+        ),
+      )
+    }
+
+    return result
   }
 
   async getTask(id: number, userId: string): Promise<Task | undefined> {

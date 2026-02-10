@@ -204,9 +204,9 @@ export const TaskForm = ({
         onSubmit={form.handleSubmit((data) =>
           onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder'])),
         )}
-        className="flex flex-col h-full space-y-6"
+        className="flex flex-col h-full"
       >
-        <div className="flex-1 space-y-6">
+        <div className="pb-2">
           <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
@@ -225,7 +225,9 @@ export const TaskForm = ({
               </FormItem>
             )}
           />
+        </div>
 
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-5 py-2">
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {visibleRankFields.map(({ name, label, levels }) => (
@@ -258,7 +260,8 @@ export const TaskForm = ({
                 <FormControl>
                   <Textarea
                     placeholder="Additional details..."
-                    className="bg-secondary/20 border-white/5 min-h-[50px] resize-none focus-visible:ring-primary/50"
+                    className="bg-secondary/20 border-white/5 min-h-[50px] max-h-[200px] resize-none focus-visible:ring-primary/50"
+                    style={{ fieldSizing: 'content' } as React.CSSProperties}
                     {...field}
                     value={field.value ?? ''}
                   />
@@ -276,7 +279,7 @@ export const TaskForm = ({
             />
           )}
 
-          <div className="flex flex-col gap-4 mt-2">
+          <div className="flex flex-col gap-4 mt-2 pb-4">
             <FormField
               control={form.control}
               name="createdAt"
@@ -317,19 +320,19 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="pt-2 pb-4 mt-auto flex gap-3">
+        <div className="pt-2 flex gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12 border-white/10"
+            className="flex-1 h-12 border-white/10 bg-background hover:bg-secondary/20"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={!isValid}
-            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:bg-primary/80 disabled:cursor-not-allowed"
           >
             {initialData ? 'Save' : 'Create'}
           </Button>
