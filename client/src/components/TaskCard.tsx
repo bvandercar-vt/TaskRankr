@@ -243,6 +243,8 @@ export const TaskCard = ({
   const [showConfirm, setShowConfirm] = useState(false)
   const [isHolding, setIsHolding] = useState(false)
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const holdStartY = useRef<number | null>(null)
+  const SCROLL_THRESHOLD = 10
 
   const { setTaskStatus, deleteTask, updateTask } = useTaskActions()
   const { settings } = useSettings()
@@ -260,6 +262,8 @@ export const TaskCard = ({
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
 
+    holdStartY.current = 'touches' in e ? e.touches[0].clientY : e.clientY
+
     setIsHolding(true)
     const duration = 800
 
@@ -271,7 +275,13 @@ export const TaskCard = ({
 
   const cancelHold = () => {
     if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
+    holdStartY.current = null
     setIsHolding(false)
+  }
+
+  const checkMoveThreshold = (clientY: number) => {
+    if (holdStartY.current === null) return
+    if (Math.abs(clientY - holdStartY.current) > SCROLL_THRESHOLD) cancelHold()
   }
 
   useEffect(() => {
@@ -309,7 +319,9 @@ export const TaskCard = ({
         onMouseUp={cancelHold}
         onMouseLeave={cancelHold}
         onTouchStart={startHold}
+        onTouchMove={(e) => checkMoveThreshold(e.touches[0].clientY)}
         onTouchEnd={cancelHold}
+        onMouseMove={(e) => checkMoveThreshold(e.clientY)}
       >
         <div className="w-5 flex justify-center shrink-0 self-stretch">
           {hasSubtasks ? (
