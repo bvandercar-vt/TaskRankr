@@ -92,7 +92,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── query-client.ts   # @tanstack/react-query client
 │       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
 │       │   ├── auth-utils.ts     # Authentication helpers
-│       │   ├── constants.ts      # IconSizeStyle, DEFAULT_SETTINGS
+│       │   ├── constants.ts      # IconSize, DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
 │       ├── App.tsx               # Main app with routing and providers

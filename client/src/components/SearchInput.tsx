@@ -5,7 +5,7 @@
 import { Search } from 'lucide-react'
 
 import { Input } from '@/components/primitives/forms/Input'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface SearchInputProps {
@@ -33,7 +33,7 @@ export const SearchInput = ({
       className,
     )}
   >
-    <Search className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')} />
+    <Search className={cn(IconSize.HW4, 'shrink-0 text-primary')} />
     <Input
       placeholder={placeholder}
       className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"

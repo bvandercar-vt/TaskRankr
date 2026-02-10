@@ -7,14 +7,35 @@ import { CheckCircle2, Search } from 'lucide-react'
 
 import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
 import { HowToUseBanner } from '@/components/HowToUseBanner'
-import { EmptyState, PageError, PageLoading } from '@/components/PageStates'
+import {
+  EmptyState as EmptyStateBase,
+  PageError,
+  PageLoading,
+} from '@/components/PageStates'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+
+const EmptyState = ({ search }: { search: string | undefined }) => (
+  <EmptyStateBase
+    icon={
+      <Icon
+        icon={search ? Search : CheckCircle2}
+        className={cn(IconSize.HW8, 'text-muted-foreground')}
+      />
+    }
+    title={search ? 'No matching tasks found' : 'No completed tasks yet'}
+    description={
+      search
+        ? 'Try adjusting your search terms.'
+        : 'Long-press on any task to mark it as complete.'
+    }
+  />
+)
 
 const Completed = () => {
   const { data: allTasks, isLoading, error } = useTasks()
@@ -75,22 +96,7 @@ const Completed = () => {
 
         <div className="space-y-1">
           {displayedTasks.length === 0 ? (
-            <EmptyState
-              icon={
-                <Icon
-                  icon={search ? Search : CheckCircle2}
-                  className={cn(IconSizeStyle.HW8, 'text-muted-foreground')}
-                />
-              }
-              title={
-                search ? 'No matching tasks found' : 'No completed tasks yet'
-              }
-              description={
-                search
-                  ? 'Try adjusting your search terms.'
-                  : 'Long-press on any task to mark it as complete.'
-              }
-            />
+            <EmptyState search={search} />
           ) : (
             displayedTasks.map((task) => (
               <TaskCard

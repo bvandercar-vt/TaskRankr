@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/primitives/DropdownMenu'
 import { SearchInput } from '@/components/SearchInput'
-import { IconSizeStyle, Routes } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
 
@@ -64,7 +64,7 @@ export const DropdownMenuHeader = ({
               className="h-10 w-10"
               data-testid="button-menu"
             >
-              <Menu className={IconSizeStyle.HW5} />
+              <Menu className={IconSize.HW5} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
