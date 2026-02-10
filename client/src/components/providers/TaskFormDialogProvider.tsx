@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
-import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
+import { useTaskActions } from '@/hooks/useTasks'
 import type { CreateTask, Task } from '~/shared/schema'
 import type { DeleteTaskArgs, MutateTaskContent } from './LocalStateProvider'
 
@@ -39,7 +39,7 @@ export const useTaskDialog = () => {
 interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
-    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
+    'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -55,7 +55,6 @@ const DesktopDialog = ({
   mode,
   parentId,
   activeTask,
-  isPending,
   onSubmit,
   onClose,
   onAddChild,
@@ -88,7 +87,6 @@ const DesktopDialog = ({
           <div className="mt-4">
             <TaskForm
               onSubmit={onSubmit}
-              isPending={isPending}
               initialData={activeTask}
               parentId={parentId}
               onCancel={onClose}
@@ -107,7 +105,6 @@ const MobileDialog = ({
   isOpen,
   activeTask,
   parentId,
-  isPending,
   onSubmit,
   onClose,
   onAddChild,
@@ -126,7 +123,6 @@ const MobileDialog = ({
         <div className="flex-1 overflow-y-auto px-4 pt-10">
           <TaskForm
             onSubmit={onSubmit}
-            isPending={isPending}
             initialData={activeTask}
             parentId={parentId}
             onCancel={onClose}
@@ -154,9 +150,7 @@ export const TaskFormDialogProvider = ({
     null,
   )
 
-  const createTask = useCreateTask()
-  const updateTask = useUpdateTask()
-  const deleteTask = useDeleteTask()
+  const { createTask, updateTask, deleteTask } = useTaskActions()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -204,18 +198,13 @@ export const TaskFormDialogProvider = ({
 
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
-      createTask.mutate({ ...data, parentId } as CreateTask, {
-        onSuccess: closeDialog,
-      })
+      createTask({ ...data, parentId } as CreateTask)
+      closeDialog()
     } else if (mode === 'edit' && activeTask) {
-      updateTask.mutate(
-        { id: activeTask.id, ...data },
-        { onSuccess: closeDialog },
-      )
+      updateTask({ id: activeTask.id, ...data })
+      closeDialog()
     }
   }
-
-  const isPending = createTask.isPending || updateTask.isPending
 
   useEffect(() => {
     if (isOpen) {
@@ -240,7 +229,6 @@ export const TaskFormDialogProvider = ({
         mode={mode}
         parentId={parentId}
         activeTask={activeTask}
-        isPending={isPending}
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
@@ -252,7 +240,6 @@ export const TaskFormDialogProvider = ({
         isOpen={isOpen}
         parentId={parentId}
         activeTask={activeTask}
-        isPending={isPending}
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
@@ -266,7 +253,7 @@ export const TaskFormDialogProvider = ({
         taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
           if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id)
+            deleteTask(subtaskToDelete.id)
             setSubtaskToDelete(null)
           }
         }}

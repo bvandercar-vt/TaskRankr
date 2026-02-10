@@ -25,7 +25,7 @@ import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
-import { useSetTaskStatus, useTasks } from '@/hooks/useTasks'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
 import { IconSizeStyle } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
@@ -164,7 +164,7 @@ const Settings = () => {
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
   const { data: tasks } = useTasks()
-  const setTaskStatus = useSetTaskStatus()
+  const { setTaskStatus } = useTaskActions()
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -216,10 +216,7 @@ const Settings = () => {
                       (t) => t.status === TaskStatus.IN_PROGRESS,
                     )
                     if (inProgressTask) {
-                      setTaskStatus.mutate({
-                        id: inProgressTask.id,
-                        status: TaskStatus.PINNED,
-                      })
+                      setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
                     }
                   }
                 }}

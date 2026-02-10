@@ -5,7 +5,7 @@
 
 import { omit } from 'es-toolkit'
 
-import type { TaskWithSubtasks } from '~/shared/schema'
+import type { Task, TaskWithSubtasks } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
   tasks: 'taskrankr-guest-tasks',
@@ -80,7 +80,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     const newSyncOps: Array<{
       type: 'create_task'
       tempId: number
-      data: Omit<TaskWithSubtasks, 'id' | 'userId' | 'subtasks'>
+      data: Omit<Task, 'id' | 'userId'>
     }> = []
 
     for (const task of userCreatedTasks) {

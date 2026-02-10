@@ -25,12 +25,7 @@ import { Check, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
-import {
-  useReorderSubtasks,
-  useSetTaskStatus,
-  useTasks,
-  useUpdateTask,
-} from '@/hooks/useTasks'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
@@ -55,15 +50,12 @@ const SortModeToggle = ({
   directChildIds,
   onSortModeChange,
 }: SortModeToggleProps) => {
-  const updateTask = useUpdateTask()
-  const reorderSubtasks = useReorderSubtasks()
+  const { updateTask, reorderSubtasks } = useTaskActions()
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(initialSortMode)
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
-  const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
   const handleToggle = () => {
-    if (isMutating) return
     const newMode: SubtaskSortMode = isManualSortMode
       ? SubtaskSortMode.INHERIT
       : SubtaskSortMode.MANUAL
@@ -72,16 +64,10 @@ const SortModeToggle = ({
     onSortModeChange(newMode)
 
     if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks.mutate({
-        parentId: taskId,
-        orderedIds: directChildIds,
-      })
+      reorderSubtasks(taskId, directChildIds)
     }
 
-    updateTask.mutate({
-      id: taskId,
-      subtaskSortMode: newMode,
-    })
+    updateTask({ id: taskId, subtaskSortMode: newMode })
   }
 
   return (
@@ -93,10 +79,7 @@ const SortModeToggle = ({
         Sorting Method
       </span>
       <div
-        className={cn(
-          'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-          isMutating && 'opacity-50 pointer-events-none',
-        )}
+        className="inline-flex rounded-md border border-white/10 overflow-hidden self-start"
         role="radiogroup"
         aria-label="Subtask sort order"
         data-testid="toggle-sort-mode"
@@ -277,8 +260,7 @@ export const SubtasksCard = ({
   onSubtaskDelete,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
-  const setTaskStatus = useSetTaskStatus()
-  const reorderSubtasks = useReorderSubtasks()
+  const { setTaskStatus, reorderSubtasks } = useTaskActions()
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
@@ -363,10 +345,7 @@ export const SubtasksCard = ({
       if (oldIndex !== -1 && newIndex !== -1) {
         const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
         setLocalSubtaskOrder(newOrder)
-        reorderSubtasks.mutate({
-          parentId: task.id,
-          orderedIds: newOrder,
-        })
+        reorderSubtasks(task.id, newOrder)
       }
     }
   }
@@ -418,13 +397,10 @@ export const SubtasksCard = ({
                         t.status === TaskStatus.COMPLETED
                           ? TaskStatus.OPEN
                           : TaskStatus.COMPLETED
-                      setTaskStatus.mutate({
-                        id: t.id,
-                        status: newStatus,
-                      })
+                      setTaskStatus(t.id, newStatus)
                     }}
                     isManualSortMode={isManualSortMode}
-                    isDragDisabled={reorderSubtasks.isPending}
+                    isDragDisabled={false}
                   />
                 ))}
               </div>

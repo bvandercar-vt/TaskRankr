@@ -12,11 +12,7 @@ import { Badge } from '@/components/primitives/Badge'
 import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
-import {
-  useDeleteTask,
-  useSetTaskStatus,
-  useUpdateTask,
-} from '@/hooks/useTasks'
+import { useTaskActions } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
@@ -126,9 +122,7 @@ export const TaskCard = ({
   const [isHolding, setIsHolding] = useState(false)
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const setTaskStatus = useSetTaskStatus()
-  const deleteTask = useDeleteTask()
-  const updateTask = useUpdateTask()
+  const { setTaskStatus, deleteTask, updateTask } = useTaskActions()
   const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
@@ -165,7 +159,7 @@ export const TaskCard = ({
   }, [])
 
   const handleSetStatus = (status: TaskStatus) => {
-    setTaskStatus.mutate({ id: task.id, status })
+    setTaskStatus(task.id, status)
     setShowConfirm(false)
   }
 
@@ -319,9 +313,9 @@ export const TaskCard = ({
         inProgressTime={getTotalAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
-          updateTask.mutate({ id: task.id, inProgressTime: timeMs })
+          updateTask({ id: task.id, inProgressTime: timeMs })
         }}
-        onDelete={() => deleteTask.mutate(task.id)}
+        onDelete={() => deleteTask(task.id)}
       />
     </div>
   )

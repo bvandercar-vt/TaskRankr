@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
-import { Calendar as CalendarIcon, Loader2 } from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/Button'
@@ -32,7 +32,6 @@ import { RankFieldSelect } from '@/components/RankFieldSelect'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
@@ -95,7 +94,6 @@ const DateCreatedInput = ({ value, onChange }: DateCreatedInputProps) => (
 
 export interface TaskFormProps {
   onSubmit: (data: MutateTaskContent) => void
-  isPending: boolean
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
@@ -106,7 +104,6 @@ export interface TaskFormProps {
 
 export const TaskForm = ({
   onSubmit,
-  isPending,
   initialData,
   parentId,
   onCancel,
@@ -331,12 +328,9 @@ export const TaskForm = ({
           </Button>
           <Button
             type="submit"
-            disabled={isPending || !isValid}
+            disabled={!isValid}
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending && (
-              <Loader2 className={cn(IconSizeStyle.HW4, 'mr-2 animate-spin')} />
-            )}
             {initialData ? 'Save' : 'Create'}
           </Button>
         </div>
