@@ -551,53 +551,30 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
-  const value = useMemo(
-    () => ({
-      tasks,
-      settings,
-      syncQueue,
-      isInitialized,
-      hasDemoData,
-      createTask,
-      updateTask,
-      setTaskStatus,
-      deleteTask,
-      reorderSubtasks,
-      updateSettings,
-      clearSyncQueue,
-      removeSyncOperation,
-      replaceTaskId,
-      setTasksFromServer,
-      setSettingsFromServer,
-      resetToDefaults,
-      initDemoData,
-      deleteDemoData,
-    }),
-    [
-      tasks,
-      settings,
-      syncQueue,
-      isInitialized,
-      hasDemoData,
-      createTask,
-      updateTask,
-      setTaskStatus,
-      deleteTask,
-      reorderSubtasks,
-      updateSettings,
-      clearSyncQueue,
-      removeSyncOperation,
-      replaceTaskId,
-      setTasksFromServer,
-      setSettingsFromServer,
-      resetToDefaults,
-      initDemoData,
-      deleteDemoData,
-    ],
-  )
-
   return (
-    <LocalStateContext.Provider value={value}>
+    <LocalStateContext.Provider
+      value={{
+        tasks,
+        settings,
+        syncQueue,
+        isInitialized,
+        hasDemoData,
+        createTask,
+        updateTask,
+        setTaskStatus,
+        deleteTask,
+        reorderSubtasks,
+        updateSettings,
+        clearSyncQueue,
+        removeSyncOperation,
+        replaceTaskId,
+        setTasksFromServer,
+        setSettingsFromServer,
+        resetToDefaults,
+        initDemoData,
+        deleteDemoData,
+      }}
+    >
       {children}
     </LocalStateContext.Provider>
   )
