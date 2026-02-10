@@ -42,6 +42,13 @@ export const ConfirmDeleteDialog = ({
         <AlertDialogCancel className="bg-secondary/50 border-white/5 hover:bg-white/10">
           Cancel
         </AlertDialogCancel>
+        <AlertDialogAction
+          onClick={onConfirm}
+          className="bg-destructive hover:bg-destructive/90 text-white"
+          data-testid="button-delete-permanently"
+        >
+          Delete Permanently
+        </AlertDialogAction>
         {onRemoveAsSubtask && (
           <AlertDialogAction asChild>
             <Button
@@ -53,13 +60,6 @@ export const ConfirmDeleteDialog = ({
             </Button>
           </AlertDialogAction>
         )}
-        <AlertDialogAction
-          onClick={onConfirm}
-          className="bg-destructive hover:bg-destructive/90 text-white"
-          data-testid="button-delete-permanently"
-        >
-          Delete Permanently
-        </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
