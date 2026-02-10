@@ -282,7 +282,7 @@ export const TaskForm = ({
             />
           )}
 
-          <div className="flex flex-col gap-4 mt-2">
+          <div className="flex flex-col gap-4 mt-2 pb-4">
             <FormField
               control={form.control}
               name="createdAt"
@@ -323,19 +323,19 @@ export const TaskForm = ({
           </div>
         </div>
 
-        <div className="sticky bottom-0 pt-2 pb-4 flex gap-3">
+        <div className="sticky bottom-0 py-2 pb-6 flex gap-3 bg-background">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12 border-white/10 bg-secondary"
+            className="flex-1 h-12 border-white/10 bg-background hover:bg-secondary/20"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={!isValid}
-            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:bg-primary/80 disabled:cursor-not-allowed"
           >
             {initialData ? "Save" : "Create"}
           </Button>
