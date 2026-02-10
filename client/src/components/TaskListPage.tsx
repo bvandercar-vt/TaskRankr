@@ -22,15 +22,12 @@ export const TaskListPageHeader = ({
   <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-5">
     <HowToUseBanner />
 
-    <h1
-      className={
-        showTitle ? 'text-2xl font-bold tracking-tight mb-2 px-2' : 'sr-only'
-      }
+    <DropdownMenuHeader
+      title={title}
+      showTitle={showTitle}
+      searchVal={searchVal}
+      onSearchChange={setSearchVal}
     >
-      {title}
-    </h1>
-
-    <DropdownMenuHeader searchVal={searchVal} onSearchChange={setSearchVal}>
       {ColumnHeaders}
     </DropdownMenuHeader>
   </div>

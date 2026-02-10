@@ -31,12 +31,16 @@ import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
 
 interface DropdownMenuHeaderProps {
+  title?: React.ReactNode
+  showTitle?: boolean
   searchVal: string
   onSearchChange: (value: string) => void
   children?: React.ReactNode
 }
 
 export const DropdownMenuHeader = ({
+  title,
+  showTitle = true,
   searchVal,
   onSearchChange,
   children,
@@ -55,7 +59,13 @@ export const DropdownMenuHeader = ({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2 pr-2">
+      {title && showTitle && (
+        <h1 className="text-2xl font-bold tracking-tight mb-2 px-2 sm:hidden">
+          {title}
+        </h1>
+      )}
+      {title && !showTitle && <h1 className="sr-only">{title}</h1>}
+      <div className="flex items-center gap-1 mb-2 pr-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -128,6 +138,14 @@ export const DropdownMenuHeader = ({
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {title && showTitle && (
+          <h1 className="hidden sm:block text-2xl font-bold tracking-tight px-2">
+            {title}
+          </h1>
+        )}
+
+        <div className="flex-1" />
 
         {children}
       </div>
