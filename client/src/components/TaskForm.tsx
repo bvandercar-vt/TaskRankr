@@ -96,6 +96,7 @@ export interface TaskFormProps {
   onSubmit: (data: MutateTaskContent) => void
   initialData?: Task
   parentId?: number | null
+  title?: string
   onCancel: () => void
   onAddChild?: (parentId: number) => void
   onEditChild?: (task: Task) => void
