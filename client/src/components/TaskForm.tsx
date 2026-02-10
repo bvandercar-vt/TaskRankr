@@ -100,6 +100,7 @@ export interface TaskFormProps {
   onAddChild?: (parentId: number) => void
   onEditChild?: (task: Task) => void
   onSubtaskDelete?: (task: DeleteTaskArgs) => void
+  onAssignSubtask?: (task: Task) => void
 }
 
 export const TaskForm = ({
@@ -110,6 +111,7 @@ export const TaskForm = ({
   onAddChild,
   onEditChild,
   onSubtaskDelete,
+  onAssignSubtask,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
@@ -206,7 +208,7 @@ export const TaskForm = ({
         )}
         className="flex flex-col h-full"
       >
-        <div className="pb-2">
+        <div className="pb-2  px-4 pt-2">
           <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
@@ -227,112 +229,117 @@ export const TaskForm = ({
           />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-5 py-2">
-          {visibleRankFields.length > 0 && (
-            <div className="grid grid-cols-2 gap-4">
-              {visibleRankFields.map(({ name, label, levels }) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name}
-                  render={({ field }) => (
-                    <RankFieldSelect
-                      name={name}
-                      label={label}
-                      levels={levels}
-                      field={field}
-                      isRequired={Boolean(rankFieldConfig.get(name)?.required)}
-                    />
-                  )}
-                />
-              ))}
-            </div>
-          )}
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">
-                  Description
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Additional details..."
-                    className="bg-secondary/20 border-white/5 min-h-[50px] max-h-[200px] resize-none focus-visible:ring-primary/50"
-                    style={{ fieldSizing: 'content' } as React.CSSProperties}
-                    {...field}
-                    value={field.value ?? ''}
+        <div className="min-h-0 overflow-y-auto  [scrollbar-gutter:stable_both-edges] py-2">
+          <div className="flex-1  space-y-5 px-2">
+            {visibleRankFields.length > 0 && (
+              <div className="grid grid-cols-2 gap-4">
+                {visibleRankFields.map(({ name, label, levels }) => (
+                  <FormField
+                    key={name}
+                    control={form.control}
+                    name={name}
+                    render={({ field }) => (
+                      <RankFieldSelect
+                        name={name}
+                        label={label}
+                        levels={levels}
+                        field={field}
+                        isRequired={Boolean(
+                          rankFieldConfig.get(name)?.required,
+                        )}
+                      />
+                    )}
                   />
-                </FormControl>
-              </FormItem>
+                ))}
+              </div>
             )}
-          />
 
-          {initialData && onAddChild && (
-            <SubtasksCard
-              task={initialData}
-              onAddChild={onAddChild}
-              onEditChild={onEditChild}
-              onSubtaskDelete={onSubtaskDelete}
-            />
-          )}
-
-          <div className="flex flex-col gap-4 mt-2 pb-4">
             <FormField
               control={form.control}
-              name="createdAt"
+              name="description"
               render={({ field }) => (
-                <DateCreatedInput
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    Description
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Additional details..."
+                      className="bg-secondary/20 border-white/5 min-h-[50px] max-h-[200px] resize-none focus-visible:ring-primary/50"
+                      style={{ fieldSizing: 'content' } as React.CSSProperties}
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                </FormItem>
               )}
             />
 
-            {initialData?.status === TaskStatus.COMPLETED && (
-              <>
-                {initialData?.completedAt && (
+            {initialData && onAddChild && (
+              <SubtasksCard
+                task={initialData}
+                onAddChild={onAddChild}
+                onEditChild={onEditChild}
+                onSubtaskDelete={onSubtaskDelete}
+                onAssignSubtask={onAssignSubtask}
+              />
+            )}
+
+            <div className="flex flex-col gap-4 mt-2 pb-4">
+              <FormField
+                control={form.control}
+                name="createdAt"
+                render={({ field }) => (
+                  <DateCreatedInput
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+
+              {initialData?.status === TaskStatus.COMPLETED && (
+                <>
+                  {initialData?.completedAt && (
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Date Completed
+                      </div>
+                      <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                        {format(new Date(initialData.completedAt), 'PPP p')}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between gap-4">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Date Completed
+                      Time Spent
                     </div>
-                    <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                      {format(new Date(initialData.completedAt), 'PPP p')}
-                    </div>
+                    <TimeInput
+                      durationMs={form.watch('inProgressTime') || 0}
+                      onDurationChange={(ms) =>
+                        form.setValue('inProgressTime', ms)
+                      }
+                      className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    />
                   </div>
-                )}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Time Spent
-                  </div>
-                  <TimeInput
-                    durationMs={form.watch('inProgressTime') || 0}
-                    onDurationChange={(ms) =>
-                      form.setValue('inProgressTime', ms)
-                    }
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                  />
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="pt-2 flex gap-3">
+        <div className="pt-2 pb-4 px-4 flex gap-3 ">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12 border-white/10 bg-background hover:bg-secondary/20"
+            className="flex-1 h-12 border-white/10 bg-background hover:bg-secondary/20 text-lg"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={!isValid}
-            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:bg-primary/80 disabled:cursor-not-allowed"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg disabled:bg-primary/80 disabled:cursor-not-allowed"
           >
             {initialData ? 'Save' : 'Create'}
           </Button>

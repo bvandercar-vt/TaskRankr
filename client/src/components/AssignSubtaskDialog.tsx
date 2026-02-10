@@ -8,7 +8,6 @@ import { Button } from '@/components/primitives/Button'
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
@@ -17,6 +16,8 @@ import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { filterRootTasks } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+
+const LAYER_CLASS = 'z-[200]'
 
 interface AssignSubtaskDialogProps {
   open: boolean
@@ -96,7 +97,10 @@ export const AssignSubtaskDialog = ({
         onOpenChange(v)
       }}
     >
-      <DialogContent className="max-w-sm">
+      <DialogContent
+        className={cn('max-w-sm rounded-lg', LAYER_CLASS)}
+        overlayClassName={LAYER_CLASS}
+      >
         <DialogHeader>
           <DialogTitle data-testid="title-assign-subtask">
             Assign Subtask
@@ -110,7 +114,7 @@ export const AssignSubtaskDialog = ({
           data-testid="search-assign-tasks"
         />
         <div
-          className="max-h-64 overflow-y-auto divide-y divide-white/5"
+          className="h-64 overflow-y-auto divide-y divide-white/5"
           data-testid="list-orphan-tasks"
         >
           {filteredTasks.length === 0 ? (
@@ -138,22 +142,24 @@ export const AssignSubtaskDialog = ({
             ))
           )}
         </div>
-        <DialogFooter>
+        <div className="flex gap-2">
           <Button
             variant="outline"
+            className="flex-1"
             onClick={handleClose}
             data-testid="button-cancel-assign"
           >
             Cancel
           </Button>
           <Button
+            className="flex-1"
             onClick={handleConfirm}
             disabled={selectedId === null}
             data-testid="button-confirm-assign"
           >
             Confirm
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

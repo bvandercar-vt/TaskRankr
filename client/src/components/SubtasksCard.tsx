@@ -23,7 +23,6 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Check, GripVertical, Link, Pencil, Plus, Trash2 } from 'lucide-react'
 
-import { AssignSubtaskDialog } from '@/components/AssignSubtaskDialog'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
@@ -271,13 +270,14 @@ const SubtaskItem = ({
 }
 
 const SUBTASK_ACTION_BTN_STYLE =
-  'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground'
+  'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
 
 interface SubtasksCardProps {
   task: Task
   onAddChild: (parentId: number) => void
   onEditChild?: (task: Task) => void
   onSubtaskDelete?: (task: DeleteTaskArgs) => void
+  onAssignSubtask?: (task: Task) => void
 }
 
 export const SubtasksCard = ({
@@ -285,10 +285,10 @@ export const SubtasksCard = ({
   onAddChild,
   onEditChild,
   onSubtaskDelete,
+  onAssignSubtask,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
   const { setTaskStatus, reorderSubtasks } = useTaskActions()
-  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
@@ -459,7 +459,7 @@ export const SubtasksCard = ({
         </button>
         <button
           type="button"
-          onClick={() => setAssignDialogOpen(true)}
+          onClick={() => onAssignSubtask?.(task)}
           className={cn(
             SUBTASK_ACTION_BTN_STYLE,
             'flex-1 gap-1.5 border-l border-white/5',
@@ -470,11 +470,6 @@ export const SubtasksCard = ({
           Assign
         </button>
       </div>
-      <AssignSubtaskDialog
-        open={assignDialogOpen}
-        onOpenChange={setAssignDialogOpen}
-        parentTask={task}
-      />
     </div>
   )
 }
