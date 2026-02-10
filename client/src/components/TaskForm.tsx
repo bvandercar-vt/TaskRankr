@@ -328,7 +328,7 @@ export const TaskForm = ({
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 h-12 border-white/10"
+            className="flex-1 h-12 border-white/10 bg-secondary"
           >
             Cancel
           </Button>
