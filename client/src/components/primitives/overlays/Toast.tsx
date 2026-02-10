@@ -6,7 +6,7 @@ import * as ToastPrimitives from '@radix-ui/react-toast'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
 
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const ToastProvider = ToastPrimitives.Provider
@@ -83,7 +83,7 @@ export const ToastClose = forwardRefHelper(
       toast-close=""
       {...props}
     >
-      <X className={IconSizeStyle.HW4} />
+      <X className={IconSize.HW4} />
     </ToastPrimitives.Close>
   ),
   ToastPrimitives.Close,

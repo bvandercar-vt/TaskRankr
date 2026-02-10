@@ -4,7 +4,7 @@
 
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const Switch = forwardRefHelper(
@@ -20,7 +20,7 @@ export const Switch = forwardRefHelper(
       <SwitchPrimitives.Thumb
         className={cn(
           'pointer-events-none block',
-          IconSizeStyle.HW5,
+          IconSize.HW5,
           'rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
         )}
       />

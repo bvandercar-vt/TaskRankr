@@ -29,7 +29,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSizeStyle, Routes } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
@@ -48,6 +48,35 @@ const Card = ({
     {children}
   </div>
 )
+
+const UserInfoCard = () => {
+  const { user } = useAuth()
+
+  return (
+    <Card className="mt-8 flex items-center justify-between">
+      <div>
+        <p
+          className="font-semibold text-foreground"
+          data-testid="text-user-name"
+        >
+          {user?.firstName} {user?.lastName}
+        </p>
+        <p
+          className="text-sm text-muted-foreground"
+          data-testid="text-user-email"
+        >
+          {user?.email}
+        </p>
+      </div>
+      <a href={authPaths.logout}>
+        <Button variant="outline" className="gap-2" data-testid="button-logout">
+          <LogOut className={IconSize.HW4} />
+          Log Out
+        </Button>
+      </a>
+    </Card>
+  )
+}
 
 interface SwitchSettingProps {
   title: string
@@ -162,7 +191,7 @@ const ExportButton = () => {
       disabled={hasNoTasks}
       data-testid="button-export"
     >
-      <Download className={IconSizeStyle.HW4} />
+      <Download className={IconSize.HW4} />
       Export Tasks
     </Button>
   )
@@ -210,7 +239,7 @@ const ImportButton = () => {
         disabled={isImporting}
         data-testid="button-import"
       >
-        <Upload className={IconSizeStyle.HW4} />
+        <Upload className={IconSize.HW4} />
         {isImporting ? 'Importing...' : 'Import Tasks'}
       </Button>
       <input
@@ -225,11 +254,52 @@ const ImportButton = () => {
   )
 }
 
+const ClearLocalStorageConfirmDialog = () => {
+  const { toast } = useToast()
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="gap-2 text-red-400/70 border-red-400/30"
+          data-testid="button-clear-local-storage"
+        >
+          <Trash2 className={IconSize.HW4} />
+          Clear Local Storage
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Clear Local Storage?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will remove all locally cached data and re-pull fresh data from
+            the server. Your synced data won't be affected.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel data-testid="button-cancel-clear">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              localStorage.clear()
+              toast({ title: 'Local storage cleared' })
+              window.location.reload()
+            }}
+            data-testid="button-confirm-clear"
+          >
+            Clear
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
-  const { user } = useAuth()
   const { isGuestMode } = useGuestMode()
-  const { toast } = useToast()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
 
@@ -324,42 +394,12 @@ const Settings = () => {
               </p>
             </div>
             <ChevronRight
-              className={cn(
-                IconSizeStyle.HW5,
-                'text-muted-foreground shrink-0',
-              )}
+              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
             />
           </Card>
         </Link>
 
-        {!isGuestMode && (
-          <Card className="mt-8 flex items-center justify-between">
-            <div>
-              <p
-                className="font-semibold text-foreground"
-                data-testid="text-user-name"
-              >
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="text-user-email"
-              >
-                {user?.email}
-              </p>
-            </div>
-            <a href={authPaths.logout}>
-              <Button
-                variant="outline"
-                className="gap-2"
-                data-testid="button-logout"
-              >
-                <LogOut className={IconSizeStyle.HW4} />
-                Log Out
-              </Button>
-            </a>
-          </Card>
-        )}
+        {!isGuestMode && <UserInfoCard />}
 
         <ContactCard className="mt-4" />
 
@@ -386,42 +426,7 @@ const Settings = () => {
             Remove all locally cached data and re-pull fresh data from the
             server. Your synced data on the server won't be affected.
           </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 text-red-400/70 border-red-400/30"
-                data-testid="button-clear-local-storage"
-              >
-                <Trash2 className={IconSizeStyle.HW4} />
-                Clear Local Storage
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Clear Local Storage?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove all locally cached data and re-pull fresh
-                  data from the server. Your synced data won't be affected.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel data-testid="button-cancel-clear">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    localStorage.clear()
-                    toast({ title: 'Local storage cleared' })
-                    window.location.reload()
-                  }}
-                  data-testid="button-confirm-clear"
-                >
-                  Clear
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ClearLocalStorageConfirmDialog />
         </CollapsibleCard>
 
         <div className="mt-16 text-center text-muted-foreground">

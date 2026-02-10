@@ -19,7 +19,7 @@ import { BackButton } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
-import { IconSizeStyle, Routes } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 
 const InstructionCard = ({
   icon,
@@ -61,13 +61,13 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<MousePointer2 className={IconSizeStyle.HW5} />}
+                icon={<MousePointer2 className={IconSize.HW5} />}
                 title="Tap to Edit"
                 description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
                 testId="card-tap-to-edit"
               />
               <InstructionCard
-                icon={<Hand className={IconSizeStyle.HW5} />}
+                icon={<Hand className={IconSize.HW5} />}
                 title="Hold to Change Status"
                 description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
                 testId="card-hold-to-change-status"
@@ -81,7 +81,7 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<ArrowUpDown className={IconSizeStyle.HW5} />}
+                icon={<ArrowUpDown className={IconSize.HW5} />}
                 title="Sort Options"
                 description={
                   <>
@@ -105,13 +105,13 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<Layers className={IconSizeStyle.HW5} />}
+                icon={<Layers className={IconSize.HW5} />}
                 title="Nested Tasks"
                 description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
                 testId="card-nested-tasks"
               />
               <InstructionCard
-                icon={<GripVertical className={IconSizeStyle.HW5} />}
+                icon={<GripVertical className={IconSize.HW5} />}
                 title="Manual Ordering"
                 description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
                 testId="card-manual-ordering"
@@ -125,19 +125,19 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<Pin className={IconSizeStyle.HW5} />}
+                icon={<Pin className={IconSize.HW5} />}
                 title="Pinned"
                 description="Pin important tasks to keep them at the top of your list."
                 testId="card-pinned"
               />
               <InstructionCard
-                icon={<PlayCircle className={IconSizeStyle.HW5} />}
+                icon={<PlayCircle className={IconSize.HW5} />}
                 title="In Progress (if setting enabled)"
                 description="Pins to the top of your list, while also accumulating time spent in progress."
                 testId="card-in-progress"
               />
               <InstructionCard
-                icon={<CheckCircle2 className={IconSizeStyle.HW5} />}
+                icon={<CheckCircle2 className={IconSize.HW5} />}
                 title="Completed"
                 description="Completed tasks are moved to a separate list you can access from the menu."
                 testId="card-completed"
@@ -151,7 +151,7 @@ const HowToUse = () => {
             </h2>
             <div className="space-y-3">
               <InstructionCard
-                icon={<Settings className={IconSizeStyle.HW5} />}
+                icon={<Settings className={IconSize.HW5} />}
                 title="Customize Your Experience"
                 description={
                   <>

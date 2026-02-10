@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/primitives/DropdownMenu'
 import { Input } from '@/components/primitives/forms/Input'
-import { IconSizeStyle, Routes } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
@@ -65,7 +65,7 @@ export const DropdownMenuHeader = ({
               className="h-10 w-10"
               data-testid="button-menu"
             >
-              <Menu className={IconSizeStyle.HW5} />
+              <Menu className={IconSize.HW5} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -135,7 +135,7 @@ export const DropdownMenuHeader = ({
 
       {isSearchExpanded && (
         <div className="flex items-center bg-secondary/30 rounded-full border border-white/5 px-4 h-10 mb-3 mx-1">
-          <Search className={cn(IconSizeStyle.HW4, 'shrink-0 text-primary')} />
+          <Search className={cn(IconSize.HW4, 'shrink-0 text-primary')} />
           <Input
             placeholder="Search..."
             className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-full p-0 ml-3 text-sm placeholder:text-muted-foreground/50"

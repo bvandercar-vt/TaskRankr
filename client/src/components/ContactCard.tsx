@@ -1,6 +1,6 @@
 import { Mail } from 'lucide-react'
 
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 
 export const ContactCard = ({ className }: { className?: string }) => (
   <div
@@ -17,7 +17,7 @@ export const ContactCard = ({ className }: { className?: string }) => (
         className="inline-flex items-center gap-2 text-sm text-purple-400 hover-elevate rounded-md px-1"
         data-testid="link-contact-email"
       >
-        <Mail className={IconSizeStyle.HW4} />
+        <Mail className={IconSize.HW4} />
         taskrankr@gmail.com
       </a>
     </div>
