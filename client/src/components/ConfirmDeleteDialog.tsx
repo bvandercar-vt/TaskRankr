@@ -42,6 +42,7 @@ export const ConfirmDeleteDialog = ({
         <AlertDialogAction
           onClick={onConfirm}
           className="bg-destructive hover:bg-destructive/90 text-white"
+          data-testid="button-delete-permanently"
         >
           Delete Permanently
         </AlertDialogAction>

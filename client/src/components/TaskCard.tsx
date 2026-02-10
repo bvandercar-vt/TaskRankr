@@ -13,24 +13,51 @@ import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
+  type FieldConfig,
+  type RankField,
   SubtaskSortMode,
+  type Task,
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
 
-interface TaskBadgeProps {
+const Title = ({
+  name,
+  isCompleted,
+  numberIndex,
+}: {
+  name: string
+  isCompleted: boolean
+  numberIndex: number | undefined
+}) => (
+  <h3
+    className={cn(
+      'font-semibold truncate text-base',
+      isCompleted ? 'text-muted-foreground line-through' : 'text-foreground',
+    )}
+  >
+    {numberIndex !== undefined && (
+      <span className="text-muted-foreground mr-1">{numberIndex + 1}.</span>
+    )}
+    {name}
+  </h3>
+)
+
+const TaskBadge = ({
+  value,
+  styleClass,
+  muted,
+}: {
   value: string
   styleClass: string
   muted?: boolean
-}
-
-const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
+}) => (
   <Badge
     variant="outline"
     className={cn(
@@ -43,6 +70,95 @@ const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
   >
     {value}
   </Badge>
+)
+
+const InProgressBadge = ({
+  setShowConfirm,
+}: {
+  setShowConfirm: (show: boolean) => void
+}) => (
+  // biome-ignore lint/a11y/noStaticElementInteractions: TODO: resolve
+  // biome-ignore lint/a11y/useKeyWithClickEvents: TODO: resolve
+  <div
+    onClick={(e) => {
+      e.stopPropagation()
+      setShowConfirm(true)
+    }}
+    className="cursor-pointer"
+  >
+    <TaskBadge
+      value="In Progress"
+      styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
+    />
+  </div>
+)
+
+const PinIcon = ({
+  setShowConfirm,
+}: {
+  setShowConfirm: (show: boolean) => void
+}) => (
+  <Pin
+    className={cn(
+      IconSize.HW4,
+      'text-slate-400 shrink-0 rotate-45 cursor-pointer',
+    )}
+    data-testid="icon-pinned"
+    onClick={(e) => {
+      e.stopPropagation()
+      setShowConfirm(true)
+    }}
+  />
+)
+
+const RankBadges = ({
+  task,
+  fieldConfig,
+  isCompleted,
+}: {
+  task: Pick<Task, RankField>
+  fieldConfig: FieldConfig
+  isCompleted: boolean
+}) => (
+  <div className="flex items-center gap-1 justify-end">
+    {RANK_FIELDS_COLUMNS.map(({ name: field }) => {
+      if (!fieldConfig[field].visible) return null
+      const value = task[field]
+      return (
+        <TaskBadge
+          key={field}
+          value={value ?? ''}
+          styleClass={getRankFieldStyle(field, value, 'opacity-0')}
+          muted={isCompleted}
+        />
+      )
+    })}
+  </div>
+)
+
+const CollapseCaret = ({
+  taskId,
+  isExpanded,
+  toggleExpanded,
+}: {
+  taskId: number
+  isExpanded: boolean
+  toggleExpanded: (taskId: number) => void
+}) => (
+  <button
+    onClick={(e) => {
+      e.stopPropagation()
+      toggleExpanded(taskId)
+    }}
+    className="group/expand flex items-center justify-center w-full rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+    type="button"
+    data-testid={`button-expand-${taskId}`}
+  >
+    <Icon
+      icon={isExpanded ? ChevronDown : ChevronRight}
+      className="w-3.5 h-3.5 text-muted-foreground"
+    />
+  </button>
 )
 
 const formatDuration = (ms: number) => {
@@ -170,7 +286,7 @@ export const TaskCard = ({
   }
 
   return (
-    <div className="group relative">
+    <div className="group relative" data-testid={`task-card-${task.id}`}>
       <motion.div
         layout
         initial={{ opacity: 0, y: 10 }}
@@ -197,20 +313,11 @@ export const TaskCard = ({
       >
         <div className="w-5 flex justify-center shrink-0 self-stretch">
           {hasSubtasks ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                toggleExpanded(task.id)
-              }}
-              className="group/expand flex items-center justify-center w-full rounded-md hover:bg-white/10 transition-colors cursor-pointer"
-              type="button"
-              data-testid={`button-expand-${task.id}`}
-            >
-              <Icon
-                icon={isExpanded ? ChevronDown : ChevronRight}
-                className="w-3.5 h-3.5 text-muted-foreground"
-              />
-            </button>
+            <CollapseCaret
+              taskId={task.id}
+              isExpanded={isExpanded}
+              toggleExpanded={toggleExpanded}
+            />
           ) : (
             <div className="w-3.5" />
           )}
@@ -218,67 +325,22 @@ export const TaskCard = ({
 
         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-4">
           <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-            <h3
-              className={cn(
-                'font-semibold truncate text-base',
-                isNestedCompleted
-                  ? 'text-muted-foreground line-through'
-                  : 'text-foreground',
-              )}
-            >
-              {numberIndex !== undefined && (
-                <span className="text-muted-foreground mr-1">
-                  {numberIndex + 1}.
-                </span>
-              )}
-              {task.name}
-            </h3>
+            <Title
+              name={task.name}
+              isCompleted={isNestedCompleted}
+              numberIndex={numberIndex}
+            />
             {isInProgress && (
-              // biome-ignore lint/a11y/noStaticElementInteractions: TODO: resolve
-              // biome-ignore lint/a11y/useKeyWithClickEvents: TODO: resolve
-              <div
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowConfirm(true)
-                }}
-                className="cursor-pointer"
-              >
-                <TaskBadge
-                  value="In Progress"
-                  styleClass="text-blue-400 bg-blue-400/10 border-blue-400/20"
-                />
-              </div>
+              <InProgressBadge setShowConfirm={setShowConfirm} />
             )}
-            {isPinned && (
-              <Pin
-                className={cn(
-                  IconSizeStyle.HW4,
-                  'text-slate-400 shrink-0 rotate-45 cursor-pointer',
-                )}
-                data-testid="icon-pinned"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowConfirm(true)
-                }}
-              />
-            )}
+            {isPinned && <PinIcon setShowConfirm={setShowConfirm} />}
           </div>
-
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
-            <div className="flex items-center gap-1 justify-end">
-              {RANK_FIELDS_COLUMNS.map(({ name: field }) => {
-                if (!settings.fieldConfig[field].visible) return null
-                const value = task[field]
-                return (
-                  <TaskBadge
-                    key={field}
-                    value={value ?? ''}
-                    styleClass={getRankFieldStyle(field, value, 'opacity-0')}
-                    muted={isNestedCompleted}
-                  />
-                )
-              })}
-            </div>
+            <RankBadges
+              task={task}
+              fieldConfig={settings.fieldConfig}
+              isCompleted={isNestedCompleted}
+            />
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">
                 <CompletedTimeDisplay {...task} />
