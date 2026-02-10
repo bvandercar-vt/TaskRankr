@@ -67,36 +67,32 @@ const DesktopDialog = ({
         className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="flex flex-col">
-          <DialogHeader className="sticky top-0 z-10 bg-card pb-4 flex flex-row items-center justify-between space-y-0">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl font-display tracking-tight">
-                {mode === 'create'
-                  ? parentId
-                    ? 'New Subtask'
-                    : 'New Task'
-                  : 'Edit Task'}
-              </DialogTitle>
-              <DialogDescription className="sr-only">
-                {mode === 'create'
-                  ? 'Add a new item to your list.'
-                  : 'Update task details and properties.'}
-              </DialogDescription>
-            </div>
-          </DialogHeader>
-          <div>
-            <TaskForm
-              key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
-              onSubmit={onSubmit}
-              initialData={activeTask}
-              parentId={parentId}
-              onCancel={onClose}
-              onAddChild={onAddChild}
-              onEditChild={onEditChild}
-              onSubtaskDelete={onSubtaskDelete}
-            />
+        <DialogHeader className="sticky top-[-24px] z-10 bg-card pt-6 -mt-6 pb-4 flex flex-row items-center justify-between space-y-0">
+          <div className="flex-1">
+            <DialogTitle className="text-2xl font-display tracking-tight">
+              {mode === 'create'
+                ? parentId
+                  ? 'New Subtask'
+                  : 'New Task'
+                : 'Edit Task'}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {mode === 'create'
+                ? 'Add a new item to your list.'
+                : 'Update task details and properties.'}
+            </DialogDescription>
           </div>
-        </div>
+        </DialogHeader>
+        <TaskForm
+          key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
+          onSubmit={onSubmit}
+          initialData={activeTask}
+          parentId={parentId}
+          onCancel={onClose}
+          onAddChild={onAddChild}
+          onEditChild={onEditChild}
+          onSubtaskDelete={onSubtaskDelete}
+        />
       </DialogContent>
     </Dialog>
   </div>
