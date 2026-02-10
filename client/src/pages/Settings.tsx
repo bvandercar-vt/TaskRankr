@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { BackButton } from '@/components/BackButton'
+import { BackButtonHeader } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/primitives/overlays/AlertDialog'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
@@ -304,141 +305,134 @@ const Settings = () => {
   const { setTaskStatus } = useTaskActions()
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <BackButton />
-          <h1 className="text-2xl font-bold" data-testid="heading-settings">
-            Settings
-          </h1>
-        </div>
+    <ScrollablePage>
+      <BackButtonHeader title="Settings" />
 
-        <div className="space-y-4">
-          <SwitchCard
-            title="Automatically Pin new tasks"
-            description="When enabled, new tasks will be pinned to the top of your list automatically."
-            checked={settings.autoPinNewTasks}
-            onCheckedChange={(checked) =>
-              updateSettings({ autoPinNewTasks: checked })
-            }
-            data-testid="switch-auto-pin"
-          />
-          <SwitchCard
-            title="Always sort pinned by Priority"
-            description={
-              settings.alwaysSortPinnedByPriority
-                ? 'Pinned tasks are always sorted by priority first, then by your selected sort.'
-                : 'Pinned tasks are sorted using your selected sort only.'
-            }
-            checked={settings.alwaysSortPinnedByPriority}
-            onCheckedChange={(checked) =>
-              updateSettings({ alwaysSortPinnedByPriority: checked })
-            }
-            data-testid="switch-sort-pinned-priority"
-          />
-          <Card>
-            <div className="flex items-center justify-between">
-              <SwitchSetting
-                title='Enable "In Progress" Status'
-                description={
-                  'Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
-                }
-                checked={settings.enableInProgressStatus}
-                onCheckedChange={(checked) => {
-                  updateSettings({ enableInProgressStatus: checked })
-                  if (!checked) {
-                    updateSettings({ enableInProgressTime: false })
-                    // Demote any in_progress task to pinned
-                    const inProgressTask = allTasks.find(
-                      (t) => t.status === TaskStatus.IN_PROGRESS,
-                    )
-                    if (inProgressTask) {
-                      setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
-                    }
+      <div className="space-y-4">
+        <SwitchCard
+          title="Automatically Pin new tasks"
+          description="When enabled, new tasks will be pinned to the top of your list automatically."
+          checked={settings.autoPinNewTasks}
+          onCheckedChange={(checked) =>
+            updateSettings({ autoPinNewTasks: checked })
+          }
+          data-testid="switch-auto-pin"
+        />
+        <SwitchCard
+          title="Always sort pinned by Priority"
+          description={
+            settings.alwaysSortPinnedByPriority
+              ? 'Pinned tasks are always sorted by priority first, then by your selected sort.'
+              : 'Pinned tasks are sorted using your selected sort only.'
+          }
+          checked={settings.alwaysSortPinnedByPriority}
+          onCheckedChange={(checked) =>
+            updateSettings({ alwaysSortPinnedByPriority: checked })
+          }
+          data-testid="switch-sort-pinned-priority"
+        />
+        <Card>
+          <div className="flex items-center justify-between">
+            <SwitchSetting
+              title='Enable "In Progress" Status'
+              description={
+                'Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
+              }
+              checked={settings.enableInProgressStatus}
+              onCheckedChange={(checked) => {
+                updateSettings({ enableInProgressStatus: checked })
+                if (!checked) {
+                  updateSettings({ enableInProgressTime: false })
+                  // Demote any in_progress task to pinned
+                  const inProgressTask = allTasks.find(
+                    (t) => t.status === TaskStatus.IN_PROGRESS,
+                  )
+                  if (inProgressTask) {
+                    setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
                   }
-                }}
-                data-testid="switch-enable-in-progress"
+                }
+              }}
+              data-testid="switch-enable-in-progress"
+            />
+          </div>
+          {settings.enableInProgressStatus && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+              <SwitchSetting
+                title='Enable "In Progress" Time'
+                description="Track and display time spent In Progress."
+                checked={settings.enableInProgressTime}
+                onCheckedChange={(checked) =>
+                  updateSettings({ enableInProgressTime: checked })
+                }
+                data-testid="switch-enable-time"
               />
             </div>
-            {settings.enableInProgressStatus && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                <SwitchSetting
-                  title='Enable "In Progress" Time'
-                  description="Track and display time spent In Progress."
-                  checked={settings.enableInProgressTime}
-                  onCheckedChange={(checked) =>
-                    updateSettings({ enableInProgressTime: checked })
-                  }
-                  data-testid="switch-enable-time"
-                />
-              </div>
-            )}
-          </Card>
-        </div>
+          )}
+        </Card>
+      </div>
 
-        <AttributeSettingsCard
-          fieldConfig={settings.fieldConfig}
-          updateFieldFlags={updateFieldFlags}
-        />
+      <AttributeSettingsCard
+        fieldConfig={settings.fieldConfig}
+        updateFieldFlags={updateFieldFlags}
+      />
 
-        <div className="mt-8">
-          <SortInfo />
-        </div>
+      <div className="mt-8">
+        <SortInfo />
+      </div>
 
-        <Link href={Routes.HOW_TO_USE}>
-          <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
-            <div>
-              <h3 className="font-semibold text-foreground">How To Use</h3>
-              <p className="text-sm text-muted-foreground">
-                Learn how to get the most out of TaskRankr
-              </p>
-            </div>
-            <ChevronRight
-              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
-            />
-          </Card>
-        </Link>
-
-        {!isGuestMode && <UserInfoCard />}
-
-        <ContactCard className="mt-4" />
-
-        <CollapsibleCard
-          title="Import/Export Data"
-          className="mt-8 bg-card/50"
-          data-testid="collapsible-import-export"
-        >
-          <div className="flex flex-wrap justify-center gap-3">
-            <ExportButton />
-            <ImportButton />
+      <Link href={Routes.HOW_TO_USE}>
+        <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
+          <div>
+            <h3 className="font-semibold text-foreground">How To Use</h3>
+            <p className="text-sm text-muted-foreground">
+              Learn how to get the most out of TaskRankr
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Export your tasks as JSON or import from a previously exported file.
-          </p>
-        </CollapsibleCard>
+          <ChevronRight
+            className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
+          />
+        </Card>
+      </Link>
 
-        <CollapsibleCard
-          title="Clear Local Data"
-          className="mt-3 bg-card/50"
-          data-testid="collapsible-clear-local-data"
-        >
-          <p className="text-sm text-muted-foreground mb-3">
-            Remove all locally cached data and re-pull fresh data from the
-            server. Your synced data on the server won't be affected.
-          </p>
-          <ClearLocalStorageConfirmDialog />
-        </CollapsibleCard>
+      {!isGuestMode && <UserInfoCard />}
 
-        <div className="mt-16 text-center text-muted-foreground">
-          <p className="text-sm font-medium" data-testid="text-app-name">
-            TaskRankr
-          </p>
-          <p className="text-xs mt-1" data-testid="text-app-description">
-            Track tasks with priority, ease, enjoyment, and time ratings.
-          </p>
+      <ContactCard className="mt-4" />
+
+      <CollapsibleCard
+        title="Import/Export Data"
+        className="mt-8 bg-card/50"
+        data-testid="collapsible-import-export"
+      >
+        <div className="flex flex-wrap justify-center gap-3">
+          <ExportButton />
+          <ImportButton />
         </div>
-      </main>
-    </div>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          Export your tasks as JSON or import from a previously exported file.
+        </p>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        title="Clear Local Data"
+        className="mt-3 bg-card/50"
+        data-testid="collapsible-clear-local-data"
+      >
+        <p className="text-sm text-muted-foreground mb-3">
+          Remove all locally cached data and re-pull fresh data from the server.
+          Your synced data on the server won't be affected.
+        </p>
+        <ClearLocalStorageConfirmDialog />
+      </CollapsibleCard>
+
+      <div className="mt-16 text-center text-muted-foreground">
+        <p className="text-sm font-medium" data-testid="text-app-name">
+          TaskRankr
+        </p>
+        <p className="text-xs mt-1" data-testid="text-app-description">
+          Track tasks with priority, ease, enjoyment, and time ratings.
+        </p>
+      </div>
+    </ScrollablePage>
   )
 }
 

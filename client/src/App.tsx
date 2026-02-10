@@ -4,7 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Route, Switch, useLocation } from 'wouter'
+import { Route, Switch } from 'wouter'
 
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
@@ -35,18 +35,8 @@ import { StatusBanner } from './components/StatusBanner'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 
-const ScrollToTop = () => {
-  const [location] = useLocation()
-  // biome-ignore lint/correctness/useExhaustiveDependencies: needs it
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [location])
-  return null
-}
-
 const Router = () => (
-  <>
-    <ScrollToTop />
+  <div className="flex-1 flex flex-col min-h-0">
     <Switch>
       <Route path={Routes.HOME} component={Home} />
       <Route path={Routes.COMPLETED} component={Completed} />
@@ -54,7 +44,7 @@ const Router = () => (
       <Route path={Routes.HOW_TO_USE} component={HowToUse} />
       <Route component={NotFound} />
     </Switch>
-  </>
+  </div>
 )
 
 const AuthenticatedApp = () => {
@@ -71,7 +61,7 @@ const AuthenticatedApp = () => {
         clearGuestStorage()
         toast({
           title: 'Tasks imported',
-          description: `${result.migratedCount} task${result.migratedCount === 1 ? '' : 's'} from guest mode ${result.migratedCount === 1 ? 'has' : 'have'} been added to your account.`,
+          description: `${result.migratedCount} tasks from guest mode have been added to your account.`,
         })
       }
     }
@@ -97,8 +87,10 @@ const AuthenticatedApp = () => {
       <SyncProvider isAuthenticated={shouldSync}>
         <ExpandedTasksProvider>
           <TaskFormDialogProvider>
-            <StatusBanner />
-            <Router />
+            <div className="h-dvh flex flex-col overflow-hidden">
+              <StatusBanner />
+              <Router />
+            </div>
           </TaskFormDialogProvider>
         </ExpandedTasksProvider>
       </SyncProvider>
