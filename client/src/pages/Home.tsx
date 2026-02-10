@@ -22,8 +22,6 @@ import { IconSizeStyle } from '@/lib/constants'
 import {
   filterTasksDeep,
   RANK_FIELDS_COLUMNS,
-  SORT_ORDER_MAP,
-  sortTasks,
   sortTaskTree,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
@@ -121,11 +119,11 @@ const Home = () => {
       (t) => t.status === TaskStatus.PINNED,
     )
 
-    const pinnedSortChain =
+    const pinnedSort =
       settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
-        ? [SortOption.PRIORITY, ...SORT_ORDER_MAP[sortBy]]
-        : SORT_ORDER_MAP[sortBy]
-    const sortedPinned = sortTasks(pinnedOnly, pinnedSortChain)
+        ? SortOption.PRIORITY
+        : sortBy
+    const sortedPinned = sortTaskTree(pinnedOnly, pinnedSort)
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
