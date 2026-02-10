@@ -6,10 +6,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import {
-  ConfirmDeleteDialog,
-  SubtaskActionDialog,
-} from '@/components/ConfirmDeleteDialog'
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
+import { SubtaskActionDialog } from '@/components/SubtaskActionDialog'
 import {
   Dialog,
   DialogContent,
