@@ -64,7 +64,7 @@ const DesktopDialog = ({
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
       <DialogContent
-        className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-y-auto bg-card border-white/10 p-6 shadow-2xl rounded-xl"
+        className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-y-auto overflow-x-hidden bg-card border-white/10 p-6 shadow-2xl rounded-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="sr-only">
