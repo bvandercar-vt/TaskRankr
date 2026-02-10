@@ -199,8 +199,8 @@ const Home = () => {
   if (error) return <PageError />
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32">
-      <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8">
+    <div className="h-screen flex flex-col bg-background text-foreground">
+      <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-8">
         <HowToUseBanner />
 
         <h1 className="sr-only">Home (Open Tasks)</h1>
@@ -212,8 +212,10 @@ const Home = () => {
             fieldConfig={settings.fieldConfig}
           />
         </DropdownMenuHeader>
+      </div>
 
-        <div className="space-y-1">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-32">
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 space-y-1">
           {displayedTasks.length === 0 ? (
             <EmptyState
               search={search}
@@ -227,7 +229,7 @@ const Home = () => {
             <DeleteDemoDataButton onClick={deleteDemoData} />
           )}
         </div>
-      </main>
+      </div>
 
       <CreateTaskButton onClick={() => openCreateDialog()} />
     </div>

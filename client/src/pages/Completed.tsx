@@ -82,8 +82,8 @@ const Completed = () => {
   )
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32">
-      <main className="max-w-5xl mx-auto px-2 sm:px-4 py-5">
+    <div className="h-screen flex flex-col bg-background text-foreground">
+      <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-5">
         <HowToUseBanner />
 
         <h1 className="text-2xl font-bold tracking-tight mb-2 px-2">
@@ -93,8 +93,10 @@ const Completed = () => {
         <DropdownMenuHeader search={search} onSearchChange={setSearch}>
           {ColumnHeaders}
         </DropdownMenuHeader>
+      </div>
 
-        <div className="space-y-1">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-32">
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 space-y-1">
           {displayedTasks.length === 0 ? (
             <EmptyState search={search} />
           ) : (
@@ -108,7 +110,7 @@ const Completed = () => {
             ))
           )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
