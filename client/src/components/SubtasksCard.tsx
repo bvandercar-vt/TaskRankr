@@ -2,7 +2,7 @@
  * @fileoverview Subtask list with drag-and-drop reordering for the task form
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   closestCenter,
   DndContext,
@@ -23,15 +23,9 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Check, GripVertical, Link, Pencil, Plus, Trash2 } from 'lucide-react'
 
+import { AssignSubtaskDialog } from '@/components/AssignSubtaskDialog'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/primitives/overlays/Dialog'
 import { Switch } from '@/components/primitives/forms/Switch'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
@@ -273,123 +267,6 @@ const SubtaskItem = ({
         </Button>
       </div>
     </div>
-  )
-}
-
-interface AssignSubtaskDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  parentTask: Task
-  allTasks: Task[]
-}
-
-const AssignSubtaskDialog = ({
-  open,
-  onOpenChange,
-  parentTask,
-  allTasks,
-}: AssignSubtaskDialogProps) => {
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const { updateTask } = useTaskActions()
-
-  const collectDescendantIds = useCallback(
-    (taskId: number): Set<number> => {
-      const ids = new Set<number>()
-      const walk = (id: number) => {
-        ids.add(id)
-        for (const t of allTasks) {
-          if (t.parentId === id) walk(t.id)
-        }
-      }
-      walk(taskId)
-      return ids
-    },
-    [allTasks],
-  )
-
-  const orphanTasks = useMemo(() => {
-    const descendantIds = collectDescendantIds(parentTask.id)
-    return allTasks.filter(
-      (t) =>
-        t.parentId === null &&
-        t.id !== parentTask.id &&
-        !descendantIds.has(t.id) &&
-        t.status !== TaskStatus.COMPLETED,
-    )
-  }, [allTasks, parentTask.id, collectDescendantIds])
-
-  const handleConfirm = () => {
-    if (selectedId === null) return
-    updateTask({ id: selectedId, parentId: parentTask.id })
-    if (parentTask.subtaskSortMode === SubtaskSortMode.MANUAL) {
-      updateTask({
-        id: parentTask.id,
-        subtaskOrder: [...parentTask.subtaskOrder, selectedId],
-      })
-    }
-    setSelectedId(null)
-    onOpenChange(false)
-  }
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) setSelectedId(null)
-        onOpenChange(v)
-      }}
-    >
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle data-testid="title-assign-subtask">
-            Assign Subtask
-          </DialogTitle>
-        </DialogHeader>
-        <div
-          className="max-h-64 overflow-y-auto divide-y divide-white/5"
-          data-testid="list-orphan-tasks"
-        >
-          {orphanTasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">
-              No available tasks to assign
-            </p>
-          ) : (
-            orphanTasks.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelectedId(t.id)}
-                className={cn(
-                  'w-full text-left px-3 py-2.5 text-sm transition-colors',
-                  selectedId === t.id
-                    ? 'bg-primary/20 text-foreground'
-                    : 'hover-elevate text-muted-foreground',
-                )}
-                data-testid={`button-assign-task-${t.id}`}
-              >
-                {t.name}
-              </button>
-            ))
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            data-testid="button-cancel-assign"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={selectedId === null}
-            data-testid="button-confirm-assign"
-          >
-            Confirm
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 

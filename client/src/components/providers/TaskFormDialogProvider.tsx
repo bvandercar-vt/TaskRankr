@@ -255,6 +255,22 @@ export const TaskFormDialogProvider = ({
             setSubtaskToDelete(null)
           }
         }}
+        onRemoveAsSubtask={
+          subtaskToDelete
+            ? () => {
+                updateTask({ id: subtaskToDelete.id, parentId: null })
+                if (activeTask) {
+                  updateTask({
+                    id: activeTask.id,
+                    subtaskOrder: activeTask.subtaskOrder.filter(
+                      (sid) => sid !== subtaskToDelete.id,
+                    ),
+                  })
+                }
+                setSubtaskToDelete(null)
+              }
+            : undefined
+        }
       />
     </TaskFormDialogContext.Provider>
   )
