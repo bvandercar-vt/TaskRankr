@@ -86,7 +86,7 @@ export const SortInfo = ({
     <div className="p-4 bg-card rounded-lg border border-white/10">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-start gap-2 cursor-pointer"
+        className="w-full flex items-center justify-between cursor-pointer"
         data-testid={`${prefix}button-sort-info-toggle`}
         type="button"
       >
