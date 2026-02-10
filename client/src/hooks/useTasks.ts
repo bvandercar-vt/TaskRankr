@@ -12,19 +12,9 @@ import type { Task, TaskWithSubtasks, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
-
-  if (!localState) {
-    return {
-      data: undefined,
-      isLoading: true,
-      error: null,
-      refetch: () => Promise.resolve(),
-    }
-  }
-
   return {
-    data: localState.tasks,
-    isLoading: !localState.isInitialized,
+    data: localState?.tasks ?? undefined,
+    isLoading: localState ? !localState.isInitialized : true,
     error: null,
     refetch: () => Promise.resolve(),
   }
@@ -73,15 +63,13 @@ export const useTask = (id: number) => {
   }
 }
 
-type TaskActions = {
+export const useTaskActions = (): {
   createTask: (data: CreateTaskContent) => TaskWithSubtasks
   updateTask: (update: UpdateTask) => TaskWithSubtasks
   setTaskStatus: (id: number, status: Task['status']) => TaskWithSubtasks
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-}
-
-export const useTaskActions = (): TaskActions => {
+} => {
   const localState = useLocalStateSafe()
 
   if (!localState) {

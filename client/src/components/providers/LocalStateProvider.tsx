@@ -603,15 +603,12 @@ export const LocalStateProvider = ({
   )
 }
 
+export const useLocalStateSafe = () => useContext(LocalStateContext)
+
 export const useLocalState = () => {
-  const context = useContext(LocalStateContext)
+  const context = useLocalStateSafe()
   if (!context) {
     throw new Error('useLocalState must be used within a LocalStateProvider')
   }
-  return context
-}
-
-export const useLocalStateSafe = () => {
-  const context = useContext(LocalStateContext)
   return context
 }
