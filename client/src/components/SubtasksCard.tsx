@@ -27,7 +27,7 @@ import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
@@ -208,7 +208,7 @@ const SubtaskItem = ({
             {...listeners}
             data-testid={`drag-handle-${task.id}`}
           >
-            <GripVertical className={IconSizeStyle.HW4} />
+            <GripVertical className={IconSize.HW4} />
           </button>
         )}
         {task.depth > 0 && (
@@ -252,7 +252,7 @@ const SubtaskItem = ({
             onClick={() => onEdit(task)}
             data-testid={`button-edit-subtask-${task.id}`}
           >
-            <Pencil className={IconSizeStyle.HW4} />
+            <Pencil className={IconSize.HW4} />
           </Button>
         )}
         <Button
@@ -262,7 +262,7 @@ const SubtaskItem = ({
           onClick={() => onDelete(task)}
           data-testid={`button-delete-subtask-${task.id}`}
         >
-          <Trash2 className={cn(IconSizeStyle.HW4, 'text-destructive')} />
+          <Trash2 className={cn(IconSize.HW4, 'text-destructive')} />
         </Button>
       </div>
     </div>
@@ -448,7 +448,7 @@ export const SubtasksCard = ({
         className="w-full flex items-center justify-center gap-2 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground border-t border-white/5"
         data-testid="button-add-subtask"
       >
-        <Plus className={IconSizeStyle.HW4} />
+        <Plus className={IconSize.HW4} />
         Add Subtask
       </button>
     </div>

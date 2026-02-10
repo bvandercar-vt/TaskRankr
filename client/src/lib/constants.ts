@@ -8,7 +8,7 @@ import {
   type UserSettings,
 } from '~/shared/schema'
 
-export const IconSizeStyle = {
+export const IconSize = {
   HW4: 'h-4 w-4',
   HW5: 'h-5 w-5',
   HW6: 'h-6 w-6',

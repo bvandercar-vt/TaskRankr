@@ -7,7 +7,7 @@ import { CheckCircle, Clock, ListTodo, Star } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
@@ -60,21 +60,19 @@ const Landing = () => {
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSizeStyle.HW6, 'text-primary')} />
+            <Star className={cn(IconSize.HW6, 'text-primary')} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <CheckCircle
-              className={cn(IconSizeStyle.HW6, 'text-emerald-500')}
-            />
+            <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
             <span>Easy tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSizeStyle.HW6, 'text-blue-500')} />
+            <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
             <span>Time tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSizeStyle.HW6, 'text-amber-500')} />
+            <ListTodo className={cn(IconSize.HW6, 'text-amber-500')} />
             <span>Nested tasks</span>
           </div>
         </div>

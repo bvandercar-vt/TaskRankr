@@ -7,7 +7,7 @@ import { HelpCircle, X } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
-import { IconSizeStyle, Routes } from '@/lib/constants'
+import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 const HOW_TO_USE_BANNER_KEY = 'taskrankr-how-to-use-dismissed'
@@ -45,9 +45,7 @@ export const HowToUseBanner = () => {
       data-testid="banner-how-to-use"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <HelpCircle
-          className={cn(IconSizeStyle.HW5, 'shrink-0 text-primary')}
-        />
+        <HelpCircle className={cn(IconSize.HW5, 'shrink-0 text-primary')} />
         <span className="text-sm text-foreground">
           New here?{' '}
           <Link href={Routes.HOW_TO_USE}>
@@ -66,7 +64,7 @@ export const HowToUseBanner = () => {
         onClick={dismiss}
         data-testid="button-dismiss-how-to-use"
       >
-        <X className={IconSizeStyle.HW4} />
+        <X className={IconSize.HW4} />
       </Button>
     </div>
   )
