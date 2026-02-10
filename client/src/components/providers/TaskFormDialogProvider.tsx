@@ -117,7 +117,7 @@ const MobileDialog = ({
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
         className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
       >
-        <div className="flex-1 overflow-y-auto px-4 pt-4">
+        <div className="flex-1 overflow-y-auto p-4">
           <TaskForm
             key={activeTask?.id ?? `new-${parentId ?? "root"}`}
             onSubmit={onSubmit}
