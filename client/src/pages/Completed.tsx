@@ -5,20 +5,32 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, Search } from 'lucide-react'
 
-import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
-import { HowToUseBanner } from '@/components/HowToUseBanner'
-import {
-  EmptyState as EmptyStateBase,
-  PageError,
-  PageLoading,
-} from '@/components/PageStates'
+import { EmptyState as EmptyStateBase } from '@/components/PageStates'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
+import {
+  TaskListPageHeader,
+  TaskListPageWrapper,
+  TaskListTreeLayout,
+} from '@/components/TaskListPage'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSize } from '@/lib/constants'
 import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+
+const ColumnHeaders = () => (
+  <div className="flex items-center gap-1 shrink-0 justify-end">
+    {RANK_FIELDS_COLUMNS.map((field) => (
+      <span
+        key={`${field.name}-col-header`}
+        className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
+      >
+        {field.labelShort ?? field.label}
+      </span>
+    ))}
+  </div>
+)
 
 const EmptyState = ({ search }: { search: string | undefined }) => (
   <EmptyStateBase
@@ -38,7 +50,7 @@ const EmptyState = ({ search }: { search: string | undefined }) => (
 )
 
 const Completed = () => {
-  const { data: allTasks, isLoading, error } = useTasks()
+  const { data: allTasks, isLoading } = useTasks()
   const [search, setSearch] = useState('')
 
   const completedTasks = useMemo(() => {
@@ -65,51 +77,25 @@ const Completed = () => {
     [completedTasks, search],
   )
 
-  if (isLoading) return <PageLoading />
-  if (error) return <PageError />
-
-  const ColumnHeaders = displayedTasks.length > 0 && (
-    <div className="flex items-center gap-1 shrink-0 justify-end">
-      {RANK_FIELDS_COLUMNS.map((field) => (
-        <span
-          key={`${field.name}-col-header`}
-          className="text-[10px] font-medium text-muted-foreground uppercase w-16 text-center"
-        >
-          {field.labelShort ?? field.label}
-        </span>
-      ))}
-    </div>
-  )
-
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32">
-      <main className="max-w-5xl mx-auto px-2 sm:px-4 py-5">
-        <HowToUseBanner />
+    <TaskListPageWrapper isLoading={isLoading}>
+      <TaskListPageHeader
+        title="Completed Tasks"
+        ColumnHeaders={displayedTasks.length > 0 && <ColumnHeaders />}
+        searchVal={search}
+        setSearchVal={setSearch}
+      />
 
-        <h1 className="text-2xl font-bold tracking-tight mb-2 px-2">
-          Completed Tasks
-        </h1>
-
-        <DropdownMenuHeader search={search} onSearchChange={setSearch}>
-          {ColumnHeaders}
-        </DropdownMenuHeader>
-
-        <div className="space-y-1">
-          {displayedTasks.length === 0 ? (
-            <EmptyState search={search} />
-          ) : (
-            displayedTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                showRestore
-                showCompletedDate
-              />
-            ))
-          )}
-        </div>
-      </main>
-    </div>
+      <TaskListTreeLayout>
+        {displayedTasks.length === 0 ? (
+          <EmptyState search={search} />
+        ) : (
+          displayedTasks.map((task) => (
+            <TaskCard key={task.id} task={task} showRestore showCompletedDate />
+          ))
+        )}
+      </TaskListTreeLayout>
+    </TaskListPageWrapper>
   )
 }
 

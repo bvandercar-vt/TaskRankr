@@ -27,17 +27,43 @@ import {
 } from '@/components/primitives/DropdownMenu'
 import { SearchInput } from '@/components/SearchInput'
 import { IconSize, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
 
+const Title = ({
+  title,
+  showTitle,
+  className,
+}: {
+  title: React.ReactNode
+  showTitle?: boolean
+  className?: string
+}) =>
+  title && (
+    <h1
+      className={
+        showTitle
+          ? cn('text-2xl font-bold tracking-tight', className)
+          : 'sr-only'
+      }
+    >
+      {title}
+    </h1>
+  )
+
 interface DropdownMenuHeaderProps {
-  search: string
+  title?: React.ReactNode
+  showTitle?: boolean
+  searchVal: string
   onSearchChange: (value: string) => void
   children?: React.ReactNode
 }
 
 export const DropdownMenuHeader = ({
-  search,
+  title,
+  showTitle = true,
+  searchVal,
   onSearchChange,
   children,
 }: DropdownMenuHeaderProps) => {
@@ -55,7 +81,12 @@ export const DropdownMenuHeader = ({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2 pr-2">
+      <Title
+        title={title}
+        showTitle={showTitle}
+        className="mb-2 px-2 sm:hidden"
+      />
+      <div className="flex items-center gap-1 mb-2 pr-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -89,7 +120,7 @@ export const DropdownMenuHeader = ({
               <Link href={Routes.HOME}>
                 <DropdownMenuItem
                   icon={Home}
-                  label="Home"
+                  label="Home (Open Tasks)"
                   data-testid="menu-item-home"
                 />
               </Link>
@@ -129,15 +160,23 @@ export const DropdownMenuHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <Title
+          title={title}
+          showTitle={showTitle}
+          className="hidden sm:block px-2"
+        />
+
+        <div className="flex-1" />
+
         {children}
       </div>
 
       {isSearchExpanded && (
         <SearchInput
-          value={search}
+          value={searchVal}
           onChange={onSearchChange}
           autoFocus
-          onBlur={() => !search && setIsSearchExpanded(false)}
+          onBlur={() => !searchVal && setIsSearchExpanded(false)}
           className="mb-3 mx-1"
         />
       )}
