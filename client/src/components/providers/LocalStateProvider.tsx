@@ -231,6 +231,7 @@ export const LocalStateProvider = ({
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
+      localStorage.removeItem('taskrankr-guest-expanded')
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
