@@ -50,11 +50,13 @@ TaskRankr is a multi-user task management application designed for tracking task
 │   └── src/
 │       ├── components/   # UI components
 │       │   ├── primitives/       # Base UI components (shadcn/ui)
-│       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea)
+│       │   │   ├── forms/        # Form controls (Calendar, Checkbox, Form, Input, Label, Select, Switch, Textarea, TimeInput)
 │       │   │   ├── overlays/     # AlertDialog, Dialog, Popover, Toast, Toaster, Tooltip
 │       │   │   ├── Badge.tsx, Button.tsx, Card.tsx, Toggle.tsx
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
+│       │   ├── BackButton.tsx    # Back navigation button to home
+│       │   ├── ContactCard.tsx   # Contact/email card
 │       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
 │       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu + search
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
@@ -64,6 +66,10 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
 │       │   │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       │   │   └── TaskFormDialogProvider.tsx  # Context for task form dialog state
+│       │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
+│       │   ├── SortButton.tsx    # Sort option toggle button
+│       │   ├── StatusBanner.tsx  # Auth/guest status banner
+│       │   ├── SubtasksCard.tsx  # Subtask list with drag-and-drop and assign
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
