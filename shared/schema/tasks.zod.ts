@@ -4,6 +4,7 @@
 
 import { relations, sql } from 'drizzle-orm'
 import {
+  boolean,
   integer,
   pgTable,
   serial,
@@ -87,6 +88,7 @@ export const tasks = pgTable('tasks', {
     .array()
     .default(sql`'{}'::integer[]`)
     .notNull(),
+  subtasksShowNumbers: boolean('subtasks_show_numbers').default(false).notNull(),
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -112,6 +114,7 @@ const taskSchemaCommon = {
     .nativeEnum(SubtaskSortMode)
     .default(SubtaskSortMode.INHERIT),
   subtaskOrder: z.array(z.number()).default([]),
+  subtasksShowNumbers: z.boolean().default(false),
   createdAt: z.coerce.date(),
   completedAt: z.coerce.date().nullish(),
   inProgressStartedAt: z.coerce.date().nullish(),

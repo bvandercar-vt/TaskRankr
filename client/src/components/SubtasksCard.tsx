@@ -130,13 +130,16 @@ const SortModeToggle = ({
           </label>
         </div>
         {isManualSortMode && (
-          <label className="flex items-center gap-1.5 cursor-pointer">
+          <label className="flex items-center gap-1.5 flex-1 justify-end cursor-pointer">
+            <span className="text-xs text-muted-foreground">Show numbers</span>
             <Switch
               checked={showNumbers}
-              onCheckedChange={onShowNumbersChange}
+              onCheckedChange={(checked) => {
+                onShowNumbersChange(checked)
+                updateTask({ id: taskId, subtasksShowNumbers: checked })
+              }}
               data-testid="switch-show-numbers"
             />
-            <span className="text-xs text-muted-foreground">Show numbers</span>
           </label>
         )}
       </div>
@@ -288,7 +291,7 @@ export const SubtasksCard = ({
     task.subtaskSortMode,
   )
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
-  const [showNumbers, setShowNumbers] = useState(false)
+  const [showNumbers, setShowNumbers] = useState(task.subtasksShowNumbers)
 
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,

@@ -17,7 +17,11 @@ import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+import {
+  SubtaskSortMode,
+  TaskStatus,
+  type TaskWithSubtasks,
+} from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
 
 interface TaskBadgeProps {
@@ -110,6 +114,7 @@ interface TaskCardProps {
   level?: number
   showRestore?: boolean
   showCompletedDate?: boolean
+  numberPrefix?: string
 }
 
 export const TaskCard = ({
@@ -117,6 +122,7 @@ export const TaskCard = ({
   level = 0,
   showRestore = false,
   showCompletedDate = false,
+  numberPrefix,
 }: TaskCardProps) => {
   const [showConfirm, setShowConfirm] = useState(false)
   const [isHolding, setIsHolding] = useState(false)
@@ -220,6 +226,11 @@ export const TaskCard = ({
                   : 'text-foreground',
               )}
             >
+              {numberPrefix && (
+                <span className="text-muted-foreground mr-1">
+                  {numberPrefix}
+                </span>
+              )}
               {task.name}
             </h3>
             {isInProgress && (
@@ -291,13 +302,19 @@ export const TaskCard = ({
                 className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]"
                 style={{ marginLeft: `${level * 16}px` }}
               />
-              {task.subtasks.map((subtask) => (
+              {task.subtasks.map((subtask, index) => (
                 <TaskCard
                   key={subtask.id}
                   task={subtask}
                   level={level + 1}
                   showRestore={showRestore}
                   showCompletedDate={showCompletedDate}
+                  numberPrefix={
+                    task.subtasksShowNumbers &&
+                    task.subtaskSortMode === SubtaskSortMode.MANUAL
+                      ? `${index + 1}.`
+                      : undefined
+                  }
                 />
               ))}
             </div>

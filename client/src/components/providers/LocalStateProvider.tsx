@@ -325,6 +325,7 @@ export const LocalStateProvider = ({
         completedAt: null,
         subtaskSortMode: SubtaskSortMode.INHERIT,
         subtaskOrder: [],
+        subtasksShowNumbers: false,
         subtasks: [],
         ...pick(data, [
           'name',
@@ -336,6 +337,7 @@ export const LocalStateProvider = ({
           'parentId',
           'subtaskSortMode',
           'subtaskOrder',
+          'subtasksShowNumbers',
         ]),
       }
 
