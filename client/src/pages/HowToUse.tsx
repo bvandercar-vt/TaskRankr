@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { ContactCard } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
@@ -176,6 +177,8 @@ const HowToUse = () => {
             </div>
           </section>
         </div>
+
+        <ContactCard className="mt-8" />
       </main>
     </div>
   )
