@@ -262,8 +262,7 @@ export const TaskCard = ({
   const startHold = (e: React.MouseEvent | React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
 
-    holdStartY.current =
-      'touches' in e ? e.touches[0].clientY : e.clientY
+    holdStartY.current = 'touches' in e ? e.touches[0].clientY : e.clientY
 
     setIsHolding(true)
     const duration = 800
