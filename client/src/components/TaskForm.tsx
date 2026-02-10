@@ -207,24 +207,26 @@ export const TaskForm = ({
         className="flex flex-col h-full"
       >
         <div className="flex-1 space-y-5">
-          <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Task Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Task name"
-                    className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="sticky top-0 z-10 pb-2 bg-background sm:bg-card">
+            <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Task Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Task name"
+                      className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">

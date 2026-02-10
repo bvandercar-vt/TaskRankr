@@ -68,7 +68,7 @@ const DesktopDialog = ({
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+          <DialogHeader className="sticky top-0 z-10 bg-card pb-4 flex flex-row items-center justify-between space-y-0">
             <div className="flex-1">
               <DialogTitle className="text-2xl font-display tracking-tight">
                 {mode === 'create'
@@ -84,7 +84,7 @@ const DesktopDialog = ({
               </DialogDescription>
             </div>
           </DialogHeader>
-          <div className="mt-4">
+          <div>
             <TaskForm
               key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
               onSubmit={onSubmit}
