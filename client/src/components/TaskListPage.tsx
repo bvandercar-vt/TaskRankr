@@ -38,9 +38,9 @@ export const TaskListTreeLayout = ({
 }: {
   children: React.ReactNode
 }) => (
-  <div className="flex-1 min-h-0 overflow-y-auto pb-32">
+  <main className="flex-1 min-h-0 overflow-y-auto pb-32">
     <div className="max-w-5xl mx-auto px-2 sm:px-4 space-y-1">{children}</div>
-  </div>
+  </main>
 )
 
 export const TaskListPageWrapper = ({

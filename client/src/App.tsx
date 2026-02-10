@@ -4,7 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Route, Switch, useLocation } from 'wouter'
+import { Route, Switch } from 'wouter'
 
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
@@ -34,7 +34,6 @@ import Settings from '@/pages/Settings'
 import { StatusBanner } from './components/StatusBanner'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
-
 
 const Router = () => (
   <div className="flex-1 flex flex-col min-h-0">
