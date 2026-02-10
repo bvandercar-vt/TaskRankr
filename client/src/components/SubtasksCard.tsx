@@ -331,7 +331,8 @@ export const SubtasksCard = ({
       parentId_: number,
       depth: number,
       parentSortMode: SubtaskSortMode,
-    ): (TaskWithSubtasks & { depth: number })[] => {
+      parentShowNumbers: boolean,
+    ): (TaskWithSubtasks & { depth: number; numberPrefix?: string })[] => {
       let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
@@ -342,18 +343,23 @@ export const SubtasksCard = ({
         children = sortTasksByIdOrder(children, order)
       }
 
-      const result: Array<TaskWithSubtasks & { depth: number }> = []
-      for (const child of children) {
-        result.push({ ...child, depth })
+      const result: Array<TaskWithSubtasks & { depth: number; numberPrefix?: string }> = []
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+        const numberPrefix =
+          parentShowNumbers && parentSortMode === SubtaskSortMode.MANUAL
+            ? `${i + 1}.`
+            : undefined
+        result.push({ ...child, depth, numberPrefix })
         result.push(
-          ...collectDescendants(child.id, depth + 1, child.subtaskSortMode),
+          ...collectDescendants(child.id, depth + 1, child.subtaskSortMode, child.subtasksShowNumbers),
         )
       }
       return result
     }
 
-    return collectDescendants(task.id, 0, sortMode)
-  }, [task, allTasks, sortMode, localSubtaskOrder])
+    return collectDescendants(task.id, 0, sortMode, showNumbers)
+  }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
 
   const directChildIds = useMemo(
     () => subtasks.filter((t) => t.depth === 0).map((t) => t.id),
@@ -413,35 +419,24 @@ export const SubtasksCard = ({
               strategy={verticalListSortingStrategy}
             >
               <div className="divide-y divide-white/5">
-                {subtasks.map((subtask, index) => {
-                  let numberPrefix: string | undefined
-                  if (showNumbers && isManualSortMode && subtask.depth === 0) {
-                    const directIndex =
-                      subtasks
-                        .slice(0, index + 1)
-                        .filter((t) => t.depth === 0).length
-                    numberPrefix = `${directIndex}.`
-                  }
-
-                  return (
-                    <SubtaskItem
-                      key={subtask.id}
-                      task={subtask}
-                      onEdit={onEditChild}
-                      onDelete={(t) => onSubtaskDelete?.(t)}
-                      onToggleComplete={(t) => {
-                        const newStatus =
-                          t.status === TaskStatus.COMPLETED
-                            ? TaskStatus.OPEN
-                            : TaskStatus.COMPLETED
-                        setTaskStatus(t.id, newStatus)
-                      }}
-                      isManualSortMode={isManualSortMode}
-                      isDragDisabled={false}
-                      numberPrefix={numberPrefix}
-                    />
-                  )
-                })}
+                {subtasks.map((subtask) => (
+                  <SubtaskItem
+                    key={subtask.id}
+                    task={subtask}
+                    onEdit={onEditChild}
+                    onDelete={(t) => onSubtaskDelete?.(t)}
+                    onToggleComplete={(t) => {
+                      const newStatus =
+                        t.status === TaskStatus.COMPLETED
+                          ? TaskStatus.OPEN
+                          : TaskStatus.COMPLETED
+                      setTaskStatus(t.id, newStatus)
+                    }}
+                    isManualSortMode={isManualSortMode}
+                    isDragDisabled={false}
+                    numberPrefix={subtask.numberPrefix}
+                  />
+                ))}
               </div>
             </SortableContext>
           </DndContext>
