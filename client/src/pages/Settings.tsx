@@ -3,7 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { BookOpen, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { BookOpen, ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
@@ -316,18 +316,17 @@ const Settings = () => {
         </div>
 
         <Link href={Routes.HOW_TO_USE}>
-          <Card className="mt-4 flex items-center justify-between hover-elevate cursor-pointer">
-            <div className="flex items-center gap-3">
-              <BookOpen
-                className={cn(IconSizeStyle.HW5, 'text-muted-foreground')}
-              />
-              <div>
-                <h3 className="font-semibold text-foreground">How To Use</h3>
-                <p className="text-sm text-muted-foreground">
-                  Learn how to get the most out of TaskRankr
-                </p>
-              </div>
+          <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
+            <div>
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                How To Use
+                <BookOpen className={cn(IconSizeStyle.HW4, 'text-muted-foreground')} />
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Learn how to get the most out of TaskRankr
+              </p>
             </div>
+            <ChevronRight className={cn(IconSizeStyle.HW5, 'text-muted-foreground shrink-0')} />
           </Card>
         </Link>
 
