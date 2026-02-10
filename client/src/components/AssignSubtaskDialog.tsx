@@ -142,15 +142,17 @@ export const AssignSubtaskDialog = ({
               ))
             )}
           </div>
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2">
             <Button
               variant="outline"
+              className="flex-1"
               onClick={handleClose}
               data-testid="button-cancel-assign"
             >
               Cancel
             </Button>
             <Button
+              className="flex-1"
               onClick={handleConfirm}
               disabled={selectedId === null}
               data-testid="button-confirm-assign"
