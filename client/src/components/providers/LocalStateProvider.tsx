@@ -74,8 +74,6 @@ interface LocalStateContextValue {
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: TaskWithSubtasks[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
-  resetToDefaults: () => void
-  initDemoData: () => void
   deleteDemoData: () => void
 }
 
@@ -93,8 +91,6 @@ const getStorageKeys = (mode: StorageMode) => ({
   syncQueue: `taskrankr-${mode}-sync-queue`,
   demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
 })
-
-const DEFAULT_TASKS: TaskWithSubtasks[] = []
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -204,7 +200,7 @@ export const LocalStateProvider = ({
 }: LocalStateProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
-  const [tasks, setTasks] = useState<TaskWithSubtasks[]>(DEFAULT_TASKS)
+  const [tasks, setTasks] = useState<TaskWithSubtasks[]>([])
   const [syncQueue, setSyncQueue] = useState<SyncOperationWithArgs[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
@@ -216,7 +212,7 @@ export const LocalStateProvider = ({
       storageKeys.settings,
       DEFAULT_SETTINGS,
     )
-    const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
+    const loadedTasks = loadFromStorage(storageKeys.tasks, [])
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
     const loadedQueue = loadFromStorage<SyncOperationWithArgs[]>(
       storageKeys.syncQueue,
@@ -507,31 +503,11 @@ export const LocalStateProvider = ({
     setSettings(serverSettings)
   }, [])
 
-  const resetToDefaults = useCallback(() => {
-    setTasks(DEFAULT_TASKS)
-    setSettings(DEFAULT_SETTINGS)
-    setSyncQueue([])
-    setDemoTaskIds([])
-    nextIdRef.current = -1
-    localStorage.removeItem(storageKeys.tasks)
-    localStorage.removeItem(storageKeys.settings)
-    localStorage.removeItem(storageKeys.syncQueue)
-    localStorage.removeItem(storageKeys.nextId)
-    localStorage.removeItem(storageKeys.demoTaskIds)
-  }, [storageKeys])
-
   useEffect(() => {
     if (isInitialized) {
       localStorage.setItem(storageKeys.demoTaskIds, JSON.stringify(demoTaskIds))
     }
   }, [demoTaskIds, isInitialized, storageKeys])
-
-  const initDemoData = useCallback(() => {
-    const demoTasks = createDemoTasks(nextIdRef)
-    localStorage.setItem(storageKeys.nextId, JSON.stringify(nextIdRef.current))
-    setDemoTaskIds(demoTasks.map((t) => t.id))
-    setTasks((prev) => [...prev, ...demoTasks])
-  }, [storageKeys])
 
   const deleteDemoData = useCallback(() => {
     const idsToDelete = new Set(demoTaskIds)
@@ -570,8 +546,6 @@ export const LocalStateProvider = ({
         replaceTaskId,
         setTasksFromServer,
         setSettingsFromServer,
-        resetToDefaults,
-        initDemoData,
         deleteDemoData,
       }}
     >
