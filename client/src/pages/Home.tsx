@@ -21,7 +21,6 @@ import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import {
   filterAndSortTree,
-  filterTaskTree,
   RANK_FIELDS_COLUMNS,
   sortTaskTree,
 } from '@/lib/sort-tasks'
@@ -41,25 +40,21 @@ const Home = () => {
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pinned tasks to be hoisted to top
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
-  const { taskTree, pinnedTasks } = useMemo(() => {
-    if (!tasks) return { taskTree: [], pinnedTasks: [] }
+  const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
+    if (!tasks)
+      return { taskTree: [], inProgressTask: undefined, pinnedTasks: [] }
 
-    // Filter out completed ROOT tasks (completed subtasks stay under their parent)
     const activeTasks = tasks.filter(
       (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
     )
 
-    // Collect tasks to hoist:
-    // - All in_progress tasks (both top-level and subtasks)
-    // - All pinned tasks (both top-level and subtasks)
-    // Subtasks also remain visible under their parent (with minimal styling)
-    const inProgressList: TaskWithSubtasks[] = []
+    let inProgress: TaskWithSubtasks | undefined
     const pinnedList: TaskWithSubtasks[] = []
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
       if (task.status === TaskStatus.IN_PROGRESS) {
-        inProgressList.push({ ...task, subtasks: [] })
+        inProgress = { ...task, subtasks: [] }
         hoistedIds.add(task.id)
       } else if (task.status === TaskStatus.PINNED) {
         pinnedList.push({ ...task, subtasks: [] })
@@ -67,12 +62,6 @@ const Home = () => {
       }
     })
 
-    // Hoisted order: in_progress first, then pinned
-    const hoistedList = [...inProgressList, ...pinnedList]
-
-    // Build full tree
-    // - Subtasks with pinned/in_progress status stay under parent (also shown hoisted)
-    // - Top-level pinned/in_progress are excluded from tree (only shown hoisted)
     const nodes: Record<number, TaskWithSubtasks> = {}
     const roots: TaskWithSubtasks[] = []
 
@@ -82,40 +71,39 @@ const Home = () => {
 
     activeTasks.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
-        // Subtasks always go under their parent (even if pinned/in_progress)
         nodes[task.parentId].subtasks.push(nodes[task.id])
       } else if (!task.parentId && !hoistedIds.has(task.id)) {
-        // Top-level tasks go to roots unless they're hoisted
         roots.push(nodes[task.id])
       }
     })
 
-    return { taskTree: roots, pinnedTasks: hoistedList }
+    return {
+      taskTree: roots,
+      inProgressTask: inProgress,
+      pinnedTasks: pinnedList,
+    }
   }, [tasks])
 
   const displayedTasks = useMemo(() => {
     const sortedTree = filterAndSortTree(taskTree, search, sortBy)
 
-    // Filter pinned tasks by search term
-    const filteredPinned = filterTaskTree(pinnedTasks, search)
-
-    // Separate in_progress (always first) from pinned, then sort pinned
-    const inProgressTask = filteredPinned.filter(
-      (t) => t.status === TaskStatus.IN_PROGRESS,
-    )
-    const pinnedOnly = filteredPinned.filter(
-      (t) => t.status === TaskStatus.PINNED,
+    const filteredPinned = pinnedTasks.filter((task) =>
+      task.name.toLowerCase().includes(search.toLowerCase()),
     )
 
     const pinnedSort =
       settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
         ? SortOption.PRIORITY
         : sortBy
-    const sortedPinned = sortTaskTree(pinnedOnly, pinnedSort)
+    const sortedPinned = sortTaskTree(filteredPinned, pinnedSort)
 
-    // Combine: in_progress first, then sorted pinned, then sorted tree
-    return [...inProgressTask, ...sortedPinned, ...sortedTree]
-  }, [taskTree, pinnedTasks, search, sortBy, settings])
+    const matchesSearch =
+      !search ||
+      inProgressTask?.name.toLowerCase().includes(search.toLowerCase())
+    const hoisted = matchesSearch && inProgressTask ? [inProgressTask] : []
+
+    return [...hoisted, ...sortedPinned, ...sortedTree]
+  }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings])
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />
