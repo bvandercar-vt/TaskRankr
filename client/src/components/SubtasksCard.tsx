@@ -24,6 +24,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { Check, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
+import { Switch } from '@/components/primitives/forms/Switch'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
@@ -41,14 +42,18 @@ interface SortModeToggleProps {
   taskId: number
   initialSortMode: SubtaskSortMode
   directChildIds: number[]
+  showNumbers: boolean
   onSortModeChange: (mode: SubtaskSortMode) => void
+  onShowNumbersChange: (show: boolean) => void
 }
 
 const SortModeToggle = ({
   taskId,
   initialSortMode,
   directChildIds,
+  showNumbers,
   onSortModeChange,
+  onShowNumbersChange,
 }: SortModeToggleProps) => {
   const { updateTask, reorderSubtasks } = useTaskActions()
 
@@ -78,50 +83,62 @@ const SortModeToggle = ({
       >
         Sorting Method
       </span>
-      <div
-        className="inline-flex rounded-md border border-white/10 overflow-hidden self-start"
-        role="radiogroup"
-        aria-label="Subtask sort order"
-        data-testid="toggle-sort-mode"
-      >
-        <label
-          className={cn(
-            'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-            isManualSortMode
-              ? 'bg-transparent text-muted-foreground'
-              : 'bg-secondary text-foreground',
-          )}
-          data-testid="toggle-sort-inherit"
+      <div className="flex items-center gap-3 flex-wrap">
+        <div
+          className="inline-flex rounded-md border border-white/10 overflow-hidden"
+          role="radiogroup"
+          aria-label="Subtask sort order"
+          data-testid="toggle-sort-mode"
         >
-          <input
-            type="radio"
-            name="subtask-sort-mode"
-            value={SubtaskSortMode.INHERIT}
-            checked={!isManualSortMode}
-            onChange={() => isManualSortMode && handleToggle()}
-            className="sr-only"
-          />
-          Inherit
-        </label>
-        <label
-          className={cn(
-            'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-            isManualSortMode
-              ? 'bg-secondary text-foreground'
-              : 'bg-transparent text-muted-foreground',
-          )}
-          data-testid="toggle-sort-manual"
-        >
-          <input
-            type="radio"
-            name="subtask-sort-mode"
-            value={SubtaskSortMode.MANUAL}
-            checked={isManualSortMode}
-            onChange={() => !isManualSortMode && handleToggle()}
-            className="sr-only"
-          />
-          Manual
-        </label>
+          <label
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+              isManualSortMode
+                ? 'bg-transparent text-muted-foreground'
+                : 'bg-secondary text-foreground',
+            )}
+            data-testid="toggle-sort-inherit"
+          >
+            <input
+              type="radio"
+              name="subtask-sort-mode"
+              value={SubtaskSortMode.INHERIT}
+              checked={!isManualSortMode}
+              onChange={() => isManualSortMode && handleToggle()}
+              className="sr-only"
+            />
+            Inherit
+          </label>
+          <label
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+              isManualSortMode
+                ? 'bg-secondary text-foreground'
+                : 'bg-transparent text-muted-foreground',
+            )}
+            data-testid="toggle-sort-manual"
+          >
+            <input
+              type="radio"
+              name="subtask-sort-mode"
+              value={SubtaskSortMode.MANUAL}
+              checked={isManualSortMode}
+              onChange={() => !isManualSortMode && handleToggle()}
+              className="sr-only"
+            />
+            Manual
+          </label>
+        </div>
+        {isManualSortMode && (
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <Switch
+              checked={showNumbers}
+              onCheckedChange={onShowNumbersChange}
+              data-testid="switch-show-numbers"
+            />
+            <span className="text-xs text-muted-foreground">Show numbers</span>
+          </label>
+        )}
       </div>
       <span
         className="text-[11px] text-muted-foreground/70 leading-snug"
@@ -142,6 +159,7 @@ interface SubtaskItemProps {
   onToggleComplete: (task: Task) => void
   isManualSortMode: boolean
   isDragDisabled?: boolean
+  numberPrefix?: string
 }
 
 const SubtaskItem = ({
@@ -151,6 +169,7 @@ const SubtaskItem = ({
   onToggleComplete,
   isManualSortMode,
   isDragDisabled,
+  numberPrefix,
 }: SubtaskItemProps) => {
   const {
     attributes,
@@ -217,6 +236,9 @@ const SubtaskItem = ({
             isCompleted && 'line-through text-muted-foreground',
           )}
         >
+          {numberPrefix && (
+            <span className="text-muted-foreground mr-1">{numberPrefix}</span>
+          )}
           {task.name}
         </span>
       </div>
@@ -266,6 +288,7 @@ export const SubtasksCard = ({
     task.subtaskSortMode,
   )
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
+  const [showNumbers, setShowNumbers] = useState(false)
 
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
@@ -373,7 +396,9 @@ export const SubtasksCard = ({
             taskId={task.id}
             initialSortMode={task.subtaskSortMode}
             directChildIds={directChildIds}
+            showNumbers={showNumbers}
             onSortModeChange={handleSortModeChange}
+            onShowNumbersChange={setShowNumbers}
           />
           <DndContext
             sensors={sensors}
@@ -385,23 +410,35 @@ export const SubtasksCard = ({
               strategy={verticalListSortingStrategy}
             >
               <div className="divide-y divide-white/5">
-                {subtasks.map((subtask) => (
-                  <SubtaskItem
-                    key={subtask.id}
-                    task={subtask}
-                    onEdit={onEditChild}
-                    onDelete={(t) => onSubtaskDelete?.(t)}
-                    onToggleComplete={(t) => {
-                      const newStatus =
-                        t.status === TaskStatus.COMPLETED
-                          ? TaskStatus.OPEN
-                          : TaskStatus.COMPLETED
-                      setTaskStatus(t.id, newStatus)
-                    }}
-                    isManualSortMode={isManualSortMode}
-                    isDragDisabled={false}
-                  />
-                ))}
+                {subtasks.map((subtask, index) => {
+                  let numberPrefix: string | undefined
+                  if (showNumbers && isManualSortMode && subtask.depth === 0) {
+                    const directIndex =
+                      subtasks
+                        .slice(0, index + 1)
+                        .filter((t) => t.depth === 0).length
+                    numberPrefix = `${directIndex}.`
+                  }
+
+                  return (
+                    <SubtaskItem
+                      key={subtask.id}
+                      task={subtask}
+                      onEdit={onEditChild}
+                      onDelete={(t) => onSubtaskDelete?.(t)}
+                      onToggleComplete={(t) => {
+                        const newStatus =
+                          t.status === TaskStatus.COMPLETED
+                            ? TaskStatus.OPEN
+                            : TaskStatus.COMPLETED
+                        setTaskStatus(t.id, newStatus)
+                      }}
+                      isManualSortMode={isManualSortMode}
+                      isDragDisabled={false}
+                      numberPrefix={numberPrefix}
+                    />
+                  )
+                })}
               </div>
             </SortableContext>
           </DndContext>
