@@ -6,6 +6,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import { AssignSubtaskDialog } from '@/components/AssignSubtaskDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import {
   Dialog,
@@ -40,7 +41,11 @@ export const useTaskDialog = () => {
 interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
-    'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
+    | 'onSubmit'
+    | 'onAddChild'
+    | 'onEditChild'
+    | 'onSubtaskDelete'
+    | 'onAssignSubtask'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -61,6 +66,7 @@ const DesktopDialog = ({
   onAddChild,
   onEditChild,
   onSubtaskDelete,
+  onAssignSubtask,
 }: TaskFormDialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
@@ -93,6 +99,7 @@ const DesktopDialog = ({
           onAddChild={onAddChild}
           onEditChild={onEditChild}
           onSubtaskDelete={onSubtaskDelete}
+          onAssignSubtask={onAssignSubtask}
         />
       </DialogContent>
     </Dialog>
@@ -108,6 +115,7 @@ const MobileDialog = ({
   onAddChild,
   onEditChild,
   onSubtaskDelete,
+  onAssignSubtask,
 }: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
@@ -118,18 +126,17 @@ const MobileDialog = ({
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
       >
-        <div className="flex-1 overflow-y-auto p-4">
-          <TaskForm
-            key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
-            onSubmit={onSubmit}
-            initialData={activeTask}
-            parentId={parentId}
-            onCancel={onClose}
-            onAddChild={onAddChild}
-            onEditChild={onEditChild}
-            onSubtaskDelete={onSubtaskDelete}
-          />
-        </div>
+        <TaskForm
+          key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
+          onSubmit={onSubmit}
+          initialData={activeTask}
+          parentId={parentId}
+          onCancel={onClose}
+          onAddChild={onAddChild}
+          onEditChild={onEditChild}
+          onSubtaskDelete={onSubtaskDelete}
+          onAssignSubtask={onAssignSubtask}
+        />
       </motion.div>
     )}
   </AnimatePresence>
@@ -149,6 +156,7 @@ export const TaskFormDialogProvider = ({
     null,
   )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
 
@@ -234,6 +242,7 @@ export const TaskFormDialogProvider = ({
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
         onSubtaskDelete={setSubtaskToDelete}
+        onAssignSubtask={setAssignParentTask}
       />
 
       <MobileDialog
@@ -245,6 +254,7 @@ export const TaskFormDialogProvider = ({
         onAddChild={openCreateDialog}
         onEditChild={handleEditChild}
         onSubtaskDelete={setSubtaskToDelete}
+        onAssignSubtask={setAssignParentTask}
       />
 
       <SubtaskActionDialog
@@ -285,6 +295,16 @@ export const TaskFormDialogProvider = ({
           }
         }}
       />
+
+      {assignParentTask && (
+        <AssignSubtaskDialog
+          open={!!assignParentTask}
+          onOpenChange={(open) => {
+            if (!open) setAssignParentTask(null)
+          }}
+          parentTask={assignParentTask}
+        />
+      )}
     </TaskFormDialogContext.Provider>
   )
 }
