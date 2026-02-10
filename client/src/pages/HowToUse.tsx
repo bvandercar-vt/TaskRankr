@@ -16,6 +16,7 @@ import {
 import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
+import { ContactCard } from '@/components/ContactCard'
 import { Card, CardContent } from '@/components/primitives/Card'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSizeStyle, Routes } from '@/lib/constants'
@@ -171,6 +172,8 @@ const HowToUse = () => {
             </div>
           </section>
         </div>
+
+        <ContactCard className="mt-8" />
       </main>
     </div>
   )

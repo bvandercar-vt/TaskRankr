@@ -3,9 +3,11 @@
  */
 
 import { useRef, useState } from 'react'
-import { Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { Link } from 'wouter'
 
 import { BackButton } from '@/components/BackButton'
+import { ContactCard } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
@@ -27,7 +29,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSizeStyle } from '@/lib/constants'
+import { IconSizeStyle, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
@@ -313,6 +315,23 @@ const Settings = () => {
           <SortInfo />
         </div>
 
+        <Link href={Routes.HOW_TO_USE}>
+          <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
+            <div>
+              <h3 className="font-semibold text-foreground">How To Use</h3>
+              <p className="text-sm text-muted-foreground">
+                Learn how to get the most out of TaskRankr
+              </p>
+            </div>
+            <ChevronRight
+              className={cn(
+                IconSizeStyle.HW5,
+                'text-muted-foreground shrink-0',
+              )}
+            />
+          </Card>
+        </Link>
+
         {!isGuestMode && (
           <Card className="mt-8 flex items-center justify-between">
             <div>
@@ -341,6 +360,8 @@ const Settings = () => {
             </a>
           </Card>
         )}
+
+        <ContactCard className="mt-4" />
 
         <CollapsibleCard
           title="Import/Export Data"
