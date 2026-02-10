@@ -7,7 +7,15 @@ import { boolean, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
-import { type RankField, SortOption } from './tasks.zod'
+export enum SortOption {
+  DATE_CREATED = 'date_created',
+  PRIORITY = 'priority',
+  EASE = 'ease',
+  ENJOYMENT = 'enjoyment',
+  TIME = 'time',
+}
+
+export type RankField = Exclude<SortOption, `date_${string}`>
 
 export const fieldFlagsSchema = z.object({
   visible: z.boolean(),
@@ -44,7 +52,7 @@ export const userSettings = pgTable('user_settings', {
   alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
     .default(true)
     .notNull(),
-  sortBy: text('sort_by').default('priority').notNull(),
+  sortBy: text('sort_by').default(SortOption.DATE_CREATED).notNull(),
   fieldConfig: jsonb('field_config')
     .$type<FieldConfig>()
     .default(DEFAULT_FIELD_CONFIG)
@@ -53,7 +61,7 @@ export const userSettings = pgTable('user_settings', {
 
 const userSettingsCommon = {
   userId: z.string().min(1),
-  sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE),
+  sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE_CREATED),
   fieldConfig: fieldConfigSchema.default(DEFAULT_FIELD_CONFIG),
 }
 

@@ -12,9 +12,10 @@ import {
 } from 'react'
 
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-
-const STORAGE_KEY_AUTH = 'taskrankr-auth-expanded'
-const STORAGE_KEY_GUEST = 'taskrankr-guest-expanded'
+import {
+  getStorageKeys,
+  StorageMode,
+} from '@/components/providers/LocalStateProvider'
 
 interface ExpandedTasksContextValue {
   expandedIds: Set<number>
@@ -37,7 +38,9 @@ export const useExpandedTasks = () => {
 
 export const useExpandedTasksState = () => {
   const { isGuestMode } = useGuestMode()
-  const storageKey = isGuestMode ? STORAGE_KEY_GUEST : STORAGE_KEY_AUTH
+  const storageKey = getStorageKeys(
+    isGuestMode ? StorageMode.GUEST : StorageMode.AUTH,
+  ).expanded
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(() => {
     if (typeof window === 'undefined') return new Set()
