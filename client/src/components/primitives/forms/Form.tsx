@@ -3,11 +3,11 @@
  * Integrates react-hook-form with @radix-ui primitives.
  */
 
-'use client'
+"use client";
 
-import { createContext, useContext, useId } from 'react'
-import type * as LabelPrimitive from '@radix-ui/react-label'
-import { Slot } from '@radix-ui/react-slot'
+import { createContext, useContext, useId } from "react";
+import type * as LabelPrimitive from "@radix-ui/react-label";
+import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
   type ControllerProps,
@@ -15,23 +15,23 @@ import {
   type FieldValues,
   FormProvider,
   useFormContext,
-} from 'react-hook-form'
+} from "react-hook-form";
 
-import { Label } from '@/components/primitives/forms/Label'
-import { cn, forwardRefHelper } from '@/lib/utils'
+import { Label } from "@/components/primitives/forms/Label";
+import { cn, forwardRefHelper } from "@/lib/utils";
 
-export const Form = FormProvider
+export const Form = FormProvider;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
-  name: TName
-}
+  name: TName;
+};
 
 const FormFieldContext = createContext<FormFieldContextValue>(
   {} as FormFieldContextValue,
-)
+);
 
 export const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -43,21 +43,21 @@ export const FormField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
     </FormFieldContext.Provider>
-  )
-}
+  );
+};
 
 const useFormField = () => {
-  const fieldContext = useContext(FormFieldContext)
-  const itemContext = useContext(FormItemContext)
-  const { getFieldState, formState } = useFormContext()
+  const fieldContext = useContext(FormFieldContext);
+  const itemContext = useContext(FormItemContext);
+  const { getFieldState, formState } = useFormContext();
 
-  const fieldState = getFieldState(fieldContext.name, formState)
+  const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
-    throw new Error('useFormField should be used within <FormField>')
+    throw new Error("useFormField should be used within <FormField>");
   }
 
-  const { id } = itemContext
+  const { id } = itemContext;
 
   return {
     id,
@@ -66,50 +66,50 @@ const useFormField = () => {
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
-  }
-}
+  };
+};
 
 type FormItemContextValue = {
-  id: string
-}
+  id: string;
+};
 
 const FormItemContext = createContext<FormItemContextValue>(
   {} as FormItemContextValue,
-)
+);
 
 export const FormItem = forwardRefHelper<HTMLDivElement>(
   ({ className, ...props }, ref) => {
-    const id = useId()
+    const id = useId();
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn('space-y-2', className)} {...props} />
+        <div ref={ref} className={cn("space-y-2", className)} {...props} />
       </FormItemContext.Provider>
-    )
+    );
   },
-  'FormItem',
-)
+  "FormItem",
+);
 
 export const FormLabel = forwardRefHelper<typeof LabelPrimitive.Root>(
   ({ className, ...props }, ref) => {
-    const { error, formItemId } = useFormField()
+    const { error, formItemId } = useFormField();
 
     return (
       <Label
         ref={ref}
-        className={cn(error && 'text-destructive', className)}
+        className={cn(error && "text-destructive", className)}
         htmlFor={formItemId}
         {...props}
       />
-    )
+    );
   },
-  'FormLabel',
-)
+  "FormLabel",
+);
 
 export const FormControl = forwardRefHelper<typeof Slot>(
   ({ ...props }, ref) => {
     const { error, formItemId, formDescriptionId, formMessageId } =
-      useFormField()
+      useFormField();
 
     return (
       <Slot
@@ -123,46 +123,46 @@ export const FormControl = forwardRefHelper<typeof Slot>(
         aria-invalid={!!error}
         {...props}
       />
-    )
+    );
   },
-  'FormControl',
-)
+  "FormControl",
+);
 
 export const FormDescription = forwardRefHelper<HTMLParagraphElement>(
   ({ className, ...props }, ref) => {
-    const { formDescriptionId } = useFormField()
+    const { formDescriptionId } = useFormField();
 
     return (
       <p
         ref={ref}
         id={formDescriptionId}
-        className={cn('text-sm text-muted-foreground', className)}
+        className={cn("text-sm text-muted-foreground", className)}
         {...props}
       />
-    )
+    );
   },
-  'FormDescription',
-)
+  "FormDescription",
+);
 
 export const FormMessage = forwardRefHelper<HTMLParagraphElement>(
   ({ className, children, ...props }, ref) => {
-    const { error, formMessageId } = useFormField()
-    const body = error ? String(error?.message ?? '') : children
+    const { error, formMessageId } = useFormField();
+    const body = error ? String(error?.message ?? "") : children;
 
     if (!body) {
-      return null
+      return null;
     }
 
     return (
       <p
         ref={ref}
         id={formMessageId}
-        className={cn('text-sm font-medium text-destructive', className)}
+        className={cn("text-sm font-medium text-destructive", className)}
         {...props}
       >
         {body}
       </p>
-    )
+    );
   },
-  'FormMessage',
-)
+  "FormMessage",
+);
