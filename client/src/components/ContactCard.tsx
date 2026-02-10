@@ -1,10 +1,10 @@
-import { Mail } from "lucide-react";
+import { Mail } from 'lucide-react'
 
-import { IconSizeStyle } from "@/lib/constants";
+import { IconSizeStyle } from '@/lib/constants'
 
 export const ContactCard = ({ className }: { className?: string }) => (
   <div
-    className={`p-4 bg-card rounded-lg border border-white/10  ${className ?? ""}`}
+    className={`p-4 bg-card rounded-lg border border-white/10  ${className ?? ''}`}
     data-testid="card-contact"
   >
     <h3 className="font-semibold text-foreground">Help & Feedback</h3>
@@ -22,4 +22,4 @@ export const ContactCard = ({ className }: { className?: string }) => (
       </a>
     </div>
   </div>
-);
+)
