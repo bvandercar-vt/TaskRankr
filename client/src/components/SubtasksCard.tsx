@@ -474,7 +474,6 @@ export const SubtasksCard = ({
         open={assignDialogOpen}
         onOpenChange={setAssignDialogOpen}
         parentTask={task}
-        allTasks={allTasks}
       />
     </div>
   )

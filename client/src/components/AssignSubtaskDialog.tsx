@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
 import { SearchInput } from '@/components/SearchInput'
-import { useTaskActions } from '@/hooks/useTasks'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
@@ -21,15 +21,14 @@ interface AssignSubtaskDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   parentTask: Task
-  allTasks: Task[]
 }
 
 export const AssignSubtaskDialog = ({
   open,
   onOpenChange,
   parentTask,
-  allTasks,
 }: AssignSubtaskDialogProps) => {
+  const { data: allTasks } = useTasks()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
   const { updateTask } = useTaskActions()
