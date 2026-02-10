@@ -5,6 +5,7 @@
 
 import { omit } from 'es-toolkit'
 
+import { SyncOperationType } from '@/components/providers/LocalStateProvider'
 import type { Task, TaskWithSubtasks } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
@@ -78,7 +79,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     const idMapping = new Map<number, number>()
     const migratedTasks: TaskWithSubtasks[] = []
     const newSyncOps: Array<{
-      type: 'create_task'
+      type: SyncOperationType.CREATE_TASK
       tempId: number
       data: Omit<Task, 'id' | 'userId'>
     }> = []
@@ -98,7 +99,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       migratedTasks.push(migratedTask)
 
       newSyncOps.push({
-        type: 'create_task',
+        type: SyncOperationType.CREATE_TASK,
         tempId: newId,
         data: { ...omit(task, ['id', 'userId', 'subtasks']), parentId: null },
       })
@@ -122,7 +123,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       migratedTasks.push(migratedTask)
 
       newSyncOps.push({
-        type: 'create_task',
+        type: SyncOperationType.CREATE_TASK,
         tempId: newId,
         data: {
           ...omit(task, ['id', 'userId', 'subtasks']),

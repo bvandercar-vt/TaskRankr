@@ -32,22 +32,35 @@ export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 
-export type SyncOperation =
+export enum SyncOperationType {
+  CREATE_TASK = 'create_task',
+  UPDATE_TASK = 'update_task',
+  SET_STATUS = 'set_status',
+  DELETE_TASK = 'delete_task',
+  UPDATE_SETTINGS = 'update_settings',
+  REORDER_SUBTASKS = 'reorder_subtasks',
+}
+
+export type SyncOperationWithArgs =
   | {
-      type: 'create_task'
+      type: SyncOperationType.CREATE_TASK
       tempId: number
       data: CreateTaskContent
     }
-  | { type: 'update_task'; id: number; data: UpdateTaskContent }
-  | { type: 'set_status'; id: number; status: TaskStatus }
-  | { type: 'delete_task'; id: number }
-  | { type: 'update_settings'; data: Partial<UserSettings> }
-  | { type: 'reorder_subtasks'; parentId: number; orderedIds: number[] }
+  | { type: SyncOperationType.UPDATE_TASK; id: number; data: UpdateTaskContent }
+  | { type: SyncOperationType.SET_STATUS; id: number; status: TaskStatus }
+  | { type: SyncOperationType.DELETE_TASK; id: number }
+  | { type: SyncOperationType.UPDATE_SETTINGS; data: Partial<UserSettings> }
+  | {
+      type: SyncOperationType.REORDER_SUBTASKS
+      parentId: number
+      orderedIds: number[]
+    }
 
 interface LocalStateContextValue {
   tasks: TaskWithSubtasks[]
   settings: UserSettings
-  syncQueue: SyncOperation[]
+  syncQueue: SyncOperationWithArgs[]
   isInitialized: boolean
   hasDemoData: boolean
   createTask: (data: CreateTaskContent) => TaskWithSubtasks
@@ -192,7 +205,7 @@ export const LocalStateProvider = ({
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
   const [tasks, setTasks] = useState<TaskWithSubtasks[]>(DEFAULT_TASKS)
-  const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
+  const [syncQueue, setSyncQueue] = useState<SyncOperationWithArgs[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
 
@@ -205,7 +218,7 @@ export const LocalStateProvider = ({
     )
     const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
-    const loadedQueue = loadFromStorage<SyncOperation[]>(
+    const loadedQueue = loadFromStorage<SyncOperationWithArgs[]>(
       storageKeys.syncQueue,
       [],
     )
@@ -250,7 +263,7 @@ export const LocalStateProvider = ({
   }, [syncQueue, isInitialized, storageKeys])
 
   const enqueue = useCallback(
-    (op: SyncOperation) => {
+    (op: SyncOperationWithArgs) => {
       if (shouldSync) {
         setSyncQueue((prev) => [...prev, op])
       }
@@ -345,7 +358,7 @@ export const LocalStateProvider = ({
         }
         return updated
       })
-      enqueue({ type: 'create_task', tempId, data })
+      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
 
       return newTask
     },
@@ -361,7 +374,7 @@ export const LocalStateProvider = ({
           return updatedTask
         }),
       )
-      enqueue({ type: 'update_task', id, data: updates })
+      enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -416,7 +429,7 @@ export const LocalStateProvider = ({
         return newTasks
       })
 
-      enqueue({ type: 'set_status', id, status })
+      enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -451,7 +464,7 @@ export const LocalStateProvider = ({
 
         return deleteTaskFromTree(updated, id)
       })
-      enqueue({ type: 'delete_task', id })
+      enqueue({ type: SyncOperationType.DELETE_TASK, id })
     },
     [enqueue],
   )
@@ -464,7 +477,11 @@ export const LocalStateProvider = ({
           subtaskOrder: orderedIds,
         })),
       )
-      enqueue({ type: 'reorder_subtasks', parentId, orderedIds })
+      enqueue({
+        type: SyncOperationType.REORDER_SUBTASKS,
+        parentId,
+        orderedIds,
+      })
     },
     [enqueue],
   )
@@ -472,7 +489,7 @@ export const LocalStateProvider = ({
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
       setSettings((prev) => ({ ...prev, ...updates }))
-      enqueue({ type: 'update_settings', data: updates })
+      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: updates })
     },
     [enqueue],
   )
