@@ -25,6 +25,8 @@ export const createDemoTasks = (nextIdRef: {
   const numberedParentId = getNextId()
   const numberedResearchId = getNextId()
   const numberedDraftId = getNextId()
+  const numberedDraftOutlineId = getNextId()
+  const numberedDraftTimelineId = getNextId()
   const numberedReviewId = getNextId()
   const numberedCompletedId = getNextId()
 
@@ -234,6 +236,46 @@ export const createDemoTasks = (nextIdRef: {
       inProgressTime: 0,
       inProgressStartedAt: null,
       createdAt: new Date(now.getTime() - 40_000),
+      completedAt: null,
+      subtaskSortMode: SubtaskSortMode.MANUAL,
+      subtaskOrder: [numberedDraftOutlineId, numberedDraftTimelineId],
+      subtasksShowNumbers: true,
+      subtasks: [],
+    },
+    {
+      id: numberedDraftOutlineId,
+      userId: 'local',
+      name: 'Outline key sections',
+      description: 'List the main topics and structure',
+      priority: Priority.MEDIUM,
+      ease: Ease.EASY,
+      enjoyment: Enjoyment.MEDIUM,
+      time: Time.LOW,
+      parentId: numberedDraftId,
+      status: TaskStatus.OPEN,
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 38_000),
+      completedAt: null,
+      subtaskSortMode: SubtaskSortMode.INHERIT,
+      subtaskOrder: [],
+      subtasksShowNumbers: false,
+      subtasks: [],
+    },
+    {
+      id: numberedDraftTimelineId,
+      userId: 'local',
+      name: 'Add timeline estimates',
+      description: 'Estimate how long each phase will take',
+      priority: Priority.LOW,
+      ease: Ease.MEDIUM,
+      enjoyment: Enjoyment.LOW,
+      time: Time.LOWEST,
+      parentId: numberedDraftId,
+      status: TaskStatus.OPEN,
+      inProgressTime: 0,
+      inProgressStartedAt: null,
+      createdAt: new Date(now.getTime() - 36_000),
       completedAt: null,
       subtaskSortMode: SubtaskSortMode.INHERIT,
       subtaskOrder: [],
