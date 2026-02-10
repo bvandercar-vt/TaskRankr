@@ -225,13 +225,17 @@ export const LocalStateProvider = ({
     setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
 
-    if (storageMode === StorageMode.GUEST && loadedTasks.length === 0) {
+    if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
       localStorage.setItem(
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
-      localStorage.removeItem('taskrankr-guest-expanded')
+      if (storageMode === StorageMode.GUEST) {
+        localStorage.removeItem('taskrankr-guest-expanded')
+      } else {
+        localStorage.removeItem('taskrankr-auth-expanded')
+      }
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
@@ -495,7 +499,16 @@ export const LocalStateProvider = ({
 
   const setTasksFromServer = useCallback(
     (serverTasks: TaskWithSubtasks[]) => {
-      setTasks(serverTasks)
+      if (serverTasks.length === 0) {
+        setTasks((prev) => {
+          const hasOnlyDemoTasks =
+            prev.length > 0 && prev.every((t) => t.id < 0)
+          if (hasOnlyDemoTasks) return prev
+          return serverTasks
+        })
+      } else {
+        setTasks(serverTasks)
+      }
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
     },
