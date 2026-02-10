@@ -15,29 +15,7 @@ import {
 } from 'react'
 
 import { tsr } from '@/lib/ts-rest'
-import type { Task, TaskWithSubtasks } from '~/shared/schema'
 import { SyncOperationType, useLocalState } from './LocalStateProvider'
-
-const buildTaskTree = (flatTasks: Task[]): TaskWithSubtasks[] => {
-  const taskMap = new Map<number, TaskWithSubtasks>()
-  const rootTasks: TaskWithSubtasks[] = []
-
-  for (const task of flatTasks) {
-    taskMap.set(task.id, { ...task, subtasks: [] })
-  }
-
-  for (const task of flatTasks) {
-    const taskWithSubs = taskMap.get(task.id)
-    if (!taskWithSubs) continue
-    if (task.parentId && taskMap.has(task.parentId)) {
-      taskMap.get(task.parentId)?.subtasks.push(taskWithSubs)
-    } else {
-      rootTasks.push(taskWithSubs)
-    }
-  }
-
-  return rootTasks
-}
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -98,7 +76,7 @@ export const SyncProvider = ({
       ])
 
       if (tasksResult.status === 200) {
-        setTasksFromServer(buildTaskTree(tasksResult.body))
+        setTasksFromServer(tasksResult.body)
       }
       if (settingsResult.status === 200) {
         setSettingsFromServer(settingsResult.body)
