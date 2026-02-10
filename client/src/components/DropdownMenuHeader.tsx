@@ -120,7 +120,7 @@ export const DropdownMenuHeader = ({
               <Link href={Routes.HOME}>
                 <DropdownMenuItem
                   icon={Home}
-                  label="Home"
+                  label="Home (Open Tasks)"
                   data-testid="menu-item-home"
                 />
               </Link>

@@ -35,18 +35,9 @@ import { StatusBanner } from './components/StatusBanner'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 
-const ScrollToTop = () => {
-  const [location] = useLocation()
-  // biome-ignore lint/correctness/useExhaustiveDependencies: needs it
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [location])
-  return null
-}
 
 const Router = () => (
   <div className="flex-1 flex flex-col min-h-0">
-    <ScrollToTop />
     <Switch>
       <Route path={Routes.HOME} component={Home} />
       <Route path={Routes.COMPLETED} component={Completed} />
