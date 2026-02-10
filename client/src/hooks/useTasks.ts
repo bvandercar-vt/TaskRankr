@@ -1,9 +1,8 @@
 /**
- * @fileoverview Task CRUD operations hooks (for listing, creation, updates,
- * deletion, and status changes, etc.)
+ * @fileoverview Task CRUD operations hooks. All mutations go through
+ * LocalStateProvider which applies changes instantly; SyncProvider
+ * handles background server sync.
  */
-
-import { useMutation } from '@tanstack/react-query'
 
 import {
   type CreateTaskContent,
@@ -13,19 +12,11 @@ import type { Task, TaskWithSubtasks, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
-
-  if (!localState) {
-    return {
-      data: undefined,
-      isLoading: true,
-      error: null,
-      refetch: () => Promise.resolve(),
-    }
-  }
-
+  const tasks = localState?.tasks ?? []
+  const isLoading = localState ? !localState.isInitialized : true
   return {
-    data: localState.tasks,
-    isLoading: !localState.isInitialized,
+    data: tasks,
+    isLoading,
     error: null,
     refetch: () => Promise.resolve(),
   }
@@ -34,7 +25,7 @@ export const useTasks = () => {
 export const useTaskParentChain = (parentId?: number) => {
   const { data: tasks } = useTasks()
 
-  if (!parentId || !tasks) return []
+  if (!parentId) return []
 
   const chain: Pick<Task, 'id' | 'name'>[] = []
   let currentId: number | null | undefined = parentId
@@ -68,97 +59,40 @@ export const useTask = (id: number) => {
   }
 
   return {
-    data: tasks ? findTask(tasks, id) : undefined,
+    data: findTask(tasks, id),
     isLoading,
     error: null,
   }
 }
 
-export const useCreateTask = () => {
+export const useTaskActions = (): {
+  createTask: (data: CreateTaskContent) => TaskWithSubtasks
+  updateTask: (update: UpdateTask) => TaskWithSubtasks
+  setTaskStatus: (id: number, status: Task['status']) => TaskWithSubtasks
+  deleteTask: (id: number) => void
+  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
+} => {
   const localState = useLocalStateSafe()
 
-  return useMutation({
-    // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async (data: CreateTaskContent) => {
-      if (!localState) {
-        throw new Error('Local state not initialized')
-      }
-      return localState.createTask(data)
-    },
-  })
+  if (!localState) {
+    const noop = () => {
+      throw new Error('Local state not initialized')
+    }
+    return {
+      createTask: noop,
+      updateTask: noop,
+      setTaskStatus: noop,
+      deleteTask: noop,
+      reorderSubtasks: noop,
+    }
+  }
+
+  return {
+    createTask: (data) => localState.createTask(data),
+    updateTask: ({ id, ...updates }) => localState.updateTask(id, updates),
+    setTaskStatus: (id, status) => localState.setTaskStatus(id, status),
+    deleteTask: (id) => localState.deleteTask(id),
+    reorderSubtasks: (parentId, orderedIds) =>
+      localState.reorderSubtasks(parentId, orderedIds),
+  }
 }
-
-export const useUpdateTask = () => {
-  const localState = useLocalStateSafe()
-
-  return useMutation({
-    // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async ({ id, ...updates }: UpdateTask) => {
-      if (!localState) {
-        throw new Error('Local state not initialized')
-      }
-      return localState.updateTask(id, updates)
-    },
-  })
-}
-
-export const useSetTaskStatus = () => {
-  const localState = useLocalStateSafe()
-
-  return useMutation({
-    // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async ({ id, status }: Pick<Task, 'id' | 'status'>) => {
-      if (!localState) {
-        throw new Error('Local state not initialized')
-      }
-      return localState.setTaskStatus(id, status)
-    },
-  })
-}
-
-export const useDeleteTask = () => {
-  const localState = useLocalStateSafe()
-
-  return useMutation({
-    // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async (id: number) => {
-      if (!localState) {
-        throw new Error('Local state not initialized')
-      }
-      localState.deleteTask(id)
-    },
-  })
-}
-
-export const useReorderSubtasks = () => {
-  const localState = useLocalStateSafe()
-
-  return useMutation({
-    // biome-ignore lint/suspicious/useAwait: expects a promise
-    mutationFn: async ({
-      parentId,
-      orderedIds,
-    }: {
-      parentId: number
-      orderedIds: number[]
-    }) => {
-      if (!localState) {
-        throw new Error('Local state not initialized')
-      }
-      localState.reorderSubtasks(parentId, orderedIds)
-    },
-  })
-}
-
-export const sortTasksByOrder = (
-  tasks: TaskWithSubtasks[],
-  order: number[],
-): TaskWithSubtasks[] =>
-  [...tasks].sort((a, b) => {
-    const indexA = order.indexOf(a.id)
-    const indexB = order.indexOf(b.id)
-    return (
-      (indexA === -1 ? Number.POSITIVE_INFINITY : indexA) -
-      (indexB === -1 ? Number.POSITIVE_INFINITY : indexB)
-    )
-  })
