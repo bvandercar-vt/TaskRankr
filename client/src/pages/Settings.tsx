@@ -383,8 +383,8 @@ const Settings = () => {
           data-testid="collapsible-clear-local-data"
         >
           <p className="text-sm text-muted-foreground mb-3">
-            Remove all locally cached data. Your synced data on the server won't
-            be affected.
+            Remove all locally cached data and re-pull fresh data from the
+            server. Your synced data on the server won't be affected.
           </p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -401,8 +401,8 @@ const Settings = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Clear Local Storage?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will remove all locally cached data and reload the app.
-                  Your synced data on the server won't be affected.
+                  This will remove all locally cached data and re-pull fresh
+                  data from the server. Your synced data won't be affected.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
