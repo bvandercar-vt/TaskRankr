@@ -448,7 +448,8 @@ export const createDemoTasks = (nextIdRef: {
       id: getNextId(),
       userId: 'local',
       name: 'Define project scope',
-      description: 'This subtask was already finished before the others started.',
+      description:
+        'This subtask was already finished before the others started.',
       priority: Priority.HIGH,
       ease: Ease.EASY,
       enjoyment: Enjoyment.MEDIUM,
