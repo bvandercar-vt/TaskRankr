@@ -30,12 +30,7 @@ import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import {
-  SubtaskSortMode,
-  type Task,
-  TaskStatus,
-  type TaskWithSubtasks,
-} from '~/shared/schema'
+import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import type { DeleteTaskArgs } from './providers/LocalStateProvider'
 
 interface SortModeToggleProps {
@@ -156,7 +151,7 @@ const SortModeToggle = ({
   )
 }
 
-type Subtask = TaskWithSubtasks & { depth: number; subtaskIndex?: number }
+type Subtask = Task & { depth: number; subtaskIndex?: number }
 
 interface SubtaskItemProps {
   task: Subtask
@@ -318,31 +313,19 @@ export const SubtasksCard = ({
   )
 
   const subtasks = useMemo(() => {
-    const flattenTasks = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] => {
-      const result: TaskWithSubtasks[] = []
-      for (const t of tasks) {
-        result.push(t)
-        if (t.subtasks.length > 0) {
-          result.push(...flattenTasks(t.subtasks))
-        }
-      }
-      return result
-    }
-    const flatList = flattenTasks(allTasks)
-
     const collectDescendants = (
       parentId_: number,
       depth: number,
       parentSortMode: SubtaskSortMode,
       parentShowNumbers: boolean,
     ): Subtask[] => {
-      let children = flatList.filter((t) => t.parentId === parentId_)
+      let children = allTasks.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
         const order =
           depth === 0 && localSubtaskOrder
             ? localSubtaskOrder
-            : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
+            : (allTasks.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
         children = sortTasksByIdOrder(children, order)
       } else {
         children = [...children].sort((a, b) => {
