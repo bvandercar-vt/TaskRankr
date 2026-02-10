@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
+import { SubtaskActionDialog } from '@/components/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 import { useTaskActions } from '@/hooks/useTasks'
 import type { CreateTask, Task } from '~/shared/schema'
@@ -147,6 +148,7 @@ export const TaskFormDialogProvider = ({
   const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
     null,
   )
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
 
@@ -245,13 +247,40 @@ export const TaskFormDialogProvider = ({
         onSubtaskDelete={setSubtaskToDelete}
       />
 
-      <ConfirmDeleteDialog
-        open={!!subtaskToDelete}
+      <SubtaskActionDialog
+        open={!!subtaskToDelete && !showDeleteConfirm}
         onOpenChange={(open) => !open && setSubtaskToDelete(null)}
+        taskName={subtaskToDelete?.name ?? ''}
+        onDelete={() => setShowDeleteConfirm(true)}
+        onRemoveAsSubtask={() => {
+          if (subtaskToDelete) {
+            updateTask({ id: subtaskToDelete.id, parentId: null })
+            if (activeTask) {
+              updateTask({
+                id: activeTask.id,
+                subtaskOrder: activeTask.subtaskOrder.filter(
+                  (sid) => sid !== subtaskToDelete.id,
+                ),
+              })
+            }
+            setSubtaskToDelete(null)
+          }
+        }}
+      />
+
+      <ConfirmDeleteDialog
+        open={showDeleteConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowDeleteConfirm(false)
+            setSubtaskToDelete(null)
+          }
+        }}
         taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
           if (subtaskToDelete) {
             deleteTask(subtaskToDelete.id)
+            setShowDeleteConfirm(false)
             setSubtaskToDelete(null)
           }
         }}
