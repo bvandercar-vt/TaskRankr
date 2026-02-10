@@ -27,8 +27,30 @@ import {
 } from '@/components/primitives/DropdownMenu'
 import { SearchInput } from '@/components/SearchInput'
 import { IconSize, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 import { useGuestMode } from './providers/GuestModeProvider'
+
+const Title = ({
+  title,
+  showTitle,
+  className,
+}: {
+  title: React.ReactNode
+  showTitle?: boolean
+  className?: string
+}) =>
+  title && (
+    <h1
+      className={
+        showTitle
+          ? cn('text-2xl font-bold tracking-tight', className)
+          : 'sr-only'
+      }
+    >
+      {title}
+    </h1>
+  )
 
 interface DropdownMenuHeaderProps {
   title?: React.ReactNode
@@ -59,12 +81,11 @@ export const DropdownMenuHeader = ({
 
   return (
     <>
-      {title && showTitle && (
-        <h1 className="text-2xl font-bold tracking-tight mb-2 px-2 sm:hidden">
-          {title}
-        </h1>
-      )}
-      {title && !showTitle && <h1 className="sr-only">{title}</h1>}
+      <Title
+        title={title}
+        showTitle={showTitle}
+        className="mb-2 px-2 sm:hidden"
+      />
       <div className="flex items-center gap-1 mb-2 pr-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -139,11 +160,11 @@ export const DropdownMenuHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {title && showTitle && (
-          <h1 className="hidden sm:block text-2xl font-bold tracking-tight px-2">
-            {title}
-          </h1>
-        )}
+        <Title
+          title={title}
+          showTitle={showTitle}
+          className="hidden sm:block px-2"
+        />
 
         <div className="flex-1" />
 
