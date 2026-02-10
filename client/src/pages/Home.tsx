@@ -4,7 +4,7 @@
  *
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { LayoutList, Plus, Search } from 'lucide-react'
 
 import { DropdownMenuHeader } from '@/components/DropdownMenuHeader'
@@ -20,16 +20,13 @@ import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import {
-  filterTasksDeep,
+  filterAndSortTree,
+  filterTaskTree,
   RANK_FIELDS_COLUMNS,
   sortTaskTree,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import {
-  SortOption,
-  TaskStatus,
-  type TaskWithSubtasks,
-} from '~/shared/schema'
+import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Home = () => {
   const { data: tasks, isLoading, error } = useTasks()
@@ -40,12 +37,6 @@ const Home = () => {
 
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
-
-  const filterAndSortTree = useCallback(
-    (nodes: TaskWithSubtasks[], term: string, sort: SortOption) =>
-      sortTaskTree(filterTasksDeep(nodes, term), sort),
-    [],
-  )
 
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pinned tasks to be hoisted to top
@@ -103,13 +94,10 @@ const Home = () => {
   }, [tasks])
 
   const displayedTasks = useMemo(() => {
-    if (!taskTree) return []
     const sortedTree = filterAndSortTree(taskTree, search, sortBy)
 
     // Filter pinned tasks by search term
-    const filteredPinned = pinnedTasks.filter((task) =>
-      task.name.toLowerCase().includes(search.toLowerCase()),
-    )
+    const filteredPinned = filterTaskTree(pinnedTasks, search)
 
     // Separate in_progress (always first) from pinned, then sort pinned
     const inProgressTask = filteredPinned.filter(
@@ -127,7 +115,7 @@ const Home = () => {
 
     // Combine: in_progress first, then sorted pinned, then sorted tree
     return [...inProgressTask, ...sortedPinned, ...sortedTree]
-  }, [taskTree, pinnedTasks, search, sortBy, filterAndSortTree, settings])
+  }, [taskTree, pinnedTasks, search, sortBy, settings])
 
   if (isLoading) return <PageLoading />
   if (error) return <PageError />

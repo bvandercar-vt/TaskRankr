@@ -12,11 +12,7 @@ import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import {
-  filterTasksDeep,
-  RANK_FIELDS_COLUMNS,
-  sortTaskTree,
-} from '@/lib/sort-tasks'
+import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
@@ -54,7 +50,7 @@ const Completed = () => {
   }, [tasks])
 
   const displayedTasks = useMemo(
-    () => sortTaskTree(filterTasksDeep(completedTasks, search), SortOption.DATE),
+    () => filterAndSortTree(completedTasks, search, SortOption.DATE),
     [completedTasks, search],
   )
 

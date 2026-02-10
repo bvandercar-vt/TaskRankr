@@ -32,7 +32,7 @@ import {
   useUpdateTask,
 } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { sortTasksByOrder } from '@/lib/sort-tasks'
+import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   SubtaskSortMode,
@@ -332,7 +332,7 @@ export const SubtasksCard = ({
           depth === 0 && localSubtaskOrder
             ? localSubtaskOrder
             : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
-        children = sortTasksByOrder(children, order)
+        children = sortTasksByIdOrder(children, order)
       }
 
       const result: Array<TaskWithSubtasks & { depth: number }> = []

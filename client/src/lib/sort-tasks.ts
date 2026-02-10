@@ -13,6 +13,7 @@ import {
   type RankField,
   SortOption,
   SubtaskSortMode,
+  type Task,
   type TaskWithSubtasks,
   Time,
 } from '~/shared/schema'
@@ -52,11 +53,7 @@ const getLevelWeight = (
 ): number => (level ? (LEVEL_WEIGHTS[level] ?? 0) : 0)
 
 /** Compares two tasks by a single field, respecting its sort direction. */
-const compareByField = (
-  a: TaskWithSubtasks,
-  b: TaskWithSubtasks,
-  field: SortOption,
-): number => {
+const compareByField = (a: Task, b: Task, field: SortOption): number => {
   if (field === SortOption.DATE) {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   }
@@ -66,11 +63,11 @@ const compareByField = (
   return direction === SortDirection.DESC ? valB - valA : valA - valB
 }
 
-/** Sorts tasks by a passed sort order; earlier fields take priority. */
-export const sortTasks = (
-  tasks: TaskWithSubtasks[],
+/** Sorts tasks by a passed sort order of fields; earlier fields take priority. */
+export const sortTasksByField = <T extends Task>(
+  tasks: T[],
   fields: SortOption[],
-): TaskWithSubtasks[] =>
+): T[] =>
   [...tasks].sort((a, b) => {
     for (const field of fields) {
       const cmp = compareByField(a, b, field)
@@ -79,10 +76,11 @@ export const sortTasks = (
     return 0
   })
 
-export const sortTasksByOrder = (
-  tasks: TaskWithSubtasks[],
+/** Sorts tasks by a passed sort order of ids; earlier ids take priority. */
+export const sortTasksByIdOrder = <T extends Task>(
+  tasks: T[],
   order: number[],
-): TaskWithSubtasks[] =>
+): T[] =>
   [...tasks].sort((a, b) => {
     const indexA = order.indexOf(a.id)
     const indexB = order.indexOf(b.id)
@@ -101,26 +99,26 @@ export const SORT_ORDER_MAP = {
 } as const satisfies { [K in SortOption]: [K, ...SortOption[]] }
 
 export const sortTaskTree = (
-  nodes: TaskWithSubtasks[],
+  tasks: TaskWithSubtasks[],
   sort: SortOption,
   parentSortMode?: SubtaskSortMode,
   parentSubtaskOrder?: number[],
 ): TaskWithSubtasks[] => {
-  const withSortedChildren = nodes.map((node) => ({
-    ...node,
+  const withSortedChildren = tasks.map((task) => ({
+    ...task,
     subtasks: sortTaskTree(
-      node.subtasks,
+      task.subtasks,
       sort,
-      node.subtaskSortMode,
-      node.subtaskOrder,
+      task.subtaskSortMode,
+      task.subtaskOrder,
     ),
   }))
 
   if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
-    return sortTasksByOrder(withSortedChildren, parentSubtaskOrder)
+    return sortTasksByIdOrder(withSortedChildren, parentSubtaskOrder)
   }
 
-  return sortTasks(withSortedChildren, SORT_ORDER_MAP[sort])
+  return sortTasksByField(withSortedChildren, SORT_ORDER_MAP[sort])
 }
 
 // *****************************************************************************
@@ -180,18 +178,24 @@ export const RANK_FIELDS_COLUMNS = [
 // Filtering
 // *****************************************************************************
 
-export const filterTasksDeep = (
-  nodes: TaskWithSubtasks[],
-  term: string,
+export const filterTaskTree = (
+  tasks: TaskWithSubtasks[],
+  searchTerm: string,
 ): TaskWithSubtasks[] => {
-  if (!term) return nodes
-  const lower = term.toLowerCase()
-  return nodes.reduce((acc: TaskWithSubtasks[], node) => {
-    const matches = node.name.toLowerCase().includes(lower)
-    const filteredSubtasks = filterTasksDeep(node.subtasks, term)
+  if (!searchTerm) return tasks
+  const lower = searchTerm.toLowerCase()
+  return tasks.reduce((acc: TaskWithSubtasks[], task) => {
+    const matches = task.name.toLowerCase().includes(lower)
+    const filteredSubtasks = filterTaskTree(task.subtasks, searchTerm)
     if (matches || filteredSubtasks.length > 0) {
-      acc.push({ ...node, subtasks: filteredSubtasks })
+      acc.push({ ...task, subtasks: filteredSubtasks })
     }
     return acc
   }, [])
 }
+
+export const filterAndSortTree = (
+  tasks: TaskWithSubtasks[],
+  searchTerm: string,
+  sort: SortOption,
+) => sortTaskTree(filterTaskTree(tasks, searchTerm), sort)
