@@ -19,7 +19,7 @@ import {
   StorageMode,
 } from '@/components/providers/LocalStateProvider'
 import { SyncProvider, useSyncSafe } from '@/components/providers/SyncProvider'
-import { TaskDialogProvider } from '@/components/providers/TaskDialogProvider'
+import { TaskFormDialogProvider } from '@/components/providers/TaskFormDialogProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import {
@@ -153,10 +153,10 @@ const AuthenticatedApp = () => {
     <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
       <SyncProvider isAuthenticated={shouldSync}>
         <ExpandedTasksProvider>
-          <TaskDialogProvider>
+          <TaskFormDialogProvider>
             <StatusBanner />
             <Router />
-          </TaskDialogProvider>
+          </TaskFormDialogProvider>
         </ExpandedTasksProvider>
       </SyncProvider>
     </LocalStateProvider>

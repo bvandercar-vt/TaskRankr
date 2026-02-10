@@ -27,12 +27,23 @@ export const CollapsibleCard = ({
 }: CollapsibleCardProps) => {
   const [open, setOpen] = useState(defaultOpen)
 
+  const TitleElement =
+    typeof title === 'string' ? (
+      <h3 className="font-semibold text-muted-foreground">{title}</h3>
+    ) : (
+      title
+    )
+
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: TODO: fix with onKey
+    // biome-ignore lint/a11y/noStaticElementInteractions: TODO: better a11y
     <div
       className={cn(
         !noCard && 'p-4 bg-card rounded-lg border border-white/10',
+        !open && 'cursor-pointer',
         className,
       )}
+      onClick={!open ? () => setOpen(true) : undefined}
     >
       <button
         type="button"
@@ -40,14 +51,15 @@ export const CollapsibleCard = ({
           'flex items-center justify-between w-full text-left',
           triggerClassName,
         )}
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          if (open) {
+            e.stopPropagation()
+            setOpen(false)
+          }
+        }}
         data-testid={testId}
       >
-        {typeof title === 'string' ? (
-          <h3 className="font-semibold text-muted-foreground">{title}</h3>
-        ) : (
-          title
-        )}
+        {TitleElement}
         <ChevronDown
           className={cn(
             IconSizeStyle.HW4,

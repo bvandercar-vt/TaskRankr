@@ -26,11 +26,18 @@ const genId = () => {
   return count.toString()
 }
 
-type Action =
-  | { type: 'ADD_TOAST'; toast: ToasterToast }
-  | { type: 'UPDATE_TOAST'; toast: Partial<ToasterToast> }
-  | { type: 'DISMISS_TOAST'; toastId?: ToasterToast['id'] }
-  | { type: 'REMOVE_TOAST'; toastId?: ToasterToast['id'] }
+enum ToastActionType {
+  ADD = 'ADD',
+  UPDATE = 'UPDATE',
+  DISMISS = 'DISMISS',
+  REMOVE = 'REMOVE',
+}
+
+type ToastAction =
+  | { type: ToastActionType.ADD; toast: ToasterToast }
+  | { type: ToastActionType.UPDATE; toast: Partial<ToasterToast> }
+  | { type: ToastActionType.DISMISS; toastId?: ToasterToast['id'] }
+  | { type: ToastActionType.REMOVE; toastId?: ToasterToast['id'] }
 
 interface State {
   toasts: ToasterToast[]
@@ -45,22 +52,22 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({ type: 'REMOVE_TOAST', toastId })
+    dispatch({ type: ToastActionType.REMOVE, toastId })
   }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
 }
 
-export const reducer = (state: State, action: Action): State => {
+export const reducer = (state: State, action: ToastAction): State => {
   // biome-ignore lint/style/useDefaultSwitchClause: is exhaustive for the type
   switch (action.type) {
-    case 'ADD_TOAST':
+    case ToastActionType.ADD:
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
       }
 
-    case 'UPDATE_TOAST':
+    case ToastActionType.UPDATE:
       return {
         ...state,
         toasts: state.toasts.map((t) =>
@@ -68,7 +75,7 @@ export const reducer = (state: State, action: Action): State => {
         ),
       }
 
-    case 'DISMISS_TOAST': {
+    case ToastActionType.DISMISS: {
       const { toastId } = action
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
@@ -93,7 +100,7 @@ export const reducer = (state: State, action: Action): State => {
         ),
       }
     }
-    case 'REMOVE_TOAST':
+    case ToastActionType.REMOVE:
       if (action.toastId === undefined) {
         return {
           ...state,
@@ -111,7 +118,7 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
-const dispatch = (action: Action) => {
+const dispatch = (action: ToastAction) => {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
     listener(memoryState)
@@ -126,14 +133,13 @@ export const toast = ({ ...props }: Toast) => {
   // biome-ignore lint/nursery/noShadow: is fine
   const update = (props: ToasterToast) =>
     dispatch({
-      type: 'UPDATE_TOAST',
+      type: ToastActionType.UPDATE,
       toast: { ...props, id },
     })
 
-  const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id })
-
+  const dismiss = () => dispatch({ type: ToastActionType.DISMISS, toastId: id })
   dispatch({
-    type: 'ADD_TOAST',
+    type: ToastActionType.ADD,
     toast: {
       ...props,
       id,
@@ -168,6 +174,7 @@ export const useToast = () => {
   return {
     ...state,
     toast,
-    dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
+    dismiss: (toastId?: string) =>
+      dispatch({ type: ToastActionType.DISMISS, toastId }),
   }
 }

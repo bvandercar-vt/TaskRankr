@@ -3,7 +3,8 @@
  * (priority, ease, enjoyment, time).
  */
 
-import type { RankField, RankFieldValueMap } from '~/shared/schema'
+import type { RankField } from '~/shared/schema'
+import type { RankFieldValueMap } from './sort-tasks'
 
 const STYLES_COMMON = {
   red: 'text-red-400 bg-red-400/10 border-red-500/20',

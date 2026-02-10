@@ -2,41 +2,14 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
-import {
-  Calendar as CalendarIcon,
-  Check,
-  GripVertical,
-  Loader2,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/Button'
-import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Calendar } from '@/components/primitives/forms/Calendar'
 import {
   Form,
@@ -47,169 +20,90 @@ import {
   FormMessage,
 } from '@/components/primitives/forms/Form'
 import { Input } from '@/components/primitives/forms/Input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/primitives/forms/Select'
 import { Textarea } from '@/components/primitives/forms/Textarea'
+import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
+import { RankFieldSelect } from '@/components/RankFieldSelect'
+import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
-import {
-  sortTasksByOrder,
-  useReorderSubtasks,
-  useSetTaskStatus,
-  useTaskParentChain,
-  useTasks,
-  useUpdateTask,
-} from '@/hooks/useTasks'
-import { IconSizeStyle } from '@/lib/constants'
-import { getRankFieldStyle } from '@/lib/rank-field-styles'
+import { useTaskParentChain } from '@/hooks/useTasks'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
   type MutateTask,
-  RANK_FIELDS_CRITERIA,
   type RankField,
-  SubtaskSortMode,
   type Task,
   TaskStatus,
-  type TaskWithSubtasks,
 } from '~/shared/schema'
-import type { MutateTaskContent } from './providers/LocalStateProvider'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
+} from './providers/LocalStateProvider'
 
-interface SortableSubtaskItemProps {
-  task: Task & { depth: number }
-  onEdit?: (task: Task) => void
-  onDelete: (task: { id: number; name: string }) => void
-  onToggleComplete: (task: Task) => void
-  isManualMode: boolean
-  isDragDisabled?: boolean
+interface DateCreatedInputProps {
+  value: Date | undefined
+  onChange: (date: Date | undefined) => void
 }
 
-const SortableSubtaskItem = ({
-  task,
-  onEdit,
-  onDelete,
-  onToggleComplete,
-  isManualMode,
-  isDragDisabled,
-}: SortableSubtaskItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id, disabled: isDragDisabled })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    paddingLeft: `${12 + task.depth * 16}px`,
-  }
-
-  const isDirect = task.depth === 0
-  const showDragHandle = isManualMode && isDirect
-  const isCompleted = task.status === TaskStatus.COMPLETED
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        'flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none',
-        isDragging && 'opacity-50 bg-secondary/20',
-      )}
-      data-testid={`subtask-row-${task.id}`}
-    >
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        {showDragHandle && (
-          <button
-            type="button"
-            className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-muted-foreground"
-            {...attributes}
-            {...listeners}
-            data-testid={`drag-handle-${task.id}`}
-          >
-            <GripVertical className={IconSizeStyle.HW4} />
-          </button>
-        )}
-        {task.depth > 0 && (
-          <span className="text-muted-foreground/50 text-xs leading-none">
-            └
-          </span>
-        )}
-        <button
-          type="button"
-          onClick={() => onToggleComplete(task)}
-          className={cn(
-            'shrink-0 h-4 w-4 rounded-sm border transition-colors',
-            isCompleted
-              ? 'bg-emerald-600 border-emerald-600 text-white'
-              : 'border-muted-foreground/40 hover:border-muted-foreground',
-          )}
-          data-testid={`checkbox-complete-subtask-${task.id}`}
-        >
-          {isCompleted && <Check className="h-3 w-3 mx-auto" />}
-        </button>
-        <span
-          className={cn(
-            'text-sm truncate',
-            isCompleted && 'line-through text-muted-foreground',
-          )}
-        >
-          {task.name}
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        {onEdit && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(task)}
-            data-testid={`button-edit-subtask-${task.id}`}
-          >
-            <Pencil className={IconSizeStyle.HW4} />
-          </Button>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete({ id: task.id, name: task.name })}
-          data-testid={`button-delete-subtask-${task.id}`}
-        >
-          <Trash2 className={cn(IconSizeStyle.HW4, 'text-destructive')} />
-        </Button>
-      </div>
+const DateCreatedInput = ({ value, onChange }: DateCreatedInputProps) => (
+  <FormItem className="flex items-center justify-between gap-4">
+    <div>
+      <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        Date Created
+      </FormLabel>
     </div>
-  )
-}
+    <Popover>
+      <PopoverTrigger asChild>
+        <FormControl>
+          <Button
+            variant={'outline'}
+            className={cn(
+              'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
+              !value && 'text-muted-foreground',
+            )}
+          >
+            {value ? format(value, 'PPP') : <span>Pick a date</span>}
+            <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
+          </Button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-auto p-0 bg-card border-white/10 z-[300]"
+        align="end"
+      >
+        <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
+          Select Creation Date
+        </div>
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={onChange}
+          initialFocus
+          className="rounded-md border-0"
+        />
+      </PopoverContent>
+    </Popover>
+  </FormItem>
+)
 
 export interface TaskFormProps {
   onSubmit: (data: MutateTaskContent) => void
-  isPending: boolean
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
   onAddChild?: (parentId: number) => void
   onEditChild?: (task: Task) => void
-  onSubtaskDelete?: (task: { id: number; name: string }) => void
+  onSubtaskDelete?: (task: DeleteTaskArgs) => void
 }
 
 export const TaskForm = ({
   onSubmit,
-  isPending,
   initialData,
   parentId,
   onCancel,
@@ -217,132 +111,13 @@ export const TaskForm = ({
   onEditChild,
   onSubtaskDelete,
 }: TaskFormProps) => {
-  const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
-    null,
-  )
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
-  const { data: allTasks } = useTasks()
-  const updateTask = useUpdateTask()
-  const setTaskStatus = useSetTaskStatus()
-  const reorderSubtasks = useReorderSubtasks()
-
-  const [sortMode, setSortMode] = useState<SubtaskSortMode>(
-    initialData?.subtaskSortMode || SubtaskSortMode.INHERIT,
-  )
-
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 200,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  )
-
-  const subtasks = useMemo(() => {
-    if (!initialData || !allTasks) return []
-    const flattenTasks = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] => {
-      const result: TaskWithSubtasks[] = []
-      for (const t of tasks) {
-        result.push(t)
-        if (t.subtasks.length > 0) {
-          result.push(...flattenTasks(t.subtasks))
-        }
-      }
-      return result
-    }
-    const flatList = flattenTasks(allTasks)
-
-    const collectDescendants = (
-      parentId_: number,
-      depth: number,
-      parentSortMode: SubtaskSortMode,
-    ): (TaskWithSubtasks & { depth: number })[] => {
-      let children = flatList.filter((t) => t.parentId === parentId_)
-
-      if (parentSortMode === SubtaskSortMode.MANUAL) {
-        const order =
-          depth === 0 && localSubtaskOrder
-            ? localSubtaskOrder
-            : (flatList.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
-        children = sortTasksByOrder(children, order)
-      }
-
-      const result: Array<TaskWithSubtasks & { depth: number }> = []
-      for (const child of children) {
-        result.push({ ...child, depth })
-        result.push(
-          ...collectDescendants(child.id, depth + 1, child.subtaskSortMode),
-        )
-      }
-      return result
-    }
-
-    return collectDescendants(initialData.id, 0, sortMode)
-  }, [initialData, allTasks, sortMode, localSubtaskOrder])
-
-  const directChildIds = useMemo(
-    () => subtasks.filter((t) => t.depth === 0).map((t) => t.id),
-    [subtasks],
-  )
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (over && active.id !== over.id && initialData) {
-      const oldIndex = directChildIds.indexOf(active.id as number)
-      const newIndex = directChildIds.indexOf(over.id as number)
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
-        setLocalSubtaskOrder(newOrder)
-        reorderSubtasks.mutate({
-          parentId: initialData.id,
-          orderedIds: newOrder,
-        })
-      }
-    }
-  }
-
-  const handleSortModeToggle = () => {
-    if (!initialData || updateTask.isPending || reorderSubtasks.isPending)
-      return
-    const newMode: SubtaskSortMode =
-      sortMode === SubtaskSortMode.INHERIT
-        ? SubtaskSortMode.MANUAL
-        : SubtaskSortMode.INHERIT
-
-    setSortMode(newMode)
-
-    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks.mutate({
-        parentId: initialData.id,
-        orderedIds: directChildIds,
-      })
-    }
-
-    setLocalSubtaskOrder(null)
-    updateTask.mutate({
-      id: initialData.id,
-      subtaskSortMode: newMode,
-    })
-  }
-
-  const isMutating = updateTask.isPending || reorderSubtasks.isPending
 
   const rankFieldConfig = useMemo(
     () =>
       new Map(
-        RANK_FIELDS_CRITERIA.map(({ name }) => {
+        RANK_FIELDS_COLUMNS.map(({ name }) => {
           const { visible, required: rawRequired } = settings.fieldConfig[name]
           const required = visible && rawRequired
           return [name, { visible, required }]
@@ -353,7 +128,7 @@ export const TaskForm = ({
 
   const visibleRankFields = useMemo(
     () =>
-      RANK_FIELDS_CRITERIA.filter(
+      RANK_FIELDS_COLUMNS.filter(
         (attr) => rankFieldConfig.get(attr.name)?.visible,
       ),
     [rankFieldConfig],
@@ -365,7 +140,7 @@ export const TaskForm = ({
         .omit({ userId: true })
         .required(
           Object.fromEntries(
-            RANK_FIELDS_CRITERIA.map(({ name }) => [
+            RANK_FIELDS_COLUMNS.map(({ name }) => [
               name,
               Boolean(rankFieldConfig.get(name)?.required),
             ]).filter(([, isReq]) => isReq),
@@ -423,8 +198,6 @@ export const TaskForm = ({
     void form.trigger()
   }, [rankFieldConfig, form])
 
-  const NONE_VALUE = 'none'
-
   return (
     <Form {...form}>
       <form
@@ -455,84 +228,22 @@ export const TaskForm = ({
 
           {visibleRankFields.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              {visibleRankFields.map((attr) => {
-                const isRequired = Boolean(
-                  rankFieldConfig.get(attr.name)?.required,
-                )
-                const showNoneOption = !isRequired
-
-                return (
-                  <FormField
-                    key={attr.name}
-                    control={form.control}
-                    name={attr.name}
-                    render={({ field }) => {
-                      const hasError = isRequired && !field.value
-                      return (
-                        <FormItem>
-                          <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {attr.label}
-                            {isRequired && (
-                              <span className="text-destructive ml-1">*</span>
-                            )}
-                          </FormLabel>
-                          <Select
-                            onValueChange={(v) =>
-                              field.onChange(v === NONE_VALUE ? null : v)
-                            }
-                            value={field.value ?? NONE_VALUE}
-                          >
-                            <FormControl>
-                              <SelectTrigger
-                                className={cn(
-                                  'bg-secondary/20 capitalize font-semibold h-10',
-                                  hasError
-                                    ? 'border-destructive/50'
-                                    : 'border-white/5',
-                                  getRankFieldStyle(
-                                    attr.name,
-                                    field.value,
-                                    'text-muted-foreground',
-                                  ),
-                                )}
-                              >
-                                <SelectValue placeholder="Select..." />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-card border-white/10 z-[200]">
-                              {showNoneOption && (
-                                <SelectItem
-                                  value={NONE_VALUE}
-                                  className="text-muted-foreground italic"
-                                >
-                                  None
-                                </SelectItem>
-                              )}
-                              {attr.levels.filter(Boolean).map((level) => (
-                                <SelectItem
-                                  key={level}
-                                  value={level}
-                                  className={cn(
-                                    'capitalize font-semibold',
-                                    getRankFieldStyle(attr.name, level),
-                                  )}
-                                >
-                                  {level}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {hasError && (
-                            <p className="text-[10px] text-destructive mt-1">
-                              Required
-                            </p>
-                          )}
-                        </FormItem>
-                      )
-                    }}
-                  />
-                )
-              })}
+              {visibleRankFields.map(({ name, label, levels }) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field }) => (
+                    <RankFieldSelect
+                      name={name}
+                      label={label}
+                      levels={levels}
+                      field={field}
+                      isRequired={Boolean(rankFieldConfig.get(name)?.required)}
+                    />
+                  )}
+                />
+              ))}
             </div>
           )}
 
@@ -557,135 +268,12 @@ export const TaskForm = ({
           />
 
           {initialData && onAddChild && (
-            <div className="border border-white/10 rounded-lg overflow-hidden">
-              {subtasks.length > 0 && (
-                <CollapsibleCard
-                  title={
-                    <span className="text-sm font-medium">
-                      Subtasks ({subtasks.length})
-                    </span>
-                  }
-                  noCard
-                  className="bg-secondary/10"
-                  triggerClassName="p-3 hover:bg-secondary/20 transition-colors"
-                  contentClassName="mt-0"
-                  data-testid="button-toggle-subtasks"
-                >
-                  <div className="flex flex-col gap-1.5 px-3 py-2.5 border-b border-white/5 bg-secondary/5">
-                    <span
-                      className="text-xs font-medium text-muted-foreground"
-                      data-testid="label-sorting-method"
-                    >
-                      Sorting Method
-                    </span>
-                    <div
-                      className={cn(
-                        'inline-flex rounded-md border border-white/10 overflow-hidden self-start',
-                        isMutating && 'opacity-50 pointer-events-none',
-                      )}
-                      role="radiogroup"
-                      aria-label="Subtask sort order"
-                      data-testid="toggle-sort-mode"
-                    >
-                      <label
-                        className={cn(
-                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                          sortMode === SubtaskSortMode.INHERIT
-                            ? 'bg-secondary text-foreground'
-                            : 'bg-transparent text-muted-foreground',
-                        )}
-                        data-testid="toggle-sort-inherit"
-                      >
-                        <input
-                          type="radio"
-                          name="subtask-sort-mode"
-                          value={SubtaskSortMode.INHERIT}
-                          checked={sortMode === SubtaskSortMode.INHERIT}
-                          onChange={() =>
-                            sortMode !== SubtaskSortMode.INHERIT &&
-                            handleSortModeToggle()
-                          }
-                          className="sr-only"
-                        />
-                        Inherit
-                      </label>
-                      <label
-                        className={cn(
-                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                          sortMode === SubtaskSortMode.MANUAL
-                            ? 'bg-secondary text-foreground'
-                            : 'bg-transparent text-muted-foreground',
-                        )}
-                        data-testid="toggle-sort-manual"
-                      >
-                        <input
-                          type="radio"
-                          name="subtask-sort-mode"
-                          value={SubtaskSortMode.MANUAL}
-                          checked={sortMode === SubtaskSortMode.MANUAL}
-                          onChange={() =>
-                            sortMode !== SubtaskSortMode.MANUAL &&
-                            handleSortModeToggle()
-                          }
-                          className="sr-only"
-                        />
-                        Manual
-                      </label>
-                    </div>
-                    <span
-                      className="text-[11px] text-muted-foreground/70 leading-snug"
-                      data-testid="text-sort-caption"
-                    >
-                      {sortMode === SubtaskSortMode.INHERIT
-                        ? 'Subtasks follow the same sort order as the main task list.'
-                        : 'Drag subtasks into your preferred order using the grip handles.'}
-                    </span>
-                  </div>
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={directChildIds}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="divide-y divide-white/5">
-                        {subtasks.map((subtask) => (
-                          <SortableSubtaskItem
-                            key={subtask.id}
-                            task={subtask}
-                            onEdit={onEditChild}
-                            onDelete={(task) => onSubtaskDelete?.(task)}
-                            onToggleComplete={(task) => {
-                              const newStatus =
-                                task.status === TaskStatus.COMPLETED
-                                  ? TaskStatus.OPEN
-                                  : TaskStatus.COMPLETED
-                              setTaskStatus.mutate({
-                                id: task.id,
-                                status: newStatus,
-                              })
-                            }}
-                            isManualMode={sortMode === SubtaskSortMode.MANUAL}
-                            isDragDisabled={isMutating}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                </CollapsibleCard>
-              )}
-              <button
-                type="button"
-                onClick={() => onAddChild(initialData.id)}
-                className="w-full flex items-center justify-center gap-2 p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-muted-foreground hover:text-foreground border-t border-white/5"
-                data-testid="button-add-subtask"
-              >
-                <Plus className={IconSizeStyle.HW4} />
-                Add Subtask
-              </button>
-            </div>
+            <SubtasksCard
+              task={initialData}
+              onAddChild={onAddChild}
+              onEditChild={onEditChild}
+              onSubtaskDelete={onSubtaskDelete}
+            />
           )}
 
           <div className="flex flex-col gap-4 mt-2">
@@ -693,120 +281,38 @@ export const TaskForm = ({
               control={form.control}
               name="createdAt"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between gap-4">
-                  <div>
-                    <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Date Created
-                    </FormLabel>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-auto bg-secondary/10 border-white/5 h-8 text-xs py-1 px-3 font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-2 h-3 w-3 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0 bg-card border-white/10 z-[300]"
-                      align="end"
-                    >
-                      <div className="p-3 border-b border-white/5 bg-secondary/50 text-[10px] uppercase tracking-wider text-muted-foreground text-center">
-                        Select Creation Date
-                      </div>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date)
-                        }}
-                        initialFocus
-                        className="rounded-md border-0"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
+                <DateCreatedInput
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               )}
             />
 
-            {initialData?.status === TaskStatus.COMPLETED &&
-              initialData?.completedAt && (
+            {initialData?.status === TaskStatus.COMPLETED && (
+              <>
+                {initialData?.completedAt && (
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Date Completed
+                    </div>
+                    <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                      {format(new Date(initialData.completedAt), 'PPP p')}
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-4">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Date Completed
+                    Time Spent
                   </div>
-                  <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                    {format(new Date(initialData.completedAt), 'PPP p')}
-                  </div>
-                </div>
-              )}
-
-            {initialData?.status === TaskStatus.COMPLETED && (
-              <div className="flex items-center justify-between gap-4">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Time Spent
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                  <TimeInput
+                    durationMs={form.watch('inProgressTime') || 0}
+                    onDurationChange={(ms) =>
+                      form.setValue('inProgressTime', ms)
+                    }
                     className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      (form.watch('inProgressTime') || 0) / 3_600_000,
-                    )}
-                    onChange={(e) => {
-                      const hours = Number.parseInt(e.target.value) || 0
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentMinutes = Math.floor(
-                        (currentMs % 3_600_000) / 60_000,
-                      )
-                      form.setValue(
-                        'inProgressTime',
-                        hours * 3_600_000 + currentMinutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-hours"
                   />
-                  <span className="text-xs text-muted-foreground">h</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="0"
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    value={Math.floor(
-                      ((form.watch('inProgressTime') || 0) % 3_600_000) /
-                        60_000,
-                    )}
-                    onChange={(e) => {
-                      const minutes = Math.min(
-                        59,
-                        Number.parseInt(e.target.value) || 0,
-                      )
-                      const currentMs = form.getValues('inProgressTime') || 0
-                      const currentHours = Math.floor(currentMs / 3_600_000)
-                      form.setValue(
-                        'inProgressTime',
-                        currentHours * 3_600_000 + minutes * 60_000,
-                      )
-                    }}
-                    data-testid="input-time-minutes"
-                  />
-                  <span className="text-xs text-muted-foreground">m</span>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -822,12 +328,9 @@ export const TaskForm = ({
           </Button>
           <Button
             type="submit"
-            disabled={isPending || !isValid}
+            disabled={!isValid}
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending && (
-              <Loader2 className={cn(IconSizeStyle.HW4, 'mr-2 animate-spin')} />
-            )}
             {initialData ? 'Save' : 'Create'}
           </Button>
         </div>

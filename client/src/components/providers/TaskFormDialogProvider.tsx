@@ -15,31 +15,31 @@ import {
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
-import { useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks'
+import { useTaskActions } from '@/hooks/useTasks'
 import type { CreateTask, Task } from '~/shared/schema'
-import type { MutateTaskContent } from './LocalStateProvider'
+import type { DeleteTaskArgs, MutateTaskContent } from './LocalStateProvider'
 
-interface TaskDialogContextType {
+interface TaskFormDialogContextType {
   openCreateDialog: (parentId?: number) => void
   openEditDialog: (task: Task) => void
   closeDialog: () => void
 }
 
-const TaskDialogContext = createContext<TaskDialogContextType | undefined>(
-  undefined,
-)
+const TaskFormDialogContext = createContext<
+  TaskFormDialogContextType | undefined
+>(undefined)
 
 export const useTaskDialog = () => {
-  const context = useContext(TaskDialogContext)
+  const context = useContext(TaskFormDialogContext)
   if (!context)
     throw new Error('useTaskDialog must be used within a TaskDialogProvider')
   return context
 }
 
-interface DialogProps
+interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
-    'isPending' | 'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
+    'onSubmit' | 'onAddChild' | 'onEditChild' | 'onSubtaskDelete'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -55,13 +55,12 @@ const DesktopDialog = ({
   mode,
   parentId,
   activeTask,
-  isPending,
   onSubmit,
   onClose,
   onAddChild,
   onEditChild,
   onSubtaskDelete,
-}: DialogProps) => (
+}: TaskFormDialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
       <DialogContent
@@ -87,8 +86,8 @@ const DesktopDialog = ({
           </DialogHeader>
           <div className="mt-4">
             <TaskForm
+              key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
               onSubmit={onSubmit}
-              isPending={isPending}
               initialData={activeTask}
               parentId={parentId}
               onCancel={onClose}
@@ -107,13 +106,12 @@ const MobileDialog = ({
   isOpen,
   activeTask,
   parentId,
-  isPending,
   onSubmit,
   onClose,
   onAddChild,
   onEditChild,
   onSubtaskDelete,
-}: Omit<DialogProps, 'setIsOpen' | 'mode'>) => (
+}: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
       <motion.div
@@ -125,8 +123,8 @@ const MobileDialog = ({
       >
         <div className="flex-1 overflow-y-auto px-4 pt-10">
           <TaskForm
+            key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
             onSubmit={onSubmit}
-            isPending={isPending}
             initialData={activeTask}
             parentId={parentId}
             onCancel={onClose}
@@ -140,7 +138,7 @@ const MobileDialog = ({
   </AnimatePresence>
 )
 
-export const TaskDialogProvider = ({
+export const TaskFormDialogProvider = ({
   children,
   // biome-ignore lint/complexity/noBannedTypes: is fine
 }: React.PropsWithChildren<{}>) => {
@@ -150,14 +148,11 @@ export const TaskDialogProvider = ({
   const [parentId, setParentId] = useState<number | undefined>(undefined)
   const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
 
-  const [subtaskToDelete, setSubtaskToDelete] = useState<{
-    id: number
-    name: string
-  } | null>(null)
+  const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
+    null,
+  )
 
-  const createTask = useCreateTask()
-  const updateTask = useUpdateTask()
-  const deleteTask = useDeleteTask()
+  const { createTask, updateTask, deleteTask } = useTaskActions()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -205,18 +200,13 @@ export const TaskDialogProvider = ({
 
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
-      createTask.mutate({ ...data, parentId } as CreateTask, {
-        onSuccess: closeDialog,
-      })
+      createTask({ ...data, parentId } as CreateTask)
+      closeDialog()
     } else if (mode === 'edit' && activeTask) {
-      updateTask.mutate(
-        { id: activeTask.id, ...data },
-        { onSuccess: closeDialog },
-      )
+      updateTask({ id: activeTask.id, ...data })
+      closeDialog()
     }
   }
-
-  const isPending = createTask.isPending || updateTask.isPending
 
   useEffect(() => {
     if (isOpen) {
@@ -230,7 +220,7 @@ export const TaskDialogProvider = ({
   }, [isOpen])
 
   return (
-    <TaskDialogContext.Provider
+    <TaskFormDialogContext.Provider
       value={{ openCreateDialog, openEditDialog, closeDialog }}
     >
       {children}
@@ -241,7 +231,6 @@ export const TaskDialogProvider = ({
         mode={mode}
         parentId={parentId}
         activeTask={activeTask}
-        isPending={isPending}
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
@@ -253,7 +242,6 @@ export const TaskDialogProvider = ({
         isOpen={isOpen}
         parentId={parentId}
         activeTask={activeTask}
-        isPending={isPending}
         onSubmit={handleSubmit}
         onClose={closeDialog}
         onAddChild={openCreateDialog}
@@ -267,11 +255,11 @@ export const TaskDialogProvider = ({
         taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
           if (subtaskToDelete) {
-            deleteTask.mutate(subtaskToDelete.id)
+            deleteTask(subtaskToDelete.id)
             setSubtaskToDelete(null)
           }
         }}
       />
-    </TaskDialogContext.Provider>
+    </TaskFormDialogContext.Provider>
   )
 }

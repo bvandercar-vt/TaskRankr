@@ -20,6 +20,7 @@ import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
   SubtaskSortMode,
+  type Task,
   TaskStatus,
   type TaskWithSubtasks,
   type UpdateTask,
@@ -29,18 +30,32 @@ import {
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
+export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
+
+export enum SyncOperationType {
+  CREATE_TASK = 'create_task',
+  UPDATE_TASK = 'update_task',
+  SET_STATUS = 'set_status',
+  DELETE_TASK = 'delete_task',
+  UPDATE_SETTINGS = 'update_settings',
+  REORDER_SUBTASKS = 'reorder_subtasks',
+}
 
 export type SyncOperation =
   | {
-      type: 'create_task'
+      type: SyncOperationType.CREATE_TASK
       tempId: number
       data: CreateTaskContent
     }
-  | { type: 'update_task'; id: number; data: UpdateTaskContent }
-  | { type: 'set_status'; id: number; status: TaskStatus }
-  | { type: 'delete_task'; id: number }
-  | { type: 'update_settings'; data: Partial<UserSettings> }
-  | { type: 'reorder_subtasks'; parentId: number; orderedIds: number[] }
+  | { type: SyncOperationType.UPDATE_TASK; id: number; data: UpdateTaskContent }
+  | { type: SyncOperationType.SET_STATUS; id: number; status: TaskStatus }
+  | { type: SyncOperationType.DELETE_TASK; id: number }
+  | { type: SyncOperationType.UPDATE_SETTINGS; data: Partial<UserSettings> }
+  | {
+      type: SyncOperationType.REORDER_SUBTASKS
+      parentId: number
+      orderedIds: number[]
+    }
 
 interface LocalStateContextValue {
   tasks: TaskWithSubtasks[]
@@ -59,8 +74,6 @@ interface LocalStateContextValue {
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: TaskWithSubtasks[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
-  resetToDefaults: () => void
-  initDemoData: () => void
   deleteDemoData: () => void
 }
 
@@ -71,15 +84,15 @@ export enum StorageMode {
   GUEST = 'guest',
 }
 
-const getStorageKeys = (mode: StorageMode) => ({
-  tasks: `taskrankr-${mode}-tasks`,
-  settings: `taskrankr-${mode}-settings`,
-  nextId: `taskrankr-${mode}-next-id`,
-  syncQueue: `taskrankr-${mode}-sync-queue`,
-  demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
-})
-
-const DEFAULT_TASKS: TaskWithSubtasks[] = []
+export const getStorageKeys = (mode: StorageMode) =>
+  ({
+    tasks: `taskrankr-${mode}-tasks`,
+    settings: `taskrankr-${mode}-settings`,
+    nextId: `taskrankr-${mode}-next-id`,
+    syncQueue: `taskrankr-${mode}-sync-queue`,
+    demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
+    expanded: `taskrankr-${mode}-expanded`,
+  }) as const
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -189,7 +202,7 @@ export const LocalStateProvider = ({
 }: LocalStateProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
-  const [tasks, setTasks] = useState<TaskWithSubtasks[]>(DEFAULT_TASKS)
+  const [tasks, setTasks] = useState<TaskWithSubtasks[]>([])
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
@@ -201,7 +214,7 @@ export const LocalStateProvider = ({
       storageKeys.settings,
       DEFAULT_SETTINGS,
     )
-    const loadedTasks = loadFromStorage(storageKeys.tasks, DEFAULT_TASKS)
+    const loadedTasks = loadFromStorage(storageKeys.tasks, [])
     const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
     const loadedQueue = loadFromStorage<SyncOperation[]>(
       storageKeys.syncQueue,
@@ -214,12 +227,14 @@ export const LocalStateProvider = ({
     setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
 
-    if (storageMode === StorageMode.GUEST && loadedTasks.length === 0) {
+    if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
       localStorage.setItem(
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
+
+      localStorage.removeItem(getStorageKeys(storageMode).expanded)
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
@@ -314,6 +329,7 @@ export const LocalStateProvider = ({
         completedAt: null,
         subtaskSortMode: SubtaskSortMode.INHERIT,
         subtaskOrder: [],
+        subtasksShowNumbers: false,
         subtasks: [],
         ...pick(data, [
           'name',
@@ -325,6 +341,7 @@ export const LocalStateProvider = ({
           'parentId',
           'subtaskSortMode',
           'subtaskOrder',
+          'subtasksShowNumbers',
         ]),
       }
 
@@ -343,7 +360,7 @@ export const LocalStateProvider = ({
         }
         return updated
       })
-      enqueue({ type: 'create_task', tempId, data })
+      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
 
       return newTask
     },
@@ -359,7 +376,7 @@ export const LocalStateProvider = ({
           return updatedTask
         }),
       )
-      enqueue({ type: 'update_task', id, data: updates })
+      enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -414,7 +431,7 @@ export const LocalStateProvider = ({
         return newTasks
       })
 
-      enqueue({ type: 'set_status', id, status })
+      enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -449,7 +466,7 @@ export const LocalStateProvider = ({
 
         return deleteTaskFromTree(updated, id)
       })
-      enqueue({ type: 'delete_task', id })
+      enqueue({ type: SyncOperationType.DELETE_TASK, id })
     },
     [enqueue],
   )
@@ -462,7 +479,11 @@ export const LocalStateProvider = ({
           subtaskOrder: orderedIds,
         })),
       )
-      enqueue({ type: 'reorder_subtasks', parentId, orderedIds })
+      enqueue({
+        type: SyncOperationType.REORDER_SUBTASKS,
+        parentId,
+        orderedIds,
+      })
     },
     [enqueue],
   )
@@ -470,49 +491,35 @@ export const LocalStateProvider = ({
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
       setSettings((prev) => ({ ...prev, ...updates }))
-      enqueue({ type: 'update_settings', data: updates })
+      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: updates })
     },
     [enqueue],
   )
 
   const setTasksFromServer = useCallback(
     (serverTasks: TaskWithSubtasks[]) => {
+      if (serverTasks.length === 0 && demoTaskIds.length > 0) {
+        return
+      }
+      if (serverTasks.length > 0) {
+        setDemoTaskIds([])
+      }
       setTasks(serverTasks)
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
     },
-    [storageKeys],
+    [storageKeys, demoTaskIds],
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
     setSettings(serverSettings)
   }, [])
 
-  const resetToDefaults = useCallback(() => {
-    setTasks(DEFAULT_TASKS)
-    setSettings(DEFAULT_SETTINGS)
-    setSyncQueue([])
-    setDemoTaskIds([])
-    nextIdRef.current = -1
-    localStorage.removeItem(storageKeys.tasks)
-    localStorage.removeItem(storageKeys.settings)
-    localStorage.removeItem(storageKeys.syncQueue)
-    localStorage.removeItem(storageKeys.nextId)
-    localStorage.removeItem(storageKeys.demoTaskIds)
-  }, [storageKeys])
-
   useEffect(() => {
     if (isInitialized) {
       localStorage.setItem(storageKeys.demoTaskIds, JSON.stringify(demoTaskIds))
     }
   }, [demoTaskIds, isInitialized, storageKeys])
-
-  const initDemoData = useCallback(() => {
-    const demoTasks = createDemoTasks(nextIdRef)
-    localStorage.setItem(storageKeys.nextId, JSON.stringify(nextIdRef.current))
-    setDemoTaskIds(demoTasks.map((t) => t.id))
-    setTasks((prev) => [...prev, ...demoTasks])
-  }, [storageKeys])
 
   const deleteDemoData = useCallback(() => {
     const idsToDelete = new Set(demoTaskIds)
@@ -532,67 +539,39 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
-  const value = useMemo(
-    () => ({
-      tasks,
-      settings,
-      syncQueue,
-      isInitialized,
-      hasDemoData,
-      createTask,
-      updateTask,
-      setTaskStatus,
-      deleteTask,
-      reorderSubtasks,
-      updateSettings,
-      clearSyncQueue,
-      removeSyncOperation,
-      replaceTaskId,
-      setTasksFromServer,
-      setSettingsFromServer,
-      resetToDefaults,
-      initDemoData,
-      deleteDemoData,
-    }),
-    [
-      tasks,
-      settings,
-      syncQueue,
-      isInitialized,
-      hasDemoData,
-      createTask,
-      updateTask,
-      setTaskStatus,
-      deleteTask,
-      reorderSubtasks,
-      updateSettings,
-      clearSyncQueue,
-      removeSyncOperation,
-      replaceTaskId,
-      setTasksFromServer,
-      setSettingsFromServer,
-      resetToDefaults,
-      initDemoData,
-      deleteDemoData,
-    ],
-  )
-
   return (
-    <LocalStateContext.Provider value={value}>
+    <LocalStateContext.Provider
+      value={{
+        tasks,
+        settings,
+        syncQueue,
+        isInitialized,
+        hasDemoData,
+        createTask,
+        updateTask,
+        setTaskStatus,
+        deleteTask,
+        reorderSubtasks,
+        updateSettings,
+        clearSyncQueue,
+        removeSyncOperation,
+        replaceTaskId,
+        setTasksFromServer,
+        setSettingsFromServer,
+        deleteDemoData,
+      }}
+    >
       {children}
     </LocalStateContext.Provider>
   )
 }
 
+export const useLocalStateSafe = () => useContext(LocalStateContext)
+
 export const useLocalState = () => {
-  const context = useContext(LocalStateContext)
+  const context = useLocalStateSafe()
   if (!context) {
     throw new Error('useLocalState must be used within a LocalStateProvider')
   }
-  return context
-}
-
-export const useLocalStateSafe = () => {
-  const context = useContext(LocalStateContext)
   return context
 }

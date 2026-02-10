@@ -8,21 +8,17 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
 import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
-import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Badge } from '@/components/primitives/Badge'
-import { useTaskDialog } from '@/components/providers/TaskDialogProvider'
+import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
-import {
-  useDeleteTask,
-  useSetTaskStatus,
-  useUpdateTask,
-} from '@/hooks/useTasks'
+import { useTaskActions } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
-  RANK_FIELDS_CRITERIA,
+  SubtaskSortMode,
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
@@ -49,14 +45,6 @@ const TaskBadge = ({ value, styleClass, muted }: TaskBadgeProps) => (
   </Badge>
 )
 
-interface TaskCardProps {
-  task: TaskWithSubtasks
-  level?: number
-  showRestore?: boolean
-  showCompletedDate?: boolean
-}
-
-// Format duration helper (milliseconds to human-readable)
 const formatDuration = (ms: number) => {
   if (ms <= 0) return null
   const totalSeconds = Math.floor(ms / 1000)
@@ -74,20 +62,59 @@ const formatDuration = (ms: number) => {
   }
 }
 
-// Calculate total accumulated time including all subtasks recursively
-const getTotalAccumulatedTime = (task: TaskWithSubtasks): number => {
-  // calculate own time
+const getTotalAccumulatedTime = (
+  task: Pick<
+    TaskWithSubtasks,
+    'inProgressTime' | 'inProgressStartedAt' | 'status' | 'subtasks'
+  >,
+): number => {
   let total = task.inProgressTime
   if (task.status === TaskStatus.IN_PROGRESS && task.inProgressStartedAt) {
     const elapsed = Date.now() - task.inProgressStartedAt.getTime()
     total += elapsed
   }
 
-  // add subtasks time
   for (const subtask of task.subtasks) {
     total += getTotalAccumulatedTime(subtask)
   }
   return total
+}
+
+const CompletedTimeDisplay = ({
+  completedAt,
+}: Pick<TaskWithSubtasks, 'completedAt'>) =>
+  completedAt && (
+    <span className="text-[10px] text-muted-foreground">
+      Completed:{' '}
+      {completedAt.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })}
+    </span>
+  )
+
+const InProgressTimeDisplay = (
+  task: Parameters<typeof getTotalAccumulatedTime>[0],
+) => {
+  const { settings } = useSettings()
+  const totalTime = getTotalAccumulatedTime(task)
+
+  if (!settings.enableInProgressTime || totalTime <= 0) return null
+
+  return (
+    <span className="text-[10px] text-muted-foreground">
+      Time spent: {formatDuration(totalTime)}
+    </span>
+  )
+}
+
+interface TaskCardProps {
+  task: TaskWithSubtasks
+  level?: number
+  showRestore?: boolean
+  showCompletedDate?: boolean
+  numberIndex?: number
 }
 
 export const TaskCard = ({
@@ -95,15 +122,13 @@ export const TaskCard = ({
   level = 0,
   showRestore = false,
   showCompletedDate = false,
+  numberIndex,
 }: TaskCardProps) => {
   const [showConfirm, setShowConfirm] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isHolding, setIsHolding] = useState(false)
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const setTaskStatus = useSetTaskStatus()
-  const deleteTask = useDeleteTask()
-  const updateTask = useUpdateTask()
+  const { setTaskStatus, deleteTask, updateTask } = useTaskActions()
   const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
@@ -140,7 +165,7 @@ export const TaskCard = ({
   }, [])
 
   const handleSetStatus = (status: TaskStatus) => {
-    setTaskStatus.mutate({ id: task.id, status })
+    setTaskStatus(task.id, status)
     setShowConfirm(false)
   }
 
@@ -170,14 +195,14 @@ export const TaskCard = ({
         onTouchStart={startHold}
         onTouchEnd={cancelHold}
       >
-        <div className="w-5 flex justify-center shrink-0">
+        <div className="w-5 flex justify-center shrink-0 self-stretch">
           {hasSubtasks ? (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 toggleExpanded(task.id)
               }}
-              className="group/expand p-0.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+              className="group/expand flex items-center justify-center w-full rounded-md hover:bg-white/10 transition-colors cursor-pointer"
               type="button"
               data-testid={`button-expand-${task.id}`}
             >
@@ -201,6 +226,11 @@ export const TaskCard = ({
                   : 'text-foreground',
               )}
             >
+              {numberIndex !== undefined && (
+                <span className="text-muted-foreground mr-1">
+                  {numberIndex + 1}.
+                </span>
+              )}
               {task.name}
             </h3>
             {isInProgress && (
@@ -236,7 +266,7 @@ export const TaskCard = ({
 
           <div className="flex flex-col items-end shrink-0 md:w-[268px] md:pr-0">
             <div className="flex items-center gap-1 justify-end">
-              {RANK_FIELDS_CRITERIA.map(({ name: field }) => {
+              {RANK_FIELDS_COLUMNS.map(({ name: field }) => {
                 if (!settings.fieldConfig[field].visible) return null
                 const value = task[field]
                 return (
@@ -251,23 +281,8 @@ export const TaskCard = ({
             </div>
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">
-                {task.completedAt && (
-                  <span className="text-[10px] text-muted-foreground">
-                    Completed:{' '}
-                    {task.completedAt.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                )}
-                {settings.enableInProgressTime &&
-                  getTotalAccumulatedTime(task) > 0 && (
-                    <span className="text-[10px] text-muted-foreground">
-                      Time spent:{' '}
-                      {formatDuration(getTotalAccumulatedTime(task))}
-                    </span>
-                  )}
+                <CompletedTimeDisplay {...task} />
+                <InProgressTimeDisplay {...task} />
               </div>
             )}
           </div>
@@ -287,13 +302,19 @@ export const TaskCard = ({
                 className="absolute left-[26px] top-0 bottom-3 w-px bg-white/[0.05]"
                 style={{ marginLeft: `${level * 16}px` }}
               />
-              {task.subtasks.map((subtask) => (
+              {task.subtasks.map((subtask, index) => (
                 <TaskCard
                   key={subtask.id}
                   task={subtask}
                   level={level + 1}
                   showRestore={showRestore}
                   showCompletedDate={showCompletedDate}
+                  numberIndex={
+                    task.subtasksShowNumbers &&
+                    task.subtaskSortMode === SubtaskSortMode.MANUAL
+                      ? index
+                      : undefined
+                  }
                 />
               ))}
             </div>
@@ -309,22 +330,9 @@ export const TaskCard = ({
         inProgressTime={getTotalAccumulatedTime(task)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
-          updateTask.mutate({ id: task.id, inProgressTime: timeMs })
+          updateTask({ id: task.id, inProgressTime: timeMs })
         }}
-        onDeleteClick={() => {
-          setShowConfirm(false)
-          setTimeout(() => setShowDeleteConfirm(true), 100)
-        }}
-      />
-
-      <ConfirmDeleteDialog
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-        taskName={task.name}
-        onConfirm={() => {
-          deleteTask.mutate(task.id)
-          setShowDeleteConfirm(false)
-        }}
+        onDelete={() => deleteTask(task.id)}
       />
     </div>
   )

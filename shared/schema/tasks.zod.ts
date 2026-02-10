@@ -4,6 +4,7 @@
 
 import { relations, sql } from 'drizzle-orm'
 import {
+  boolean,
   integer,
   pgTable,
   serial,
@@ -65,58 +66,11 @@ export enum Time {
   HIGHEST = 'highest',
 }
 
-export enum SortOption {
-  DATE = 'date',
-  PRIORITY = 'priority',
-  EASE = 'ease',
-  ENJOYMENT = 'enjoyment',
-  TIME = 'time',
-}
-
-export type RankField = Exclude<SortOption, SortOption.DATE>
-
-/** Are in display order. */
-export const RANK_FIELDS_CRITERIA = [
-  {
-    name: SortOption.PRIORITY,
-    label: 'Priority',
-    levels: Object.values(Priority),
-  },
-  {
-    name: SortOption.EASE,
-    label: 'Ease',
-    levels: Object.values(Ease),
-  },
-  {
-    name: SortOption.ENJOYMENT,
-    label: 'Enjoyment',
-    labelShort: 'Enjoy',
-    levels: Object.values(Enjoyment),
-  },
-  {
-    name: SortOption.TIME,
-    label: 'Time',
-    levels: Object.values(Time),
-  },
-] as const satisfies {
-  name: RankField
-  label: string
-  labelShort?: string
-  levels: readonly string[]
-}[]
-
-export type RankFieldValueMap = {
-  priority: Priority
-  ease: Ease
-  enjoyment: Enjoyment
-  time: Time
-}
-
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Owner of the task
   name: text('name').notNull(),
-  status: text('status').default('open').notNull(), // open, in_progress, pinned, completed
+  status: text('status').default(TaskStatus.OPEN).notNull(),
   description: text('description'),
   priority: text('priority'),
   ease: text('ease'),
@@ -127,10 +81,15 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   parentId: integer('parent_id'),
-  subtaskSortMode: text('subtask_sort_mode').default('inherit').notNull(), // inherit, manual
+  subtaskSortMode: text('subtask_sort_mode')
+    .default(SubtaskSortMode.INHERIT)
+    .notNull(),
   subtaskOrder: integer('subtask_order')
     .array()
     .default(sql`'{}'::integer[]`)
+    .notNull(),
+  subtasksShowNumbers: boolean('subtasks_show_numbers')
+    .default(false)
     .notNull(),
 })
 
@@ -157,6 +116,7 @@ const taskSchemaCommon = {
     .nativeEnum(SubtaskSortMode)
     .default(SubtaskSortMode.INHERIT),
   subtaskOrder: z.array(z.number()).default([]),
+  subtasksShowNumbers: z.boolean().default(false),
   createdAt: z.coerce.date(),
   completedAt: z.coerce.date().nullish(),
   inProgressStartedAt: z.coerce.date().nullish(),

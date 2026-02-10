@@ -16,7 +16,7 @@ import {
 
 import { tsr } from '@/lib/ts-rest'
 import type { Task, TaskWithSubtasks } from '~/shared/schema'
-import { useLocalState } from './LocalStateProvider'
+import { SyncOperationType, useLocalState } from './LocalStateProvider'
 
 const buildTaskTree = (flatTasks: Task[]): TaskWithSubtasks[] => {
   const taskMap = new Map<number, TaskWithSubtasks>()
@@ -160,7 +160,7 @@ export const SyncProvider = ({
         let success = false
 
         switch (op.type) {
-          case 'create_task': {
+          case SyncOperationType.CREATE_TASK: {
             const result = await tsr.tasks.create.mutate({ body: op.data })
             if (result.status === 201) {
               idMap.set(op.tempId, result.body.id)
@@ -169,7 +169,7 @@ export const SyncProvider = ({
             }
             break
           }
-          case 'update_task': {
+          case SyncOperationType.UPDATE_TASK: {
             const realId = resolveId(op.id)
             if (realId < 0) {
               success = true
@@ -182,7 +182,7 @@ export const SyncProvider = ({
             success = result.status === 200
             break
           }
-          case 'set_status': {
+          case SyncOperationType.SET_STATUS: {
             const realId = resolveId(op.id)
             if (realId < 0) {
               success = true
@@ -195,7 +195,7 @@ export const SyncProvider = ({
             success = result.status === 200
             break
           }
-          case 'delete_task': {
+          case SyncOperationType.DELETE_TASK: {
             const realId = resolveId(op.id)
             if (realId < 0) {
               success = true
@@ -207,12 +207,12 @@ export const SyncProvider = ({
             success = result.status === 204
             break
           }
-          case 'update_settings': {
+          case SyncOperationType.UPDATE_SETTINGS: {
             const result = await tsr.settings.update.mutate({ body: op.data })
             success = result.status === 200
             break
           }
-          case 'reorder_subtasks': {
+          case SyncOperationType.REORDER_SUBTASKS: {
             const realParentId = resolveId(op.parentId)
             if (realParentId < 0) {
               success = true
