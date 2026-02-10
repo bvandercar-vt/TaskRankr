@@ -12,9 +12,13 @@ import { Icon } from '@/components/primitives/LucideIcon'
 import { TaskCard } from '@/components/TaskCard'
 import { useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
-import { filterTasksDeep, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import {
+  filterTasksDeep,
+  RANK_FIELDS_COLUMNS,
+  sortTaskTree,
+} from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
-import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+import { SortOption, TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const Completed = () => {
   const { data: tasks, isLoading, error } = useTasks()
@@ -23,12 +27,10 @@ const Completed = () => {
   const completedTasks = useMemo(() => {
     if (!tasks) return []
 
-    // Find root-level completed tasks (no parent)
     const completedRoots = tasks.filter(
       (task) => task.status === TaskStatus.COMPLETED && !task.parentId,
     )
 
-    // Build subtask tree for each completed root
     const buildSubtaskTree = (parentId: number): TaskWithSubtasks[] => {
       const children = tasks.filter((t) => t.parentId === parentId)
       return children.map((child) => ({
@@ -42,7 +44,6 @@ const Completed = () => {
       subtasks: buildSubtaskTree(task.id),
     }))
 
-    // Sort by completedAt date (most recent first)
     roots.sort((a, b) => {
       const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0
       const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0
@@ -53,7 +54,7 @@ const Completed = () => {
   }, [tasks])
 
   const displayedTasks = useMemo(
-    () => filterTasksDeep(completedTasks, search),
+    () => sortTaskTree(filterTasksDeep(completedTasks, search), SortOption.DATE),
     [completedTasks, search],
   )
 

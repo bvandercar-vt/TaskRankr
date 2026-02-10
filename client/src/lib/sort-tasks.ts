@@ -12,6 +12,7 @@ import {
   Priority,
   type RankField,
   SortOption,
+  SubtaskSortMode,
   type TaskWithSubtasks,
   Time,
 } from '~/shared/schema'
@@ -98,6 +99,29 @@ export const SORT_ORDER_MAP = {
   enjoyment: [SortOption.ENJOYMENT, SortOption.PRIORITY, SortOption.EASE],
   time: [SortOption.TIME, SortOption.PRIORITY, SortOption.EASE],
 } as const satisfies { [K in SortOption]: [K, ...SortOption[]] }
+
+export const sortTaskTree = (
+  nodes: TaskWithSubtasks[],
+  sort: SortOption,
+  parentSortMode?: SubtaskSortMode,
+  parentSubtaskOrder?: number[],
+): TaskWithSubtasks[] => {
+  const withSortedChildren = nodes.map((node) => ({
+    ...node,
+    subtasks: sortTaskTree(
+      node.subtasks,
+      sort,
+      node.subtaskSortMode,
+      node.subtaskOrder,
+    ),
+  }))
+
+  if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
+    return sortTasksByOrder(withSortedChildren, parentSubtaskOrder)
+  }
+
+  return sortTasks(withSortedChildren, SORT_ORDER_MAP[sort])
+}
 
 // *****************************************************************************
 // Column criteria

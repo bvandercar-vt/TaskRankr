@@ -24,12 +24,11 @@ import {
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
   sortTasks,
-  sortTasksByOrder,
+  sortTaskTree,
 } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   SortOption,
-  SubtaskSortMode,
   TaskStatus,
   type TaskWithSubtasks,
 } from '~/shared/schema'
@@ -44,47 +43,10 @@ const Home = () => {
   const sortBy = settings.sortBy
   const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
 
-  const sortTree = useCallback(
-    (
-      nodes: TaskWithSubtasks[],
-      sort: SortOption,
-      parentSortMode?: SubtaskSortMode,
-      parentSubtaskOrder?: number[],
-    ): TaskWithSubtasks[] => {
-      const withSortedChildren = nodes.map((node) => ({
-        ...node,
-        subtasks: sortTree(
-          node.subtasks,
-          sort,
-          node.subtaskSortMode,
-          node.subtaskOrder,
-        ),
-      }))
-
-      if (parentSortMode === SubtaskSortMode.MANUAL && parentSubtaskOrder) {
-        return sortTasksByOrder(withSortedChildren, parentSubtaskOrder)
-      }
-
-      return sortTasks(withSortedChildren, SORT_ORDER_MAP[sort])
-    },
-    [],
-  )
-
   const filterAndSortTree = useCallback(
-    (
-      nodes: TaskWithSubtasks[],
-      term: string,
-      sort: SortOption,
-      parentSortMode?: SubtaskSortMode,
-      parentSubtaskOrder?: number[],
-    ): TaskWithSubtasks[] =>
-      sortTree(
-        filterTasksDeep(nodes, term),
-        sort,
-        parentSortMode,
-        parentSubtaskOrder,
-      ),
-    [sortTree],
+    (nodes: TaskWithSubtasks[], term: string, sort: SortOption) =>
+      sortTaskTree(filterTasksDeep(nodes, term), sort),
+    [],
   )
 
   // Build tree from flat list, excluding completed tasks
