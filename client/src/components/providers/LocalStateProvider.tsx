@@ -22,7 +22,6 @@ import {
   SubtaskSortMode,
   type Task,
   TaskStatus,
-  type TaskWithSubtasks,
   type UpdateTask,
   type UserSettings,
 } from '~/shared/schema'
@@ -58,21 +57,21 @@ export type SyncOperation =
     }
 
 interface LocalStateContextValue {
-  tasks: TaskWithSubtasks[]
+  tasks: Task[]
   settings: UserSettings
   syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
-  createTask: (data: CreateTaskContent) => TaskWithSubtasks
-  updateTask: (id: number, updates: UpdateTaskContent) => TaskWithSubtasks
-  setTaskStatus: (id: number, status: TaskStatus) => TaskWithSubtasks
+  createTask: (data: CreateTaskContent) => Task
+  updateTask: (id: number, updates: UpdateTaskContent) => Task
+  setTaskStatus: (id: number, status: TaskStatus) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   updateSettings: (updates: Partial<UserSettings>) => void
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
-  setTasksFromServer: (tasks: TaskWithSubtasks[]) => void
+  setTasksFromServer: (tasks: Task[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
   deleteDemoData: () => void
 }
@@ -100,93 +99,30 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
     if (!stored) return fallback
     const parsed = JSON.parse(stored)
     if (key.endsWith('-tasks')) {
-      const reviveDates = (tasks: TaskWithSubtasks[]): TaskWithSubtasks[] =>
-        tasks.map((t) => ({
-          ...t,
-          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
-          completedAt: t.completedAt ? new Date(t.completedAt) : null,
-          inProgressStartedAt: t.inProgressStartedAt
-            ? new Date(t.inProgressStartedAt)
-            : null,
-          subtasks: reviveDates(t.subtasks),
-        }))
-      return reviveDates(parsed) as T
+      const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
+        const result: Task[] = []
+        for (const t of tasks) {
+          const { subtasks, ...rest } = t as Task & { subtasks?: Task[] }
+          result.push({
+            ...rest,
+            createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
+            completedAt: rest.completedAt ? new Date(rest.completedAt) : null,
+            inProgressStartedAt: rest.inProgressStartedAt
+              ? new Date(rest.inProgressStartedAt)
+              : null,
+          })
+          if (subtasks && subtasks.length > 0) {
+            result.push(...flatten(subtasks))
+          }
+        }
+        return result
+      }
+      return flatten(parsed) as T
     }
     return parsed
   } catch {
     return fallback
   }
-}
-
-const updateTaskInTree = (
-  tasks: TaskWithSubtasks[],
-  id: number,
-  updater: (task: TaskWithSubtasks) => TaskWithSubtasks,
-): TaskWithSubtasks[] =>
-  tasks.map((task) => {
-    if (task.id === id) {
-      return updater(task)
-    }
-    if (task.subtasks.length > 0) {
-      return {
-        ...task,
-        subtasks: updateTaskInTree(task.subtasks, id, updater),
-      }
-    }
-    return task
-  })
-
-const deleteTaskFromTree = (
-  tasks: TaskWithSubtasks[],
-  id: number,
-): TaskWithSubtasks[] =>
-  tasks
-    .filter((task) => task.id !== id)
-    .map((task) => ({
-      ...task,
-      subtasks: deleteTaskFromTree(task.subtasks, id),
-    }))
-
-const getTotalTimeFromTask = (task: TaskWithSubtasks): number => {
-  let total = task.inProgressTime
-  for (const subtask of task.subtasks) {
-    total += getTotalTimeFromTask(subtask)
-  }
-  return total
-}
-
-const findTaskInTree = (
-  tasks: TaskWithSubtasks[],
-  id: number,
-): TaskWithSubtasks | undefined => {
-  for (const task of tasks) {
-    if (task.id === id) return task
-    const found = findTaskInTree(task.subtasks, id)
-    if (found) return found
-  }
-  return undefined
-}
-
-const addTaskToTree = (
-  tasks: TaskWithSubtasks[],
-  newTask: TaskWithSubtasks,
-  parentId: number | null,
-): TaskWithSubtasks[] => {
-  if (!parentId) {
-    return [...tasks, newTask]
-  }
-  return tasks.map((task) => {
-    if (task.id === parentId) {
-      return { ...task, subtasks: [...task.subtasks, newTask] }
-    }
-    if (task.subtasks.length > 0) {
-      return {
-        ...task,
-        subtasks: addTaskToTree(task.subtasks, newTask, parentId),
-      }
-    }
-    return task
-  })
 }
 
 interface LocalStateProviderProps {
@@ -202,7 +138,7 @@ export const LocalStateProvider = ({
 }: LocalStateProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
-  const [tasks, setTasks] = useState<TaskWithSubtasks[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
@@ -279,24 +215,56 @@ export const LocalStateProvider = ({
     setSyncQueue((prev) => prev.filter((_, i) => i !== index))
   }, [])
 
+  // Helper to update a task by ID
+  const updateTaskById = useCallback(
+    (
+      id: number,
+      updateThisTask: (task: Task) => Partial<Task>,
+      updateOtherTasks?: (task: Task) => Partial<Task>,
+    ): Task | undefined => {
+      let updatedTask: Task | undefined
+      setTasks((prev) =>
+        prev.map((task) => {
+          if (task.id === id) {
+            updatedTask = { ...task, ...updateThisTask(task) }
+            return updatedTask
+          } else {
+            return { ...task, ...updateOtherTasks?.(task) }
+          }
+        }),
+      )
+      return updatedTask
+    },
+    [],
+  )
+
   const replaceTaskId = useCallback((tempId: number, realId: number) => {
-    setTasks((prev) => {
-      const updated = updateTaskInTree(prev, tempId, (task) => ({
-        ...task,
-        id: realId,
-      }))
-      const replaceInOrder = (tasks_: TaskWithSubtasks[]): TaskWithSubtasks[] =>
-        tasks_.map((t) => ({
-          ...t,
-          subtaskOrder: t.subtaskOrder.map((id) =>
-            id === tempId ? realId : id,
-          ),
-          subtasks: replaceInOrder(t.subtasks),
-        }))
-      return replaceInOrder(updated)
-    })
+    setTasks((prev) =>
+      prev.map((t) => ({
+        ...(t.id === tempId ? { ...t, id: realId } : t),
+        parentId: t.parentId === tempId ? realId : t.parentId,
+        subtaskOrder: t.subtaskOrder.map((sid) =>
+          sid === tempId ? realId : sid,
+        ),
+      })),
+    )
     setSyncQueue((prev) =>
       prev.map((op) => {
+        if (op.type === SyncOperationType.CREATE_TASK) {
+          if (op.tempId === tempId) return { ...op, tempId: realId }
+          if (op.data.parentId === tempId)
+            return { ...op, data: { ...op.data, parentId: realId } }
+          return op
+        }
+        if (op.type === SyncOperationType.REORDER_SUBTASKS) {
+          return {
+            ...op,
+            parentId: op.parentId === tempId ? realId : op.parentId,
+            orderedIds: op.orderedIds.map((oid) =>
+              oid === tempId ? realId : oid,
+            ),
+          }
+        }
         if ('id' in op && op.id === tempId) {
           return { ...op, id: realId }
         }
@@ -306,14 +274,14 @@ export const LocalStateProvider = ({
   }, [])
 
   const createTask = useCallback(
-    (data: CreateTaskContent): TaskWithSubtasks => {
+    (data: CreateTaskContent): Task => {
       const tempId = nextIdRef.current--
       localStorage.setItem(
         storageKeys.nextId,
         JSON.stringify(nextIdRef.current),
       )
 
-      const newTask: TaskWithSubtasks = {
+      const newTask: Task = {
         id: tempId,
         userId: 'local',
         description: null,
@@ -330,7 +298,6 @@ export const LocalStateProvider = ({
         subtaskSortMode: SubtaskSortMode.INHERIT,
         subtaskOrder: [],
         subtasksShowNumbers: false,
-        subtasks: [],
         ...pick(data, [
           'name',
           'description',
@@ -346,125 +313,117 @@ export const LocalStateProvider = ({
       }
 
       setTasks((prev) => {
-        let updated = addTaskToTree(prev, newTask, data.parentId ?? null)
+        let updated = [...prev, newTask]
         if (data.parentId) {
-          updated = updateTaskInTree(updated, data.parentId, (parent) => {
-            if (parent.subtaskSortMode === SubtaskSortMode.MANUAL) {
-              return {
-                ...parent,
-                subtaskOrder: [...parent.subtaskOrder, tempId],
-              }
-            }
-            return parent
-          })
+          updated = updated.map((t) =>
+            t.id === data.parentId &&
+            t.subtaskSortMode === SubtaskSortMode.MANUAL
+              ? { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
+              : t,
+          )
         }
         return updated
       })
       enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
-
       return newTask
     },
     [settings.autoPinNewTasks, enqueue, storageKeys],
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskContent): TaskWithSubtasks => {
-      let updatedTask: TaskWithSubtasks | undefined
-      setTasks((prev) =>
-        updateTaskInTree(prev, id, (task) => {
-          updatedTask = { ...task, ...updates }
-          return updatedTask
-        }),
-      )
+    (id: number, updates: UpdateTaskContent): Task => {
+      const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue],
+    [enqueue, updateTaskById],
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): TaskWithSubtasks => {
-      let updatedTask: TaskWithSubtasks | undefined
-      setTasks((prev) => {
-        let newTasks = prev
-
-        if (status === TaskStatus.IN_PROGRESS) {
-          newTasks = newTasks.map((t) => {
-            if (t.id !== id && t.status === TaskStatus.IN_PROGRESS) {
+    (id: number, status: TaskStatus): Task => {
+      const updatedTask = updateTaskById(
+        id,
+        () => {
+          switch (status) {
+            case TaskStatus.IN_PROGRESS:
               return {
-                ...t,
-                status: TaskStatus.PINNED,
+                status: TaskStatus.IN_PROGRESS,
+                inProgressStartedAt: new Date(),
+              }
+            case TaskStatus.COMPLETED:
+              return {
+                status: TaskStatus.COMPLETED,
+                completedAt: new Date(),
                 inProgressStartedAt: null,
               }
-            }
-            return t
-          })
-          newTasks = updateTaskInTree(newTasks, id, (task) => {
-            updatedTask = {
-              ...task,
-              status: TaskStatus.IN_PROGRESS,
-              inProgressStartedAt: new Date(),
-            }
-            return updatedTask
-          })
-        } else if (status === TaskStatus.COMPLETED) {
-          newTasks = updateTaskInTree(newTasks, id, (task) => {
-            updatedTask = {
-              ...task,
-              status: TaskStatus.COMPLETED,
-              completedAt: new Date(),
-              inProgressStartedAt: null,
-            }
-            return updatedTask
-          })
-        } else {
-          newTasks = updateTaskInTree(newTasks, id, (task) => {
-            updatedTask = { ...task, status, inProgressStartedAt: null }
-            return updatedTask
-          })
-        }
-
-        if (!updatedTask) {
-          updatedTask = findTaskInTree(newTasks, id)
-        }
-        return newTasks
-      })
+            default:
+              return {
+                status,
+                inProgressStartedAt: null,
+              }
+          }
+        },
+        // Clear IN_PROGRESS status from other tasks when setting a new task to IN_PROGRESS
+        status === TaskStatus.IN_PROGRESS
+          ? (t) =>
+              t.status === TaskStatus.IN_PROGRESS
+                ? {
+                    status: TaskStatus.PINNED,
+                    inProgressStartedAt: null,
+                  }
+                : {}
+          : undefined,
+      )
 
       enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue],
+    [enqueue, updateTaskById],
   )
 
   const deleteTask = useCallback(
     (id: number) => {
       setTasks((prev) => {
-        const taskToDelete = findTaskInTree(prev, id)
+        const taskToDelete = prev.find((t) => t.id === id)
         if (!taskToDelete) return prev
 
-        let updated = prev
+        const idsToDelete = new Set<number>()
+        const collectDescendants = (parentId: number) => {
+          idsToDelete.add(parentId)
+          for (const t of prev) {
+            if (t.parentId === parentId) collectDescendants(t.id)
+          }
+        }
+        collectDescendants(id)
+
+        let totalTime = 0
+        for (const t of prev) {
+          if (idsToDelete.has(t.id)) totalTime += t.inProgressTime
+        }
+
+        let updated = prev.filter((t) => !idsToDelete.has(t.id))
 
         if (taskToDelete.parentId) {
-          const timeToAccumulate = getTotalTimeFromTask(taskToDelete)
-          updated = updateTaskInTree(
-            updated,
-            taskToDelete.parentId,
-            (parent) => ({
-              ...parent,
-              ...(timeToAccumulate > 0
-                ? {
-                    inProgressTime:
-                      (parent.inProgressTime ?? 0) + timeToAccumulate,
-                  }
-                : {}),
-              subtaskOrder: parent.subtaskOrder.filter((sid) => sid !== id),
-            }),
+          updated = updated.map((t) =>
+            t.id === taskToDelete.parentId
+              ? {
+                  ...t,
+                  ...(totalTime > 0
+                    ? {
+                        inProgressTime: (t.inProgressTime ?? 0) + totalTime,
+                      }
+                    : {}),
+                  subtaskOrder: t.subtaskOrder.filter(
+                    (sid) => !idsToDelete.has(sid),
+                  ),
+                }
+              : t,
           )
         }
 
-        return deleteTaskFromTree(updated, id)
+        return updated
       })
       enqueue({ type: SyncOperationType.DELETE_TASK, id })
     },
@@ -473,19 +432,14 @@ export const LocalStateProvider = ({
 
   const reorderSubtasks = useCallback(
     (parentId: number, orderedIds: number[]) => {
-      setTasks((prev) =>
-        updateTaskInTree(prev, parentId, (parent) => ({
-          ...parent,
-          subtaskOrder: orderedIds,
-        })),
-      )
+      updateTaskById(parentId, () => ({ subtaskOrder: orderedIds }))
       enqueue({
         type: SyncOperationType.REORDER_SUBTASKS,
         parentId,
         orderedIds,
       })
     },
-    [enqueue],
+    [enqueue, updateTaskById],
   )
 
   const updateSettings = useCallback(
@@ -497,7 +451,7 @@ export const LocalStateProvider = ({
   )
 
   const setTasksFromServer = useCallback(
-    (serverTasks: TaskWithSubtasks[]) => {
+    (serverTasks: Task[]) => {
       if (serverTasks.length === 0 && demoTaskIds.length > 0) {
         return
       }
@@ -523,16 +477,7 @@ export const LocalStateProvider = ({
 
   const deleteDemoData = useCallback(() => {
     const idsToDelete = new Set(demoTaskIds)
-    const filterDemoTasks = (
-      taskList: TaskWithSubtasks[],
-    ): TaskWithSubtasks[] =>
-      taskList
-        .filter((task) => !idsToDelete.has(task.id))
-        .map((task) => ({
-          ...task,
-          subtasks: filterDemoTasks(task.subtasks),
-        }))
-    setTasks((prev) => filterDemoTasks(prev))
+    setTasks((prev) => prev.filter((task) => !idsToDelete.has(task.id)))
     setDemoTaskIds([])
   }, [demoTaskIds])
 

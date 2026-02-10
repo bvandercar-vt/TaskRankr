@@ -6,7 +6,7 @@
 import { omit } from 'es-toolkit'
 
 import { SyncOperationType } from '@/components/providers/LocalStateProvider'
-import type { Task, TaskWithSubtasks } from '~/shared/schema'
+import type { Task } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
   tasks: 'taskrankr-guest-tasks',
@@ -24,7 +24,7 @@ const AUTH_STORAGE_KEYS = {
 
 export interface MigrationResult {
   migratedCount: number
-  tasks: TaskWithSubtasks[]
+  tasks: Task[]
 }
 
 export const getGuestTasksToMigrate = (): MigrationResult => {
@@ -36,7 +36,7 @@ export const getGuestTasksToMigrate = (): MigrationResult => {
       return { migratedCount: 0, tasks: [] }
     }
 
-    const guestTasks: TaskWithSubtasks[] = JSON.parse(guestTasksRaw)
+    const guestTasks: Task[] = JSON.parse(guestTasksRaw)
     const demoIds: number[] = demoIdsRaw ? JSON.parse(demoIdsRaw) : []
     const demoIdSet = new Set(demoIds)
 
@@ -62,7 +62,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 
   try {
     const existingAuthTasksRaw = localStorage.getItem(AUTH_STORAGE_KEYS.tasks)
-    const existingAuthTasks: TaskWithSubtasks[] = existingAuthTasksRaw
+    const existingAuthTasks: Task[] = existingAuthTasksRaw
       ? JSON.parse(existingAuthTasksRaw)
       : []
 
@@ -77,7 +77,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     let nextId = existingNextIdRaw ? JSON.parse(existingNextIdRaw) : -1
 
     const idMapping = new Map<number, number>()
-    const migratedTasks: TaskWithSubtasks[] = []
+    const migratedTasks: Task[] = []
     const newSyncOps: Array<{
       type: SyncOperationType.CREATE_TASK
       tempId: number
@@ -90,18 +90,17 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       const newId = nextId--
       idMapping.set(task.id, newId)
 
-      const migratedTask: TaskWithSubtasks = {
+      const migratedTask: Task = {
         ...task,
         id: newId,
         userId: 'local',
-        subtasks: [],
       }
       migratedTasks.push(migratedTask)
 
       newSyncOps.push({
         type: SyncOperationType.CREATE_TASK,
         tempId: newId,
-        data: { ...omit(task, ['id', 'userId', 'subtasks']), parentId: null },
+        data: { ...omit(task, ['id', 'userId']), parentId: null },
       })
     }
 
@@ -113,12 +112,11 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 
       idMapping.set(task.id, newId)
 
-      const migratedTask: TaskWithSubtasks = {
+      const migratedTask: Task = {
         ...task,
         id: newId,
         parentId: newParentId,
         userId: 'local',
-        subtasks: [],
       }
       migratedTasks.push(migratedTask)
 
@@ -126,7 +124,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
         type: SyncOperationType.CREATE_TASK,
         tempId: newId,
         data: {
-          ...omit(task, ['id', 'userId', 'subtasks']),
+          ...omit(task, ['id', 'userId']),
           parentId: newParentId,
         },
       })
