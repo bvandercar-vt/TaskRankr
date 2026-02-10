@@ -6,6 +6,7 @@ import { useRef, useState } from 'react'
 import { Download, LogOut, Trash2, Upload } from 'lucide-react'
 
 import { BackButton } from '@/components/BackButton'
+import { ContactCard } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
@@ -402,6 +403,8 @@ const Settings = () => {
             </AlertDialogContent>
           </AlertDialog>
         </CollapsibleCard>
+
+        <ContactCard className="mt-8" />
 
         <div className="mt-16 text-center text-muted-foreground">
           <p className="text-sm font-medium" data-testid="text-app-name">
