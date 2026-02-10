@@ -207,13 +207,7 @@ export const TaskForm = ({
         className="flex flex-col h-full"
       >
         <div className="flex-1 space-y-5">
-          {parentChain.length > 0 && (
-            <TagChain
-              items={parentChain}
-              label="Parent"
-              className="px-1 mb-2"
-            />
-          )}
+          <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
             name="name"
