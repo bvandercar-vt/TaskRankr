@@ -318,14 +318,17 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
             <div>
-              <h3 className="font-semibold text-foreground">
-                How To Use
-              </h3>
+              <h3 className="font-semibold text-foreground">How To Use</h3>
               <p className="text-sm text-muted-foreground">
                 Learn how to get the most out of TaskRankr
               </p>
             </div>
-            <ChevronRight className={cn(IconSizeStyle.HW5, 'text-muted-foreground shrink-0')} />
+            <ChevronRight
+              className={cn(
+                IconSizeStyle.HW5,
+                'text-muted-foreground shrink-0',
+              )}
+            />
           </Card>
         </Link>
 

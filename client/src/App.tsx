@@ -38,6 +38,7 @@ import { queryClient } from './lib/query-client'
 
 const ScrollToTop = () => {
   const [location] = useLocation()
+  // biome-ignore lint/correctness/useExhaustiveDependencies: needs it
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [location])
