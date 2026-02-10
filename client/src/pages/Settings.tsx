@@ -304,7 +304,7 @@ const Settings = () => {
   const { setTaskStatus } = useTaskActions()
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex-1 overflow-y-auto bg-background text-foreground">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-8">
           <BackButton />
