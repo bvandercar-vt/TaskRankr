@@ -26,18 +26,18 @@ const genId = () => {
   return count.toString()
 }
 
-enum ActionType {
-  ADD_TOAST = 'ADD_TOAST',
-  UPDATE_TOAST = 'UPDATE_TOAST',
-  DISMISS_TOAST = 'DISMISS_TOAST',
-  REMOVE_TOAST = 'REMOVE_TOAST',
+enum ToastActionType {
+  ADD = 'ADD',
+  UPDATE = 'UPDATE',
+  DISMISS = 'DISMISS',
+  REMOVE = 'REMOVE',
 }
 
-type Action =
-  | { type: ActionType.ADD_TOAST; toast: ToasterToast }
-  | { type: ActionType.UPDATE_TOAST; toast: Partial<ToasterToast> }
-  | { type: ActionType.DISMISS_TOAST; toastId?: ToasterToast['id'] }
-  | { type: ActionType.REMOVE_TOAST; toastId?: ToasterToast['id'] }
+type ToastActionWithArgs =
+  | { type: ToastActionType.ADD; toast: ToasterToast }
+  | { type: ToastActionType.UPDATE; toast: Partial<ToasterToast> }
+  | { type: ToastActionType.DISMISS; toastId?: ToasterToast['id'] }
+  | { type: ToastActionType.REMOVE; toastId?: ToasterToast['id'] }
 
 interface State {
   toasts: ToasterToast[]
@@ -52,22 +52,22 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
-    dispatch({ type: ActionType.REMOVE_TOAST, toastId })
+    dispatch({ type: ToastActionType.REMOVE, toastId })
   }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
 }
 
-export const reducer = (state: State, action: Action): State => {
+export const reducer = (state: State, action: ToastActionWithArgs): State => {
   // biome-ignore lint/style/useDefaultSwitchClause: is exhaustive for the type
   switch (action.type) {
-    case ActionType.ADD_TOAST:
+    case ToastActionType.ADD:
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
       }
 
-    case ActionType.UPDATE_TOAST:
+    case ToastActionType.UPDATE:
       return {
         ...state,
         toasts: state.toasts.map((t) =>
@@ -75,7 +75,7 @@ export const reducer = (state: State, action: Action): State => {
         ),
       }
 
-    case ActionType.DISMISS_TOAST: {
+    case ToastActionType.DISMISS: {
       const { toastId } = action
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
@@ -100,7 +100,7 @@ export const reducer = (state: State, action: Action): State => {
         ),
       }
     }
-    case ActionType.REMOVE_TOAST:
+    case ToastActionType.REMOVE:
       if (action.toastId === undefined) {
         return {
           ...state,
@@ -118,7 +118,7 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
-const dispatch = (action: Action) => {
+const dispatch = (action: ToastActionWithArgs) => {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
     listener(memoryState)
@@ -133,14 +133,13 @@ export const toast = ({ ...props }: Toast) => {
   // biome-ignore lint/nursery/noShadow: is fine
   const update = (props: ToasterToast) =>
     dispatch({
-      type: ActionType.UPDATE_TOAST,
+      type: ToastActionType.UPDATE,
       toast: { ...props, id },
     })
 
-  const dismiss = () =>
-    dispatch({ type: ActionType.DISMISS_TOAST, toastId: id })
+  const dismiss = () => dispatch({ type: ToastActionType.DISMISS, toastId: id })
   dispatch({
-    type: ActionType.ADD_TOAST,
+    type: ToastActionType.ADD,
     toast: {
       ...props,
       id,
@@ -176,6 +175,6 @@ export const useToast = () => {
     ...state,
     toast,
     dismiss: (toastId?: string) =>
-      dispatch({ type: ActionType.DISMISS_TOAST, toastId }),
+      dispatch({ type: ToastActionType.DISMISS, toastId }),
   }
 }
