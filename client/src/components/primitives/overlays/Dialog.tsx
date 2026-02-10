@@ -29,10 +29,12 @@ export const DialogOverlay = forwardRefHelper(
   DialogPrimitive.Overlay,
 )
 
-export const DialogContent = forwardRefHelper(
-  ({ className, children, ...props }, ref) => (
+export const DialogContent = forwardRefHelper<
+  typeof DialogPrimitive.Content,
+  { overlayClassName?: string }
+>(({ className, overlayClassName, children, ...props }, ref) => (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
