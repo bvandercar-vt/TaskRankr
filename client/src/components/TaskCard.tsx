@@ -114,7 +114,7 @@ interface TaskCardProps {
   level?: number
   showRestore?: boolean
   showCompletedDate?: boolean
-  numberPrefix?: string
+  numberIndex?: number
 }
 
 export const TaskCard = ({
@@ -122,7 +122,7 @@ export const TaskCard = ({
   level = 0,
   showRestore = false,
   showCompletedDate = false,
-  numberPrefix,
+  numberIndex,
 }: TaskCardProps) => {
   const [showConfirm, setShowConfirm] = useState(false)
   const [isHolding, setIsHolding] = useState(false)
@@ -226,9 +226,9 @@ export const TaskCard = ({
                   : 'text-foreground',
               )}
             >
-              {numberPrefix && (
+              {numberIndex !== undefined && (
                 <span className="text-muted-foreground mr-1">
-                  {numberPrefix}
+                  {numberIndex + 1}.
                 </span>
               )}
               {task.name}
@@ -309,10 +309,10 @@ export const TaskCard = ({
                   level={level + 1}
                   showRestore={showRestore}
                   showCompletedDate={showCompletedDate}
-                  numberPrefix={
+                  numberIndex={
                     task.subtasksShowNumbers &&
                     task.subtaskSortMode === SubtaskSortMode.MANUAL
-                      ? `${index + 1}.`
+                      ? index
                       : undefined
                   }
                 />
