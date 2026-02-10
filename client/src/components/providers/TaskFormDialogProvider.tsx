@@ -86,6 +86,7 @@ const DesktopDialog = ({
           </DialogHeader>
           <div className="mt-4">
             <TaskForm
+              key={activeTask?.id ?? 'new'}
               onSubmit={onSubmit}
               initialData={activeTask}
               parentId={parentId}
@@ -122,6 +123,7 @@ const MobileDialog = ({
       >
         <div className="flex-1 overflow-y-auto px-4 pt-10">
           <TaskForm
+            key={activeTask?.id ?? 'new'}
             onSubmit={onSubmit}
             initialData={activeTask}
             parentId={parentId}
