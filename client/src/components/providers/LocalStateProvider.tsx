@@ -499,20 +499,17 @@ export const LocalStateProvider = ({
 
   const setTasksFromServer = useCallback(
     (serverTasks: TaskWithSubtasks[]) => {
-      if (serverTasks.length === 0) {
-        setTasks((prev) => {
-          const hasOnlyDemoTasks =
-            prev.length > 0 && prev.every((t) => t.id < 0)
-          if (hasOnlyDemoTasks) return prev
-          return serverTasks
-        })
-      } else {
-        setTasks(serverTasks)
+      if (serverTasks.length === 0 && demoTaskIds.length > 0) {
+        return
       }
+      if (serverTasks.length > 0) {
+        setDemoTaskIds([])
+      }
+      setTasks(serverTasks)
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
     },
-    [storageKeys],
+    [storageKeys, demoTaskIds],
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
