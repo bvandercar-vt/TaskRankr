@@ -24,8 +24,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { Check, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
-import { Switch } from '@/components/primitives/forms/Switch'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { Switch } from '@/components/primitives/forms/Switch'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { IconSizeStyle } from '@/lib/constants'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
@@ -130,6 +130,7 @@ const SortModeToggle = ({
           </label>
         </div>
         {isManualSortMode && (
+          // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
           <label className="flex items-center gap-1.5 flex-1 justify-end cursor-pointer">
             <span className="text-xs text-muted-foreground">Show numbers</span>
             <Switch
@@ -155,14 +156,15 @@ const SortModeToggle = ({
   )
 }
 
+type Subtask = TaskWithSubtasks & { depth: number; subtaskIndex?: number }
+
 interface SubtaskItemProps {
-  task: Task & { depth: number }
+  task: Subtask
   onEdit?: (task: Task) => void
   onDelete: (task: DeleteTaskArgs) => void
   onToggleComplete: (task: Task) => void
   isManualSortMode: boolean
   isDragDisabled?: boolean
-  numberPrefix?: string
 }
 
 const SubtaskItem = ({
@@ -172,7 +174,6 @@ const SubtaskItem = ({
   onToggleComplete,
   isManualSortMode,
   isDragDisabled,
-  numberPrefix,
 }: SubtaskItemProps) => {
   const {
     attributes,
@@ -239,8 +240,10 @@ const SubtaskItem = ({
             isCompleted && 'line-through text-muted-foreground',
           )}
         >
-          {numberPrefix && (
-            <span className="text-muted-foreground mr-1">{numberPrefix}</span>
+          {task.subtaskIndex !== undefined && (
+            <span className="text-muted-foreground mr-1">
+              {task.subtaskIndex + 1}.
+            </span>
           )}
           {task.name}
         </span>
@@ -332,7 +335,7 @@ export const SubtasksCard = ({
       depth: number,
       parentSortMode: SubtaskSortMode,
       parentShowNumbers: boolean,
-    ): (TaskWithSubtasks & { depth: number; numberPrefix?: string })[] => {
+    ): Subtask[] => {
       let children = flatList.filter((t) => t.parentId === parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
@@ -343,16 +346,24 @@ export const SubtasksCard = ({
         children = sortTasksByIdOrder(children, order)
       }
 
-      const result: Array<TaskWithSubtasks & { depth: number; numberPrefix?: string }> = []
+      const result: Subtask[] = []
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
-        const numberPrefix =
-          parentShowNumbers && parentSortMode === SubtaskSortMode.MANUAL
-            ? `${i + 1}.`
-            : undefined
-        result.push({ ...child, depth, numberPrefix })
+        result.push({
+          ...child,
+          depth,
+          subtaskIndex:
+            parentShowNumbers && parentSortMode === SubtaskSortMode.MANUAL
+              ? i
+              : undefined,
+        })
         result.push(
-          ...collectDescendants(child.id, depth + 1, child.subtaskSortMode, child.subtasksShowNumbers),
+          ...collectDescendants(
+            child.id,
+            depth + 1,
+            child.subtaskSortMode,
+            child.subtasksShowNumbers,
+          ),
         )
       }
       return result
@@ -434,7 +445,6 @@ export const SubtasksCard = ({
                     }}
                     isManualSortMode={isManualSortMode}
                     isDragDisabled={false}
-                    numberPrefix={subtask.numberPrefix}
                   />
                 ))}
               </div>

@@ -88,7 +88,9 @@ export const tasks = pgTable('tasks', {
     .array()
     .default(sql`'{}'::integer[]`)
     .notNull(),
-  subtasksShowNumbers: boolean('subtasks_show_numbers').default(false).notNull(),
+  subtasksShowNumbers: boolean('subtasks_show_numbers')
+    .default(false)
+    .notNull(),
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
