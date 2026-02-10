@@ -12,9 +12,11 @@ import type { Task, TaskWithSubtasks, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
   const localState = useLocalStateSafe()
+  const tasks = localState?.tasks ?? []
+  const isLoading = localState ? !localState.isInitialized : true
   return {
-    data: localState?.tasks ?? [],
-    isLoading: localState ? !localState.isInitialized : true,
+    data: tasks,
+    isLoading,
     error: null,
     refetch: () => Promise.resolve(),
   }
