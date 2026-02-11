@@ -137,34 +137,25 @@ const HowToUse = () => {
                 testId="card-settings"
               />
             </Link>
+            {!isStandalone && (
+              <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+                <IconCard
+                  className="hover-elevate cursor-pointer"
+                  icon={<Download className={IconSize.HW5} />}
+                  title={
+                    <span className="flex items-center gap-1">
+                      Install as App
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </span>
+                  }
+                  description="Add TaskRankr to your home screen for offline access and a full-screen experience."
+                  testId="card-how-to-install"
+                />
+              </Link>
+            )}
           </div>
         </section>
       </div>
-
-      {!isStandalone && (
-        <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-          <IconCard
-            className="mt-8 hover-elevate cursor-pointer"
-            icon={<Download className={IconSize.HW5} />}
-            title={
-              <span className="flex items-center gap-1">
-                Install as App
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </span>
-            }
-            description={
-              <>
-                Add TaskRankr to your home screen for offline access and a
-                full-screen experience.{' '}
-                <span className="text-primary underline underline-offset-2">
-                  See install instructions
-                </span>
-              </>
-            }
-            testId="card-how-to-install"
-          />
-        </Link>
-      )}
 
       <ContactCard className="mt-4" />
     </ScrollablePage>
