@@ -227,9 +227,8 @@ const HowToInstall = () => {
                   <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
                   or{' '}
                   <MonitorDown className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
-                  install icon near the right side. You can also
-                  click the three-dot menu and select{' '}
-                  <strong>Install TaskRankr</strong>.
+                  install icon near the right side. You can also click the
+                  three-dot menu and select <strong>Install TaskRankr</strong>.
                 </>
               }
               data-testid="card-desktop-step-1"
