@@ -2,6 +2,7 @@
  * @fileoverview Instructions for installing TaskRankr as a PWA
  */
 
+import { useState } from 'react'
 import {
   AppWindow,
   Download,
@@ -12,60 +13,49 @@ import {
   SquarePlus,
   Wifi,
   WifiOff,
-} from "lucide-react";
+} from 'lucide-react'
 
-import { useState } from "react";
+import { BackButtonHeader } from '@/components/BackButton'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { IconCard, type IconCardProps } from '@/components/primitives/IconCard'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
+import { IconSize } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
-import { BackButtonHeader } from "@/components/BackButton";
-import { CollapsibleCard } from "@/components/primitives/CollapsibleCard";
-import { IconCard } from "@/components/primitives/IconCard";
-import { ScrollablePage } from "@/components/primitives/ScrollablePage";
-import { IconSize } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-
-type DeviceType = "ios" | "android" | "desktop";
+type DeviceType = 'ios' | 'android' | 'desktop'
 
 function detectDevice(): DeviceType {
-  const ua = navigator.userAgent;
-  if (/iPad|iPhone|iPod/.test(ua)) return "ios";
-  if (/Android/i.test(ua)) return "android";
-  return "desktop";
+  const ua = navigator.userAgent
+  if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
+  if (/Android/i.test(ua)) return 'android'
+  return 'desktop'
 }
 
-const StepCard = (props: {
-  stepNumber: number;
-  title: string;
-  description: React.ReactNode;
-  testId: string;
-}) => (
-  <IconCard
-    icon={props.stepNumber}
-    title={props.title}
-    description={props.description}
-    testId={props.testId}
-    small
-  />
-);
+const StepCard = (
+  props: Pick<IconCardProps, 'title' | 'description' | 'testId'> & {
+    stepNumber: number
+  },
+) => <IconCard {...props} icon={props.stepNumber} small />
 
 const DeviceSectionTitle = ({
   icon,
   label,
 }: {
-  icon: React.ReactNode;
-  label: string;
+  icon: React.ReactNode
+  label: string
 }) => (
   <span className="flex items-center gap-2 text-lg font-semibold text-primary">
     {icon}
     {label}
   </span>
-);
+)
 
 const HowToInstall = () => {
-  const device = detectDevice();
-  const [expanded, setExpanded] = useState<DeviceType | null>(device);
+  const device = detectDevice()
+  const [expanded, setExpanded] = useState<DeviceType | null>(device)
 
   const toggle = (section: DeviceType) =>
-    setExpanded((prev) => (prev === section ? null : section));
+    setExpanded((prev) => (prev === section ? null : section))
 
   return (
     <ScrollablePage className="pb-16">
@@ -105,12 +95,12 @@ const HowToInstall = () => {
         </section>
 
         <CollapsibleCard
-          open={expanded === "ios"}
-          onOpenChange={() => toggle("ios")}
+          open={expanded === 'ios'}
+          onOpenChange={() => toggle('ios')}
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Smartphone className={cn(IconSize.HW5, "text-primary")} />}
+              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
               label="iPhone / iPad (Safari)"
             />
           }
@@ -128,8 +118,8 @@ const HowToInstall = () => {
               title="Tap the Share button"
               description={
                 <>
-                  Tap the{" "}
-                  <Share className="inline h-4 w-4 align-text-bottom text-primary" />{" "}
+                  Tap the{' '}
+                  <Share className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
                   Share button at the bottom of the screen.
                 </>
               }
@@ -140,9 +130,9 @@ const HowToInstall = () => {
               title="Tap 'Add to Home Screen'"
               description={
                 <>
-                  Scroll down in the share menu and tap{" "}
-                  <strong>Add to Home Screen</strong>{" "}
-                  <SquarePlus className="inline h-4 w-4 align-text-bottom text-primary" />{" "}
+                  Scroll down in the share menu and tap{' '}
+                  <strong>Add to Home Screen</strong>{' '}
+                  <SquarePlus className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
                   .
                 </>
               }
@@ -153,7 +143,7 @@ const HowToInstall = () => {
               title="Confirm"
               description={
                 <>
-                  You can rename the app if you'd like, then tap{" "}
+                  You can rename the app if you'd like, then tap{' '}
                   <strong>Add</strong> in the top-right corner. TaskRankr will
                   appear on your home screen.
                 </>
@@ -164,12 +154,12 @@ const HowToInstall = () => {
         </CollapsibleCard>
 
         <CollapsibleCard
-          open={expanded === "android"}
-          onOpenChange={() => toggle("android")}
+          open={expanded === 'android'}
+          onOpenChange={() => toggle('android')}
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Smartphone className={cn(IconSize.HW5, "text-primary")} />}
+              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
               label="Android (Chrome)"
             />
           }
@@ -193,9 +183,9 @@ const HowToInstall = () => {
               title="Tap 'Install app' or 'Add to Home screen'"
               description={
                 <>
-                  Look for{" "}
-                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{" "}
-                  <strong>Install app</strong> or{" "}
+                  Look for{' '}
+                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <strong>Install app</strong> or{' '}
                   <strong>Add to Home screen</strong> in the menu.
                 </>
               }
@@ -217,12 +207,12 @@ const HowToInstall = () => {
         </CollapsibleCard>
 
         <CollapsibleCard
-          open={expanded === "desktop"}
-          onOpenChange={() => toggle("desktop")}
+          open={expanded === 'desktop'}
+          onOpenChange={() => toggle('desktop')}
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Globe className={cn(IconSize.HW5, "text-primary")} />}
+              icon={<Globe className={cn(IconSize.HW5, 'text-primary')} />}
               label="Desktop (Chrome / Edge)"
             />
           }
@@ -234,10 +224,10 @@ const HowToInstall = () => {
               title="Look for the install icon"
               description={
                 <>
-                  In the address bar, look for a{" "}
-                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{" "}
+                  In the address bar, look for a{' '}
+                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
                   install icon or a prompt near the right side. You can also
-                  click the three-dot menu and select{" "}
+                  click the three-dot menu and select{' '}
                   <strong>Install TaskRankr</strong>.
                 </>
               }
@@ -253,7 +243,7 @@ const HowToInstall = () => {
         </CollapsibleCard>
       </div>
     </ScrollablePage>
-  );
-};
+  )
+}
 
-export default HowToInstall;
+export default HowToInstall

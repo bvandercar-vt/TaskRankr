@@ -2,16 +2,15 @@
  * @fileoverview 404 Not Found error page.
  */
 
-import { AlertCircle, Home } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { AlertCircle, Home } from 'lucide-react'
+import { Link, useLocation } from 'wouter'
 
-import { Badge } from "@/components/primitives/Badge";
-
-import { Button } from "@/components/primitives/Button";
-import { Card, CardContent } from "@/components/primitives/Card";
+import { Badge } from '@/components/primitives/Badge'
+import { Button } from '@/components/primitives/Button'
+import { Card, CardContent } from '@/components/primitives/Card'
 
 export default function NotFound() {
-  const [location] = useLocation();
+  const [location] = useLocation()
 
   return (
     <div className="min-h-screen w-full flex items-start justify-center pt-[20vh] bg-background">
@@ -23,7 +22,10 @@ export default function NotFound() {
               404 Page Not Found
             </h1>
           </div>
-          <p className="text-center text-sm text-muted-foreground mb-4" data-testid="text-not-found-path">
+          <p
+            className="text-center text-sm text-muted-foreground mb-4"
+            data-testid="text-not-found-path"
+          >
             <Badge variant="secondary">{location}</Badge>
           </p>
           <div className="flex justify-center">
@@ -37,5 +39,5 @@ export default function NotFound() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
