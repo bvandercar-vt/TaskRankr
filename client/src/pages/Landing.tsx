@@ -61,14 +61,30 @@ const Landing = () => {
           </div>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
+        {!isStandalone && (
+          <div className="mt-12 flex justify-center">
+            <Link href={Routes.HOW_TO_INSTALL}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 text-lg px-8 min-w-[200px]"
+                data-testid="button-how-to-install"
+              >
+                <Download className={IconSize.HW5} />
+                Install as App
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col items-center gap-2">
             <Star className={cn(IconSize.HW6, 'text-primary')} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
-            <span>Easy tracking</span>
+            <span>Ease levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
@@ -80,22 +96,6 @@ const Landing = () => {
           </div>
         </div>
       </main>
-
-      {!isStandalone && (
-        <div className="flex justify-center px-6 pb-4">
-          <Link href={Routes.HOW_TO_INSTALL}>
-            <Button
-              size="lg"
-              variant="outline"
-              className="gap-2 text-lg px-8 min-w-[200px]"
-              data-testid="button-how-to-install"
-            >
-              <Download className={IconSize.HW5} />
-              Install as App
-            </Button>
-          </Link>
-        </div>
-      )}
 
       <footer
         className="p-6 text-center text-sm text-muted-foreground"
