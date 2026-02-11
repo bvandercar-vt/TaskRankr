@@ -32,6 +32,26 @@ const Landing = () => {
         <p className="text-lg text-muted-foreground pb-4">
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground mb-8">
+          <div className="flex flex-col items-center gap-2">
+            <Star className={cn(IconSize.HW6, "text-primary")} />
+            <span>Priority levels</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <CheckCircle className={cn(IconSize.HW6, "text-emerald-500")} />
+            <span>Ease levels</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Clock className={cn(IconSize.HW6, "text-blue-500")} />
+            <span>Time tracking</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <ListTodo className={cn(IconSize.HW6, "text-amber-500")} />
+            <span>Nested tasks</span>
+          </div>
+        </div>
+
         <div className="flex flex-col items-center gap-3">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href={authPaths.login}>
@@ -72,25 +92,6 @@ const Landing = () => {
             </Link>
           </div>
         )}
-
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
-          <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSize.HW6, "text-primary")} />
-            <span>Priority levels</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <CheckCircle className={cn(IconSize.HW6, "text-emerald-500")} />
-            <span>Ease levels</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSize.HW6, "text-blue-500")} />
-            <span>Time tracking</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSize.HW6, "text-amber-500")} />
-            <span>Nested tasks</span>
-          </div>
-        </div>
       </main>
 
       <footer
