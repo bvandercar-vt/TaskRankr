@@ -19,12 +19,14 @@ export default function NotFound() {
               404 Page Not Found
             </h1>
           </div>
-          <Link href="/">
-            <Button data-testid="link-home">
-              <Home className="h-4 w-4" />
-              Go Home
-            </Button>
-          </Link>
+          <div className="flex justify-center">
+            <Link href="/">
+              <Button data-testid="link-home">
+                <Home className="h-4 w-4" />
+                Go Home
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
