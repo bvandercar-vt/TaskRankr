@@ -143,7 +143,10 @@ const Home = () => {
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
-      if (task.status === TaskStatus.IN_PROGRESS || task.status === TaskStatus.PINNED) {
+      if (
+        task.status === TaskStatus.IN_PROGRESS ||
+        task.status === TaskStatus.PINNED
+      ) {
         hoistedIds.add(task.id)
       }
     })
