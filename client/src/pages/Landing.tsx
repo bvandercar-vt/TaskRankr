@@ -18,7 +18,7 @@ const Landing = () => {
   const isStandalone = isStandalonePWA();
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="max-h-screen bg-background text-foreground flex flex-col">
       <header className="p-6">
         <h1 className="text-xl font-bold" data-testid="text-logo">
           TaskRankr
