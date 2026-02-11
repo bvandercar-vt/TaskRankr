@@ -28,11 +28,11 @@ import { cn } from "@/lib/utils";
 
 const CardSection = ({
   title,
-  testId,
+  "data-testid": testId,
   children,
 }: {
   title: string;
-  testId: string;
+  "data-testid": string;
   children: React.ReactNode;
 }) => (
   <section data-testid={testId}>
@@ -49,7 +49,7 @@ const HowToUse = () => {
       <BackButtonHeader title="How To Use" />
 
       <div className="space-y-6">
-        <CardSection title="Working with Tasks" testId="section-working-with-tasks">
+        <CardSection title="Working with Tasks" data-testid="section-working-with-tasks">
           <IconCard
             icon={<MousePointer2 className={IconSize.HW5} />}
             title="Tap to Edit"
@@ -64,7 +64,7 @@ const HowToUse = () => {
           />
         </CardSection>
 
-        <CardSection title="Sorting Tasks" testId="section-sorting">
+        <CardSection title="Sorting Tasks" data-testid="section-sorting">
           <IconCard
             icon={<ArrowUpDown className={IconSize.HW5} />}
             title="Sort Options"
@@ -82,7 +82,7 @@ const HowToUse = () => {
           />
         </CardSection>
 
-        <CardSection title="Subtasks" testId="section-subtasks">
+        <CardSection title="Subtasks" data-testid="section-subtasks">
           <IconCard
             icon={<Layers className={IconSize.HW5} />}
             title="Nested Tasks"
@@ -97,7 +97,7 @@ const HowToUse = () => {
           />
         </CardSection>
 
-        <CardSection title="Task Statuses" testId="section-task-statuses">
+        <CardSection title="Task Statuses" data-testid="section-task-statuses">
           <IconCard
             icon={<Pin className={IconSize.HW5} />}
             title="Pinned"
@@ -118,7 +118,7 @@ const HowToUse = () => {
           />
         </CardSection>
 
-        <CardSection title="Additional" testId="section-additional">
+        <CardSection title="Additional" data-testid="section-additional">
           <Link href={Routes.SETTINGS} data-testid="link-settings">
             <IconCard
               className="hover-elevate cursor-pointer"

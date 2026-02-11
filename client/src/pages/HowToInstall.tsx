@@ -32,7 +32,7 @@ function detectDevice(): DeviceType {
 }
 
 const StepCard = (
-  props: Pick<IconCardProps, 'title' | 'description' | 'testId'> & {
+  props: Pick<IconCardProps, 'title' | 'description' | 'data-testid'> & {
     stepNumber: number
   },
 ) => <IconCard {...props} icon={props.stepNumber} small />
@@ -71,25 +71,25 @@ const HowToInstall = () => {
               icon={<MonitorSmartphone className={IconSize.HW5} />}
               title="Home Screen Icon"
               description="Get quick access to TaskRankr."
-              testId="card-benefit-icon"
+              data-testid="card-benefit-icon"
             />
             <IconCard
               icon={<AppWindow className={IconSize.HW5} />}
               title="Full Screen Experience"
               description="Hide browser navigation elements."
-              testId="card-benefit-fullscreen"
+              data-testid="card-benefit-fullscreen"
             />
             <IconCard
               icon={<WifiOff className={IconSize.HW5} />}
               title="Offline Access"
               description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
-              testId="card-benefit-offline"
+              data-testid="card-benefit-offline"
             />
             <IconCard
               icon={<Wifi className={IconSize.HW5} />}
               title="Fast Loading"
               description="Installed apps load faster."
-              testId="card-benefit-fast"
+              data-testid="card-benefit-fast"
             />
           </div>
         </section>
@@ -111,7 +111,7 @@ const HowToInstall = () => {
               stepNumber={1}
               title="Open in Safari"
               description="Make sure you're viewing TaskRankr in Safari. This won't work from other browsers on iOS."
-              testId="card-ios-step-1"
+              data-testid="card-ios-step-1"
             />
             <StepCard
               stepNumber={2}
@@ -123,7 +123,7 @@ const HowToInstall = () => {
                   Share button at the bottom of the screen.
                 </>
               }
-              testId="card-ios-step-2"
+              data-testid="card-ios-step-2"
             />
             <StepCard
               stepNumber={3}
@@ -136,7 +136,7 @@ const HowToInstall = () => {
                   .
                 </>
               }
-              testId="card-ios-step-3"
+              data-testid="card-ios-step-3"
             />
             <StepCard
               stepNumber={4}
@@ -148,7 +148,7 @@ const HowToInstall = () => {
                   appear on your home screen.
                 </>
               }
-              testId="card-ios-step-4"
+              data-testid="card-ios-step-4"
             />
           </div>
         </CollapsibleCard>
@@ -170,13 +170,13 @@ const HowToInstall = () => {
               stepNumber={1}
               title="Open in Chrome"
               description="Make sure you're viewing TaskRankr in Google Chrome."
-              testId="card-android-step-1"
+              data-testid="card-android-step-1"
             />
             <StepCard
               stepNumber={2}
               title="Tap the menu"
               description="Tap the three-dot menu in the top-right corner of Chrome."
-              testId="card-android-step-2"
+              data-testid="card-android-step-2"
             />
             <StepCard
               stepNumber={3}
@@ -189,7 +189,7 @@ const HowToInstall = () => {
                   <strong>Add to Home screen</strong> in the menu.
                 </>
               }
-              testId="card-android-step-3"
+              data-testid="card-android-step-3"
             />
             <StepCard
               stepNumber={4}
@@ -201,7 +201,7 @@ const HowToInstall = () => {
                   app drawer.
                 </>
               }
-              testId="card-android-step-4"
+              data-testid="card-android-step-4"
             />
           </div>
         </CollapsibleCard>
@@ -231,13 +231,13 @@ const HowToInstall = () => {
                   <strong>Install TaskRankr</strong>.
                 </>
               }
-              testId="card-desktop-step-1"
+              data-testid="card-desktop-step-1"
             />
             <StepCard
               stepNumber={2}
               title="Confirm installation"
               description="Click Install in the confirmation dialog. TaskRankr will open in its own window without browser chrome."
-              testId="card-desktop-step-2"
+              data-testid="card-desktop-step-2"
             />
           </div>
         </CollapsibleCard>
