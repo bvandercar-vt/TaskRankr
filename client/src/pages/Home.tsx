@@ -140,27 +140,20 @@ const Home = () => {
       (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
     )
 
-    let inProgress: TaskWithSubtasks | undefined
-    const pinnedList: TaskWithSubtasks[] = []
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
-      if (task.status === TaskStatus.IN_PROGRESS) {
-        inProgress = { ...task, subtasks: [] }
-        hoistedIds.add(task.id)
-      } else if (task.status === TaskStatus.PINNED) {
-        pinnedList.push({ ...task, subtasks: [] })
+      if (task.status === TaskStatus.IN_PROGRESS || task.status === TaskStatus.PINNED) {
         hoistedIds.add(task.id)
       }
     })
 
     const nodes: Record<number, TaskWithSubtasks> = {}
-    const roots: TaskWithSubtasks[] = []
-
     activeTasks.forEach((task) => {
       nodes[task.id] = { ...task, subtasks: [] }
     })
 
+    const roots: TaskWithSubtasks[] = []
     activeTasks.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
         nodes[task.parentId].subtasks.push(nodes[task.id])
@@ -168,6 +161,19 @@ const Home = () => {
         roots.push(nodes[task.id])
       }
     })
+
+    let inProgress: TaskWithSubtasks | undefined
+    const pinnedList: TaskWithSubtasks[] = []
+
+    for (const id of hoistedIds) {
+      const node = nodes[id]
+      if (!node) continue
+      if (node.status === TaskStatus.IN_PROGRESS) {
+        inProgress = node
+      } else {
+        pinnedList.push(node)
+      }
+    }
 
     return {
       taskTree: roots,
