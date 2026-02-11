@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/primitives/Card";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen w-full flex items-start justify-center pt-[20vh] bg-background">
       <Card className="w-full max-w-md mx-4">
         <CardContent className="pt-6">
           <div className="flex mb-4 gap-2">
