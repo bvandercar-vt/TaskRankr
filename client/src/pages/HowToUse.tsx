@@ -123,25 +123,20 @@ const HowToUse = () => {
         <section data-testid="section-additional">
           <h2 className="text-lg font-semibold mb-3 text-primary">Additional</h2>
           <div className="space-y-3">
-            <IconCard
-              icon={<Settings className={IconSize.HW5} />}
-              title="Customize Your Experience"
-              description={
-                <>
-                  Visit the{' '}
-                  <Link
-                    href={Routes.SETTINGS}
-                    className="text-primary underline underline-offset-2"
-                  >
-                    Settings page
-                  </Link>{' '}
-                  to configure which rank fields are visible or required, toggle
-                  features like auto-pinning new tasks, In Progress status, time
-                  tracking, and more.
-                </>
-              }
-              testId="card-settings"
-            />
+            <Link href={Routes.SETTINGS} data-testid="link-settings">
+              <IconCard
+                className="hover-elevate cursor-pointer"
+                icon={<Settings className={IconSize.HW5} />}
+                title={
+                  <span className="flex items-center gap-1">
+                    Customize Your Experience
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </span>
+                }
+                description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
+                testId="card-settings"
+              />
+            </Link>
           </div>
         </section>
       </div>
