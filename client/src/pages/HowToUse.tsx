@@ -153,11 +153,10 @@ const HowToUse = () => {
                 />
               </Link>
             )}
+            <ContactCard />
           </div>
         </section>
       </div>
-
-      <ContactCard className="mt-4" />
     </ScrollablePage>
   )
 }
