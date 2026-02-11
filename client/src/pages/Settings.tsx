@@ -2,17 +2,17 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useRef, useState } from "react";
-import { isStandalonePWA } from "is-standalone-pwa";
-import { ChevronRight, Download, LogOut, Trash2, Upload } from "lucide-react";
-import { Link } from "wouter";
+import { useRef, useState } from 'react'
+import { isStandalonePWA } from 'is-standalone-pwa'
+import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import { Link } from 'wouter'
 
-import { BackButtonHeader } from "@/components/BackButton";
-import { ContactCard } from "@/components/ContactCard";
-import { Button } from "@/components/primitives/Button";
-import { CollapsibleCard } from "@/components/primitives/CollapsibleCard";
-import { Checkbox } from "@/components/primitives/forms/Checkbox";
-import { Switch } from "@/components/primitives/forms/Switch";
+import { BackButtonHeader } from '@/components/BackButton'
+import { ContactCard } from '@/components/ContactCard'
+import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
+import { Switch } from '@/components/primitives/forms/Switch'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,36 +23,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/primitives/overlays/AlertDialog";
-import { ScrollablePage } from "@/components/primitives/ScrollablePage";
-import { useGuestMode } from "@/components/providers/GuestModeProvider";
-import { SortInfo } from "@/components/SortInfo";
-import { useAuth } from "@/hooks/useAuth";
-import { useSettings } from "@/hooks/useSettings";
-import { useTaskActions, useTasks } from "@/hooks/useTasks";
-import { useToast } from "@/hooks/useToast";
-import { IconSize, Routes } from "@/lib/constants";
-import { queryClient } from "@/lib/query-client";
-import { RANK_FIELDS_COLUMNS } from "@/lib/sort-tasks";
-import { QueryKeys, tsr } from "@/lib/ts-rest";
-import { cn } from "@/lib/utils";
-import { authPaths } from "~/shared/constants";
-import { contract } from "~/shared/contract";
-import { type FieldConfig, TaskStatus } from "~/shared/schema";
+} from '@/components/primitives/overlays/AlertDialog'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
+import { useGuestMode } from '@/components/providers/GuestModeProvider'
+import { SortInfo } from '@/components/SortInfo'
+import { useAuth } from '@/hooks/useAuth'
+import { useSettings } from '@/hooks/useSettings'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { useToast } from '@/hooks/useToast'
+import { IconSize, Routes } from '@/lib/constants'
+import { queryClient } from '@/lib/query-client'
+import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { QueryKeys, tsr } from '@/lib/ts-rest'
+import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
+import { contract } from '~/shared/contract'
+import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) => (
   <div
-    className={cn("p-4 bg-card rounded-lg border border-white/10", className)}
+    className={cn('p-4 bg-card rounded-lg border border-white/10', className)}
   >
     {children}
   </div>
-);
+)
 
 const UserInfoCard = () => {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   return (
     <Card className="flex items-center justify-between">
@@ -77,15 +77,15 @@ const UserInfoCard = () => {
         </Button>
       </a>
     </Card>
-  );
-};
+  )
+}
 
 interface SwitchSettingProps {
-  title: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  "data-testid": string;
+  title: string
+  description: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  'data-testid': string
 }
 
 const SwitchSetting = ({
@@ -93,7 +93,7 @@ const SwitchSetting = ({
   description,
   checked,
   onCheckedChange,
-  "data-testid": testId,
+  'data-testid': testId,
 }: SwitchSettingProps) => (
   <>
     <div className="flex-1 mr-2">
@@ -106,20 +106,20 @@ const SwitchSetting = ({
       data-testid={testId}
     />
   </>
-);
+)
 
 const SwitchCard = (props: SwitchSettingProps) => (
   <Card className="flex items-center justify-between">
     <SwitchSetting {...props} />
   </Card>
-);
+)
 
 const AttributeSettingsCard = ({
   fieldConfig,
   updateFieldFlags,
 }: {
-  fieldConfig: FieldConfig;
-  updateFieldFlags: ReturnType<typeof useSettings>["updateFieldFlags"];
+  fieldConfig: FieldConfig
+  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
 }) => (
   <Card className="mt-4">
     <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
@@ -142,7 +142,7 @@ const AttributeSettingsCard = ({
       </thead>
       <tbody>
         {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
-          const { visible, required } = fieldConfig[name];
+          const { visible, required } = fieldConfig[name]
 
           return (
             <tr key={name} className="border-b border-white/5">
@@ -151,11 +151,11 @@ const AttributeSettingsCard = ({
                 <Checkbox
                   checked={visible}
                   onCheckedChange={(checked) => {
-                    const newVisible = !!checked;
+                    const newVisible = !!checked
                     updateFieldFlags(name, {
                       visible: newVisible,
                       ...(!newVisible && required ? { required: false } : {}),
-                    });
+                    })
                   }}
                   data-testid={`checkbox-${name}-visible`}
                 />
@@ -167,28 +167,28 @@ const AttributeSettingsCard = ({
                     updateFieldFlags(name, { required: !!checked })
                   }
                   disabled={!visible}
-                  className={!visible ? "opacity-50" : ""}
+                  className={!visible ? 'opacity-50' : ''}
                   data-testid={`checkbox-${name}-required`}
                 />
               </td>
             </tr>
-          );
+          )
         })}
       </tbody>
     </table>
   </Card>
-);
+)
 
 const ExportButton = () => {
-  const { data: tasks } = useTasks();
-  const hasNoTasks = tasks.length === 0;
+  const { data: tasks } = useTasks()
+  const hasNoTasks = tasks.length === 0
 
   return (
     <Button
       variant="outline"
       className="gap-2"
       onClick={() => {
-        window.location.href = contract.tasks.export.path;
+        window.location.href = contract.tasks.export.path
       }}
       disabled={hasNoTasks}
       data-testid="button-export"
@@ -196,41 +196,41 @@ const ExportButton = () => {
       <Download className={IconSize.HW4} />
       Export Tasks
     </Button>
-  );
-};
+  )
+}
 
 const ImportButton = () => {
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImporting, setIsImporting] = useState(false);
+  const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isImporting, setIsImporting] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    setIsImporting(true);
+    setIsImporting(true)
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const text = await file.text()
+      const data = JSON.parse(text)
 
       const result = await tsr.tasks.import.mutate({
         body: { tasks: data.tasks || data },
-      });
+      })
       if (result.status !== 200) {
-        throw new Error("Import failed");
+        throw new Error('Import failed')
       }
 
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks });
-      toast({ title: "Tasks imported successfully" });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      toast({ title: 'Tasks imported successfully' })
     } catch (_error) {
-      toast({ title: "Failed to import tasks", variant: "destructive" });
+      toast({ title: 'Failed to import tasks', variant: 'destructive' })
     } finally {
-      setIsImporting(false);
+      setIsImporting(false)
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = ''
       }
     }
-  };
+  }
 
   return (
     <>
@@ -242,7 +242,7 @@ const ImportButton = () => {
         data-testid="button-import"
       >
         <Upload className={IconSize.HW4} />
-        {isImporting ? "Importing..." : "Import Tasks"}
+        {isImporting ? 'Importing...' : 'Import Tasks'}
       </Button>
       <input
         ref={fileInputRef}
@@ -253,11 +253,11 @@ const ImportButton = () => {
         data-testid="input-import-file"
       />
     </>
-  );
-};
+  )
+}
 
 const ClearLocalStorageConfirmDialog = () => {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   return (
     <AlertDialog>
@@ -285,9 +285,9 @@ const ClearLocalStorageConfirmDialog = () => {
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              localStorage.clear();
-              toast({ title: "Local storage cleared" });
-              window.location.reload();
+              localStorage.clear()
+              toast({ title: 'Local storage cleared' })
+              window.location.reload()
             }}
             data-testid="button-confirm-clear"
           >
@@ -296,15 +296,15 @@ const ClearLocalStorageConfirmDialog = () => {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
+  )
+}
 
 const Settings = () => {
-  const { settings, updateSettings, updateFieldFlags } = useSettings();
-  const { isGuestMode } = useGuestMode();
-  const isStandalone = isStandalonePWA();
-  const { data: allTasks } = useTasks();
-  const { setTaskStatus } = useTaskActions();
+  const { settings, updateSettings, updateFieldFlags } = useSettings()
+  const { isGuestMode } = useGuestMode()
+  const isStandalone = isStandalonePWA()
+  const { data: allTasks } = useTasks()
+  const { setTaskStatus } = useTaskActions()
 
   return (
     <ScrollablePage>
@@ -324,8 +324,8 @@ const Settings = () => {
           title="Always sort pinned by Priority"
           description={
             settings.alwaysSortPinnedByPriority
-              ? "Pinned tasks are always sorted by priority first, then by your selected sort."
-              : "Pinned tasks are sorted using your selected sort only."
+              ? 'Pinned tasks are always sorted by priority first, then by your selected sort.'
+              : 'Pinned tasks are sorted using your selected sort only.'
           }
           checked={settings.alwaysSortPinnedByPriority}
           onCheckedChange={(checked) =>
@@ -342,15 +342,15 @@ const Settings = () => {
               }
               checked={settings.enableInProgressStatus}
               onCheckedChange={(checked) => {
-                updateSettings({ enableInProgressStatus: checked });
+                updateSettings({ enableInProgressStatus: checked })
                 if (!checked) {
-                  updateSettings({ enableInProgressTime: false });
+                  updateSettings({ enableInProgressTime: false })
                   // Demote any in_progress task to pinned
                   const inProgressTask = allTasks.find(
                     (t) => t.status === TaskStatus.IN_PROGRESS,
-                  );
+                  )
                   if (inProgressTask) {
-                    setTaskStatus(inProgressTask.id, TaskStatus.PINNED);
+                    setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
                   }
                 }
               }}
@@ -392,7 +392,7 @@ const Settings = () => {
               </p>
             </div>
             <ChevronRight
-              className={cn(IconSize.HW5, "text-muted-foreground shrink-0")}
+              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
             />
           </Card>
         </Link>
@@ -409,7 +409,7 @@ const Settings = () => {
                 </p>
               </div>
               <ChevronRight
-                className={cn(IconSize.HW5, "text-muted-foreground shrink-0")}
+                className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
               />
             </Card>
           </Link>
@@ -457,7 +457,7 @@ const Settings = () => {
         </p>
       </div>
     </ScrollablePage>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings
