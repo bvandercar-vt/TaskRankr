@@ -2,7 +2,7 @@
  * @fileoverview Instructional page explaining how to use the app
  */
 
-import { isStandalonePWA } from 'is-standalone-pwa'
+import { isStandalonePWA } from "is-standalone-pwa";
 import {
   ArrowUpDown,
   CheckCircle2,
@@ -15,18 +15,18 @@ import {
   Pin,
   PlayCircle,
   Settings,
-} from 'lucide-react'
-import { Link } from 'wouter'
+} from "lucide-react";
+import { Link } from "wouter";
 
-import { BackButtonHeader } from '@/components/BackButton'
-import { ContactCard } from '@/components/ContactCard'
-import { IconCard } from '@/components/primitives/IconCard'
-import { ScrollablePage } from '@/components/primitives/ScrollablePage'
-import { SortInfo } from '@/components/SortInfo'
-import { IconSize, Routes } from '@/lib/constants'
+import { BackButtonHeader } from "@/components/BackButton";
+import { ContactCard } from "@/components/ContactCard";
+import { IconCard } from "@/components/primitives/IconCard";
+import { ScrollablePage } from "@/components/primitives/ScrollablePage";
+import { SortInfo } from "@/components/SortInfo";
+import { IconSize, Routes } from "@/lib/constants";
 
 const HowToUse = () => {
-  const isStandalone = isStandalonePWA()
+  const isStandalone = isStandalonePWA();
 
   return (
     <ScrollablePage className="pb-16">
@@ -42,13 +42,13 @@ const HowToUse = () => {
               icon={<MousePointer2 className={IconSize.HW5} />}
               title="Tap to Edit"
               description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
-              testId="card-tap-to-edit"
+              data-testid="card-tap-to-edit"
             />
             <IconCard
               icon={<Hand className={IconSize.HW5} />}
               title="Hold to Change Status"
               description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
-              testId="card-hold-to-change-status"
+              data-testid="card-hold-to-change-status"
             />
           </div>
         </section>
@@ -71,7 +71,7 @@ const HowToUse = () => {
                   <SortInfo defaultExpanded={false} />
                 </>
               }
-              testId="card-sorting"
+              data-testid="card-sorting"
             />
           </div>
         </section>
@@ -83,13 +83,13 @@ const HowToUse = () => {
               icon={<Layers className={IconSize.HW5} />}
               title="Nested Tasks"
               description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
-              testId="card-nested-tasks"
+              data-testid="card-nested-tasks"
             />
             <IconCard
               icon={<GripVertical className={IconSize.HW5} />}
               title="Manual Ordering"
               description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
-              testId="card-manual-ordering"
+              data-testid="card-manual-ordering"
             />
           </div>
         </section>
@@ -103,25 +103,27 @@ const HowToUse = () => {
               icon={<Pin className={IconSize.HW5} />}
               title="Pinned"
               description="Pin important tasks to keep them at the top of your list."
-              testId="card-pinned"
+              data-testid="card-pinned"
             />
             <IconCard
               icon={<PlayCircle className={IconSize.HW5} />}
               title="In Progress (if setting enabled)"
               description="Pins to the top of your list, while also accumulating time spent in progress."
-              testId="card-in-progress"
+              data-testid="card-in-progress"
             />
             <IconCard
               icon={<CheckCircle2 className={IconSize.HW5} />}
               title="Completed"
               description="Completed tasks are moved to a separate list you can access from the menu."
-              testId="card-completed"
+              data-testid="card-completed"
             />
           </div>
         </section>
 
         <section data-testid="section-additional">
-          <h2 className="text-lg font-semibold mb-3 text-primary">Additional</h2>
+          <h2 className="text-lg font-semibold mb-3 text-primary">
+            Additional
+          </h2>{" "}
           <div className="space-y-3">
             <Link href={Routes.SETTINGS} data-testid="link-settings">
               <IconCard
@@ -134,11 +136,14 @@ const HowToUse = () => {
                   </span>
                 }
                 description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
-                testId="card-settings"
+                data-testid="card-settings"
               />
             </Link>
             {!isStandalone && (
-              <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+              <Link
+                href={Routes.HOW_TO_INSTALL}
+                data-testid="link-how-to-install"
+              >
                 <IconCard
                   className="hover-elevate cursor-pointer"
                   icon={<Download className={IconSize.HW5} />}
@@ -149,7 +154,7 @@ const HowToUse = () => {
                     </span>
                   }
                   description="Add TaskRankr to your home screen for offline access and a full-screen experience."
-                  testId="card-how-to-install"
+                  data-testid="card-how-to-install"
                 />
               </Link>
             )}
@@ -158,7 +163,7 @@ const HowToUse = () => {
         </section>
       </div>
     </ScrollablePage>
-  )
-}
+  );
+};
 
-export default HowToUse
+export default HowToUse;

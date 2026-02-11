@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 export interface IconCardProps {
   icon: React.ReactNode
   title: React.ReactNode
+  titleRightIcon?: React.ReactNode
   'data-testid'?: string
   description: React.ReactNode
   small?: boolean
@@ -17,6 +18,7 @@ export interface IconCardProps {
 export const IconCard = ({
   icon,
   title,
+  titleRightIcon,
   description,
   'data-testid': testId,
   small,
@@ -36,7 +38,10 @@ export const IconCard = ({
         {icon}
       </div>
       <div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+        <h3 className="font-semibold text-foreground mb-1 flex items-center gap-1">
+          {title}
+          {titleRightIcon}
+        </h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </CardContent>
