@@ -92,6 +92,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── Settings.tsx      # User preferences & attribute visibility
 │       │   ├── Completed.tsx     # Completed tasks view
 │       │   ├── HowToUse.tsx      # Instructional page (tap-to-edit, hold-for-status)
+│       │   ├── HowToInstall.tsx  # PWA install instructions (iOS, Android, Desktop)
 │       │   ├── Landing.tsx       # Unauthenticated landing page
 │       │   └── NotFound.tsx
 │       ├── lib/
