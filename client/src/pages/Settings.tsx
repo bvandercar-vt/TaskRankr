@@ -382,7 +382,7 @@ const Settings = () => {
         <SortInfo />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-3 py-2">
         <Link href={Routes.HOW_TO_USE}>
           <Card className="flex items-center justify-between hover-elevate cursor-pointer">
             <div>
@@ -420,31 +420,33 @@ const Settings = () => {
         <ContactCard />
       </div>
 
-      <CollapsibleCard
-        title="Import/Export Data"
-        className="mt-8 bg-card/50"
-        data-testid="collapsible-import-export"
-      >
-        <div className="flex flex-wrap justify-center gap-3">
-          <ExportButton />
-          <ImportButton />
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Export your tasks as JSON or import from a previously exported file.
-        </p>
-      </CollapsibleCard>
+      <div className="pt-6 space-y-3">
+        <CollapsibleCard
+          title="Import/Export Data"
+          className="bg-card/50"
+          data-testid="collapsible-import-export"
+        >
+          <div className="flex flex-wrap justify-center gap-3">
+            <ExportButton />
+            <ImportButton />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Export your tasks as JSON or import from a previously exported file.
+          </p>
+        </CollapsibleCard>
 
-      <CollapsibleCard
-        title="Clear Local Data"
-        className="mt-3 bg-card/50"
-        data-testid="collapsible-clear-local-data"
-      >
-        <p className="text-sm text-muted-foreground mb-3">
-          Remove all locally cached data and re-pull fresh data from the server.
-          Your synced data on the server won't be affected.
-        </p>
-        <ClearLocalStorageConfirmDialog />
-      </CollapsibleCard>
+        <CollapsibleCard
+          title="Clear Local Data"
+          className="bg-card/50"
+          data-testid="collapsible-clear-local-data"
+        >
+          <p className="text-sm text-muted-foreground mb-3">
+            Remove all locally cached data and re-pull fresh data from the
+            server. Your synced data on the server won't be affected.
+          </p>
+          <ClearLocalStorageConfirmDialog />
+        </CollapsibleCard>
+      </div>
 
       <div className="mt-16 text-center text-muted-foreground">
         <p className="text-sm font-medium" data-testid="text-app-name">
