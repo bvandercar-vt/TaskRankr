@@ -1,0 +1,247 @@
+/**
+ * @fileoverview Instructions for installing TaskRankr as a PWA
+ */
+
+import { useState } from 'react'
+import {
+  AppWindow,
+  Download,
+  Globe,
+  MonitorSmartphone,
+  Share,
+  Smartphone,
+  SquarePlus,
+  Wifi,
+  WifiOff,
+} from 'lucide-react'
+
+import { BackButtonHeader } from '@/components/BackButton'
+import { CardSection } from '@/components/primitives/CardSection'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { IconCard, type IconCardProps } from '@/components/primitives/IconCard'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
+import { IconSize } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+
+type DeviceType = 'ios' | 'android' | 'desktop'
+
+function detectDevice(): DeviceType {
+  const ua = navigator.userAgent
+  if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
+  if (/Android/i.test(ua)) return 'android'
+  return 'desktop'
+}
+
+const StepCard = (
+  props: Pick<IconCardProps, 'title' | 'description' | 'data-testid'> & {
+    stepNumber: number
+  },
+) => (
+  <IconCard {...props} icon={props.stepNumber} contentClassName="p-3" small />
+)
+
+const DeviceSectionTitle = ({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode
+  label: string
+}) => (
+  <span className="flex items-center gap-2 text-lg font-semibold text-primary">
+    {icon}
+    {label}
+  </span>
+)
+
+const HowToInstall = () => {
+  const device = detectDevice()
+  const [expanded, setExpanded] = useState<DeviceType | null>(device)
+
+  const toggle = (section: DeviceType) =>
+    setExpanded((prev) => (prev === section ? null : section))
+
+  return (
+    <ScrollablePage className="pb-16">
+      <BackButtonHeader title="How To Install" />
+
+      <div className="space-y-6">
+        <CardSection title="Why Install?" data-testid="section-benefits">
+          <IconCard
+            icon={<AppWindow className={IconSize.HW5} />}
+            title="Full Screen Experience"
+            description="Hide browser navigation elements."
+            data-testid="card-benefit-fullscreen"
+          />
+          <IconCard
+            icon={<WifiOff className={IconSize.HW5} />}
+            title="Offline Access"
+            description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
+            data-testid="card-benefit-offline"
+          />
+          <IconCard
+            icon={<MonitorSmartphone className={IconSize.HW5} />}
+            title="Home Screen Icon"
+            description="Get quick access to TaskRankr."
+            data-testid="card-benefit-icon"
+          />
+          <IconCard
+            icon={<Wifi className={IconSize.HW5} />}
+            title="Fast Loading"
+            description="Installed apps load faster."
+            data-testid="card-benefit-fast"
+          />
+        </CardSection>
+
+        <CollapsibleCard
+          open={expanded === 'ios'}
+          onOpenChange={() => toggle('ios')}
+          noCard
+          title={
+            <DeviceSectionTitle
+              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
+              label="iPhone / iPad (Safari)"
+            />
+          }
+          data-testid="section-iphone"
+        >
+          <div className="space-y-3">
+            <StepCard
+              stepNumber={1}
+              title="Open in Safari"
+              description="Make sure you're viewing TaskRankr in Safari. This won't work from other browsers on iOS."
+              data-testid="card-ios-step-1"
+            />
+            <StepCard
+              stepNumber={2}
+              title="Tap the Share button"
+              description={
+                <>
+                  Tap the{' '}
+                  <Share className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  Share button at the bottom of the screen.
+                </>
+              }
+              data-testid="card-ios-step-2"
+            />
+            <StepCard
+              stepNumber={3}
+              title="Tap 'Add to Home Screen'"
+              description={
+                <>
+                  Scroll down in the share menu and tap{' '}
+                  <strong>Add to Home Screen</strong>{' '}
+                  <SquarePlus className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  .
+                </>
+              }
+              data-testid="card-ios-step-3"
+            />
+            <StepCard
+              stepNumber={4}
+              title="Confirm"
+              description={
+                <>
+                  You can rename the app if you'd like, then tap{' '}
+                  <strong>Add</strong> in the top-right corner. TaskRankr will
+                  appear on your home screen.
+                </>
+              }
+              data-testid="card-ios-step-4"
+            />
+          </div>
+        </CollapsibleCard>
+
+        <CollapsibleCard
+          open={expanded === 'android'}
+          onOpenChange={() => toggle('android')}
+          noCard
+          title={
+            <DeviceSectionTitle
+              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
+              label="Android (Chrome)"
+            />
+          }
+          data-testid="section-android"
+        >
+          <div className="space-y-3">
+            <StepCard
+              stepNumber={1}
+              title="Open in Chrome"
+              description="Make sure you're viewing TaskRankr in Google Chrome."
+              data-testid="card-android-step-1"
+            />
+            <StepCard
+              stepNumber={2}
+              title="Tap the menu"
+              description="Tap the three-dot menu in the top-right corner of Chrome."
+              data-testid="card-android-step-2"
+            />
+            <StepCard
+              stepNumber={3}
+              title="Tap 'Install app' or 'Add to Home screen'"
+              description={
+                <>
+                  Look for{' '}
+                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <strong>Install app</strong> or{' '}
+                  <strong>Add to Home screen</strong> in the menu.
+                </>
+              }
+              data-testid="card-android-step-3"
+            />
+            <StepCard
+              stepNumber={4}
+              title="Confirm"
+              description={
+                <>
+                  Tap <strong>Install</strong> or <strong>Add</strong> to
+                  confirm. TaskRankr will appear on your home screen and in your
+                  app drawer.
+                </>
+              }
+              data-testid="card-android-step-4"
+            />
+          </div>
+        </CollapsibleCard>
+
+        <CollapsibleCard
+          open={expanded === 'desktop'}
+          onOpenChange={() => toggle('desktop')}
+          noCard
+          title={
+            <DeviceSectionTitle
+              icon={<Globe className={cn(IconSize.HW5, 'text-primary')} />}
+              label="Desktop (Chrome / Edge)"
+            />
+          }
+          data-testid="section-desktop"
+        >
+          <div className="space-y-3">
+            <StepCard
+              stepNumber={1}
+              title="Look for the install icon"
+              description={
+                <>
+                  In the address bar, look for a{' '}
+                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  install icon or a prompt near the right side. You can also
+                  click the three-dot menu and select{' '}
+                  <strong>Install TaskRankr</strong>.
+                </>
+              }
+              data-testid="card-desktop-step-1"
+            />
+            <StepCard
+              stepNumber={2}
+              title="Confirm installation"
+              description="Click Install in the confirmation dialog. TaskRankr will open in its own window without browser chrome."
+              data-testid="card-desktop-step-2"
+            />
+          </div>
+        </CollapsibleCard>
+      </div>
+    </ScrollablePage>
+  )
+}
+
+export default HowToInstall
