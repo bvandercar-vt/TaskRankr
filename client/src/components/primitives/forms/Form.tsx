@@ -90,21 +90,21 @@ export const FormItem = forwardRefHelper<HTMLDivElement>(
   'FormItem',
 )
 
-export const FormLabel = forwardRefHelper<typeof LabelPrimitive.Root>(
-  ({ className, ...props }, ref) => {
-    const { error, formItemId } = useFormField()
+export const FormLabel = forwardRefHelper<
+  typeof LabelPrimitive.Root,
+  { redOnError?: boolean }
+>(({ className, redOnError, ...props }, ref) => {
+  const { error, formItemId } = useFormField()
 
-    return (
-      <Label
-        ref={ref}
-        className={cn(error && 'text-destructive', className)}
-        htmlFor={formItemId}
-        {...props}
-      />
-    )
-  },
-  'FormLabel',
-)
+  return (
+    <Label
+      ref={ref}
+      className={cn(error && redOnError && 'text-destructive', className)}
+      htmlFor={formItemId}
+      {...props}
+    />
+  )
+}, 'FormLabel')
 
 export const FormControl = forwardRefHelper<typeof Slot>(
   ({ ...props }, ref) => {
