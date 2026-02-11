@@ -229,8 +229,11 @@ export const TaskForm = ({
           />
         </div>
 
-        <div className="min-h-0 overflow-y-auto  [scrollbar-gutter:stable_both-edges] py-2">
-          <div className="flex-1  space-y-5 px-2">
+        <div
+          className="min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges] py-2"
+          data-testid="form-scroll-region"
+        >
+          <div className="flex-1 space-y-5 px-3">
             {visibleRankFields.length > 0 && (
               <div className="grid grid-cols-2 gap-4">
                 {visibleRankFields.map(({ name, label, levels }) => (

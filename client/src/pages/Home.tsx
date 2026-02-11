@@ -44,7 +44,7 @@ const SortButtons = ({
   setSortBy: (value: SortOption) => void
   fieldConfig: FieldConfig
 }) => (
-  <div className="flex items-center gap-1">
+  <div className="flex items-center gap-1 pr-1">
     <SortButton
       label="Date"
       value={SortOption.DATE_CREATED}
