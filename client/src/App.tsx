@@ -4,7 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Route, Switch } from 'wouter'
+import { Route, Switch, useLocation } from 'wouter'
 
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
@@ -27,6 +27,7 @@ import {
 } from '@/lib/migrate-guest-tasks'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
+import HowToInstall from '@/pages/HowToInstall'
 import HowToUse from '@/pages/HowToUse'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
@@ -42,6 +43,7 @@ const Router = () => (
       <Route path={Routes.COMPLETED} component={Completed} />
       <Route path={Routes.SETTINGS} component={Settings} />
       <Route path={Routes.HOW_TO_USE} component={HowToUse} />
+      <Route path={Routes.HOW_TO_INSTALL} component={HowToInstall} />
       <Route component={NotFound} />
     </Switch>
   </div>
@@ -52,6 +54,7 @@ const AuthenticatedApp = () => {
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
   const hasMigrated = useRef(false)
+  const [location] = useLocation()
 
   useEffect(() => {
     if (isAuthenticated && !isGuestMode && !hasMigrated.current) {
@@ -76,6 +79,9 @@ const AuthenticatedApp = () => {
   }
 
   if (!isAuthenticated && !isGuestMode) {
+    if (location === Routes.HOW_TO_INSTALL) {
+      return <HowToInstall />
+    }
     return <Landing />
   }
 
