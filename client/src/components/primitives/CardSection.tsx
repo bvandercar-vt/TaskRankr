@@ -9,6 +9,6 @@ export const CardSection = ({
 }) => (
   <section data-testid={testId}>
     <h2 className="text-lg font-semibold mb-3 text-primary">{title}</h2>
-    <div className="space-y-3">{children}</div>
+    <div className="flex flex-col gap-3">{children}</div>
   </section>
 )
