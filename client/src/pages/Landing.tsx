@@ -66,8 +66,7 @@ const Landing = () => {
             <Link href={Routes.HOW_TO_INSTALL}>
               <Button
                 size="lg"
-                variant="outline"
-                className="gap-2 text-lg px-8 min-w-[200px]"
+                className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
                 data-testid="button-how-to-install"
               >
                 <Download className={IconSize.HW5} />
