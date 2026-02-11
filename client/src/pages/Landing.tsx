@@ -3,19 +3,19 @@
  * Provides login/signup call-to-action for new users.
  */
 
-import { isStandalonePWA } from "is-standalone-pwa";
-import { CheckCircle, Clock, Download, ListTodo, Star } from "lucide-react";
-import { Link } from "wouter";
+import { isStandalonePWA } from 'is-standalone-pwa'
+import { CheckCircle, Clock, Download, ListTodo, Star } from 'lucide-react'
+import { Link } from 'wouter'
 
-import { Button } from "@/components/primitives/Button";
-import { useGuestMode } from "@/components/providers/GuestModeProvider";
-import { IconSize, Routes } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import { authPaths } from "~/shared/constants";
+import { Button } from '@/components/primitives/Button'
+import { useGuestMode } from '@/components/providers/GuestModeProvider'
+import { IconSize, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+import { authPaths } from '~/shared/constants'
 
 const Landing = () => {
-  const { enterGuestMode } = useGuestMode();
-  const isStandalone = isStandalonePWA();
+  const { enterGuestMode } = useGuestMode()
+  const isStandalone = isStandalonePWA()
 
   return (
     <div className="max-h-screen bg-background text-foreground flex flex-col">
@@ -35,19 +35,19 @@ const Landing = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground mb-8">
           <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSize.HW6, "text-primary")} />
+            <Star className={cn(IconSize.HW6, 'text-primary')} />
             <span>Priority levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <CheckCircle className={cn(IconSize.HW6, "text-emerald-500")} />
+            <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
             <span>Ease levels</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSize.HW6, "text-blue-500")} />
+            <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
             <span>Time tracking</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSize.HW6, "text-amber-500")} />
+            <ListTodo className={cn(IconSize.HW6, 'text-amber-500')} />
             <span>Nested tasks</span>
           </div>
         </div>
@@ -101,7 +101,7 @@ const Landing = () => {
         <p data-testid="text-footer-brand">TaskRankr</p>
       </footer>
     </div>
-  );
-};
+  )
+}
 
-export default Landing;
+export default Landing
