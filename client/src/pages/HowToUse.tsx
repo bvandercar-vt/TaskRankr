@@ -2,7 +2,7 @@
  * @fileoverview Instructional page explaining how to use the app
  */
 
-import { isStandalonePWA } from "is-standalone-pwa";
+import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ArrowUpDown,
   CheckCircle2,
@@ -15,41 +15,30 @@ import {
   Pin,
   PlayCircle,
   Settings,
-} from "lucide-react";
-import { Link } from "wouter";
+} from 'lucide-react'
+import { Link } from 'wouter'
 
-import { BackButtonHeader } from "@/components/BackButton";
-import { ContactCard } from "@/components/ContactCard";
-import { IconCard } from "@/components/primitives/IconCard";
-import { ScrollablePage } from "@/components/primitives/ScrollablePage";
-import { SortInfo } from "@/components/SortInfo";
-import { IconSize, Routes } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-
-const CardSection = ({
-  title,
-  "data-testid": testId,
-  children,
-}: {
-  title: string;
-  "data-testid": string;
-  children: React.ReactNode;
-}) => (
-  <section data-testid={testId}>
-    <h2 className="text-lg font-semibold mb-3 text-primary">{title}</h2>
-    <div className="space-y-3">{children}</div>
-  </section>
-);
+import { BackButtonHeader } from '@/components/BackButton'
+import { ContactCard } from '@/components/ContactCard'
+import { CardSection } from '@/components/primitives/CardSection'
+import { IconCard } from '@/components/primitives/IconCard'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
+import { SortInfo } from '@/components/SortInfo'
+import { IconSize, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 const HowToUse = () => {
-  const isStandalone = isStandalonePWA();
+  const isStandalone = isStandalonePWA()
 
   return (
     <ScrollablePage className="pb-16">
       <BackButtonHeader title="How To Use" />
 
       <div className="space-y-6">
-        <CardSection title="Working with Tasks" data-testid="section-working-with-tasks">
+        <CardSection
+          title="Working with Tasks"
+          data-testid="section-working-with-tasks"
+        >
           <IconCard
             icon={<MousePointer2 className={IconSize.HW5} />}
             title="Tap to Edit"
@@ -72,8 +61,8 @@ const HowToUse = () => {
               <>
                 <div className="mb-4">
                   Use the sort buttons at the top of the task list to order
-                  tasks by date created, priority, ease, enjoyment, or time.
-                  You can customize which rank fields are visible in Settings.
+                  tasks by date created, priority, ease, enjoyment, or time. You
+                  can customize which rank fields are visible in Settings.
                 </div>
                 <SortInfo defaultExpanded={false} />
               </>
@@ -124,7 +113,11 @@ const HowToUse = () => {
               className="hover-elevate cursor-pointer"
               icon={<Settings className={IconSize.HW5} />}
               title="Customize Your Experience"
-              titleRightIcon={<ChevronRight className={cn(IconSize.HW4, "text-muted-foreground")} />}
+              titleRightIcon={
+                <ChevronRight
+                  className={cn(IconSize.HW4, 'text-muted-foreground')}
+                />
+              }
               description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
               data-testid="card-settings"
             />
@@ -138,7 +131,11 @@ const HowToUse = () => {
                 className="hover-elevate cursor-pointer"
                 icon={<Download className={IconSize.HW5} />}
                 title="Install as App"
-                titleRightIcon={<ChevronRight className={cn(IconSize.HW4, "text-muted-foreground")} />}
+                titleRightIcon={
+                  <ChevronRight
+                    className={cn(IconSize.HW4, 'text-muted-foreground')}
+                  />
+                }
                 description="Add TaskRankr to your home screen for offline access and a full-screen experience."
                 data-testid="card-how-to-install"
               />
@@ -148,7 +145,7 @@ const HowToUse = () => {
         </CardSection>
       </div>
     </ScrollablePage>
-  );
-};
+  )
+}
 
-export default HowToUse;
+export default HowToUse

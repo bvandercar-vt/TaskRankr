@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 
 import { BackButtonHeader } from '@/components/BackButton'
+import { CardSection } from '@/components/primitives/CardSection'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { IconCard, type IconCardProps } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
@@ -62,37 +63,32 @@ const HowToInstall = () => {
       <BackButtonHeader title="How To Install" />
 
       <div className="space-y-6">
-        <section data-testid="section-benefits">
-          <h2 className="text-lg font-semibold mb-3 text-primary">
-            Why Install?
-          </h2>
-          <div className="space-y-3">
-            <IconCard
-              icon={<MonitorSmartphone className={IconSize.HW5} />}
-              title="Home Screen Icon"
-              description="Get quick access to TaskRankr."
-              data-testid="card-benefit-icon"
-            />
-            <IconCard
-              icon={<AppWindow className={IconSize.HW5} />}
-              title="Full Screen Experience"
-              description="Hide browser navigation elements."
-              data-testid="card-benefit-fullscreen"
-            />
-            <IconCard
-              icon={<WifiOff className={IconSize.HW5} />}
-              title="Offline Access"
-              description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
-              data-testid="card-benefit-offline"
-            />
-            <IconCard
-              icon={<Wifi className={IconSize.HW5} />}
-              title="Fast Loading"
-              description="Installed apps load faster."
-              data-testid="card-benefit-fast"
-            />
-          </div>
-        </section>
+        <CardSection title="Why Install?" data-testid="section-benefits">
+          <IconCard
+            icon={<MonitorSmartphone className={IconSize.HW5} />}
+            title="Home Screen Icon"
+            description="Get quick access to TaskRankr."
+            data-testid="card-benefit-icon"
+          />
+          <IconCard
+            icon={<AppWindow className={IconSize.HW5} />}
+            title="Full Screen Experience"
+            description="Hide browser navigation elements."
+            data-testid="card-benefit-fullscreen"
+          />
+          <IconCard
+            icon={<WifiOff className={IconSize.HW5} />}
+            title="Offline Access"
+            description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
+            data-testid="card-benefit-offline"
+          />
+          <IconCard
+            icon={<Wifi className={IconSize.HW5} />}
+            title="Fast Loading"
+            description="Installed apps load faster."
+            data-testid="card-benefit-fast"
+          />
+        </CardSection>
 
         <CollapsibleCard
           open={expanded === 'ios'}
