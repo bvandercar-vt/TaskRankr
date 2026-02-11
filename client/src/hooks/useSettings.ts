@@ -3,6 +3,7 @@
  * updates.
  */
 
+import { useMemo } from 'react'
 import { toMerged } from 'es-toolkit'
 
 import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
@@ -14,7 +15,11 @@ export type UserSettingsContent = Omit<UserSettings, 'userId'>
 export const useSettings = () => {
   const localState = useLocalStateSafe()
 
-  const settings: UserSettings = localState?.settings ?? DEFAULT_SETTINGS
+  const rawSettings = localState?.settings
+  const settings: UserSettings = useMemo(
+    () => toMerged(DEFAULT_SETTINGS, rawSettings ?? {}),
+    [rawSettings],
+  )
   const isLoading = !localState?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
