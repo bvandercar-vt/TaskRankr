@@ -17,8 +17,8 @@ import {
 import { useState } from "react";
 
 import { BackButtonHeader } from "@/components/BackButton";
-import { Card, CardContent } from "@/components/primitives/Card";
 import { CollapsibleCard } from "@/components/primitives/CollapsibleCard";
+import { IconCard } from "@/components/primitives/IconCard";
 import { ScrollablePage } from "@/components/primitives/ScrollablePage";
 import { IconSize } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -32,52 +32,19 @@ function detectDevice(): DeviceType {
   return "desktop";
 }
 
-const StepCard = ({
-  stepNumber,
-  title,
-  description,
-  testId,
-}: {
+const StepCard = (props: {
   stepNumber: number;
   title: string;
   description: React.ReactNode;
   testId: string;
 }) => (
-  <Card className="bg-card/50 border-white/10" data-testid={testId}>
-    <CardContent className="p-4 flex items-start gap-4">
-      <div className="shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
-        {stepNumber}
-      </div>
-      <div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const BenefitCard = ({
-  icon,
-  title,
-  description,
-  testId,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  testId: string;
-}) => (
-  <Card className="bg-card/50 border-white/10" data-testid={testId}>
-    <CardContent className="p-4 flex items-start gap-4">
-      <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-        {icon}
-      </div>
-      <div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-    </CardContent>
-  </Card>
+  <IconCard
+    icon={props.stepNumber}
+    title={props.title}
+    description={props.description}
+    testId={props.testId}
+    small
+  />
 );
 
 const DeviceSectionTitle = ({
@@ -110,25 +77,25 @@ const HowToInstall = () => {
             Why Install?
           </h2>
           <div className="space-y-3">
-            <BenefitCard
+            <IconCard
               icon={<MonitorSmartphone className={IconSize.HW5} />}
               title="Home Screen Icon"
               description="Get quick access to TaskRankr."
               testId="card-benefit-icon"
             />
-            <BenefitCard
+            <IconCard
               icon={<AppWindow className={IconSize.HW5} />}
               title="Full Screen Experience"
               description="Hide browser navigation elements."
               testId="card-benefit-fullscreen"
             />
-            <BenefitCard
+            <IconCard
               icon={<WifiOff className={IconSize.HW5} />}
               title="Offline Access"
               description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
               testId="card-benefit-offline"
             />
-            <BenefitCard
+            <IconCard
               icon={<Wifi className={IconSize.HW5} />}
               title="Fast Loading"
               description="Installed apps load faster."

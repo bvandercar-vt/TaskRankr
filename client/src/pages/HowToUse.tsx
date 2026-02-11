@@ -20,33 +20,10 @@ import { Link } from 'wouter'
 import { BackButtonHeader } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
 import { Card, CardContent } from '@/components/primitives/Card'
+import { IconCard } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSize, Routes } from '@/lib/constants'
-
-const InstructionCard = ({
-  icon,
-  title,
-  description,
-  testId,
-}: {
-  icon: React.ReactNode
-  title: React.ReactNode
-  description: React.ReactNode
-  testId: string
-}) => (
-  <Card className="bg-card/50 border-white/10" data-testid={testId}>
-    <CardContent className="p-4 flex items-start gap-4">
-      <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-        {icon}
-      </div>
-      <div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-    </CardContent>
-  </Card>
-)
 
 const HowToUse = () => {
   const isStandalone = isStandalonePWA()
@@ -61,13 +38,13 @@ const HowToUse = () => {
             Working with Tasks
           </h2>
           <div className="space-y-3">
-            <InstructionCard
+            <IconCard
               icon={<MousePointer2 className={IconSize.HW5} />}
               title="Tap to Edit"
               description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
               testId="card-tap-to-edit"
             />
-            <InstructionCard
+            <IconCard
               icon={<Hand className={IconSize.HW5} />}
               title="Hold to Change Status"
               description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
@@ -81,7 +58,7 @@ const HowToUse = () => {
             Sorting Taks
           </h2>
           <div className="space-y-3">
-            <InstructionCard
+            <IconCard
               icon={<ArrowUpDown className={IconSize.HW5} />}
               title="Sort Options"
               description={
@@ -102,13 +79,13 @@ const HowToUse = () => {
         <section data-testid="section-subtasks">
           <h2 className="text-lg font-semibold mb-3 text-primary">Subtasks</h2>
           <div className="space-y-3">
-            <InstructionCard
+            <IconCard
               icon={<Layers className={IconSize.HW5} />}
               title="Nested Tasks"
               description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
               testId="card-nested-tasks"
             />
-            <InstructionCard
+            <IconCard
               icon={<GripVertical className={IconSize.HW5} />}
               title="Manual Ordering"
               description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
@@ -122,19 +99,19 @@ const HowToUse = () => {
             Task Statuses
           </h2>
           <div className="space-y-3">
-            <InstructionCard
+            <IconCard
               icon={<Pin className={IconSize.HW5} />}
               title="Pinned"
               description="Pin important tasks to keep them at the top of your list."
               testId="card-pinned"
             />
-            <InstructionCard
+            <IconCard
               icon={<PlayCircle className={IconSize.HW5} />}
               title="In Progress (if setting enabled)"
               description="Pins to the top of your list, while also accumulating time spent in progress."
               testId="card-in-progress"
             />
-            <InstructionCard
+            <IconCard
               icon={<CheckCircle2 className={IconSize.HW5} />}
               title="Completed"
               description="Completed tasks are moved to a separate list you can access from the menu."
@@ -146,7 +123,7 @@ const HowToUse = () => {
         <section data-testid="section-settings">
           <h2 className="text-lg font-semibold mb-3 text-primary">Settings</h2>
           <div className="space-y-3">
-            <InstructionCard
+            <IconCard
               icon={<Settings className={IconSize.HW5} />}
               title="Customize Your Experience"
               description={
