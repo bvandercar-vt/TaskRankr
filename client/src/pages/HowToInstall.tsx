@@ -211,8 +211,8 @@ const HowToInstall = () => (
                 In the address bar, look for a{' '}
                 <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
                 install icon or a prompt near the right side. You can also click
-                the three-dot menu and select{' '}
-                <strong>Install TaskRankr</strong>.
+                the three-dot menu and select <strong>Install TaskRankr</strong>
+                .
               </>
             }
             testId="card-desktop-step-1"

@@ -3,19 +3,19 @@
  * Provides login/signup call-to-action for new users.
  */
 
+import { isStandalonePWA } from 'is-standalone-pwa'
 import { CheckCircle, Clock, Download, ListTodo, Star } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { useIsStandalone } from '@/hooks/useIsStandalone'
 import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
 const Landing = () => {
   const { enterGuestMode } = useGuestMode()
-  const isStandalone = useIsStandalone()
+  const isStandalone = isStandalonePWA()
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">

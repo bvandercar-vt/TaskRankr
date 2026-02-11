@@ -3,13 +3,8 @@
  */
 
 import { useRef, useState } from 'react'
-import {
-  ChevronRight,
-  Download,
-  LogOut,
-  Trash2,
-  Upload,
-} from 'lucide-react'
+import { isStandalonePWA } from 'is-standalone-pwa'
+import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { BackButtonHeader } from '@/components/BackButton'
@@ -35,7 +30,6 @@ import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { useIsStandalone } from '@/hooks/useIsStandalone'
 import { useToast } from '@/hooks/useToast'
 import { IconSize, Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
@@ -308,7 +302,7 @@ const ClearLocalStorageConfirmDialog = () => {
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
-  const isStandalone = useIsStandalone()
+  const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
 
