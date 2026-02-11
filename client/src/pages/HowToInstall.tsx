@@ -65,12 +65,6 @@ const HowToInstall = () => {
       <div className="space-y-6">
         <CardSection title="Why Install?" data-testid="section-benefits">
           <IconCard
-            icon={<MonitorSmartphone className={IconSize.HW5} />}
-            title="Home Screen Icon"
-            description="Get quick access to TaskRankr."
-            data-testid="card-benefit-icon"
-          />
-          <IconCard
             icon={<AppWindow className={IconSize.HW5} />}
             title="Full Screen Experience"
             description="Hide browser navigation elements."
@@ -81,6 +75,12 @@ const HowToInstall = () => {
             title="Offline Access"
             description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
             data-testid="card-benefit-offline"
+          />
+          <IconCard
+            icon={<MonitorSmartphone className={IconSize.HW5} />}
+            title="Home Screen Icon"
+            description="Get quick access to TaskRankr."
+            data-testid="card-benefit-icon"
           />
           <IconCard
             icon={<Wifi className={IconSize.HW5} />}
