@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { filterRootTasks } from '@/lib/sort-tasks'
@@ -33,6 +34,7 @@ export const AssignSubtaskDialog = ({
   const { data: allTasks } = useTasks()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
+  const [showCompleted, setShowCompleted] = useState(false)
   const { updateTask } = useTaskActions()
 
   const collectDescendantIds = useCallback(
@@ -57,9 +59,9 @@ export const AssignSubtaskDialog = ({
         t.parentId === null &&
         t.id !== parentTask.id &&
         !descendantIds.has(t.id) &&
-        t.status !== TaskStatus.COMPLETED,
+        (showCompleted || t.status !== TaskStatus.COMPLETED),
     )
-  }, [allTasks, parentTask.id, collectDescendantIds])
+  }, [allTasks, parentTask.id, collectDescendantIds, showCompleted])
 
   const filteredTasks = useMemo(
     () => filterRootTasks(orphanTasks, search),
@@ -77,12 +79,14 @@ export const AssignSubtaskDialog = ({
     }
     setSelectedId(null)
     setSearch('')
+    setShowCompleted(false)
     onOpenChange(false)
   }
 
   const handleClose = () => {
     setSelectedId(null)
     setSearch('')
+    setShowCompleted(false)
     onOpenChange(false)
   }
 
@@ -93,6 +97,7 @@ export const AssignSubtaskDialog = ({
         if (!v) {
           setSelectedId(null)
           setSearch('')
+          setShowCompleted(false)
         }
         onOpenChange(v)
       }}
@@ -113,6 +118,14 @@ export const AssignSubtaskDialog = ({
           autoFocus
           data-testid="search-assign-tasks"
         />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+          <Checkbox
+            checked={showCompleted}
+            onCheckedChange={(v) => setShowCompleted(v === true)}
+            data-testid="checkbox-show-completed"
+          />
+          Show Completed
+        </label>
         <div
           className="h-64 overflow-y-auto divide-y divide-white/5"
           data-testid="list-orphan-tasks"
@@ -134,6 +147,7 @@ export const AssignSubtaskDialog = ({
                   selectedId === t.id
                     ? 'bg-primary/20 text-foreground'
                     : 'hover-elevate text-muted-foreground',
+                  t.status === TaskStatus.COMPLETED && 'opacity-50',
                 )}
                 data-testid={`button-assign-task-${t.id}`}
               >
