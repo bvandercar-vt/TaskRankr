@@ -6,6 +6,7 @@ import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ArrowUpDown,
   CheckCircle2,
+  ChevronRight,
   Download,
   GripVertical,
   Hand,
@@ -19,7 +20,6 @@ import { Link } from 'wouter'
 
 import { BackButtonHeader } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
-import { Card, CardContent } from '@/components/primitives/Card'
 import { IconCard } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { SortInfo } from '@/components/SortInfo'
@@ -120,8 +120,8 @@ const HowToUse = () => {
           </div>
         </section>
 
-        <section data-testid="section-settings">
-          <h2 className="text-lg font-semibold mb-3 text-primary">Settings</h2>
+        <section data-testid="section-additional">
+          <h2 className="text-lg font-semibold mb-3 text-primary">Additional</h2>
           <div className="space-y-3">
             <IconCard
               icon={<Settings className={IconSize.HW5} />}
@@ -148,25 +148,26 @@ const HowToUse = () => {
 
       {!isStandalone && (
         <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-          <Card
-            className="mt-8 bg-card/50 border-white/10 hover-elevate cursor-pointer"
-            data-testid="card-how-to-install"
-          >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                <Download className={IconSize.HW5} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">
-                  Install as App
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Add TaskRankr to your home screen for offline access and a
-                  full-screen experience.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <IconCard
+            className="mt-8 hover-elevate cursor-pointer"
+            icon={<Download className={IconSize.HW5} />}
+            title={
+              <span className="flex items-center gap-1">
+                Install as App
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </span>
+            }
+            description={
+              <>
+                Add TaskRankr to your home screen for offline access and a
+                full-screen experience.{' '}
+                <span className="text-primary underline underline-offset-2">
+                  See install instructions
+                </span>
+              </>
+            }
+            testId="card-how-to-install"
+          />
         </Link>
       )}
 
