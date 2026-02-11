@@ -13,7 +13,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { pick } from 'es-toolkit'
+import { pick, toMerged } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { createDemoTasks } from '@/lib/demo-tasks'
@@ -146,21 +146,20 @@ export const LocalStateProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   useEffect(() => {
-    const loadedSettings = {
-      ...DEFAULT_SETTINGS,
-      ...loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS),
-      fieldConfig: {
-        ...DEFAULT_SETTINGS.fieldConfig,
-        ...loadFromStorage(storageKeys.settings, DEFAULT_SETTINGS).fieldConfig,
-      },
-    }
-    const loadedTasks = loadFromStorage(storageKeys.tasks, [])
-    const loadedNextId = loadFromStorage(storageKeys.nextId, -1)
-    const loadedQueue = loadFromStorage<SyncOperation[]>(
+    const loadedSettings: UserSettings = toMerged(
+      DEFAULT_SETTINGS,
+      loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
+    )
+    const loadedTasks: Task[] = loadFromStorage<Task[]>(storageKeys.tasks, [])
+    const loadedNextId: number = loadFromStorage<number>(storageKeys.nextId, -1)
+    const loadedQueue: SyncOperation[] = loadFromStorage<SyncOperation[]>(
       storageKeys.syncQueue,
       [],
     )
-    const loadedDemoIds = loadFromStorage<number[]>(storageKeys.demoTaskIds, [])
+    const loadedDemoIds: number[] = loadFromStorage<number[]>(
+      storageKeys.demoTaskIds,
+      [],
+    )
 
     setSettings(loadedSettings)
     nextIdRef.current = loadedNextId
