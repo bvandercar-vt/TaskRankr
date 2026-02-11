@@ -11,6 +11,8 @@ type CollapsibleCardProps = React.PropsWithChildren<{
   triggerClassName?: string
   contentClassName?: string
   defaultOpen?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   noCard?: boolean
   'data-testid'?: string
 }>
@@ -22,10 +24,18 @@ export const CollapsibleCard = ({
   triggerClassName,
   contentClassName,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
   noCard = false,
   'data-testid': testId,
 }: CollapsibleCardProps) => {
-  const [open, setOpen] = useState(defaultOpen)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const setOpen = (value: boolean) => {
+    if (!isControlled) setUncontrolledOpen(value)
+    onOpenChange?.(value)
+  }
 
   const TitleElement =
     typeof title === 'string' ? (

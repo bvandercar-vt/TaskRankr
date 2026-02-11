@@ -2,9 +2,12 @@
  * @fileoverview Instructional page explaining how to use the app
  */
 
+import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ArrowUpDown,
   CheckCircle2,
+  ChevronRight,
+  Download,
   GripVertical,
   Hand,
   Layers,
@@ -17,66 +20,41 @@ import { Link } from 'wouter'
 
 import { BackButtonHeader } from '@/components/BackButton'
 import { ContactCard } from '@/components/ContactCard'
-import { Card, CardContent } from '@/components/primitives/Card'
+import { CardSection } from '@/components/primitives/CardSection'
+import { IconCard } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { SortInfo } from '@/components/SortInfo'
 import { IconSize, Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
-const InstructionCard = ({
-  icon,
-  title,
-  description,
-  testId,
-}: {
-  icon: React.ReactNode
-  title: React.ReactNode
-  description: React.ReactNode
-  testId: string
-}) => (
-  <Card className="bg-card/50 border-white/10" data-testid={testId}>
-    <CardContent className="p-4 flex items-start gap-4">
-      <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-        {icon}
-      </div>
-      <div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-    </CardContent>
-  </Card>
-)
+const HowToUse = () => {
+  const isStandalone = isStandalonePWA()
 
-const HowToUse = () => (
-  <ScrollablePage className="pb-16">
-    <BackButtonHeader title="How To Use" />
+  return (
+    <ScrollablePage className="pb-16">
+      <BackButtonHeader title="How To Use" />
 
-    <div className="space-y-6">
-      <section data-testid="section-working-with-tasks">
-        <h2 className="text-lg font-semibold mb-3 text-primary">
-          Working with Tasks
-        </h2>
-        <div className="space-y-3">
-          <InstructionCard
+      <div className="space-y-6">
+        <CardSection
+          title="Working with Tasks"
+          data-testid="section-working-with-tasks"
+        >
+          <IconCard
             icon={<MousePointer2 className={IconSize.HW5} />}
             title="Tap to Edit"
             description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
-            testId="card-tap-to-edit"
+            data-testid="card-tap-to-edit"
           />
-          <InstructionCard
+          <IconCard
             icon={<Hand className={IconSize.HW5} />}
             title="Hold to Change Status"
             description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
-            testId="card-hold-to-change-status"
+            data-testid="card-hold-to-change-status"
           />
-        </div>
-      </section>
+        </CardSection>
 
-      <section data-testid="section-sorting">
-        <h2 className="text-lg font-semibold mb-3 text-primary">
-          Sorting Taks
-        </h2>
-        <div className="space-y-3">
-          <InstructionCard
+        <CardSection title="Sorting Tasks" data-testid="section-sorting">
+          <IconCard
             icon={<ArrowUpDown className={IconSize.HW5} />}
             title="Sort Options"
             description={
@@ -89,83 +67,85 @@ const HowToUse = () => (
                 <SortInfo defaultExpanded={false} />
               </>
             }
-            testId="card-sorting"
+            data-testid="card-sorting"
           />
-        </div>
-      </section>
+        </CardSection>
 
-      <section data-testid="section-subtasks">
-        <h2 className="text-lg font-semibold mb-3 text-primary">Subtasks</h2>
-        <div className="space-y-3">
-          <InstructionCard
+        <CardSection title="Subtasks" data-testid="section-subtasks">
+          <IconCard
             icon={<Layers className={IconSize.HW5} />}
             title="Nested Tasks"
             description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
-            testId="card-nested-tasks"
+            data-testid="card-nested-tasks"
           />
-          <InstructionCard
+          <IconCard
             icon={<GripVertical className={IconSize.HW5} />}
             title="Manual Ordering"
             description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
-            testId="card-manual-ordering"
+            data-testid="card-manual-ordering"
           />
-        </div>
-      </section>
+        </CardSection>
 
-      <section data-testid="section-task-statuses">
-        <h2 className="text-lg font-semibold mb-3 text-primary">
-          Task Statuses
-        </h2>
-        <div className="space-y-3">
-          <InstructionCard
+        <CardSection title="Task Statuses" data-testid="section-task-statuses">
+          <IconCard
             icon={<Pin className={IconSize.HW5} />}
             title="Pinned"
             description="Pin important tasks to keep them at the top of your list."
-            testId="card-pinned"
+            data-testid="card-pinned"
           />
-          <InstructionCard
+          <IconCard
             icon={<PlayCircle className={IconSize.HW5} />}
             title="In Progress (if setting enabled)"
             description="Pins to the top of your list, while also accumulating time spent in progress."
-            testId="card-in-progress"
+            data-testid="card-in-progress"
           />
-          <InstructionCard
+          <IconCard
             icon={<CheckCircle2 className={IconSize.HW5} />}
             title="Completed"
             description="Completed tasks are moved to a separate list you can access from the menu."
-            testId="card-completed"
+            data-testid="card-completed"
           />
-        </div>
-      </section>
+        </CardSection>
 
-      <section data-testid="section-settings">
-        <h2 className="text-lg font-semibold mb-3 text-primary">Settings</h2>
-        <div className="space-y-3">
-          <InstructionCard
-            icon={<Settings className={IconSize.HW5} />}
-            title="Customize Your Experience"
-            description={
-              <>
-                Visit the{' '}
-                <Link
-                  href={Routes.SETTINGS}
-                  className="text-primary underline underline-offset-2"
-                >
-                  Settings page
-                </Link>{' '}
-                to configure which rank fields are visible or required, toggle
-                features like auto-pinning new tasks, In Progress status, time
-                tracking, and more.
-              </>
-            }
-            testId="card-settings"
-          />
-        </div>
-      </section>
-    </div>
-
-    <ContactCard className="mt-8" />
-  </ScrollablePage>
-)
+        <CardSection title="Additional" data-testid="section-additional">
+          <Link href={Routes.SETTINGS} data-testid="link-settings">
+            <IconCard
+              className="hover-elevate cursor-pointer"
+              icon={<Settings className={IconSize.HW5} />}
+              title="Customize Your Experience"
+              titleRightIcon={
+                <ChevronRight
+                  className={cn(IconSize.HW4, 'text-muted-foreground')}
+                />
+              }
+              description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
+              data-testid="card-settings"
+            />
+          </Link>
+          {!isStandalone && (
+            <Link
+              href={Routes.HOW_TO_INSTALL}
+              data-testid="link-how-to-install"
+            >
+              <IconCard
+                className="hover-elevate cursor-pointer"
+                icon={<Download className={IconSize.HW5} />}
+                title="Install as App"
+                titleRightIcon={
+                  <ChevronRight
+                    className={cn(IconSize.HW4, 'text-muted-foreground')}
+                  />
+                }
+                description="Add TaskRankr to your home screen for offline access and a full-screen experience."
+                data-testid="card-how-to-install"
+              />
+            </Link>
+          )}
+          <ContactCard />
+        </CardSection>
+      </div>
+    </ScrollablePage>
+  )
+}
 
 export default HowToUse

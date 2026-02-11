@@ -3,6 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
+import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
@@ -54,7 +55,7 @@ const UserInfoCard = () => {
   const { user } = useAuth()
 
   return (
-    <Card className="mt-8 flex items-center justify-between">
+    <Card className="flex items-center justify-between">
       <div>
         <p
           className="font-semibold text-foreground"
@@ -301,6 +302,7 @@ const ClearLocalStorageConfirmDialog = () => {
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
+  const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
 
@@ -376,53 +378,75 @@ const Settings = () => {
         updateFieldFlags={updateFieldFlags}
       />
 
-      <div className="mt-8">
+      <div className="my-6">
         <SortInfo />
       </div>
 
-      <Link href={Routes.HOW_TO_USE}>
-        <Card className="mt-4 flex items-center justify-between gap-2 hover-elevate cursor-pointer">
-          <div>
-            <h3 className="font-semibold text-foreground">How To Use</h3>
-            <p className="text-sm text-muted-foreground">
-              Learn how to get the most out of TaskRankr
-            </p>
+      <div className="flex flex-col gap-3 py-2">
+        <Link href={Routes.HOW_TO_USE}>
+          <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+            <div>
+              <h3 className="font-semibold text-foreground">How To Use</h3>
+              <p className="text-sm text-muted-foreground">
+                Learn how to get the most out of TaskRankr
+              </p>
+            </div>
+            <ChevronRight
+              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
+            />
+          </Card>
+        </Link>
+
+        {!isStandalone && (
+          <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+            <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Install as App
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Add to your home screen for offline access
+                </p>
+              </div>
+              <ChevronRight
+                className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
+              />
+            </Card>
+          </Link>
+        )}
+
+        {!isGuestMode && <UserInfoCard />}
+
+        <ContactCard />
+      </div>
+
+      <div className="pt-6 space-y-3">
+        <CollapsibleCard
+          title="Import/Export Data"
+          className="bg-card/50"
+          data-testid="collapsible-import-export"
+        >
+          <div className="flex flex-wrap justify-center gap-3">
+            <ExportButton />
+            <ImportButton />
           </div>
-          <ChevronRight
-            className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
-          />
-        </Card>
-      </Link>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Export your tasks as JSON or import from a previously exported file.
+          </p>
+        </CollapsibleCard>
 
-      {!isGuestMode && <UserInfoCard />}
-
-      <ContactCard className="mt-4" />
-
-      <CollapsibleCard
-        title="Import/Export Data"
-        className="mt-8 bg-card/50"
-        data-testid="collapsible-import-export"
-      >
-        <div className="flex flex-wrap justify-center gap-3">
-          <ExportButton />
-          <ImportButton />
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Export your tasks as JSON or import from a previously exported file.
-        </p>
-      </CollapsibleCard>
-
-      <CollapsibleCard
-        title="Clear Local Data"
-        className="mt-3 bg-card/50"
-        data-testid="collapsible-clear-local-data"
-      >
-        <p className="text-sm text-muted-foreground mb-3">
-          Remove all locally cached data and re-pull fresh data from the server.
-          Your synced data on the server won't be affected.
-        </p>
-        <ClearLocalStorageConfirmDialog />
-      </CollapsibleCard>
+        <CollapsibleCard
+          title="Clear Local Data"
+          className="bg-card/50"
+          data-testid="collapsible-clear-local-data"
+        >
+          <p className="text-sm text-muted-foreground mb-3">
+            Remove all locally cached data and re-pull fresh data from the
+            server. Your synced data on the server won't be affected.
+          </p>
+          <ClearLocalStorageConfirmDialog />
+        </CollapsibleCard>
+      </div>
 
       <div className="mt-16 text-center text-muted-foreground">
         <p className="text-sm font-medium" data-testid="text-app-name">
