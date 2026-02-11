@@ -129,12 +129,8 @@ const HowToUse = () => {
               <IconCard
                 className="hover-elevate cursor-pointer"
                 icon={<Settings className={IconSize.HW5} />}
-                title={
-                  <span className="flex items-center gap-1">
-                    Customize Your Experience
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </span>
-                }
+                title="Customize Your Experience"
+                titleRightIcon={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
                 description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
                 data-testid="card-settings"
               />
@@ -147,12 +143,8 @@ const HowToUse = () => {
                 <IconCard
                   className="hover-elevate cursor-pointer"
                   icon={<Download className={IconSize.HW5} />}
-                  title={
-                    <span className="flex items-center gap-1">
-                      Install as App
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </span>
-                  }
+                  title="Install as App"
+                  titleRightIcon={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
                   description="Add TaskRankr to your home screen for offline access and a full-screen experience."
                   data-testid="card-how-to-install"
                 />
