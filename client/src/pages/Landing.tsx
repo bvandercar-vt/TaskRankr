@@ -18,7 +18,7 @@ const Landing = () => {
   const isStandalone = isStandalonePWA()
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="max-h-screen bg-background text-foreground flex flex-col">
       <header className="p-6">
         <h1 className="text-xl font-bold" data-testid="text-logo">
           TaskRankr
@@ -26,57 +26,14 @@ const Landing = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="max-w-2xl space-y-8">
-          <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-            Track tasks with clarity
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Rate priority, ease, enjoyment, and time for each task. Sort by any
-            attribute at a glance.
-          </p>
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href={authPaths.login}>
-                <Button
-                  size="lg"
-                  className="text-lg px-8 min-w-[200px]"
-                  data-testid="button-get-started"
-                >
-                  Log In / Sign Up*
-                </Button>
-              </a>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-8 min-w-[200px]"
-                data-testid="button-try-guest"
-                onClick={enterGuestMode}
-              >
-                Try as Guest
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              <sup>*</sup>Log in to back up your data and sync across devices.
-            </p>
-          </div>
-        </div>
+        <h2 className="text-4xl md:text-5xl font-bold leading-tight pb-2">
+          Prioritize your tasks.
+        </h2>
+        <p className="text-lg text-muted-foreground pb-4">
+          Rate and sort by priority, ease, enjoyment, and time for each task.
+        </p>
 
-        {!isStandalone && (
-          <div className="mt-12 flex justify-center">
-            <Link href={Routes.HOW_TO_INSTALL}>
-              <Button
-                size="lg"
-                className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
-                data-testid="button-how-to-install"
-              >
-                <Download className={IconSize.HW5} />
-                Install as App
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground mb-8">
           <div className="flex flex-col items-center gap-2">
             <Star className={cn(IconSize.HW6, 'text-primary')} />
             <span>Priority levels</span>
@@ -94,6 +51,47 @@ const Landing = () => {
             <span>Nested tasks</span>
           </div>
         </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href={authPaths.login}>
+              <Button
+                size="lg"
+                className="text-lg px-8 min-w-[200px]"
+                data-testid="button-get-started"
+              >
+                Log In / Sign Up*
+              </Button>
+            </a>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 min-w-[200px]"
+              data-testid="button-try-guest"
+              onClick={enterGuestMode}
+            >
+              Try as Guest
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <sup>*</sup>Log in to back up your data and sync across devices.
+          </p>
+        </div>
+
+        {!isStandalone && (
+          <div className="mt-8 flex justify-center">
+            <Link href={Routes.HOW_TO_INSTALL}>
+              <Button
+                size="lg"
+                className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
+                data-testid="button-how-to-install"
+              >
+                <Download className={IconSize.HW5} />
+                Install as App
+              </Button>
+            </Link>
+          </div>
+        )}
       </main>
 
       <footer
