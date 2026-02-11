@@ -14,15 +14,10 @@ export type UserSettingsContent = Omit<UserSettings, 'userId'>
 export const useSettings = () => {
   const localState = useLocalStateSafe()
 
-  const raw = localState?.settings ?? DEFAULT_SETTINGS
-  const settings: UserSettings = {
-    ...DEFAULT_SETTINGS,
-    ...raw,
-    fieldConfig: {
-      ...DEFAULT_SETTINGS.fieldConfig,
-      ...raw.fieldConfig,
-    },
-  }
+  const settings: UserSettings = toMerged(
+    DEFAULT_SETTINGS,
+    localState?.settings ?? {},
+  )
   const isLoading = !localState?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
