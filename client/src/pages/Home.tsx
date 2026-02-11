@@ -4,47 +4,47 @@
  *
  */
 
-import { useMemo, useState } from 'react'
-import { LayoutList, Plus, Search } from 'lucide-react'
+import { useMemo, useState } from "react";
+import { LayoutList, Plus, Search } from "lucide-react";
 
-import { EmptyState as EmptyStateBase } from '@/components/PageStates'
-import { Button } from '@/components/primitives/Button'
-import { Icon } from '@/components/primitives/LucideIcon'
-import { useLocalState } from '@/components/providers/LocalStateProvider'
-import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
-import { SortButton } from '@/components/SortButton'
-import { TaskCard } from '@/components/TaskCard'
+import { EmptyState as EmptyStateBase } from "@/components/PageStates";
+import { Button } from "@/components/primitives/Button";
+import { Icon } from "@/components/primitives/LucideIcon";
+import { useLocalState } from "@/components/providers/LocalStateProvider";
+import { useTaskDialog } from "@/components/providers/TaskFormDialogProvider";
+import { SortButton } from "@/components/SortButton";
+import { TaskCard } from "@/components/TaskCard";
 import {
   TaskListPageHeader,
   TaskListPageWrapper,
   TaskListTreeLayout,
-} from '@/components/TaskListPage'
-import { useSettings } from '@/hooks/useSettings'
-import { useTasks } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
+} from "@/components/TaskListPage";
+import { useSettings } from "@/hooks/useSettings";
+import { useTasks } from "@/hooks/useTasks";
+import { IconSize } from "@/lib/constants";
 import {
   filterAndSortTree,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
-} from '@/lib/sort-tasks'
-import { cn } from '@/lib/utils'
+} from "@/lib/sort-tasks";
+import { cn } from "@/lib/utils";
 import {
   type FieldConfig,
   SortOption,
   TaskStatus,
   type TaskWithSubtasks,
-} from '~/shared/schema'
+} from "~/shared/schema";
 
 const SortButtons = ({
   sortBy,
   setSortBy,
   fieldConfig,
 }: {
-  sortBy: SortOption
-  setSortBy: (value: SortOption) => void
-  fieldConfig: FieldConfig
+  sortBy: SortOption;
+  setSortBy: (value: SortOption) => void;
+  fieldConfig: FieldConfig;
 }) => (
-  <div className="flex items-center gap-1">
+  <div className="flex items-center gap-1 pr-1">
     <SortButton
       label="Date"
       value={SortOption.DATE_CREATED}
@@ -65,7 +65,7 @@ const SortButtons = ({
       ) : null,
     )}
   </div>
-)
+);
 
 const DeleteDemoDataButton = ({ onClick }: { onClick: () => void }) => (
   <div className="mt-12 pt-6 flex justify-center">
@@ -79,7 +79,7 @@ const DeleteDemoDataButton = ({ onClick }: { onClick: () => void }) => (
       Delete Demo Data
     </Button>
   </div>
-)
+);
 
 const CreateTaskButton = ({ onClick }: { onClick: () => void }) => (
   <Button
@@ -90,27 +90,27 @@ const CreateTaskButton = ({ onClick }: { onClick: () => void }) => (
   >
     <Plus className={IconSize.HW6} />
   </Button>
-)
+);
 
 const EmptyState = ({
   search,
   onCreateClick,
 }: {
-  search: string | undefined
-  onCreateClick: () => void
+  search: string | undefined;
+  onCreateClick: () => void;
 }) => (
   <EmptyStateBase
     icon={
       <Icon
         icon={search ? Search : LayoutList}
-        className={cn(IconSize.HW8, 'text-muted-foreground')}
+        className={cn(IconSize.HW8, "text-muted-foreground")}
       />
     }
-    title={search ? 'No matching tasks found' : 'Your list is empty'}
+    title={search ? "No matching tasks found" : "Your list is empty"}
     description={
       search
-        ? 'Try adjusting your search terms.'
-        : 'Start by adding your first task to get organized.'
+        ? "Try adjusting your search terms."
+        : "Start by adding your first task to get organized."
     }
     action={
       !search && (
@@ -120,17 +120,17 @@ const EmptyState = ({
       )
     }
   />
-)
+);
 
 const Home = () => {
-  const { data: allTasks, isLoading } = useTasks()
-  const { openCreateDialog } = useTaskDialog()
-  const { settings, updateSettings } = useSettings()
-  const { hasDemoData, deleteDemoData } = useLocalState()
-  const [search, setSearch] = useState('')
+  const { data: allTasks, isLoading } = useTasks();
+  const { openCreateDialog } = useTaskDialog();
+  const { settings, updateSettings } = useSettings();
+  const { hasDemoData, deleteDemoData } = useLocalState();
+  const [search, setSearch] = useState("");
 
-  const sortBy = settings.sortBy
-  const setSortBy = (value: SortOption) => updateSettings({ sortBy: value })
+  const sortBy = settings.sortBy;
+  const setSortBy = (value: SortOption) => updateSettings({ sortBy: value });
 
   // Build tree from flat list, excluding completed tasks
   // Also extract in-progress and pinned tasks to be hoisted to top
@@ -138,49 +138,49 @@ const Home = () => {
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
     const activeTasks = allTasks.filter(
       (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
-    )
+    );
 
-    let inProgress: TaskWithSubtasks | undefined
-    const pinnedList: TaskWithSubtasks[] = []
-    const hoistedIds = new Set<number>()
+    let inProgress: TaskWithSubtasks | undefined;
+    const pinnedList: TaskWithSubtasks[] = [];
+    const hoistedIds = new Set<number>();
 
     activeTasks.forEach((task) => {
       if (task.status === TaskStatus.IN_PROGRESS) {
-        inProgress = { ...task, subtasks: [] }
-        hoistedIds.add(task.id)
+        inProgress = { ...task, subtasks: [] };
+        hoistedIds.add(task.id);
       } else if (task.status === TaskStatus.PINNED) {
-        pinnedList.push({ ...task, subtasks: [] })
-        hoistedIds.add(task.id)
+        pinnedList.push({ ...task, subtasks: [] });
+        hoistedIds.add(task.id);
       }
-    })
+    });
 
-    const nodes: Record<number, TaskWithSubtasks> = {}
-    const roots: TaskWithSubtasks[] = []
+    const nodes: Record<number, TaskWithSubtasks> = {};
+    const roots: TaskWithSubtasks[] = [];
 
     activeTasks.forEach((task) => {
-      nodes[task.id] = { ...task, subtasks: [] }
-    })
+      nodes[task.id] = { ...task, subtasks: [] };
+    });
 
     activeTasks.forEach((task) => {
       if (task.parentId && nodes[task.parentId]) {
-        nodes[task.parentId].subtasks.push(nodes[task.id])
+        nodes[task.parentId].subtasks.push(nodes[task.id]);
       } else if (!task.parentId && !hoistedIds.has(task.id)) {
-        roots.push(nodes[task.id])
+        roots.push(nodes[task.id]);
       }
-    })
+    });
 
     return {
       taskTree: roots,
       inProgressTask: inProgress,
       pinnedTasks: pinnedList,
-    }
-  }, [allTasks])
+    };
+  }, [allTasks]);
 
   const displayedTasks = useMemo(() => {
-    const sortOrder = SORT_ORDER_MAP[sortBy]
+    const sortOrder = SORT_ORDER_MAP[sortBy];
     const sortedInProgress = inProgressTask
       ? filterAndSortTree([inProgressTask], search, sortOrder)
-      : []
+      : [];
 
     const sortedPinned = filterAndSortTree(
       pinnedTasks,
@@ -188,11 +188,11 @@ const Home = () => {
       settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
         ? [SortOption.PRIORITY, ...sortOrder]
         : sortOrder,
-    )
+    );
 
-    const sortedTree = filterAndSortTree(taskTree, search, sortOrder)
-    return [...sortedInProgress, ...sortedPinned, ...sortedTree]
-  }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings])
+    const sortedTree = filterAndSortTree(taskTree, search, sortOrder);
+    return [...sortedInProgress, ...sortedPinned, ...sortedTree];
+  }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings]);
 
   return (
     <TaskListPageWrapper isLoading={isLoading}>
@@ -227,7 +227,7 @@ const Home = () => {
 
       <CreateTaskButton onClick={() => openCreateDialog()} />
     </TaskListPageWrapper>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
