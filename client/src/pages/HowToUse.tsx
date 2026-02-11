@@ -24,6 +24,7 @@ import { IconCard } from "@/components/primitives/IconCard";
 import { ScrollablePage } from "@/components/primitives/ScrollablePage";
 import { SortInfo } from "@/components/SortInfo";
 import { IconSize, Routes } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 const HowToUse = () => {
   const isStandalone = isStandalonePWA();
@@ -130,7 +131,7 @@ const HowToUse = () => {
                 className="hover-elevate cursor-pointer"
                 icon={<Settings className={IconSize.HW5} />}
                 title="Customize Your Experience"
-                titleRightIcon={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                titleRightIcon={<ChevronRight className={cn(IconSize.HW4, "text-muted-foreground")} />}
                 description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
                 data-testid="card-settings"
               />
@@ -144,7 +145,7 @@ const HowToUse = () => {
                   className="hover-elevate cursor-pointer"
                   icon={<Download className={IconSize.HW5} />}
                   title="Install as App"
-                  titleRightIcon={<ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  titleRightIcon={<ChevronRight className={cn(IconSize.HW4, "text-muted-foreground")} />}
                   description="Add TaskRankr to your home screen for offline access and a full-screen experience."
                   data-testid="card-how-to-install"
                 />
