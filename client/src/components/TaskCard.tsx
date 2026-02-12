@@ -13,7 +13,6 @@ import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
@@ -99,10 +98,7 @@ const PinIcon = ({
   setShowConfirm: (show: boolean) => void
 }) => (
   <Pin
-    className={cn(
-      IconSize.HW4,
-      'text-slate-400 shrink-0 rotate-45 cursor-pointer',
-    )}
+    className="size-4 text-slate-400 shrink-0 rotate-45 cursor-pointer"
     data-testid="icon-pinned"
     onClick={(e) => {
       e.stopPropagation()
