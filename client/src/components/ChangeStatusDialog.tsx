@@ -5,20 +5,14 @@
  */
 
 import { useEffect, useState } from 'react'
-import {
-  Clock,
-  type LucideIcon,
-  Pin,
-  PinOff,
-  StopCircle,
-  X,
-} from 'lucide-react'
+import { Clock, type LucideIcon, Pin, PinOff, StopCircle } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
 import { TimeInput } from '@/components/primitives/forms/TimeInput'
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCloseButton,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -26,7 +20,6 @@ import {
   AlertDialogTitle,
 } from '@/components/primitives/overlays/AlertDialog'
 import { useSettings } from '@/hooks/useSettings'
-import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
@@ -107,7 +100,7 @@ const ChangeStatusButton = ({
     className={cn('w-full h-11 text-base font-semibold gap-2', colorClass)}
     data-testid={testId}
   >
-    <Icon className={IconSize.HW4} />
+    <Icon className="size-4" />
     {label}
   </Button>
 )
@@ -161,15 +154,11 @@ export const ChangeStatusDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-card border-white/10 pt-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
-          onClick={() => onOpenChange(false)}
+        <AlertDialogCloseButton
+          onClose={() => onOpenChange(false)}
           data-testid="button-close-status-dialog"
-        >
-          <X className={IconSize.HW4} />
-        </Button>
+        />
+
         <AlertDialogHeader>
           <AlertDialogTitle>
             {isCompleted ? 'Restore Task?' : 'Task Status'}

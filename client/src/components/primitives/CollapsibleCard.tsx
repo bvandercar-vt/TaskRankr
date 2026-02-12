@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
-import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 type CollapsibleCardProps = React.PropsWithChildren<{
@@ -72,8 +71,7 @@ export const CollapsibleCard = ({
         {TitleElement}
         <ChevronDown
           className={cn(
-            IconSize.HW4,
-            'text-muted-foreground transition-transform duration-200',
+            'size-4 text-muted-foreground transition-transform duration-200',
             open && 'rotate-180',
           )}
         />

@@ -21,13 +21,11 @@ import {
 } from '@/components/TaskListPage'
 import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
 import {
   filterAndSortTree,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/sort-tasks'
-import { cn } from '@/lib/utils'
 import {
   type FieldConfig,
   SortOption,
@@ -88,7 +86,7 @@ const CreateTaskButton = ({ onClick }: { onClick: () => void }) => (
     className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground z-50 transition-transform active:scale-95 border-0"
     data-testid="button-create-task"
   >
-    <Plus className={IconSize.HW6} />
+    <Plus className="size-6" />
   </Button>
 )
 
@@ -103,7 +101,7 @@ const EmptyState = ({
     icon={
       <Icon
         icon={search ? Search : LayoutList}
-        className={cn(IconSize.HW8, 'text-muted-foreground')}
+        className="size-8 text-muted-foreground"
       />
     }
     title={search ? 'No matching tasks found' : 'Your list is empty'}

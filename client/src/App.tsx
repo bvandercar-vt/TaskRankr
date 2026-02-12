@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Route, Switch, useLocation } from 'wouter'
 
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
 import { ExpandedTasksProvider } from '@/components/providers/ExpandedTasksProvider'
@@ -105,14 +106,16 @@ const AuthenticatedApp = () => {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <GuestModeProvider>
-        <Toaster />
-        <AuthenticatedApp />
-      </GuestModeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <GuestModeProvider>
+          <Toaster />
+          <AuthenticatedApp />
+        </GuestModeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 )
 
 export default App

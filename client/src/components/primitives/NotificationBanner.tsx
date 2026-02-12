@@ -3,8 +3,6 @@ import type { LucideIcon } from 'lucide-react'
 import { X } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
-import { IconSize } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 
 interface NotificationBannerProps {
   storageKey: string
@@ -53,7 +51,7 @@ export const NotificationBanner = ({
       data-testid={testId}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <Icon className={cn(IconSize.HW5, 'shrink-0 text-primary')} />
+        <Icon className="size-5 shrink-0 text-primary" />
         <span className="text-sm text-foreground">{children}</span>
       </div>
       <Button
@@ -64,7 +62,7 @@ export const NotificationBanner = ({
           testId ? `button-dismiss-${testId.replace('banner-', '')}` : undefined
         }
       >
-        <X className={IconSize.HW4} />
+        <X className="size-4" />
       </Button>
     </div>
   )

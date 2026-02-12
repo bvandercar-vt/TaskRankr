@@ -51,7 +51,7 @@ Single-column stack with bottom navigation:
 
 ### Task Components
 **Task Card** (repeating unit):
-- Checkbox (leading, w-5 h-5, rounded)
+- Checkbox (leading, size-5, rounded)
 - Task title (truncate with hover expand)
 - Priority indicator (vertical bar, h-full w-1, left edge)
 - Due date badge (trailing, text-xs)

@@ -36,9 +36,9 @@ export const Toggle = forwardRefHelper<
 >(
   ({ className, variant, size, ...props }, ref) => (
     <TogglePrimitive.Root
+      {...props}
       ref={ref}
       className={cn(toggleVariants({ variant, size, className }))}
-      {...props}
     />
   ),
   TogglePrimitive.Root,
