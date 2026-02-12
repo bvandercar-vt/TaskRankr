@@ -4,6 +4,7 @@ import type React from 'react'
 
 import { DropdownMenuHeader } from './DropdownMenuHeader'
 import { HowToUseBanner } from './HowToUseBanner'
+import { InstallBanner } from './InstallBanner'
 import { PageLoading } from './PageStates'
 
 export const TaskListPageHeader = ({
@@ -19,8 +20,9 @@ export const TaskListPageHeader = ({
   searchVal: string
   setSearchVal: (value: string) => void
 }) => (
-  <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-5">
+  <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-3">
     <HowToUseBanner />
+    <InstallBanner />
 
     <DropdownMenuHeader
       title={title}
