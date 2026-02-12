@@ -118,6 +118,7 @@ export const AssignSubtaskDialog = ({
           autoFocus
           data-testid="search-assign-tasks"
         />
+        {/** biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input*/}
         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
           <Checkbox
             checked={showCompleted}

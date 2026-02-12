@@ -307,6 +307,7 @@ export const TaskForm = ({
               {...(initialData
                 ? {
                     task: initialData,
+                    // biome-ignore lint/style/noNonNullAssertion: in case of initialData, is present.
                     onAddChild: onAddChild!,
                     onEditChild,
                     onSubtaskDelete,
@@ -314,16 +315,16 @@ export const TaskForm = ({
                   }
                 : {
                     task: STUB_TASK,
-                    onAddChild: () => {
-                      form.handleSubmit((data) => {
-                        onSaveAndAddChild?.(data as MutateTaskContent)
-                      })()
-                    },
-                    onAssignSubtask: () => {
-                      form.handleSubmit((data) => {
-                        onSaveAndAssignSubtask?.(data as MutateTaskContent)
-                      })()
-                    },
+                    onAddChild: () =>
+                      form.handleSubmit((data) =>
+                        // biome-ignore lint/style/noNonNullAssertion: in case of !initialData, is present.
+                        onSaveAndAddChild!(data),
+                      )(),
+                    onAssignSubtask: () =>
+                      form.handleSubmit((data) =>
+                        // biome-ignore lint/style/noNonNullAssertion: in case of !initialData, is present.
+                        onSaveAndAssignSubtask!(data),
+                      )(),
                   })}
             />
 
