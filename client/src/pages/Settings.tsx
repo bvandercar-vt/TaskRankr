@@ -417,7 +417,7 @@ const Settings = () => {
 
         {!isGuestMode && <UserInfoCard />}
 
-        <ContactCard />
+        <ContactCard showDebugDownload />
       </div>
 
       <div className="pt-6 space-y-3">
