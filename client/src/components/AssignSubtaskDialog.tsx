@@ -5,13 +5,13 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/primitives/Button'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { filterRootTasks } from '@/lib/sort-tasks'
