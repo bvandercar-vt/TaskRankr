@@ -4,7 +4,15 @@
  */
 
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { CheckCircle, Clock, Download, ListTodo, Star } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import {
+  CheckCircle,
+  Clock,
+  Download,
+  ListTodo,
+  Star,
+  WifiOff,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -12,6 +20,21 @@ import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
+
+const CaptionedIcon = ({
+  icon: Icon,
+  color,
+  label,
+}: {
+  icon: LucideIcon
+  color: string
+  label: string
+}) => (
+  <div className="flex flex-col items-center gap-2">
+    <Icon className={cn(IconSize.HW6, color)} />
+    <span className="text-sm">{label}</span>
+  </div>
+)
 
 const Landing = () => {
   const { enterGuestMode } = useGuestMode()
@@ -33,22 +56,35 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground mb-8">
-          <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSize.HW6, 'text-primary')} />
-            <span>Priority levels</span>
+        <div className="flex flex-col items-center gap-6 text-sm text-muted-foreground mb-8">
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={Star}
+              color="text-yellow-500"
+              label="Priority levels"
+            />
+            <CaptionedIcon
+              icon={CheckCircle}
+              color="text-emerald-500"
+              label="Ease levels"
+            />
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
-            <span>Ease levels</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
-            <span>Time tracking</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSize.HW6, 'text-amber-500')} />
-            <span>Nested tasks</span>
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={Clock}
+              color="text-blue-500"
+              label="Time tracking"
+            />
+            <CaptionedIcon
+              icon={ListTodo}
+              color="text-amber-500"
+              label="Nested tasks"
+            />
+            <CaptionedIcon
+              icon={WifiOff}
+              color="text-violet-600"
+              label="Works offline"
+            />
           </div>
         </div>
 
