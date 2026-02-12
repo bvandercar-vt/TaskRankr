@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/Button'
 import { Calendar } from '@/components/primitives/forms/Calendar'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
 import {
   Form,
   FormControl,
@@ -122,6 +123,7 @@ export interface TaskFormProps {
   onEditSubtask: (task: Task) => void
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
+  onMarkCompleted?: (taskId: number) => void
 }
 
 export const TaskForm = ({
@@ -133,9 +135,11 @@ export const TaskForm = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
+  onMarkCompleted,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
+  const [markCompleted, setMarkCompleted] = useState(false)
 
   const rankFieldConfig = useMemo(
     () =>
@@ -224,9 +228,12 @@ export const TaskForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) =>
-          onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder'])),
-        )}
+        onSubmit={form.handleSubmit((data) => {
+          onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder']))
+          if (markCompleted && initialData && onMarkCompleted) {
+            onMarkCompleted(initialData.id)
+          }
+        })}
         className="flex flex-col h-full"
       >
         <div className="pb-2  px-4 pt-2">
@@ -333,32 +340,52 @@ export const TaskForm = ({
                 )}
               />
 
-              {initialData?.status === TaskStatus.COMPLETED && (
-                <>
-                  {initialData?.completedAt && (
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Date Completed
-                      </div>
-                      <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
-                        {format(new Date(initialData.completedAt), 'PPP p')}
-                      </div>
-                    </div>
-                  )}
+              {initialData?.status === TaskStatus.COMPLETED &&
+                initialData?.completedAt && (
                   <div className="flex items-center justify-between gap-4">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Time Spent
+                      Date Completed
                     </div>
-                    <TimeInput
-                      durationMs={form.watch('inProgressTime') || 0}
-                      onDurationChange={(ms) =>
-                        form.setValue('inProgressTime', ms)
-                      }
-                      className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                    />
+                    <div className="text-xs text-emerald-400/70 bg-emerald-400/5 px-2 py-1 rounded border border-emerald-400/10">
+                      {format(new Date(initialData.completedAt), 'PPP p')}
+                    </div>
                   </div>
-                </>
+                )}
+
+              {settings.enableInProgressTime && (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Time Spent
+                  </div>
+                  <TimeInput
+                    durationMs={form.watch('inProgressTime') || 0}
+                    onDurationChange={(ms) =>
+                      form.setValue('inProgressTime', ms)
+                    }
+                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                  />
+                </div>
               )}
+
+              {initialData &&
+                initialData.status !== TaskStatus.COMPLETED &&
+                onMarkCompleted && (
+                  <label
+                    className="flex items-center justify-between gap-4 cursor-pointer"
+                    data-testid="checkbox-mark-completed"
+                  >
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Mark as Completed
+                    </div>
+                    <Checkbox
+                      checked={markCompleted}
+                      onCheckedChange={(checked) =>
+                        setMarkCompleted(checked === true)
+                      }
+                      className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    />
+                  </label>
+                )}
             </div>
           </div>
         </div>
