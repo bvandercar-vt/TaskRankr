@@ -83,7 +83,7 @@ export const FormItem = forwardRefHelper<HTMLDivElement>(
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn('space-y-2', className)} {...props} />
+        <div {...props} ref={ref} className={cn('space-y-2', className)} />
       </FormItemContext.Provider>
     )
   },
@@ -98,10 +98,10 @@ export const FormLabel = forwardRefHelper<
 
   return (
     <Label
+      {...props}
       ref={ref}
       className={cn(error && redOnError && 'text-destructive', className)}
       htmlFor={formItemId}
-      {...props}
     />
   )
 }, 'FormLabel')
@@ -113,6 +113,7 @@ export const FormControl = forwardRefHelper<typeof Slot>(
 
     return (
       <Slot
+        {...props}
         ref={ref}
         id={formItemId}
         aria-describedby={
@@ -121,7 +122,6 @@ export const FormControl = forwardRefHelper<typeof Slot>(
             : `${formDescriptionId} ${formMessageId}`
         }
         aria-invalid={!!error}
-        {...props}
       />
     )
   },
@@ -134,10 +134,10 @@ export const FormDescription = forwardRefHelper<HTMLParagraphElement>(
 
     return (
       <p
+        {...props}
         ref={ref}
         id={formDescriptionId}
         className={cn('text-sm text-muted-foreground', className)}
-        {...props}
       />
     )
   },
@@ -155,10 +155,10 @@ export const FormMessage = forwardRefHelper<HTMLParagraphElement>(
 
     return (
       <p
+        {...props}
         ref={ref}
         id={formMessageId}
         className={cn('text-sm font-medium text-destructive', className)}
-        {...props}
       >
         {body}
       </p>

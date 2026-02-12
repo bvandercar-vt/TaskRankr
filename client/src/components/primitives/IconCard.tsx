@@ -34,7 +34,7 @@ export const IconCard = ({
       <div
         className={cn(
           'shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-primary',
-          small ? 'w-8 h-8 text-base font-bold' : 'w-10 h-10 text-lg',
+          small ? 'size-8 text-base font-bold' : 'size-10 text-lg',
         )}
       >
         {icon}

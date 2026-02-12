@@ -17,9 +17,9 @@ export const Label = forwardRefHelper<
 >(
   ({ className, ...props }, ref) => (
     <LabelPrimitive.Root
+      {...props}
       ref={ref}
       className={cn(labelVariants(), className)}
-      {...props}
     />
   ),
   LabelPrimitive.Root,

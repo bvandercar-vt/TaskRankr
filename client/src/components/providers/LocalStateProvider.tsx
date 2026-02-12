@@ -16,6 +16,7 @@ import {
 import { pick, toMerged } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
+import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   type CreateTask,
@@ -331,6 +332,11 @@ export const LocalStateProvider = ({
         return updated
       })
       enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
+      debugLog.log('task', 'create', {
+        tempId,
+        name: data.name,
+        parentId: data.parentId,
+      })
       return newTask
     },
     [settings.autoPinNewTasks, enqueue, storageKeys],
@@ -340,6 +346,7 @@ export const LocalStateProvider = ({
     (id: number, updates: UpdateTaskContent): Task => {
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
+      debugLog.log('task', 'update', { id, updates })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -383,6 +390,7 @@ export const LocalStateProvider = ({
       )
 
       enqueue({ type: SyncOperationType.SET_STATUS, id, status })
+      debugLog.log('task', 'setStatus', { id, status })
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -432,6 +440,7 @@ export const LocalStateProvider = ({
         return updated
       })
       enqueue({ type: SyncOperationType.DELETE_TASK, id })
+      debugLog.log('task', 'delete', { id })
     },
     [enqueue],
   )
@@ -444,6 +453,7 @@ export const LocalStateProvider = ({
         parentId,
         orderedIds,
       })
+      debugLog.log('task', 'reorderSubtasks', { parentId, orderedIds })
     },
     [enqueue, updateTaskById],
   )
@@ -452,6 +462,7 @@ export const LocalStateProvider = ({
     (updates: Partial<UserSettings>) => {
       setSettings((prev) => ({ ...prev, ...updates }))
       enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: updates })
+      debugLog.log('settings', 'update', updates)
     },
     [enqueue],
   )
@@ -459,6 +470,9 @@ export const LocalStateProvider = ({
   const setTasksFromServer = useCallback(
     (serverTasks: Task[]) => {
       if (serverTasks.length === 0 && demoTaskIds.length > 0) {
+        debugLog.log('sync', 'setTasksFromServer:skipped', {
+          reason: 'empty server, has demo data',
+        })
         return
       }
       if (serverTasks.length > 0) {
@@ -467,12 +481,14 @@ export const LocalStateProvider = ({
       setTasks(serverTasks)
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
+      debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
     [storageKeys, demoTaskIds],
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
     setSettings(serverSettings)
+    debugLog.log('sync', 'setSettingsFromServer', serverSettings)
   }, [])
 
   useEffect(() => {

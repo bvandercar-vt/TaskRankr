@@ -55,9 +55,9 @@ export const Button = forwardRefHelper<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : 'button'
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
         {...props}
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, className }))}
       />
     )
   },

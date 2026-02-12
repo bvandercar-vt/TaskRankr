@@ -14,6 +14,7 @@ import {
   useState,
 } from 'react'
 
+import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
 import { SyncOperationType, useLocalState } from './LocalStateProvider'
 
@@ -70,6 +71,7 @@ export const SyncProvider = ({
     if (syncQueue.length > 0) return
 
     try {
+      debugLog.log('sync', 'loadServerData:start')
       const [tasksResult, settingsResult] = await Promise.all([
         tsr.tasks.list.query(),
         tsr.settings.get.query(),
@@ -83,7 +85,12 @@ export const SyncProvider = ({
       }
 
       hasLoadedServerData.current = true
+      debugLog.log('sync', 'loadServerData:complete', {
+        tasksStatus: tasksResult.status,
+        settingsStatus: settingsResult.status,
+      })
     } catch (err) {
+      debugLog.log('sync', 'loadServerData:error', { error: String(err) })
       console.error('Failed to load server data:', err)
     }
   }, [
@@ -133,6 +140,9 @@ export const SyncProvider = ({
     const resolveId = (id: number): number => idMap.get(id) ?? id
 
     try {
+      debugLog.log('sync', 'flushQueue:start', {
+        queueLength: queueSnapshot.length,
+      })
       let successCount = 0
       for (const op of queueSnapshot) {
         let success = false
@@ -216,6 +226,10 @@ export const SyncProvider = ({
         }
       }
 
+      debugLog.log('sync', 'flushQueue:complete', {
+        successCount,
+        total: queueSnapshot.length,
+      })
       if (successCount === queueSnapshot.length) {
         clearSyncQueue()
       } else if (successCount > 0) {
@@ -224,6 +238,7 @@ export const SyncProvider = ({
         }
       }
     } catch (err) {
+      debugLog.log('sync', 'flushQueue:error', { error: String(err) })
       console.error('Sync failed:', err)
       setLastSyncError(err instanceof Error ? err.message : 'Sync failed')
     } finally {

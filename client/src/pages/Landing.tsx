@@ -17,7 +17,7 @@ import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { IconSize, Routes } from '@/lib/constants'
+import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
@@ -31,7 +31,7 @@ const CaptionedIcon = ({
   label: string
 }) => (
   <div className="flex flex-col items-center gap-2">
-    <Icon className={cn(IconSize.HW6, color)} />
+    <Icon className={cn('size-6', color)} />
     <span className="text-sm">{label}</span>
   </div>
 )
@@ -122,7 +122,7 @@ const Landing = () => {
                 className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
                 data-testid="button-how-to-install"
               >
-                <Download className={IconSize.HW5} />
+                <Download className="size-5" />
                 Install as App
               </Button>
             </Link>

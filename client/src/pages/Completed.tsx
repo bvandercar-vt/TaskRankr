@@ -14,9 +14,7 @@ import {
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
 import { useTasks } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
 import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
-import { cn } from '@/lib/utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const ColumnHeaders = () => (
@@ -37,7 +35,7 @@ const EmptyState = ({ search }: { search: string | undefined }) => (
     icon={
       <Icon
         icon={search ? Search : CheckCircle2}
-        className={cn(IconSize.HW8, 'text-muted-foreground')}
+        className="size-8 text-muted-foreground"
       />
     }
     title={search ? 'No matching tasks found' : 'No completed tasks yet'}
