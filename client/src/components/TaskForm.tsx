@@ -375,7 +375,7 @@ export const TaskForm = ({
                     data-testid="checkbox-mark-completed"
                   >
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Mark as Completed
+                      Completed
                     </div>
                     <Checkbox
                       checked={markCompleted}
