@@ -293,7 +293,10 @@ export const LocalStateProvider = ({
         enjoyment: null,
         time: null,
         parentId: null,
-        status: settings.autoPinNewTasks && !data.parentId ? TaskStatus.PINNED : TaskStatus.OPEN,
+        status:
+          settings.autoPinNewTasks && !data.parentId
+            ? TaskStatus.PINNED
+            : TaskStatus.OPEN,
         inProgressTime: 0,
         inProgressStartedAt: null,
         createdAt: new Date(),
