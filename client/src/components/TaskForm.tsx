@@ -303,31 +303,29 @@ export const TaskForm = ({
               )}
             />
 
-            {(initialData ? onAddChild : onSaveAndAddChild || onSaveAndAssignSubtask) && (
-              <SubtasksCard
-                {...(initialData
-                  ? {
-                      task: initialData,
-                      onAddChild: onAddChild!,
-                      onEditChild,
-                      onSubtaskDelete,
-                      onAssignSubtask,
-                    }
-                  : {
-                      task: STUB_TASK,
-                      onAddChild: () => {
-                        form.handleSubmit((data) => {
-                          onSaveAndAddChild?.(data as MutateTaskContent)
-                        })()
-                      },
-                      onAssignSubtask: () => {
-                        form.handleSubmit((data) => {
-                          onSaveAndAssignSubtask?.(data as MutateTaskContent)
-                        })()
-                      },
-                    })}
-              />
-            )}
+            <SubtasksCard
+              {...(initialData
+                ? {
+                    task: initialData,
+                    onAddChild: onAddChild!,
+                    onEditChild,
+                    onSubtaskDelete,
+                    onAssignSubtask,
+                  }
+                : {
+                    task: STUB_TASK,
+                    onAddChild: () => {
+                      form.handleSubmit((data) => {
+                        onSaveAndAddChild?.(data as MutateTaskContent)
+                      })()
+                    },
+                    onAssignSubtask: () => {
+                      form.handleSubmit((data) => {
+                        onSaveAndAssignSubtask?.(data as MutateTaskContent)
+                      })()
+                    },
+                  })}
+            />
 
             <div className="flex flex-col gap-4 mt-2 pb-4">
               <FormField
