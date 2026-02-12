@@ -118,12 +118,10 @@ export interface TaskFormProps {
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
-  onAddChild?: (parentId: number) => void
+  onAddChild?: (parentId: number, formData?: MutateTaskContent) => void
   onEditChild?: (task: Task) => void
   onSubtaskDelete?: (task: DeleteTaskArgs) => void
-  onAssignSubtask?: (task: Task) => void
-  onSaveAndAddChild?: (data: MutateTaskContent) => void
-  onSaveAndAssignSubtask?: (data: MutateTaskContent) => void
+  onAssignSubtask?: (task: Task, formData?: MutateTaskContent) => void
 }
 
 export const TaskForm = ({
@@ -135,8 +133,6 @@ export const TaskForm = ({
   onEditChild,
   onSubtaskDelete,
   onAssignSubtask,
-  onSaveAndAddChild,
-  onSaveAndAssignSubtask,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { settings } = useSettings()
@@ -307,24 +303,23 @@ export const TaskForm = ({
               {...(initialData
                 ? {
                     task: initialData,
-                    // biome-ignore lint/style/noNonNullAssertion: in case of initialData, is present.
-                    onAddChild: onAddChild!,
+                    onAddChild: (pid: number) => onAddChild?.(pid),
                     onEditChild,
                     onSubtaskDelete,
-                    onAssignSubtask,
+                    onAssignSubtask: (t: Task) => onAssignSubtask?.(t),
                   }
                 : {
                     task: STUB_TASK,
-                    onAddChild: () =>
-                      form.handleSubmit((data) =>
-                        // biome-ignore lint/style/noNonNullAssertion: in case of !initialData, is present.
-                        onSaveAndAddChild!(data),
-                      )(),
-                    onAssignSubtask: () =>
-                      form.handleSubmit((data) =>
-                        // biome-ignore lint/style/noNonNullAssertion: in case of !initialData, is present.
-                        onSaveAndAssignSubtask!(data),
-                      )(),
+                    onAddChild: () => {
+                      form.handleSubmit((data) => {
+                        onAddChild?.(STUB_TASK.id, data as MutateTaskContent)
+                      })()
+                    },
+                    onAssignSubtask: () => {
+                      form.handleSubmit((data) => {
+                        onAssignSubtask?.(STUB_TASK, data as MutateTaskContent)
+                      })()
+                    },
                   })}
             />
 

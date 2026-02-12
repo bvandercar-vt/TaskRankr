@@ -46,8 +46,6 @@ interface TaskFormDialogProps
     | 'onEditChild'
     | 'onSubtaskDelete'
     | 'onAssignSubtask'
-    | 'onSaveAndAddChild'
-    | 'onSaveAndAssignSubtask'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -69,8 +67,6 @@ const DesktopDialog = ({
   onEditChild,
   onSubtaskDelete,
   onAssignSubtask,
-  onSaveAndAddChild,
-  onSaveAndAssignSubtask,
 }: TaskFormDialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
@@ -104,8 +100,6 @@ const DesktopDialog = ({
           onEditChild={onEditChild}
           onSubtaskDelete={onSubtaskDelete}
           onAssignSubtask={onAssignSubtask}
-          onSaveAndAddChild={onSaveAndAddChild}
-          onSaveAndAssignSubtask={onSaveAndAssignSubtask}
         />
       </DialogContent>
     </Dialog>
@@ -122,8 +116,6 @@ const MobileDialog = ({
   onEditChild,
   onSubtaskDelete,
   onAssignSubtask,
-  onSaveAndAddChild,
-  onSaveAndAssignSubtask,
 }: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
@@ -144,8 +136,6 @@ const MobileDialog = ({
           onEditChild={onEditChild}
           onSubtaskDelete={onSubtaskDelete}
           onAssignSubtask={onAssignSubtask}
-          onSaveAndAddChild={onSaveAndAddChild}
-          onSaveAndAssignSubtask={onSaveAndAssignSubtask}
         />
       </motion.div>
     )}
@@ -224,21 +214,29 @@ export const TaskFormDialogProvider = ({
     }
   }
 
-  const handleSaveAndAddChild = (data: MutateTaskContent) => {
-    const newTask = createTask({ ...data, parentId } as CreateTask)
-    setReturnToTask(newTask)
-    setMode('create')
-    setActiveTask(undefined)
-    setParentId(newTask.id)
+  const handleAddChild = (pid: number, formData?: MutateTaskContent) => {
+    if (formData) {
+      const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setReturnToTask(newTask)
+      setMode('create')
+      setActiveTask(undefined)
+      setParentId(newTask.id)
+    } else {
+      openCreateDialog(pid)
+    }
   }
 
-  const handleSaveAndAssignSubtask = (data: MutateTaskContent) => {
-    const newTask = createTask({ ...data, parentId } as CreateTask)
-    setMode('edit')
-    setActiveTask(newTask)
-    setParentId(newTask.parentId ?? undefined)
-    setReturnToTask(undefined)
-    setAssignParentTask(newTask)
+  const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
+    if (formData) {
+      const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setMode('edit')
+      setActiveTask(newTask)
+      setParentId(newTask.parentId ?? undefined)
+      setReturnToTask(undefined)
+      setAssignParentTask(newTask)
+    } else {
+      setAssignParentTask(task)
+    }
   }
 
   useEffect(() => {
@@ -266,12 +264,10 @@ export const TaskFormDialogProvider = ({
         activeTask={activeTask}
         onSubmit={handleSubmit}
         onClose={closeDialog}
-        onAddChild={openCreateDialog}
+        onAddChild={handleAddChild}
         onEditChild={handleEditChild}
         onSubtaskDelete={setSubtaskToDelete}
-        onAssignSubtask={setAssignParentTask}
-        onSaveAndAddChild={handleSaveAndAddChild}
-        onSaveAndAssignSubtask={handleSaveAndAssignSubtask}
+        onAssignSubtask={handleAssignSubtask}
       />
 
       <MobileDialog
@@ -280,12 +276,10 @@ export const TaskFormDialogProvider = ({
         activeTask={activeTask}
         onSubmit={handleSubmit}
         onClose={closeDialog}
-        onAddChild={openCreateDialog}
+        onAddChild={handleAddChild}
         onEditChild={handleEditChild}
         onSubtaskDelete={setSubtaskToDelete}
-        onAssignSubtask={setAssignParentTask}
-        onSaveAndAddChild={handleSaveAndAddChild}
-        onSaveAndAssignSubtask={handleSaveAndAssignSubtask}
+        onAssignSubtask={handleAssignSubtask}
       />
 
       <SubtaskActionDialog
