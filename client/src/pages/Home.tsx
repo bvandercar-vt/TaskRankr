@@ -168,7 +168,7 @@ const Home = () => {
     let inProgress: TaskWithSubtasks | undefined
     const pinnedList: TaskWithSubtasks[] = []
 
-    for (const id of hoistedIds) {
+    for (const id of Array.from(hoistedIds)) {
       const node = nodes[id]
       if (!node) continue
       if (node.status === TaskStatus.IN_PROGRESS) {

@@ -42,9 +42,9 @@ interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
     | 'onSubmit'
-    | 'onAddChild'
-    | 'onEditChild'
-    | 'onSubtaskDelete'
+    | 'onAddSubtask'
+    | 'onEditSubtask'
+    | 'onDeleteSubtask'
     | 'onAssignSubtask'
   > {
   isOpen: boolean
@@ -61,12 +61,8 @@ const DesktopDialog = ({
   mode,
   parentId,
   activeTask,
-  onSubmit,
   onClose,
-  onAddChild,
-  onEditChild,
-  onSubtaskDelete,
-  onAssignSubtask,
+  ...taskFormArgs
 }: TaskFormDialogProps) => (
   <div className="hidden sm:block">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
@@ -91,15 +87,11 @@ const DesktopDialog = ({
           </div>
         </DialogHeader>
         <TaskForm
+          {...taskFormArgs}
           key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
-          onSubmit={onSubmit}
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
-          onAddChild={onAddChild}
-          onEditChild={onEditChild}
-          onSubtaskDelete={onSubtaskDelete}
-          onAssignSubtask={onAssignSubtask}
         />
       </DialogContent>
     </Dialog>
@@ -110,12 +102,8 @@ const MobileDialog = ({
   isOpen,
   activeTask,
   parentId,
-  onSubmit,
   onClose,
-  onAddChild,
-  onEditChild,
-  onSubtaskDelete,
-  onAssignSubtask,
+  ...taskFormArgs
 }: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
   <AnimatePresence>
     {isOpen && (
@@ -127,15 +115,11 @@ const MobileDialog = ({
         className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
       >
         <TaskForm
+          {...taskFormArgs}
           key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
-          onSubmit={onSubmit}
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
-          onAddChild={onAddChild}
-          onEditChild={onEditChild}
-          onSubtaskDelete={onSubtaskDelete}
-          onAssignSubtask={onAssignSubtask}
         />
       </motion.div>
     )}
@@ -178,7 +162,7 @@ export const TaskFormDialogProvider = ({
     setIsOpen(true)
   }
 
-  const handleEditChild = (task: Task) => {
+  const handleEditSubtask = (task: Task) => {
     if (activeTask) {
       setReturnToTask(activeTask)
     }
@@ -214,6 +198,31 @@ export const TaskFormDialogProvider = ({
     }
   }
 
+  const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
+    if (formData) {
+      const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setReturnToTask(newTask)
+      setMode('create')
+      setActiveTask(undefined)
+      setParentId(newTask.id)
+    } else {
+      openCreateDialog(pid)
+    }
+  }
+
+  const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
+    if (formData) {
+      const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setMode('edit')
+      setActiveTask(newTask)
+      setParentId(newTask.parentId ?? undefined)
+      setReturnToTask(undefined)
+      setAssignParentTask(newTask)
+    } else {
+      setAssignParentTask(task)
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -225,6 +234,18 @@ export const TaskFormDialogProvider = ({
     }
   }, [isOpen])
 
+  const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
+    isOpen,
+    activeTask,
+    parentId,
+    onClose: closeDialog,
+    onSubmit: handleSubmit,
+    onAddSubtask: handleAddSubtask,
+    onEditSubtask: handleEditSubtask,
+    onDeleteSubtask: setSubtaskToDelete,
+    onAssignSubtask: handleAssignSubtask,
+  }
+
   return (
     <TaskFormDialogContext.Provider
       value={{ openCreateDialog, openEditDialog, closeDialog }}
@@ -232,30 +253,12 @@ export const TaskFormDialogProvider = ({
       {children}
 
       <DesktopDialog
-        isOpen={isOpen}
+        {...taskFormDialogProps}
         setIsOpen={setIsOpen}
         mode={mode}
-        parentId={parentId}
-        activeTask={activeTask}
-        onSubmit={handleSubmit}
-        onClose={closeDialog}
-        onAddChild={openCreateDialog}
-        onEditChild={handleEditChild}
-        onSubtaskDelete={setSubtaskToDelete}
-        onAssignSubtask={setAssignParentTask}
       />
 
-      <MobileDialog
-        isOpen={isOpen}
-        parentId={parentId}
-        activeTask={activeTask}
-        onSubmit={handleSubmit}
-        onClose={closeDialog}
-        onAddChild={openCreateDialog}
-        onEditChild={handleEditChild}
-        onSubtaskDelete={setSubtaskToDelete}
-        onAssignSubtask={setAssignParentTask}
-      />
+      <MobileDialog {...taskFormDialogProps} />
 
       <SubtaskActionDialog
         open={!!subtaskToDelete && !showDeleteConfirm}
