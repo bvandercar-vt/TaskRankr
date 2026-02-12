@@ -4,7 +4,7 @@
  */
 
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { CheckCircle, Clock, Download, ListTodo, Star } from 'lucide-react'
+import { CheckCircle, Clock, Download, ListTodo, Star, WifiOff } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -33,22 +33,30 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm text-muted-foreground mb-8">
-          <div className="flex flex-col items-center gap-2">
-            <Star className={cn(IconSize.HW6, 'text-primary')} />
-            <span>Priority levels</span>
+        <div className="flex flex-col items-center gap-6 text-sm text-muted-foreground mb-8">
+          <div className="flex justify-center gap-10">
+            <div className="flex flex-col items-center gap-2">
+              <Star className={cn(IconSize.HW6, 'text-primary')} />
+              <span>Priority levels</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
+              <span>Ease levels</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <CheckCircle className={cn(IconSize.HW6, 'text-emerald-500')} />
-            <span>Ease levels</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
-            <span>Time tracking</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <ListTodo className={cn(IconSize.HW6, 'text-amber-500')} />
-            <span>Nested tasks</span>
+          <div className="flex justify-center gap-10">
+            <div className="flex flex-col items-center gap-2">
+              <Clock className={cn(IconSize.HW6, 'text-blue-500')} />
+              <span>Time tracking</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <ListTodo className={cn(IconSize.HW6, 'text-amber-500')} />
+              <span>Nested tasks</span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <WifiOff className={cn(IconSize.HW6, 'text-violet-500')} />
+              <span>Works offline</span>
+            </div>
           </div>
         </div>
 
