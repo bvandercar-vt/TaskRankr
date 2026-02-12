@@ -123,7 +123,7 @@ export const DropdownMenuRadioItem = forwardRefHelper(
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Circle className="h-2 w-2 fill-current" />
+          <Circle className={cn(IconSize.HW2, 'fill-current')} />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

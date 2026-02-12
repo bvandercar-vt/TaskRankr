@@ -227,7 +227,7 @@ const SubtaskItem = ({
           )}
           data-testid={`checkbox-complete-subtask-${task.id}`}
         >
-          {isCompleted && <Check className="h-3 w-3 mx-auto" />}
+          {isCompleted && <Check className={cn(IconSize.HW3, 'mx-auto')} />}
         </button>
         <span
           className={cn(

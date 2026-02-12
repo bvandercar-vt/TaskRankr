@@ -4,6 +4,7 @@ import { AlertTriangle, Download, Mail, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/primitives/Button'
 import { IconSize } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
+import { cn } from '@/lib/utils'
 
 interface Props {
   children: ReactNode
@@ -49,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/20">
-              <AlertTriangle className="h-5 w-5 text-red-400" />
+              <AlertTriangle className={cn(IconSize.HW5, 'text-red-400')} />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-red-100">

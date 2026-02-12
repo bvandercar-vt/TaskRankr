@@ -118,7 +118,12 @@ const HowToInstall = () => {
               description={
                 <>
                   Tap the{' '}
-                  <Share className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <Share
+                    className={cn(
+                      IconSize.HW4,
+                      'inline align-text-bottom text-primary',
+                    )}
+                  />{' '}
                   Share button at the bottom of the screen.
                 </>
               }
@@ -131,7 +136,12 @@ const HowToInstall = () => {
                 <>
                   Scroll down in the share menu and tap{' '}
                   <strong>Add to Home Screen</strong>{' '}
-                  <SquarePlus className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <SquarePlus
+                    className={cn(
+                      IconSize.HW4,
+                      'inline align-text-bottom text-primary',
+                    )}
+                  />{' '}
                   .
                 </>
               }
@@ -183,7 +193,12 @@ const HowToInstall = () => {
               description={
                 <>
                   Look for{' '}
-                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <Download
+                    className={cn(
+                      IconSize.HW4,
+                      'inline align-text-bottom text-primary',
+                    )}
+                  />{' '}
                   <strong>Install app</strong> or{' '}
                   <strong>Add to Home screen</strong> in the menu.
                 </>
@@ -224,9 +239,19 @@ const HowToInstall = () => {
               description={
                 <>
                   In the address bar, look for a{' '}
-                  <Download className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <Download
+                    className={cn(
+                      IconSize.HW4,
+                      'inline align-text-bottom text-primary',
+                    )}
+                  />{' '}
                   or{' '}
-                  <MonitorDown className="inline h-4 w-4 align-text-bottom text-primary" />{' '}
+                  <MonitorDown
+                    className={cn(
+                      IconSize.HW4,
+                      'inline align-text-bottom text-primary',
+                    )}
+                  />{' '}
                   install icon near the right side. You can also click the
                   three-dot menu and select <strong>Install TaskRankr</strong>.
                 </>

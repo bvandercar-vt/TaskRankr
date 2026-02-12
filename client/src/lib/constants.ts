@@ -9,10 +9,14 @@ import {
 } from '~/shared/schema'
 
 export const IconSize = {
+  HW2: 'h-2 w-2',
+  HW3: 'h-3 w-3',
   HW4: 'h-4 w-4',
   HW5: 'h-5 w-5',
   HW6: 'h-6 w-6',
   HW8: 'h-8 w-8',
+  HW9: 'h-9 w-9',
+  HW10: 'h-10 w-10',
 } as const
 
 export const DEFAULT_SETTINGS: UserSettings = {

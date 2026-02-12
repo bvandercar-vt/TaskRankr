@@ -4,6 +4,7 @@
 
 import { ChevronRight } from 'lucide-react'
 
+import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface TagChainItem {
@@ -51,7 +52,9 @@ export const TagChain = ({
             {item.name}
           </span>
           {idx < items.length - 1 && (
-            <ChevronRight className="w-3 h-3 text-muted-foreground" />
+            <ChevronRight
+              className={cn(IconSize.HW3, 'text-muted-foreground')}
+            />
           )}
         </div>
       ))}
