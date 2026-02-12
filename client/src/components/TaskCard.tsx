@@ -298,9 +298,13 @@ export const TaskCard = ({
   return (
     <div className="group relative" data-testid={`task-card-${task.id}`}>
       <motion.div
-        layout
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        {...(level === 0
+          ? {
+              layout: true,
+              initial: { opacity: 0, y: 10 },
+              animate: { opacity: 1, y: 0 },
+            }
+          : { initial: false })}
         className={cn(
           'relative flex items-center gap-2 pr-2 pl-1 py-1 rounded-lg border transition-all duration-200 select-none cursor-pointer',
           isNestedWithStatus
@@ -366,10 +370,24 @@ export const TaskCard = ({
       <AnimatePresence>
         {isExpanded && hasSubtasks && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: 'auto',
+              opacity: 1,
+              transition: {
+                height: { duration: 0.2 },
+                opacity: { duration: 0.15, delay: 0.05 },
+              },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: {
+                opacity: { duration: 0.1 },
+                height: { duration: 0.15, delay: 0.05 },
+              },
+            }}
+            className="overflow-hidden will-change-[height]"
           >
             <div className="relative">
               <div
