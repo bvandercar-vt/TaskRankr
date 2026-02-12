@@ -7,7 +7,6 @@
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 
-import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const Select = SelectPrimitive.Root
@@ -26,7 +25,7 @@ export const SelectTrigger = forwardRefHelper(
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className={cn(IconSize.HW4, 'opacity-50')} />
+        <ChevronDown className="size-4 opacity-50" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   ),
@@ -43,7 +42,7 @@ export const SelectScrollUpButton = forwardRefHelper(
       className={cn(SelectScrollButtonStyle, className)}
       {...props}
     >
-      <ChevronUp className={IconSize.HW4} />
+      <ChevronUp className="size-4" />
     </SelectPrimitive.ScrollUpButton>
   ),
   SelectPrimitive.ScrollUpButton,
@@ -56,7 +55,7 @@ export const SelectScrollDownButton = forwardRefHelper(
       className={cn(SelectScrollButtonStyle, className)}
       {...props}
     >
-      <ChevronDown className={IconSize.HW4} />
+      <ChevronDown className="size-4" />
     </SelectPrimitive.ScrollDownButton>
   ),
   SelectPrimitive.ScrollDownButton,
@@ -116,7 +115,7 @@ export const SelectItem = forwardRefHelper(
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <Check className={IconSize.HW4} />
+          <Check className="size-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
 

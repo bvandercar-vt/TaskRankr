@@ -27,7 +27,6 @@ import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
@@ -208,7 +207,7 @@ const SubtaskItem = ({
             {...listeners}
             data-testid={`drag-handle-${task.id}`}
           >
-            <GripVertical className={IconSize.HW4} />
+            <GripVertical className="size-4" />
           </button>
         )}
         {task.depth > 0 && (
@@ -227,7 +226,7 @@ const SubtaskItem = ({
           )}
           data-testid={`checkbox-complete-subtask-${task.id}`}
         >
-          {isCompleted && <Check className={cn(IconSize.HW3, 'mx-auto')} />}
+          {isCompleted && <Check className="size-3 mx-auto" />}
         </button>
         <span
           className={cn(
@@ -252,7 +251,7 @@ const SubtaskItem = ({
             onClick={() => onEdit(task)}
             data-testid={`button-edit-subtask-${task.id}`}
           >
-            <Pencil className={IconSize.HW4} />
+            <Pencil className="size-4" />
           </Button>
         )}
         <Button
@@ -262,7 +261,7 @@ const SubtaskItem = ({
           onClick={() => onDelete(task)}
           data-testid={`button-delete-subtask-${task.id}`}
         >
-          <Trash2 className={cn(IconSize.HW4, 'text-destructive')} />
+          <Trash2 className="size-4 text-destructive" />
         </Button>
       </div>
     </div>
@@ -454,7 +453,7 @@ export const SubtasksCard = ({
           className={cn(SUBTASK_ACTION_BTN_STYLE, 'flex-[4] gap-2')}
           data-testid="button-add-subtask"
         >
-          <Plus className={IconSize.HW4} />
+          <Plus className="size-4" />
           Add Subtask
         </button>
         <button
@@ -466,7 +465,7 @@ export const SubtasksCard = ({
           )}
           data-testid="button-assign-subtask"
         >
-          <Link className={IconSize.HW4} />
+          <Link className="size-4" />
           Assign
         </button>
       </div>

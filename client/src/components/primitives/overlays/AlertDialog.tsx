@@ -7,7 +7,6 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 import { X } from 'lucide-react'
 
 import { Button, buttonVariants } from '@/components/primitives/Button'
-import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const AlertDialog = AlertDialogPrimitive.Root
@@ -133,6 +132,6 @@ export const AlertDialogCloseButton = ({
     onClick={onClose}
     data-testid={testId}
   >
-    <X className={IconSize.HW4} />
+    <X className="size-4" />
   </Button>
 )

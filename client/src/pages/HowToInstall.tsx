@@ -21,8 +21,6 @@ import { CardSection } from '@/components/primitives/CardSection'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { IconCard, type IconCardProps } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
-import { IconSize } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 
 type DeviceType = 'ios' | 'android' | 'desktop'
 
@@ -68,25 +66,25 @@ const HowToInstall = () => {
       <div className="space-y-6">
         <CardSection title="Why Install?" data-testid="section-benefits">
           <IconCard
-            icon={<AppWindow className={IconSize.HW5} />}
+            icon={<AppWindow className="size-5" />}
             title="Full Screen Experience"
             description="Hide browser navigation elements."
             data-testid="card-benefit-fullscreen"
           />
           <IconCard
-            icon={<WifiOff className={IconSize.HW5} />}
+            icon={<WifiOff className="size-5" />}
             title="Offline Access"
             description="Use without an internet connection. Your tasks are stored locally and sync when you're back online."
             data-testid="card-benefit-offline"
           />
           <IconCard
-            icon={<MonitorSmartphone className={IconSize.HW5} />}
+            icon={<MonitorSmartphone className="size-5" />}
             title="Home Screen Icon"
             description="Get quick access to TaskRankr."
             data-testid="card-benefit-icon"
           />
           <IconCard
-            icon={<Wifi className={IconSize.HW5} />}
+            icon={<Wifi className="size-5" />}
             title="Fast Loading"
             description="Installed apps load faster."
             data-testid="card-benefit-fast"
@@ -99,7 +97,7 @@ const HowToInstall = () => {
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
+              icon={<Smartphone className="size-5 text-primary" />}
               label="iPhone / iPad (Safari)"
             />
           }
@@ -118,12 +116,7 @@ const HowToInstall = () => {
               description={
                 <>
                   Tap the{' '}
-                  <Share
-                    className={cn(
-                      IconSize.HW4,
-                      'inline align-text-bottom text-primary',
-                    )}
-                  />{' '}
+                  <Share className="size-4 inline align-text-bottom text-primary" />{' '}
                   Share button at the bottom of the screen.
                 </>
               }
@@ -136,12 +129,7 @@ const HowToInstall = () => {
                 <>
                   Scroll down in the share menu and tap{' '}
                   <strong>Add to Home Screen</strong>{' '}
-                  <SquarePlus
-                    className={cn(
-                      IconSize.HW4,
-                      'inline align-text-bottom text-primary',
-                    )}
-                  />{' '}
+                  <SquarePlus className="size-4 inline align-text-bottom text-primary" />{' '}
                   .
                 </>
               }
@@ -168,7 +156,7 @@ const HowToInstall = () => {
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Smartphone className={cn(IconSize.HW5, 'text-primary')} />}
+              icon={<Smartphone className="size-5 text-primary" />}
               label="Android (Chrome)"
             />
           }
@@ -193,12 +181,7 @@ const HowToInstall = () => {
               description={
                 <>
                   Look for{' '}
-                  <Download
-                    className={cn(
-                      IconSize.HW4,
-                      'inline align-text-bottom text-primary',
-                    )}
-                  />{' '}
+                  <Download className="size-4 inline align-text-bottom text-primary" />{' '}
                   <strong>Install app</strong> or{' '}
                   <strong>Add to Home screen</strong> in the menu.
                 </>
@@ -226,7 +209,7 @@ const HowToInstall = () => {
           noCard
           title={
             <DeviceSectionTitle
-              icon={<Globe className={cn(IconSize.HW5, 'text-primary')} />}
+              icon={<Globe className="size-5 text-primary" />}
               label="Desktop (Chrome / Edge)"
             />
           }
@@ -239,19 +222,9 @@ const HowToInstall = () => {
               description={
                 <>
                   In the address bar, look for a{' '}
-                  <Download
-                    className={cn(
-                      IconSize.HW4,
-                      'inline align-text-bottom text-primary',
-                    )}
-                  />{' '}
+                  <Download className="size-4 inline align-text-bottom text-primary" />{' '}
                   or{' '}
-                  <MonitorDown
-                    className={cn(
-                      IconSize.HW4,
-                      'inline align-text-bottom text-primary',
-                    )}
-                  />{' '}
+                  <MonitorDown className="size-4 inline align-text-bottom text-primary" />{' '}
                   install icon near the right side. You can also click the
                   three-dot menu and select <strong>Install TaskRankr</strong>.
                 </>

@@ -1,7 +1,6 @@
 import { Download, Mail } from 'lucide-react'
 
 import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { IconSize } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 
 export const ContactCard = ({
@@ -33,7 +32,7 @@ export const ContactCard = ({
             className="inline-flex items-center gap-1.5 text-sm text-purple-400 hover-elevate rounded-md px-1"
             data-testid="link-contact-email"
           >
-            <Mail className={IconSize.HW3} />
+            <Mail className="size-3" />
             taskrankr@gmail.com
           </a>
           {showDebugDownload && (
@@ -43,7 +42,7 @@ export const ContactCard = ({
               onClick={() => debugLog.download(isGuestMode)}
               data-testid="button-download-debug-logs"
             >
-              <Download className={IconSize.HW3} />
+              <Download className="size-3" />
               Download Debug Logs
             </button>
           )}

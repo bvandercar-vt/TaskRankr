@@ -2,9 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, Download, Mail, RefreshCw } from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
-import { IconSize } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
-import { cn } from '@/lib/utils'
 
 interface Props {
   children: ReactNode
@@ -50,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/20">
-              <AlertTriangle className={cn(IconSize.HW5, 'text-red-400')} />
+              <AlertTriangle className="size-5 text-red-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-red-100">
@@ -82,7 +80,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="inline-flex items-center gap-2 text-sm text-purple-400 hover-elevate rounded-md px-1"
                 data-testid="link-error-contact-email"
               >
-                <Mail className={IconSize.HW4} />
+                <Mail className="size-4" />
                 taskrankr@gmail.com
               </a>
               <Button
@@ -92,7 +90,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={() => debugLog.download(true)}
                 data-testid="button-error-download-debug-logs"
               >
-                <Download className={IconSize.HW4} />
+                <Download className="size-4" />
                 Download Debug Logs
               </Button>
             </div>
@@ -104,7 +102,7 @@ export class ErrorBoundary extends Component<Props, State> {
             onClick={() => window.location.reload()}
             data-testid="button-error-reload"
           >
-            <RefreshCw className={IconSize.HW4} />
+            <RefreshCw className="size-4" />
             Reload App
           </Button>
         </div>

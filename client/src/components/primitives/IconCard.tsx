@@ -3,7 +3,6 @@
  */
 
 import { Card, CardContent } from '@/components/primitives/Card'
-import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 export interface IconCardProps {
@@ -35,9 +34,7 @@ export const IconCard = ({
       <div
         className={cn(
           'shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-primary',
-          small
-            ? `${IconSize.HW8} text-base font-bold`
-            : `${IconSize.HW10} text-lg`,
+          small ? 'size-8 text-base font-bold' : 'size-10 text-lg',
         )}
       >
         {icon}

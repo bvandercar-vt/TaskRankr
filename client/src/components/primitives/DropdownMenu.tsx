@@ -6,7 +6,6 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronRight, Circle, type LucideIcon } from 'lucide-react'
 
-import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
 export const DropdownMenu = DropdownMenuPrimitive.Root
@@ -82,7 +81,7 @@ export const DropdownMenuItem = forwardRefHelper<
       )}
       {...props}
     >
-      {IconComponent && <IconComponent className={cn(IconSize.HW4, 'mr-2')} />}
+      {IconComponent && <IconComponent className="size-4 mr-2" />}
       {label}
     </DropdownMenuPrimitive.Item>
   ),
@@ -102,7 +101,7 @@ export const DropdownMenuCheckboxItem = forwardRefHelper(
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Check className={IconSize.HW4} />
+          <Check className="size-4" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -123,7 +122,7 @@ export const DropdownMenuRadioItem = forwardRefHelper(
     >
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Circle className={cn(IconSize.HW2, 'fill-current')} />
+          <Circle className="size-2 fill-current" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

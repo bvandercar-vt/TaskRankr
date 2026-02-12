@@ -7,7 +7,6 @@ import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
 import { buttonVariants } from '@/components/primitives/Button'
-import { IconSize } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
@@ -15,7 +14,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 const GetIconRenderer =
   (Icon: LucideIcon) =>
   ({ className, ...props }: React.ComponentProps<LucideIcon>) => (
-    <Icon className={cn(IconSize.HW4, className)} {...props} />
+    <Icon className={cn('size-4', className)} {...props} />
   )
 
 export const Calendar = ({

@@ -31,7 +31,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
-import { IconSize, Routes } from '@/lib/constants'
+import { Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
@@ -76,7 +76,7 @@ const UserInfoCard = () => {
           className="gap-2 border-muted-foreground/30 text-muted-foreground"
           data-testid="button-logout"
         >
-          <LogOut className={IconSize.HW4} />
+          <LogOut className="size-4" />
           Log Out
         </Button>
       </a>
@@ -197,7 +197,7 @@ const ExportButton = () => {
       disabled={hasNoTasks}
       data-testid="button-export"
     >
-      <Download className={IconSize.HW4} />
+      <Download className="size-4" />
       Export Tasks
     </Button>
   )
@@ -245,7 +245,7 @@ const ImportButton = () => {
         disabled={isImporting}
         data-testid="button-import"
       >
-        <Upload className={IconSize.HW4} />
+        <Upload className="size-4" />
         {isImporting ? 'Importing...' : 'Import Tasks'}
       </Button>
       <input
@@ -271,7 +271,7 @@ const ClearLocalStorageConfirmDialog = () => {
           className="gap-2 text-red-400/70 border-red-400/30"
           data-testid="button-clear-local-storage"
         >
-          <Trash2 className={IconSize.HW4} />
+          <Trash2 className="size-4" />
           Clear Local Storage
         </Button>
       </AlertDialogTrigger>
@@ -395,9 +395,7 @@ const Settings = () => {
                 Learn how to get the most out of TaskRankr
               </p>
             </div>
-            <ChevronRight
-              className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
-            />
+            <ChevronRight className="size-5 text-muted-foreground shrink-0" />
           </Card>
         </Link>
 
@@ -412,9 +410,7 @@ const Settings = () => {
                   Add to your home screen for offline access
                 </p>
               </div>
-              <ChevronRight
-                className={cn(IconSize.HW5, 'text-muted-foreground shrink-0')}
-              />
+              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
             </Card>
           </Link>
         )}

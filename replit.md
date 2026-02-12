@@ -10,6 +10,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
+- Icon Sizing: Use `size-X` tailwind class instead of `w-X h-X`
 
 ## System Architecture
 
@@ -103,7 +104,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── query-client.ts   # @tanstack/react-query client
 │       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
 │       │   ├── auth-utils.ts     # Authentication helpers
-│       │   ├── constants.ts      # IconSize, DEFAULT_SETTINGS
+│       │   ├── constants.ts      # DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
 │       ├── App.tsx               # Main app with routing and providers

@@ -8,8 +8,6 @@ import { Link, useLocation } from 'wouter'
 import { Badge } from '@/components/primitives/Badge'
 import { Button } from '@/components/primitives/Button'
 import { Card, CardContent } from '@/components/primitives/Card'
-import { IconSize } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 
 export default function NotFound() {
   const [location] = useLocation()
@@ -19,7 +17,7 @@ export default function NotFound() {
       <Card className="w-full max-w-md mx-4">
         <CardContent className="pt-6">
           <div className="flex mb-4 gap-3 justify-center">
-            <AlertCircle className={cn(IconSize.HW8, 'text-red-500')} />
+            <AlertCircle className="size-8 text-red-500" />
             <h1 className="text-2xl font-bold text-muted-foreground">
               404 Page Not Found
             </h1>
@@ -33,7 +31,7 @@ export default function NotFound() {
           <div className="flex justify-center">
             <Link href="/">
               <Button data-testid="link-home">
-                <Home className={IconSize.HW4} />
+                <Home className="size-4" />
                 Home
               </Button>
             </Link>

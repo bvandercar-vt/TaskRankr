@@ -32,7 +32,6 @@ import { RankFieldSelect } from '@/components/RankFieldSelect'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain } from '@/hooks/useTasks'
-import { IconSize } from '@/lib/constants'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
@@ -91,7 +90,7 @@ const DateCreatedInput = ({ value, onChange }: DateCreatedInputProps) => (
             )}
           >
             {value ? format(value, 'PPP') : <span>Pick a date</span>}
-            <CalendarIcon className={cn('ml-2', IconSize.HW3, 'opacity-50')} />
+            <CalendarIcon className="size-3 ml-2 opacity-50" />
           </Button>
         </FormControl>
       </PopoverTrigger>
