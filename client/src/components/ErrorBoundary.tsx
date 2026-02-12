@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { AlertTriangle, Download, Mail, RefreshCw } from 'lucide-react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 
+import { ContactCardStandalone } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { debugLog } from '@/lib/debug-logger'
 
@@ -33,32 +34,10 @@ const ErrorDialog = ({ errorText }: { errorText: string }) => (
         </pre>
       </div>
 
-      <div className="mb-4 rounded-lg border border-red-500/20 bg-red-900/30 p-4">
-        <h3 className="font-semibold text-red-100">Help & Feedback</h3>
-        <p className="text-sm text-red-300/70">
-          Support / Bug Report / Feature Suggestions
-        </p>
-        <div className="flex flex-col items-center gap-3 mt-3">
-          <a
-            href="mailto:taskrankr@gmail.com"
-            className="inline-flex items-center gap-2 text-sm text-purple-400 hover-elevate rounded-md px-1"
-            data-testid="link-error-contact-email"
-          >
-            <Mail className="size-4" />
-            taskrankr@gmail.com
-          </a>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 border-red-500/30 text-red-200 hover:text-red-100"
-            onClick={() => debugLog.download(true)}
-            data-testid="button-error-download-debug-logs"
-          >
-            <Download className="size-4" />
-            Download Debug Logs
-          </Button>
-        </div>
-      </div>
+      <ContactCardStandalone
+        showDebugDownload
+        className="mb-4 bg-red-900/30 border-red-500/20"
+      />
 
       <Button
         variant="outline"
