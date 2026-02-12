@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+import { isStandalonePWA } from 'is-standalone-pwa'
 import { Download, X } from 'lucide-react'
 import { Link } from 'wouter'
-import { isStandalonePWA } from 'is-standalone-pwa'
 
 import { Button } from '@/components/primitives/Button'
 import { IconSize, Routes } from '@/lib/constants'
