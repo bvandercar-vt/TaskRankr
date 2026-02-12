@@ -71,7 +71,7 @@ const UserInfoCard = () => {
         </p>
       </div>
       <a href={authPaths.logout}>
-        <Button variant="outline" className="gap-2" data-testid="button-logout">
+        <Button variant="outline" className="gap-2 border-muted-foreground/30 text-muted-foreground" data-testid="button-logout">
           <LogOut className={IconSize.HW4} />
           Log Out
         </Button>

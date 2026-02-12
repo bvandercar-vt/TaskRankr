@@ -37,7 +37,7 @@ export const ContactCard = ({
           </a>
           {showDebugDownload && (
             <button
-              className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors px-1"
+              className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors px-1 border border-muted-foreground/20 rounded-md py-0.5"
               onClick={() => debugLog.download(isGuestMode)}
               data-testid="button-download-debug-logs"
             >
