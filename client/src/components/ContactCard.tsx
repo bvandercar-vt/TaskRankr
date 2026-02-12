@@ -26,7 +26,7 @@ export const ContactCard = ({
             Support / Bug Report / Feature Suggestions
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1 pt-2">
+        <div className="flex flex-col items-end gap-2 pt-1">
           <a
             href="mailto:taskrankr@gmail.com"
             className="inline-flex items-center gap-1.5 text-sm text-purple-400 hover-elevate rounded-md px-1"
