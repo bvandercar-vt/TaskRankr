@@ -118,10 +118,10 @@ export interface TaskFormProps {
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
-  onAddSubtask?: (parentId: number, formData?: MutateTaskContent) => void
-  onEditSubtask?: (task: Task) => void
-  onSubtaskDelete?: (task: DeleteTaskArgs) => void
-  onAssignSubtask?: (task: Task, formData?: MutateTaskContent) => void
+  onAddSubtask: (parentId: number, formData?: MutateTaskContent) => void
+  onEditSubtask: (task: Task) => void
+  onDeleteSubtask: (task: DeleteTaskArgs) => void
+  onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
 }
 
 export const TaskForm = ({
@@ -131,7 +131,7 @@ export const TaskForm = ({
   onCancel,
   onAddSubtask,
   onEditSubtask,
-  onSubtaskDelete,
+  onDeleteSubtask,
   onAssignSubtask,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
@@ -303,23 +303,21 @@ export const TaskForm = ({
               {...(initialData
                 ? {
                     task: initialData,
-                    onAddSubtask: (pid: number) => onAddSubtask?.(pid),
+                    onAddSubtask,
                     onEditSubtask,
-                    onSubtaskDelete,
-                    onAssignSubtask: (t: Task) => onAssignSubtask?.(t),
+                    onSubtaskDelete: onDeleteSubtask,
+                    onAssignSubtask,
                   }
                 : {
                     task: STUB_TASK,
-                    onAddSubtask: () => {
+                    onAddSubtask: () =>
                       form.handleSubmit((data) => {
-                        onAddSubtask?.(STUB_TASK.id, data as MutateTaskContent)
-                      })()
-                    },
-                    onAssignSubtask: () => {
+                        onAddSubtask(STUB_TASK.id, data)
+                      })(),
+                    onAssignSubtask: () =>
                       form.handleSubmit((data) => {
-                        onAssignSubtask?.(STUB_TASK, data as MutateTaskContent)
-                      })()
-                    },
+                        onAssignSubtask(STUB_TASK, data)
+                      })(),
                   })}
             />
 
