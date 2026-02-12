@@ -48,15 +48,41 @@ class DebugLogger {
     return state
   }
 
-  download() {
-    const data = {
+  private async fetchServerData(): Promise<{
+    tasks: unknown
+    settings: unknown
+  } | null> {
+    try {
+      const [tasksRes, settingsRes] = await Promise.all([
+        fetch('/api/tasks', { credentials: 'include' }),
+        fetch('/api/settings', { credentials: 'include' }),
+      ])
+      const tasks = tasksRes.ok ? await tasksRes.json() : { error: tasksRes.statusText }
+      const settings = settingsRes.ok ? await settingsRes.json() : { error: settingsRes.statusText }
+      return { tasks, settings }
+    } catch (err) {
+      return { tasks: { error: String(err) }, settings: { error: String(err) } }
+    }
+  }
+
+  async download(isGuestMode = false) {
+    const serverData = isGuestMode ? null : await this.fetchServerData()
+
+    const data: Record<string, unknown> = {
       exportedAt: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
+      isGuestMode,
       entryCount: this.entries.length,
       localState: this.getLocalState(),
-      entries: this.entries,
     }
+
+    if (serverData) {
+      data.serverData = serverData
+    }
+
+    data.entries = this.entries
+
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     })
