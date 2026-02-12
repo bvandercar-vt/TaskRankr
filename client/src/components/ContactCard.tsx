@@ -1,35 +1,35 @@
-import { Download, Mail } from 'lucide-react'
+import { Download, Mail } from "lucide-react";
 
-import { useGuestMode } from '@/components/providers/GuestModeProvider'
-import { debugLog } from '@/lib/debug-logger'
+import { useGuestMode } from "@/components/providers/GuestModeProvider";
+import { debugLog } from "@/lib/debug-logger";
 
 export const ContactCard = ({
   className,
   showDebugDownload,
 }: {
-  className?: string
-  showDebugDownload?: boolean
+  className?: string;
+  showDebugDownload?: boolean;
 }) => {
-  const { isGuestMode } = useGuestMode()
+  const { isGuestMode } = useGuestMode();
 
   return (
     <div
-      className={`p-3 bg-card rounded-lg border border-white/10 ${className ?? ''}`}
+      className={`p-3 bg-card rounded-lg border border-white/10 ${className ?? ""}`}
       data-testid="card-contact"
     >
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <div>
-          <h3 className="text-sm font-semibold text-foreground pb-1">
+          <h3 className="text-base font-semibold text-foreground pb-1">
             Help & Feedback
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Support / Bug Report / Feature Suggestions
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 pt-2">
           <a
             href="mailto:taskrankr@gmail.com"
-            className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover-elevate rounded-md px-1"
+            className="inline-flex items-center gap-1.5 text-sm text-purple-400 hover-elevate rounded-md px-1"
             data-testid="link-contact-email"
           >
             <Mail className="h-3 w-3" />
@@ -48,5 +48,5 @@ export const ContactCard = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
