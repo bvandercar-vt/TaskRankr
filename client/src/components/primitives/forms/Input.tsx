@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const Input = forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
   ({ className, type, ...props }, ref) => (
     <input
+      {...props}
       type={type}
       className={cn(
         // h-9 to match icon buttons and default buttons.
@@ -16,7 +17,6 @@ const Input = forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
         className,
       )}
       ref={ref}
-      {...props}
     />
   ),
 )
