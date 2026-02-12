@@ -8,7 +8,10 @@ import { debugLog } from '@/lib/debug-logger'
 export const ContactCard = ({
   className,
   showDebugDownload,
-}: { className?: string; showDebugDownload?: boolean }) => {
+}: {
+  className?: string
+  showDebugDownload?: boolean
+}) => {
   const { isGuestMode } = useGuestMode()
 
   return (

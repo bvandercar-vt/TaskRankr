@@ -332,7 +332,11 @@ export const LocalStateProvider = ({
         return updated
       })
       enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
-      debugLog.log('task', 'create', { tempId, name: data.name, parentId: data.parentId })
+      debugLog.log('task', 'create', {
+        tempId,
+        name: data.name,
+        parentId: data.parentId,
+      })
       return newTask
     },
     [settings.autoPinNewTasks, enqueue, storageKeys],
@@ -466,7 +470,9 @@ export const LocalStateProvider = ({
   const setTasksFromServer = useCallback(
     (serverTasks: Task[]) => {
       if (serverTasks.length === 0 && demoTaskIds.length > 0) {
-        debugLog.log('sync', 'setTasksFromServer:skipped', { reason: 'empty server, has demo data' })
+        debugLog.log('sync', 'setTasksFromServer:skipped', {
+          reason: 'empty server, has demo data',
+        })
         return
       }
       if (serverTasks.length > 0) {

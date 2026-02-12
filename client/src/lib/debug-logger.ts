@@ -57,8 +57,12 @@ class DebugLogger {
         fetch('/api/tasks', { credentials: 'include' }),
         fetch('/api/settings', { credentials: 'include' }),
       ])
-      const tasks = tasksRes.ok ? await tasksRes.json() : { error: tasksRes.statusText }
-      const settings = settingsRes.ok ? await settingsRes.json() : { error: settingsRes.statusText }
+      const tasks = tasksRes.ok
+        ? await tasksRes.json()
+        : { error: tasksRes.statusText }
+      const settings = settingsRes.ok
+        ? await settingsRes.json()
+        : { error: settingsRes.statusText }
       return { tasks, settings }
     } catch (err) {
       return { tasks: { error: String(err) }, settings: { error: String(err) } }

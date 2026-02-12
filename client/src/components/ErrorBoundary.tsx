@@ -37,10 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return this.props.children
     }
 
-    const errorText = [
-      this.state.error.message,
-      this.state.error.stack,
-    ]
+    const errorText = [this.state.error.message, this.state.error.stack]
       .filter(Boolean)
       .join('\n\n')
 
