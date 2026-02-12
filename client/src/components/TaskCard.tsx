@@ -366,10 +366,10 @@ export const TaskCard = ({
       <AnimatePresence>
         {isExpanded && hasSubtasks && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1, transition: { height: { duration: 0.2 }, opacity: { duration: 0.15, delay: 0.05 } } }}
+            exit={{ height: 0, opacity: 0, transition: { opacity: { duration: 0.1 }, height: { duration: 0.15, delay: 0.05 } } }}
+            className="overflow-hidden will-change-[height]"
           >
             <div className="relative">
               <div
