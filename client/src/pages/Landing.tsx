@@ -5,7 +5,14 @@
 
 import { isStandalonePWA } from 'is-standalone-pwa'
 import type { LucideIcon } from 'lucide-react'
-import { CheckCircle, Clock, Download, ListTodo, Star, WifiOff } from 'lucide-react'
+import {
+  CheckCircle,
+  Clock,
+  Download,
+  ListTodo,
+  Star,
+  WifiOff,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
@@ -14,10 +21,18 @@ import { IconSize, Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { authPaths } from '~/shared/constants'
 
-const CaptionedIcon = ({ icon: Icon, color, label }: { icon: LucideIcon; color: string; label: string }) => (
+const CaptionedIcon = ({
+  icon: Icon,
+  color,
+  label,
+}: {
+  icon: LucideIcon
+  color: string
+  label: string
+}) => (
   <div className="flex flex-col items-center gap-2">
     <Icon className={cn(IconSize.HW6, color)} />
-    <span>{label}</span>
+    <span className="text-sm">{label}</span>
   </div>
 )
 
@@ -42,14 +57,34 @@ const Landing = () => {
         </p>
 
         <div className="flex flex-col items-center gap-6 text-sm text-muted-foreground mb-8">
-          <div className="flex justify-center gap-10">
-            <CaptionedIcon icon={Star} color="text-yellow-500" label="Priority levels" />
-            <CaptionedIcon icon={CheckCircle} color="text-emerald-500" label="Ease levels" />
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={Star}
+              color="text-yellow-500"
+              label="Priority levels"
+            />
+            <CaptionedIcon
+              icon={CheckCircle}
+              color="text-emerald-500"
+              label="Ease levels"
+            />
           </div>
-          <div className="flex justify-center gap-10">
-            <CaptionedIcon icon={Clock} color="text-blue-500" label="Time tracking" />
-            <CaptionedIcon icon={ListTodo} color="text-amber-500" label="Nested tasks" />
-            <CaptionedIcon icon={WifiOff} color="text-violet-500" label="Works offline" />
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={Clock}
+              color="text-blue-500"
+              label="Time tracking"
+            />
+            <CaptionedIcon
+              icon={ListTodo}
+              color="text-amber-500"
+              label="Nested tasks"
+            />
+            <CaptionedIcon
+              icon={WifiOff}
+              color="text-violet-600"
+              label="Works offline"
+            />
           </div>
         </div>
 
