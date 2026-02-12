@@ -7,6 +7,7 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCloseButton,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -15,9 +16,6 @@ import {
   AlertDialogTitle,
 } from "@/components/primitives/overlays/AlertDialog";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/primitives/Button";
-import { X } from "lucide-react";
-import { IconSize } from "@/lib/constants";
 
 interface SubtaskActionDialogProps {
   open: boolean;
@@ -46,15 +44,10 @@ export const SubtaskActionDialog = ({
           "bg-card border-white/10",
         )}
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-2 top-2 h-8 w-8 text-muted-foreground hover:text-foreground"
-          onClick={() => onOpenChange(false)}
-          data-testid="button-close-status-dialog"
-        >
-          <X className={IconSize.HW4} />
-        </Button>
+        <AlertDialogCloseButton
+          onClose={() => onOpenChange(false)}
+          data-testid="button-close-subtask-action"
+        />
         <AlertDialogHeader>
           <AlertDialogTitle>What would you like to do?</AlertDialogTitle>
           <AlertDialogDescription>
