@@ -305,7 +305,7 @@ export const TaskForm = ({
                     task: initialData,
                     onAddSubtask,
                     onEditSubtask,
-                    onSubtaskDelete: onDeleteSubtask,
+                    onDeleteSubtask,
                     onAssignSubtask,
                   }
                 : {

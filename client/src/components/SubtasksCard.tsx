@@ -276,7 +276,7 @@ interface SubtasksCardProps {
   task: Task
   onAddSubtask: (parentId: number) => void
   onEditSubtask?: (task: Task) => void
-  onSubtaskDelete?: (task: DeleteTaskArgs) => void
+  onDeleteSubtask?: (task: DeleteTaskArgs) => void
   onAssignSubtask?: (task: Task) => void
 }
 
@@ -284,7 +284,7 @@ export const SubtasksCard = ({
   task,
   onAddSubtask,
   onEditSubtask,
-  onSubtaskDelete,
+  onDeleteSubtask,
   onAssignSubtask,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
@@ -430,7 +430,7 @@ export const SubtasksCard = ({
                     key={subtask.id}
                     task={subtask}
                     onEdit={onEditSubtask}
-                    onDelete={(t) => onSubtaskDelete?.(t)}
+                    onDelete={(t) => onDeleteSubtask?.(t)}
                     onToggleComplete={(t) => {
                       const newStatus =
                         t.status === TaskStatus.COMPLETED
