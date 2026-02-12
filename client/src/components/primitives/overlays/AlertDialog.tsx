@@ -6,8 +6,7 @@
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 import { X } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
-import { buttonVariants } from '@/components/primitives/Button'
+import { Button, buttonVariants } from '@/components/primitives/Button'
 import { IconSize } from '@/lib/constants'
 import { cn, forwardRefHelper } from '@/lib/utils'
 
