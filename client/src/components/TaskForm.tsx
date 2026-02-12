@@ -303,28 +303,29 @@ export const TaskForm = ({
               )}
             />
 
-            {initialData && onAddChild && (
+            {(initialData ? onAddChild : onSaveAndAddChild || onSaveAndAssignSubtask) && (
               <SubtasksCard
-                task={initialData}
-                onAddChild={onAddChild}
-                onEditChild={onEditChild}
-                onSubtaskDelete={onSubtaskDelete}
-                onAssignSubtask={onAssignSubtask}
-              />
-            )}
-            {!initialData && (onSaveAndAddChild || onSaveAndAssignSubtask) && (
-              <SubtasksCard
-                task={STUB_TASK}
-                onAddChild={(_parentId: number) => {
-                  form.handleSubmit((data) => {
-                    onSaveAndAddChild?.(data as MutateTaskContent)
-                  })()
-                }}
-                onAssignSubtask={(_task: Task) => {
-                  form.handleSubmit((data) => {
-                    onSaveAndAssignSubtask?.(data as MutateTaskContent)
-                  })()
-                }}
+                {...(initialData
+                  ? {
+                      task: initialData,
+                      onAddChild: onAddChild!,
+                      onEditChild,
+                      onSubtaskDelete,
+                      onAssignSubtask,
+                    }
+                  : {
+                      task: STUB_TASK,
+                      onAddChild: () => {
+                        form.handleSubmit((data) => {
+                          onSaveAndAddChild?.(data as MutateTaskContent)
+                        })()
+                      },
+                      onAssignSubtask: () => {
+                        form.handleSubmit((data) => {
+                          onSaveAndAssignSubtask?.(data as MutateTaskContent)
+                        })()
+                      },
+                    })}
               />
             )}
 
