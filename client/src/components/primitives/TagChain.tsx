@@ -51,7 +51,7 @@ export const TagChain = ({
             {item.name}
           </span>
           {idx < items.length - 1 && (
-            <ChevronRight className="w-3 h-3 text-muted-foreground" />
+            <ChevronRight className="size-3 text-muted-foreground" />
           )}
         </div>
       ))}
