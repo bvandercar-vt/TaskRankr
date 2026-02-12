@@ -3,6 +3,8 @@
  * Captures timestamped action logs in a circular buffer.
  */
 
+import type { Task, UserSettings } from '~/shared/schema'
+
 interface LogEntry {
   timestamp: string
   category: string
@@ -11,6 +13,15 @@ interface LogEntry {
 }
 
 const MAX_ENTRIES = 500
+
+const safeParse = (raw: string | null) => {
+  if (raw === null) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return raw
+  }
+}
 
 class DebugLogger {
   private entries: LogEntry[] = []
@@ -33,24 +44,16 @@ class DebugLogger {
   }
 
   private getLocalState(): Record<string, unknown> {
-    const state: Record<string, unknown> = {}
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (!key?.startsWith('taskrankr-')) continue
-      const raw = localStorage.getItem(key)
-      if (raw === null) continue
-      try {
-        state[key] = JSON.parse(raw)
-      } catch {
-        state[key] = raw
-      }
-    }
-    return state
+    return Object.fromEntries(
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('taskrankr-'))
+        .map((key) => [key, safeParse(localStorage.getItem(key))]),
+    )
   }
 
   private async fetchServerData(): Promise<{
-    tasks: unknown
-    settings: unknown
+    tasks: Task[] | { error: string }
+    settings: UserSettings | { error: string }
   } | null> {
     try {
       const [tasksRes, settingsRes] = await Promise.all([
