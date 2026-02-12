@@ -32,12 +32,29 @@ class DebugLogger {
     return [...this.entries]
   }
 
+  private getLocalState(): Record<string, unknown> {
+    const state: Record<string, unknown> = {}
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key?.startsWith('taskrankr-')) continue
+      const raw = localStorage.getItem(key)
+      if (raw === null) continue
+      try {
+        state[key] = JSON.parse(raw)
+      } catch {
+        state[key] = raw
+      }
+    }
+    return state
+  }
+
   download() {
     const data = {
       exportedAt: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href,
       entryCount: this.entries.length,
+      localState: this.getLocalState(),
       entries: this.entries,
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], {
