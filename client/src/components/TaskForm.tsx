@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
-import { Calendar as CalendarIcon, Link as LinkIcon, Plus } from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/primitives/Button'
@@ -38,6 +38,7 @@ import {
   insertTaskSchema,
   type MutateTask,
   type RankField,
+  SubtaskSortMode,
   type Task,
   TaskStatus,
 } from '~/shared/schema'
@@ -45,6 +46,26 @@ import type {
   DeleteTaskArgs,
   MutateTaskContent,
 } from './providers/LocalStateProvider'
+
+const STUB_TASK: Task = {
+  id: 0,
+  userId: '',
+  name: '',
+  description: null,
+  priority: null,
+  ease: null,
+  enjoyment: null,
+  time: null,
+  parentId: null,
+  status: TaskStatus.OPEN,
+  inProgressTime: 0,
+  inProgressStartedAt: null,
+  createdAt: new Date(),
+  completedAt: null,
+  subtaskSortMode: SubtaskSortMode.INHERIT,
+  subtaskOrder: [],
+  subtasksShowNumbers: false,
+}
 
 interface DateCreatedInputProps {
   value: Date | undefined
@@ -292,40 +313,19 @@ export const TaskForm = ({
               />
             )}
             {!initialData && (onSaveAndAddChild || onSaveAndAssignSubtask) && (
-              <div className="border border-white/10 rounded-lg overflow-hidden">
-                <div className="flex border-white/5">
-                  {onSaveAndAddChild && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        form.handleSubmit((data) => {
-                          onSaveAndAddChild(data as MutateTaskContent)
-                        })()
-                      }}
-                      className="flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground flex-[4] gap-2"
-                      data-testid="button-save-and-add-subtask"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Subtask
-                    </button>
-                  )}
-                  {onSaveAndAssignSubtask && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        form.handleSubmit((data) => {
-                          onSaveAndAssignSubtask(data as MutateTaskContent)
-                        })()
-                      }}
-                      className="flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground flex-1 gap-1.5 border-l border-white/5"
-                      data-testid="button-save-and-assign-subtask"
-                    >
-                      <LinkIcon className="h-4 w-4" />
-                      Assign
-                    </button>
-                  )}
-                </div>
-              </div>
+              <SubtasksCard
+                task={STUB_TASK}
+                onAddChild={(_parentId: number) => {
+                  form.handleSubmit((data) => {
+                    onSaveAndAddChild?.(data as MutateTaskContent)
+                  })()
+                }}
+                onAssignSubtask={(_task: Task) => {
+                  form.handleSubmit((data) => {
+                    onSaveAndAssignSubtask?.(data as MutateTaskContent)
+                  })()
+                }}
+              />
             )}
 
             <div className="flex flex-col gap-4 mt-2 pb-4">
