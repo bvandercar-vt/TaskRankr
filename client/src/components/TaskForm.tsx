@@ -118,8 +118,8 @@ export interface TaskFormProps {
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
-  onAddChild?: (parentId: number, formData?: MutateTaskContent) => void
-  onEditChild?: (task: Task) => void
+  onAddSubtask?: (parentId: number, formData?: MutateTaskContent) => void
+  onEditSubtask?: (task: Task) => void
   onSubtaskDelete?: (task: DeleteTaskArgs) => void
   onAssignSubtask?: (task: Task, formData?: MutateTaskContent) => void
 }
@@ -129,8 +129,8 @@ export const TaskForm = ({
   initialData,
   parentId,
   onCancel,
-  onAddChild,
-  onEditChild,
+  onAddSubtask,
+  onEditSubtask,
   onSubtaskDelete,
   onAssignSubtask,
 }: TaskFormProps) => {
@@ -303,16 +303,16 @@ export const TaskForm = ({
               {...(initialData
                 ? {
                     task: initialData,
-                    onAddChild: (pid: number) => onAddChild?.(pid),
-                    onEditChild,
+                    onAddSubtask: (pid: number) => onAddSubtask?.(pid),
+                    onEditSubtask,
                     onSubtaskDelete,
                     onAssignSubtask: (t: Task) => onAssignSubtask?.(t),
                   }
                 : {
                     task: STUB_TASK,
-                    onAddChild: () => {
+                    onAddSubtask: () => {
                       form.handleSubmit((data) => {
-                        onAddChild?.(STUB_TASK.id, data as MutateTaskContent)
+                        onAddSubtask?.(STUB_TASK.id, data as MutateTaskContent)
                       })()
                     },
                     onAssignSubtask: () => {

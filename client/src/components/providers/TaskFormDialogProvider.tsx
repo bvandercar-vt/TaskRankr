@@ -42,8 +42,8 @@ interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
     | 'onSubmit'
-    | 'onAddChild'
-    | 'onEditChild'
+    | 'onAddSubtask'
+    | 'onEditSubtask'
     | 'onSubtaskDelete'
     | 'onAssignSubtask'
   > {
@@ -63,8 +63,8 @@ const DesktopDialog = ({
   activeTask,
   onSubmit,
   onClose,
-  onAddChild,
-  onEditChild,
+  onAddSubtask,
+  onEditSubtask,
   onSubtaskDelete,
   onAssignSubtask,
 }: TaskFormDialogProps) => (
@@ -96,8 +96,8 @@ const DesktopDialog = ({
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
-          onAddChild={onAddChild}
-          onEditChild={onEditChild}
+          onAddSubtask={onAddSubtask}
+          onEditSubtask={onEditSubtask}
           onSubtaskDelete={onSubtaskDelete}
           onAssignSubtask={onAssignSubtask}
         />
@@ -112,8 +112,8 @@ const MobileDialog = ({
   parentId,
   onSubmit,
   onClose,
-  onAddChild,
-  onEditChild,
+  onAddSubtask,
+  onEditSubtask,
   onSubtaskDelete,
   onAssignSubtask,
 }: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
@@ -132,8 +132,8 @@ const MobileDialog = ({
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
-          onAddChild={onAddChild}
-          onEditChild={onEditChild}
+          onAddSubtask={onAddSubtask}
+          onEditSubtask={onEditSubtask}
           onSubtaskDelete={onSubtaskDelete}
           onAssignSubtask={onAssignSubtask}
         />
@@ -178,7 +178,7 @@ export const TaskFormDialogProvider = ({
     setIsOpen(true)
   }
 
-  const handleEditChild = (task: Task) => {
+  const handleEditSubtask = (task: Task) => {
     if (activeTask) {
       setReturnToTask(activeTask)
     }
@@ -214,7 +214,7 @@ export const TaskFormDialogProvider = ({
     }
   }
 
-  const handleAddChild = (pid: number, formData?: MutateTaskContent) => {
+  const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
     if (formData) {
       const newTask = createTask({ ...formData, parentId } as CreateTask)
       setReturnToTask(newTask)
@@ -264,8 +264,8 @@ export const TaskFormDialogProvider = ({
         activeTask={activeTask}
         onSubmit={handleSubmit}
         onClose={closeDialog}
-        onAddChild={handleAddChild}
-        onEditChild={handleEditChild}
+        onAddSubtask={handleAddSubtask}
+        onEditSubtask={handleEditSubtask}
         onSubtaskDelete={setSubtaskToDelete}
         onAssignSubtask={handleAssignSubtask}
       />
@@ -276,8 +276,8 @@ export const TaskFormDialogProvider = ({
         activeTask={activeTask}
         onSubmit={handleSubmit}
         onClose={closeDialog}
-        onAddChild={handleAddChild}
-        onEditChild={handleEditChild}
+        onAddSubtask={handleAddSubtask}
+        onEditSubtask={handleEditSubtask}
         onSubtaskDelete={setSubtaskToDelete}
         onAssignSubtask={handleAssignSubtask}
       />

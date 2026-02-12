@@ -274,16 +274,16 @@ const SUBTASK_ACTION_BTN_STYLE =
 
 interface SubtasksCardProps {
   task: Task
-  onAddChild: (parentId: number) => void
-  onEditChild?: (task: Task) => void
+  onAddSubtask: (parentId: number) => void
+  onEditSubtask?: (task: Task) => void
   onSubtaskDelete?: (task: DeleteTaskArgs) => void
   onAssignSubtask?: (task: Task) => void
 }
 
 export const SubtasksCard = ({
   task,
-  onAddChild,
-  onEditChild,
+  onAddSubtask,
+  onEditSubtask,
   onSubtaskDelete,
   onAssignSubtask,
 }: SubtasksCardProps) => {
@@ -429,7 +429,7 @@ export const SubtasksCard = ({
                   <SubtaskItem
                     key={subtask.id}
                     task={subtask}
-                    onEdit={onEditChild}
+                    onEdit={onEditSubtask}
                     onDelete={(t) => onSubtaskDelete?.(t)}
                     onToggleComplete={(t) => {
                       const newStatus =
@@ -450,7 +450,7 @@ export const SubtasksCard = ({
       <div className="flex border-t border-white/5">
         <button
           type="button"
-          onClick={() => onAddChild(task.id)}
+          onClick={() => onAddSubtask(task.id)}
           className={cn(SUBTASK_ACTION_BTN_STYLE, 'flex-[4] gap-2')}
           data-testid="button-add-subtask"
         >
