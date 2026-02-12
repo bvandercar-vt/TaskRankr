@@ -38,6 +38,7 @@ import {
   insertTaskSchema,
   type MutateTask,
   type RankField,
+  SubtaskSortMode,
   type Task,
   TaskStatus,
 } from '~/shared/schema'
@@ -45,6 +46,26 @@ import type {
   DeleteTaskArgs,
   MutateTaskContent,
 } from './providers/LocalStateProvider'
+
+const STUB_TASK: Task = {
+  id: 0,
+  userId: '',
+  name: '',
+  description: null,
+  priority: null,
+  ease: null,
+  enjoyment: null,
+  time: null,
+  parentId: null,
+  status: TaskStatus.OPEN,
+  inProgressTime: 0,
+  inProgressStartedAt: null,
+  createdAt: new Date(),
+  completedAt: null,
+  subtaskSortMode: SubtaskSortMode.INHERIT,
+  subtaskOrder: [],
+  subtasksShowNumbers: false,
+}
 
 interface DateCreatedInputProps {
   value: Date | undefined
@@ -97,10 +118,10 @@ export interface TaskFormProps {
   initialData?: Task
   parentId?: number | null
   onCancel: () => void
-  onAddChild?: (parentId: number) => void
-  onEditChild?: (task: Task) => void
-  onSubtaskDelete?: (task: DeleteTaskArgs) => void
-  onAssignSubtask?: (task: Task) => void
+  onAddSubtask: (parentId: number, formData?: MutateTaskContent) => void
+  onEditSubtask: (task: Task) => void
+  onDeleteSubtask: (task: DeleteTaskArgs) => void
+  onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
 }
 
 export const TaskForm = ({
@@ -108,9 +129,9 @@ export const TaskForm = ({
   initialData,
   parentId,
   onCancel,
-  onAddChild,
-  onEditChild,
-  onSubtaskDelete,
+  onAddSubtask,
+  onEditSubtask,
+  onDeleteSubtask,
   onAssignSubtask,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
@@ -278,15 +299,27 @@ export const TaskForm = ({
               )}
             />
 
-            {initialData && onAddChild && (
-              <SubtasksCard
-                task={initialData}
-                onAddChild={onAddChild}
-                onEditChild={onEditChild}
-                onSubtaskDelete={onSubtaskDelete}
-                onAssignSubtask={onAssignSubtask}
-              />
-            )}
+            <SubtasksCard
+              {...(initialData
+                ? {
+                    task: initialData,
+                    onAddSubtask,
+                    onEditSubtask,
+                    onDeleteSubtask,
+                    onAssignSubtask,
+                  }
+                : {
+                    task: STUB_TASK,
+                    onAddSubtask: () =>
+                      form.handleSubmit((data) => {
+                        onAddSubtask(STUB_TASK.id, data)
+                      })(),
+                    onAssignSubtask: () =>
+                      form.handleSubmit((data) => {
+                        onAssignSubtask(STUB_TASK, data)
+                      })(),
+                  })}
+            />
 
             <div className="flex flex-col gap-4 mt-2 pb-4">
               <FormField
