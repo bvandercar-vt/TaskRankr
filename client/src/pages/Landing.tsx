@@ -36,7 +36,7 @@ const Landing = () => {
         <div className="flex flex-col items-center gap-6 text-sm text-muted-foreground mb-8">
           <div className="flex justify-center gap-10">
             <div className="flex flex-col items-center gap-2">
-              <Star className={cn(IconSize.HW6, 'text-primary')} />
+              <Star className={cn(IconSize.HW6, 'text-yellow-500')} />
               <span>Priority levels</span>
             </div>
             <div className="flex flex-col items-center gap-2">
