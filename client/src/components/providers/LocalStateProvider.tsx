@@ -13,7 +13,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { pick, toMerged } from 'es-toolkit'
+import { omit, pick, toMerged } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
@@ -103,17 +103,16 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
       const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
         const result: Task[] = []
         for (const t of tasks) {
-          const { subtasks, ...rest } = t as Task & { subtasks?: Task[] }
           result.push({
-            ...rest,
-            createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
-            completedAt: rest.completedAt ? new Date(rest.completedAt) : null,
-            inProgressStartedAt: rest.inProgressStartedAt
-              ? new Date(rest.inProgressStartedAt)
+            ...omit(t, ['subtasks']),
+            createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
+            completedAt: t.completedAt ? new Date(t.completedAt) : null,
+            inProgressStartedAt: t.inProgressStartedAt
+              ? new Date(t.inProgressStartedAt)
               : null,
           })
-          if (subtasks && subtasks.length > 0) {
-            result.push(...flatten(subtasks))
+          if (t.subtasks?.length) {
+            result.push(...flatten(t.subtasks))
           }
         }
         return result
