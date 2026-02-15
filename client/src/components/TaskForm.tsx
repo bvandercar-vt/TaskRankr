@@ -245,9 +245,15 @@ export const TaskForm = ({
               <FormItem>
                 <FormLabel className="text-sm font-medium">Task Name</FormLabel>
                 <FormControl>
-                  <Input
+                  <Textarea
                     placeholder="Task name"
-                    className="bg-secondary/20 border-white/5 h-12 text-lg focus-visible:ring-primary/50"
+                    className="bg-secondary/20 border-white/5 min-h-12 text-lg focus-visible:ring-primary/50 resize-none overflow-hidden"
+                    rows={1}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement
+                      target.style.height = 'auto'
+                      target.style.height = `${target.scrollHeight}px`
+                    }}
                     {...field}
                   />
                 </FormControl>

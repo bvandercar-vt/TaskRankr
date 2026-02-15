@@ -37,7 +37,7 @@ const Title = ({
 }) => (
   <h3
     className={cn(
-      'font-semibold truncate text-base',
+      'font-semibold text-base break-words',
       isCompleted ? 'text-muted-foreground line-through' : 'text-foreground',
     )}
   >
