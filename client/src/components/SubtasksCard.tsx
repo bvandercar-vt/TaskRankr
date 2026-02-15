@@ -230,7 +230,7 @@ const SubtaskItem = ({
         </button>
         <span
           className={cn(
-            'text-sm truncate',
+            'text-sm break-words',
             isCompleted && 'line-through text-muted-foreground',
           )}
         >
