@@ -213,4 +213,11 @@ export const filterAndSortTree = (
   searchTerm: string,
   sort: SortBy[],
   childSort?: SortBy[],
-) => sortTaskTree(filterTaskTree(tasks, searchTerm), sort, undefined, undefined, childSort)
+) =>
+  sortTaskTree(
+    filterTaskTree(tasks, searchTerm),
+    sort,
+    undefined,
+    undefined,
+    childSort,
+  )
