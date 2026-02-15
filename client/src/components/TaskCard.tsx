@@ -302,7 +302,7 @@ export const TaskCard = ({
             }
           : { initial: false })}
         className={cn(
-          'relative flex items-center gap-2 pr-2 pl-1 py-1 rounded-lg border transition-all duration-200 select-none cursor-pointer',
+          'relative flex items-center gap-2 pr-2 pl-1 py-1.5 rounded-lg border transition-all duration-200 select-none cursor-pointer',
           isNestedWithStatus
             ? 'border-transparent hover:bg-white/[0.02] hover:border-white/[0.05]'
             : isInProgress
