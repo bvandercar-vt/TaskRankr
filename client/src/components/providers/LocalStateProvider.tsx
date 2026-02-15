@@ -311,11 +311,11 @@ export const LocalStateProvider = ({
           'ease',
           'enjoyment',
           'time',
-          'parentId',
           'subtaskSortMode',
           'subtaskOrder',
           'subtasksShowNumbers',
         ]),
+        parentId: data.parentId ?? null,
       }
 
       setTasks((prev) => {
