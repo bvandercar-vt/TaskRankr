@@ -189,12 +189,15 @@ const Home = () => {
       ? filterAndSortTree([inProgressTask], search, sortOrder)
       : []
 
+    const pinnedSort =
+      settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
+        ? [SortOption.PRIORITY, ...sortOrder]
+        : sortOrder
     const sortedPinned = filterAndSortTree(
       pinnedTasks,
       search,
-      settings.alwaysSortPinnedByPriority && sortBy !== SortOption.PRIORITY
-        ? [SortOption.PRIORITY, ...sortOrder]
-        : sortOrder,
+      pinnedSort,
+      pinnedSort !== sortOrder ? sortOrder : undefined,
     )
 
     const sortedTree = filterAndSortTree(taskTree, search, sortOrder)

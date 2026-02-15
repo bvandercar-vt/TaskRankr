@@ -292,7 +292,6 @@ export const LocalStateProvider = ({
         ease: null,
         enjoyment: null,
         time: null,
-        parentId: null,
         status:
           settings.autoPinNewTasks && !data.parentId
             ? TaskStatus.PINNED

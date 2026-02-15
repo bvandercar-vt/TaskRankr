@@ -119,12 +119,14 @@ export const sortTaskTree = (
   sort: SortBy[],
   parentSortMode?: SubtaskSortMode,
   parentSubtaskOrder?: number[],
+  childSort?: SortBy[],
 ): TaskWithSubtasks[] => {
+  const inheritedSort = childSort ?? sort
   const withSortedChildren = tasks.map((task) => ({
     ...task,
     subtasks: sortTaskTree(
       task.subtasks,
-      sort,
+      inheritedSort,
       task.subtaskSortMode,
       task.subtaskOrder,
     ),
@@ -210,4 +212,5 @@ export const filterAndSortTree = (
   tasks: TaskWithSubtasks[],
   searchTerm: string,
   sort: SortBy[],
-) => sortTaskTree(filterTaskTree(tasks, searchTerm), sort)
+  childSort?: SortBy[],
+) => sortTaskTree(filterTaskTree(tasks, searchTerm), sort, undefined, undefined, childSort)
