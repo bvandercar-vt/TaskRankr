@@ -236,9 +236,14 @@ export const LocalStateProvider = ({
           if (task.id === id) {
             updatedTask = { ...task, ...updateThisTask(task) }
             return updatedTask
-          } else {
-            return { ...task, ...updateOtherTasks?.(task) }
           }
+          if (updateOtherTasks) {
+            const otherUpdates = updateOtherTasks(task)
+            return Object.keys(otherUpdates).length > 0
+              ? { ...task, ...otherUpdates }
+              : task
+          }
+          return task
         }),
       )
       return updatedTask
@@ -364,8 +369,6 @@ export const LocalStateProvider = ({
 
   const updateTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
-      console.count('[DEBUG] updateTask called')
-      console.trace('[DEBUG] updateTask trace')
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
@@ -393,7 +396,6 @@ export const LocalStateProvider = ({
 
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
-      console.count('[DEBUG] setTaskStatus called')
       const updatedTask = updateTaskById(
         id,
         (task) => {

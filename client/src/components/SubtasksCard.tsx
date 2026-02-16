@@ -70,7 +70,6 @@ const SubtaskSettings = ({
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
   const { updateTask, reorderSubtasks } = useTaskActions()
-  console.count('[DEBUG] SubtaskSettings render')
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
@@ -373,7 +372,7 @@ interface SubtasksCardProps {
 }
 
 export const SubtasksCard = ({
-  task,
+  task: taskProp,
   onAddSubtask,
   onEditSubtask,
   onDeleteSubtask,
@@ -381,6 +380,8 @@ export const SubtasksCard = ({
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
   const { setTaskStatus, reorderSubtasks } = useTaskActions()
+
+  const task = allTasks.find((t) => t.id === taskProp.id) ?? taskProp
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
