@@ -91,10 +91,7 @@ export class DatabaseStorage implements IStorage {
     const [task] = await db.insert(tasks).values(insertTask).returning()
     const created = task as Task
 
-    if (
-      created.parentId &&
-      created.status !== TaskStatus.COMPLETED
-    ) {
+    if (created.parentId && created.status !== TaskStatus.COMPLETED) {
       await this.revertParentIfInheritCompletionState(
         created.parentId,
         created.userId,
@@ -240,9 +237,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(tasks.parentId, parentId), eq(tasks.userId, userId)))
 
     const allCompleted = children.every(
-      (t) =>
-        t.id === justCompletedChildId ||
-        t.status === TaskStatus.COMPLETED,
+      (t) => t.id === justCompletedChildId || t.status === TaskStatus.COMPLETED,
     )
 
     if (allCompleted) {

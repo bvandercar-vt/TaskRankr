@@ -529,9 +529,7 @@ export const SubtasksCard = ({
       {totalCount > 0 && (
         <CollapsibleCard
           title={
-            <span className="text-sm font-medium">
-              Subtasks ({totalCount})
-            </span>
+            <span className="text-sm font-medium">Subtasks ({totalCount})</span>
           }
           defaultOpen
           noCard

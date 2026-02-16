@@ -349,9 +349,7 @@ export const LocalStateProvider = ({
               changes.completedAt = null
               changes.inProgressStartedAt = null
             }
-            return Object.keys(changes).length > 0
-              ? { ...t, ...changes }
-              : t
+            return Object.keys(changes).length > 0 ? { ...t, ...changes } : t
           })
         }
         return updated
@@ -380,15 +378,18 @@ export const LocalStateProvider = ({
           const completedDirectIds = new Set(
             prev
               .filter(
-                (t) =>
-                  t.parentId === id && t.status === TaskStatus.COMPLETED,
+                (t) => t.parentId === id && t.status === TaskStatus.COMPLETED,
               )
               .map((t) => t.id),
           )
           const toHide = new Set<number>(completedDirectIds)
           const collectDescendants = (parentIds: Set<number>) => {
             for (const t of prev) {
-              if (t.parentId !== null && parentIds.has(t.parentId) && !toHide.has(t.id)) {
+              if (
+                t.parentId !== null &&
+                parentIds.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
                 toHide.add(t.id)
               }
             }
@@ -467,9 +468,7 @@ export const LocalStateProvider = ({
           })()
 
           if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = tasksRef.current.find(
-              (t) => t.id === task.parentId,
-            )
+            const parent = tasksRef.current.find((t) => t.id === task.parentId)
             if (parent?.autoHideCompleted) {
               return { ...base, hidden: true }
             }
@@ -499,7 +498,11 @@ export const LocalStateProvider = ({
           while (frontier.size > 0) {
             const next = new Set<number>()
             for (const t of prev) {
-              if (t.parentId !== null && frontier.has(t.parentId) && !toHide.has(t.id)) {
+              if (
+                t.parentId !== null &&
+                frontier.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
                 toHide.add(t.id)
                 next.add(t.id)
               }

@@ -65,7 +65,9 @@ const Completed = () => {
     const roots: TaskWithSubtasks[] = allTasks
       .filter(
         (task) =>
-          task.status === TaskStatus.COMPLETED && !task.parentId && !task.hidden,
+          task.status === TaskStatus.COMPLETED &&
+          !task.parentId &&
+          !task.hidden,
       )
       .map((task) => ({
         ...task,

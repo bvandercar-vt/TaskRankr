@@ -230,7 +230,10 @@ export const ChangeStatusDialog = ({
             )}
 
             <Tooltip>
-              <TooltipTrigger asChild disabled={!(!isCompleted && hasIncompleteSubtasks)}>
+              <TooltipTrigger
+                asChild
+                disabled={!(!isCompleted && hasIncompleteSubtasks)}
+              >
                 <AlertDialogAction
                   onClick={() =>
                     onSetStatus(

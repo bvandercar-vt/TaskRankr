@@ -152,8 +152,7 @@ export const TaskForm = ({
   const hasIncompleteSubtasks = initialData
     ? allTasks.some(
         (t) =>
-          t.parentId === initialData.id &&
-          t.status !== TaskStatus.COMPLETED,
+          t.parentId === initialData.id && t.status !== TaskStatus.COMPLETED,
       )
     : false
 
