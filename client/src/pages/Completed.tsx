@@ -18,7 +18,7 @@ import {
   filterAndSortTree,
   getDirectSubtasks,
   RANK_FIELDS_COLUMNS,
-} from '@/lib/sort-tasks'
+} from '@/lib/task-utils'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const ColumnHeaders = () => (

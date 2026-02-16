@@ -14,7 +14,7 @@ import {
 } from '@/components/primitives/overlays/Dialog'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { filterRootTasks } from '@/lib/sort-tasks'
+import { filterRootTasks } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 

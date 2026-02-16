@@ -42,7 +42,7 @@ import {
   getDirectSubtasks,
   getTaskById,
   sortTasksByIdOrder,
-} from '@/lib/sort-tasks'
+} from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import type { DeleteTaskArgs } from './providers/LocalStateProvider'

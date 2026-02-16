@@ -14,7 +14,7 @@ import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import { getTaskStatuses, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { getTaskStatuses, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {
   type FieldConfig,

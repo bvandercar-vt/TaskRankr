@@ -42,7 +42,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Configurable Rank Fields**: Priority, ease, enjoyment, and time fields have 6 levels and customizable visibility/required settings via `fieldConfig`.
 - **Task Status System**: A clear workflow with `open`, `in_progress`, `pinned`, and `completed` statuses, including automatic demotion of `in_progress` tasks and time tracking.
 - **Subtask Ordering**: Supports both inherited sorting from parent tasks and manual drag-and-drop reordering.
-- **Sorting & Filtering Architecture**: All sorting and filtering logic lives in `client/src/lib/sort-tasks.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
+- **Sorting & Filtering Architecture**: All sorting and filtering logic lives in `client/src/lib/task-utils.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
 - **Task Hooks Architecture**: `useTasks.ts` exports data hooks (`useTasks`, `useTask`, `useTaskParentChain`) and `useTaskActions()` which returns direct calls to `LocalStateProvider` methods. All mutations are synchronous local-first operations — no `useMutation` wrappers or `isPending` states.
 
 ### Project Structure
@@ -98,7 +98,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── Landing.tsx       # Unauthenticated landing page
 │       │   └── NotFound.tsx
 │       ├── lib/
-│       │   ├── sort-tasks.ts     # Sorting + filtering logic, SORT_ORDER_MAP, RANK_FIELDS_COLUMNS
+│       │   ├── task-utils.ts     # Sorting + filtering logic, SORT_ORDER_MAP, RANK_FIELDS_COLUMNS
 │       │   ├── rank-field-styles.ts  # Rank field color mappings
 │       │   ├── ts-rest.ts        # ts-rest client + QueryKeys
 │       │   ├── query-client.ts   # @tanstack/react-query client

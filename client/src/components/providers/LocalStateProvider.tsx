@@ -19,7 +19,7 @@ import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
-import { getDirectSubtasks, getTaskById } from '@/lib/sort-tasks'
+import { getDirectSubtasks, getTaskById } from '@/lib/task-utils'
 import {
   type CreateTask,
   SubtaskSortMode,

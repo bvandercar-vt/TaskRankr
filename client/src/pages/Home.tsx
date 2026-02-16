@@ -26,7 +26,7 @@ import {
   getTaskStatuses,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
-} from '@/lib/sort-tasks'
+} from '@/lib/task-utils'
 import {
   type FieldConfig,
   SortOption,

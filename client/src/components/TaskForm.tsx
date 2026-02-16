@@ -33,7 +33,7 @@ import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
-import { getDirectSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { getDirectSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,

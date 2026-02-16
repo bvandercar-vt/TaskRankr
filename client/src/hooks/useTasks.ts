@@ -8,7 +8,7 @@ import {
   type CreateTaskContent,
   useLocalStateSafe,
 } from '@/components/providers/LocalStateProvider'
-import { getTaskById } from '@/lib/sort-tasks'
+import { getTaskById } from '@/lib/task-utils'
 import type { Task, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
