@@ -231,3 +231,9 @@ export const getTaskById = (tasks: Task[], id: number): Task | undefined =>
 
 export const getDirectSubtasks = (tasks: Task[], id: number): Task[] =>
   tasks.filter((task) => task.parentId === id)
+
+export const getTaskStatuses = (task: Task) => ({
+  isInProgress: task.status === TaskStatus.IN_PROGRESS,
+  isPinned: task.status === TaskStatus.PINNED,
+  isCompleted: task.status === TaskStatus.COMPLETED,
+})

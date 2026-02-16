@@ -23,6 +23,7 @@ import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
 import {
   filterAndSortTree,
+  getTaskStatuses,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/sort-tasks'
@@ -143,10 +144,8 @@ const Home = () => {
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
-      if (
-        task.status === TaskStatus.IN_PROGRESS ||
-        task.status === TaskStatus.PINNED
-      ) {
+      const { isInProgress, isPinned } = getTaskStatuses(task)
+      if (isInProgress || isPinned) {
         hoistedIds.add(task.id)
       }
     })
