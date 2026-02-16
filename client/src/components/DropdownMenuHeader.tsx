@@ -28,8 +28,8 @@ import {
 import { SearchInput } from '@/components/SearchInput'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { useGuestMode } from '@/providers/GuestModeProvider'
 import { authPaths } from '~/shared/constants'
-import { useGuestMode } from './providers/GuestModeProvider'
 
 const Title = ({
   title,

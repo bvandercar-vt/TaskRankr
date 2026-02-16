@@ -9,17 +9,7 @@ import { Route, Switch, useLocation } from 'wouter'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
-import { ExpandedTasksProvider } from '@/components/providers/ExpandedTasksProvider'
-import {
-  GuestModeProvider,
-  useGuestMode,
-} from '@/components/providers/GuestModeProvider'
-import {
-  LocalStateProvider,
-  StorageMode,
-} from '@/components/providers/LocalStateProvider'
-import { SyncProvider } from '@/components/providers/SyncProvider'
-import { TaskFormDialogProvider } from '@/components/providers/TaskFormDialogProvider'
+import { TaskFormDialogProvider } from '@/components/TaskFormDialogProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import {
@@ -33,6 +23,10 @@ import HowToUse from '@/pages/HowToUse'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
+import { ExpandedTasksProvider } from '@/providers/ExpandedTasksProvider'
+import { GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
+import { LocalStateProvider, StorageMode } from '@/providers/LocalStateProvider'
+import { SyncProvider } from '@/providers/SyncProvider'
 import { StatusBanner } from './components/StatusBanner'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
