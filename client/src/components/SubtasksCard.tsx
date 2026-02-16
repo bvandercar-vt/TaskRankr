@@ -44,8 +44,8 @@ import {
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
+import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
-import type { DeleteTaskArgs } from './providers/LocalStateProvider'
 
 interface SubtaskSettingsProps {
   taskId: number

@@ -10,10 +10,9 @@ import { LayoutList, Plus, Search } from 'lucide-react'
 import { EmptyState as EmptyStateBase } from '@/components/PageStates'
 import { Button } from '@/components/primitives/Button'
 import { Icon } from '@/components/primitives/LucideIcon'
-import { useLocalState } from '@/components/providers/LocalStateProvider'
-import { useTaskDialog } from '@/components/providers/TaskFormDialogProvider'
 import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
+import { useTaskDialog } from '@/components/TaskFormDialogProvider'
 import {
   TaskListPageHeader,
   TaskListPageWrapper,
@@ -27,6 +26,7 @@ import {
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/task-utils'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import {
   type FieldConfig,
   SortOption,

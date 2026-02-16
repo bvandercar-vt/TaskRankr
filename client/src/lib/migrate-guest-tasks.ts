@@ -5,7 +5,7 @@
 
 import { omit } from 'es-toolkit'
 
-import { SyncOperationType } from '@/components/providers/LocalStateProvider'
+import { SyncOperationType } from '@/providers/LocalStateProvider'
 import type { Task } from '~/shared/schema'
 
 const GUEST_STORAGE_KEYS = {
