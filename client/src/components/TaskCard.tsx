@@ -14,7 +14,11 @@ import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import { getTaskStatuses, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
+import {
+  getHasIncomplete,
+  getTaskStatuses,
+  RANK_FIELDS_COLUMNS,
+} from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {
   type FieldConfig,
@@ -416,9 +420,7 @@ export const TaskCard = ({
         inProgressTime={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
-        hasIncompleteSubtasks={task.subtasks.some(
-          (s) => s.status !== TaskStatus.COMPLETED,
-        )}
+        hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) =>
           updateTask({ id: task.id, inProgressTime: timeMs })

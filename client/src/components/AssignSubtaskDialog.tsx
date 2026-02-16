@@ -2,7 +2,7 @@
  * @fileoverview Dialog to assign an existing parentless task as a subtask
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/primitives/Button'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
@@ -14,7 +14,7 @@ import {
 } from '@/components/primitives/overlays/Dialog'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { filterRootTasks } from '@/lib/task-utils'
+import { filterRootTasks, getAllDescendantIds } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
@@ -37,31 +37,16 @@ export const AssignSubtaskDialog = ({
   const [showCompleted, setShowCompleted] = useState(false)
   const { updateTask } = useTaskActions()
 
-  const collectDescendantIds = useCallback(
-    (taskId: number): Set<number> => {
-      const ids = new Set<number>()
-      const walk = (id: number) => {
-        ids.add(id)
-        for (const t of allTasks) {
-          if (t.parentId === id) walk(t.id)
-        }
-      }
-      walk(taskId)
-      return ids
-    },
-    [allTasks],
-  )
-
   const orphanTasks = useMemo(() => {
-    const descendantIds = collectDescendantIds(parentTask.id)
+    const descendantIds = getAllDescendantIds(allTasks, parentTask.id)
     return allTasks.filter(
       (t) =>
-        t.parentId === null &&
-        t.id !== parentTask.id &&
-        !descendantIds.has(t.id) &&
-        (showCompleted || t.status !== TaskStatus.COMPLETED),
+        t.parentId === null && // must be an orphan
+        t.id !== parentTask.id && // must not be the parent task itself
+        !descendantIds.has(t.id) && // must not already be a descendant of the parent task
+        (showCompleted || t.status !== TaskStatus.COMPLETED), // filter out if set
     )
-  }, [allTasks, parentTask.id, collectDescendantIds, showCompleted])
+  }, [allTasks, parentTask.id, showCompleted])
 
   const filteredTasks = useMemo(
     () => filterRootTasks(orphanTasks, search),
