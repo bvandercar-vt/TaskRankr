@@ -27,9 +27,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
-import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { TagChain } from '@/components/primitives/TagChain'
 import { RankFieldSelect } from '@/components/RankFieldSelect'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'

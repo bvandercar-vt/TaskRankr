@@ -225,7 +225,9 @@ export const ChangeStatusDialog = ({
               </>
             )}
 
-            <SubtaskBlockedTooltip blocked={!isCompleted && !!hasIncompleteSubtasks}>
+            <SubtaskBlockedTooltip
+              blocked={!isCompleted && !!hasIncompleteSubtasks}
+            >
               <AlertDialogAction
                 onClick={() =>
                   onSetStatus(
