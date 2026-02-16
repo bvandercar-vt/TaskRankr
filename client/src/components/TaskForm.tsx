@@ -31,7 +31,7 @@ import { TagChain } from '@/components/primitives/TagChain'
 import { RankFieldSelect } from '@/components/RankFieldSelect'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskParentChain } from '@/hooks/useTasks'
+import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
 import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
@@ -140,8 +140,17 @@ export const TaskForm = ({
   onMarkCompleted,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
+  const { data: allTasks } = useTasks()
   const { settings } = useSettings()
   const [markCompleted, setMarkCompleted] = useState(false)
+
+  const hasIncompleteSubtasks = initialData
+    ? allTasks.some(
+        (t) =>
+          t.parentId === initialData.id &&
+          t.status !== TaskStatus.COMPLETED,
+      )
+    : false
 
   const rankFieldConfig = useMemo(
     () =>
@@ -380,14 +389,22 @@ export const TaskForm = ({
                 onMarkCompleted && (
                   // biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input.
                   <label
-                    className="flex items-center justify-between gap-4 cursor-pointer"
+                    className={cn(
+                      'flex items-center justify-between gap-4',
+                      hasIncompleteSubtasks
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'cursor-pointer',
+                    )}
                     data-testid="checkbox-mark-completed"
                   >
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Completed
+                      {hasIncompleteSubtasks
+                        ? 'Complete All Subtasks First'
+                        : 'Completed'}
                     </div>
                     <Checkbox
                       checked={markCompleted}
+                      disabled={hasIncompleteSubtasks}
                       onCheckedChange={(checked) =>
                         setMarkCompleted(checked === true)
                       }
