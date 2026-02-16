@@ -135,7 +135,9 @@ const Home = () => {
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
     const activeTasks = allTasks.filter(
-      (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
+      (task) =>
+        !task.hidden &&
+        (task.status !== TaskStatus.COMPLETED || task.parentId !== null),
     )
 
     const hoistedIds = new Set<number>()

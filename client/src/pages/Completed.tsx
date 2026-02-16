@@ -53,7 +53,9 @@ const Completed = () => {
 
   const completedTasks = useMemo(() => {
     const buildSubtaskTree = (parentId: number): TaskWithSubtasks[] => {
-      const children = allTasks.filter((t) => t.parentId === parentId)
+      const children = allTasks.filter(
+        (t) => t.parentId === parentId && !t.hidden,
+      )
       return children.map((child) => ({
         ...child,
         subtasks: buildSubtaskTree(child.id),
@@ -61,7 +63,10 @@ const Completed = () => {
     }
 
     const roots: TaskWithSubtasks[] = allTasks
-      .filter((task) => task.status === TaskStatus.COMPLETED && !task.parentId)
+      .filter(
+        (task) =>
+          task.status === TaskStatus.COMPLETED && !task.parentId && !task.hidden,
+      )
       .map((task) => ({
         ...task,
         subtasks: buildSubtaskTree(task.id),

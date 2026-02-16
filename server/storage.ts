@@ -148,6 +148,13 @@ export class DatabaseStorage implements IStorage {
 
     if (newStatus === TaskStatus.COMPLETED) {
       updates.completedAt = new Date()
+
+      if (currentTask.parentId) {
+        const parent = await this.getTask(currentTask.parentId, userId)
+        if (parent?.autoHideCompleted) {
+          ;(updates as Record<string, unknown>).hidden = true
+        }
+      }
     }
 
     if (
@@ -185,9 +192,14 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     updates: UpdateTaskArg,
   ): Promise<Task> {
+    const finalUpdates = { ...updates }
+    if (finalUpdates.parentId === null) {
+      finalUpdates.hidden = false
+    }
+
     const [task] = await db
       .update(tasks)
-      .set(updates)
+      .set(finalUpdates)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning()
 

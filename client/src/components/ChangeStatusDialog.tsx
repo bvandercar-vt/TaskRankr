@@ -5,7 +5,15 @@
  */
 
 import { useEffect, useState } from 'react'
-import { Clock, type LucideIcon, Pin, PinOff, StopCircle } from 'lucide-react'
+import {
+  Clock,
+  Eye,
+  EyeOff,
+  type LucideIcon,
+  Pin,
+  PinOff,
+  StopCircle,
+} from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
 import { TimeInput } from '@/components/primitives/forms/TimeInput'
@@ -111,9 +119,12 @@ interface ChangeStatusDialogProps {
   taskName: string
   status: TaskStatus
   inProgressTime: number
+  isSubtask?: boolean
+  isHidden?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
   onDelete: () => void
+  onToggleHidden?: () => void
 }
 
 export const ChangeStatusDialog = ({
@@ -122,9 +133,12 @@ export const ChangeStatusDialog = ({
   taskName,
   status,
   inProgressTime,
+  isSubtask,
+  isHidden,
   onSetStatus,
   onUpdateTime,
   onDelete,
+  onToggleHidden,
 }: ChangeStatusDialogProps) => {
   const isCompleted = status === TaskStatus.COMPLETED
   const isInProgress = status === TaskStatus.IN_PROGRESS
@@ -233,7 +247,28 @@ export const ChangeStatusDialog = ({
               />
             )}
 
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-2">
+              {isSubtask && onToggleHidden && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 h-8"
+                  onClick={() => {
+                    onToggleHidden()
+                    onOpenChange(false)
+                  }}
+                  data-testid="button-toggle-hidden"
+                >
+                  {isHidden ? (
+                    <Eye className="size-3.5" />
+                  ) : (
+                    <EyeOff className="size-3.5" />
+                  )}
+                  <span className="text-xs font-medium">
+                    {isHidden ? 'Unhide' : 'Hide'}
+                  </span>
+                </Button>
+              )}
               <DeleteButton
                 taskName={taskName}
                 onConfirm={() => {

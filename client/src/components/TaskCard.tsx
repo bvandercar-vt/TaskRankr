@@ -416,11 +416,16 @@ export const TaskCard = ({
         taskName={task.name}
         status={task.status}
         inProgressTime={getTotalAccumulatedTime(task)}
+        isSubtask={!!task.parentId}
+        isHidden={task.hidden}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
           updateTask({ id: task.id, inProgressTime: timeMs })
         }}
         onDelete={() => deleteTask(task.id)}
+        onToggleHidden={() => {
+          updateTask({ id: task.id, hidden: !task.hidden })
+        }}
       />
     </div>
   )

@@ -303,6 +303,8 @@ export const LocalStateProvider = ({
         subtaskSortMode: SubtaskSortMode.INHERIT,
         subtaskOrder: [],
         subtasksShowNumbers: false,
+        hidden: false,
+        autoHideCompleted: false,
         ...pick(data, [
           'name',
           'description',
@@ -355,25 +357,36 @@ export const LocalStateProvider = ({
     (id: number, status: TaskStatus): Task => {
       const updatedTask = updateTaskById(
         id,
-        () => {
-          switch (status) {
-            case TaskStatus.IN_PROGRESS:
-              return {
-                status: TaskStatus.IN_PROGRESS,
-                inProgressStartedAt: new Date(),
-              }
-            case TaskStatus.COMPLETED:
-              return {
-                status: TaskStatus.COMPLETED,
-                completedAt: new Date(),
-                inProgressStartedAt: null,
-              }
-            default:
-              return {
-                status,
-                inProgressStartedAt: null,
-              }
+        (task) => {
+          const base = (() => {
+            switch (status) {
+              case TaskStatus.IN_PROGRESS:
+                return {
+                  status: TaskStatus.IN_PROGRESS,
+                  inProgressStartedAt: new Date(),
+                }
+              case TaskStatus.COMPLETED:
+                return {
+                  status: TaskStatus.COMPLETED,
+                  completedAt: new Date(),
+                  inProgressStartedAt: null,
+                }
+              default:
+                return {
+                  status,
+                  inProgressStartedAt: null,
+                }
+            }
+          })()
+
+          if (status === TaskStatus.COMPLETED && task.parentId) {
+            const parent = tasks.find((t) => t.id === task.parentId)
+            if (parent?.autoHideCompleted) {
+              return { ...base, hidden: true }
+            }
           }
+
+          return base
         },
         // Clear IN_PROGRESS status from other tasks when setting a new task to IN_PROGRESS
         status === TaskStatus.IN_PROGRESS
@@ -392,7 +405,8 @@ export const LocalStateProvider = ({
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue, updateTaskById],
+    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for autoHideCompleted check
+    [enqueue, updateTaskById, tasks],
   )
 
   const deleteTask = useCallback(

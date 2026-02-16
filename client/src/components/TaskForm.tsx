@@ -65,6 +65,8 @@ const STUB_TASK: Task = {
   subtaskSortMode: SubtaskSortMode.INHERIT,
   subtaskOrder: [],
   subtasksShowNumbers: false,
+  hidden: false,
+  autoHideCompleted: false,
 }
 
 interface DateCreatedInputProps {
