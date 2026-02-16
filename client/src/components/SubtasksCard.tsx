@@ -192,7 +192,7 @@ const SubtaskSettings = ({
           {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
           <label className="flex items-center justify-between cursor-pointer">
             <span className="text-xs text-muted-foreground">
-              Auto-complete when all done
+              Auto-complete main task when all subtasks complete
             </span>
             <Switch
               checked={inheritCompletionState}
