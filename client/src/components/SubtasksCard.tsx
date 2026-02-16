@@ -36,6 +36,11 @@ import {
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/primitives/overlays/Tooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
@@ -240,6 +245,7 @@ type Subtask = Task & { depth: number; subtaskIndex?: number }
 
 interface SubtaskItemProps {
   task: Subtask
+  allTasks: Task[]
   onEdit?: (task: Task) => void
   onDelete: (task: DeleteTaskArgs) => void
   onToggleComplete: (task: Task) => void
@@ -250,6 +256,7 @@ interface SubtaskItemProps {
 
 const SubtaskItem = ({
   task,
+  allTasks,
   onEdit,
   onDelete,
   onToggleComplete,
@@ -275,6 +282,10 @@ const SubtaskItem = ({
   const isDirect = task.depth === 0
   const showDragHandle = isManualSortMode && isDirect
   const isCompleted = task.status === TaskStatus.COMPLETED
+  const hasIncompleteSubtasks = allTasks.some(
+    (t) => t.parentId === task.id && t.status !== TaskStatus.COMPLETED,
+  )
+  const disableComplete = !isCompleted && hasIncompleteSubtasks
 
   return (
     <div
@@ -304,19 +315,30 @@ const SubtaskItem = ({
             └
           </span>
         )}
-        <button
-          type="button"
-          onClick={() => onToggleComplete(task)}
-          className={cn(
-            'shrink-0 h-4 w-4 rounded-sm border transition-colors',
-            isCompleted
-              ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
-              : 'border-muted-foreground/40 hover:border-muted-foreground',
+        <Tooltip>
+          <TooltipTrigger asChild disabled={!disableComplete}>
+            <button
+              type="button"
+              onClick={() => !disableComplete && onToggleComplete(task)}
+              className={cn(
+                'shrink-0 h-4 w-4 rounded-sm border transition-colors',
+                disableComplete
+                  ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
+                  : isCompleted
+                    ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
+                    : 'border-muted-foreground/40 hover:border-muted-foreground',
+              )}
+              data-testid={`checkbox-complete-subtask-${task.id}`}
+            >
+              {isCompleted && <Check className="size-3 mx-auto" />}
+            </button>
+          </TooltipTrigger>
+          {disableComplete && (
+            <TooltipContent>
+              All subtasks must be completed first
+            </TooltipContent>
           )}
-          data-testid={`checkbox-complete-subtask-${task.id}`}
-        >
-          {isCompleted && <Check className="size-3 mx-auto" />}
-        </button>
+        </Tooltip>
         <span
           className={cn(
             'text-sm break-words',
@@ -545,6 +567,7 @@ export const SubtasksCard = ({
                   <SubtaskItem
                     key={subtask.id}
                     task={subtask}
+                    allTasks={allTasks}
                     onEdit={onEditSubtask}
                     onDelete={(t) => onDeleteSubtask?.(t)}
                     onToggleComplete={(t) => {
