@@ -219,11 +219,13 @@ export const TaskForm = ({
   } = form
 
   useEffect(() => {
+    console.count('[DEBUG] TaskForm useEffect form.reset')
     form.reset(getFormDefaults(initialData))
   }, [initialData, form, getFormDefaults])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
+    console.count('[DEBUG] TaskForm useEffect form.trigger')
     void form.trigger()
   }, [rankFieldConfig, form])
 

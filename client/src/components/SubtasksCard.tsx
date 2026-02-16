@@ -70,6 +70,7 @@ const SubtaskSettings = ({
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
   const { updateTask, reorderSubtasks } = useTaskActions()
+  console.count('[DEBUG] SubtaskSettings render')
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
