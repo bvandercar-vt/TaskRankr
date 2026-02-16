@@ -142,6 +142,7 @@ export const LocalStateProvider = ({
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
+  const tasksRef = useRef<Task[]>([])
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
@@ -188,6 +189,10 @@ export const LocalStateProvider = ({
       localStorage.setItem(storageKeys.tasks, JSON.stringify(tasks))
     }
   }, [tasks, isInitialized, storageKeys])
+
+  useEffect(() => {
+    tasksRef.current = tasks
+  }, [tasks])
 
   useEffect(() => {
     if (isInitialized) {
@@ -354,7 +359,7 @@ export const LocalStateProvider = ({
 
       return newTask
     },
-    [settings.autoPinNewTasks, enqueue, storageKeys, tasks],
+    [settings.autoPinNewTasks, enqueue, storageKeys],
   )
 
   const updateTask = useCallback(
@@ -364,7 +369,7 @@ export const LocalStateProvider = ({
       debugLog.log('task', 'update', { id, updates })
 
       if (updates.parentId != null && updatedTask) {
-        const parent = tasks.find((t) => t.id === updates.parentId)
+        const parent = tasksRef.current.find((t) => t.id === updates.parentId)
         if (
           parent?.inheritCompletionState &&
           parent.status === TaskStatus.COMPLETED &&
@@ -381,8 +386,7 @@ export const LocalStateProvider = ({
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for inheritCompletionState check
-    [enqueue, updateTaskById, tasks],
+    [enqueue, updateTaskById],
   )
 
   const setTaskStatus = useCallback(
@@ -412,7 +416,9 @@ export const LocalStateProvider = ({
           })()
 
           if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = tasks.find((t) => t.id === task.parentId)
+            const parent = tasksRef.current.find(
+              (t) => t.id === task.parentId,
+            )
             if (parent?.autoHideCompleted) {
               return { ...base, hidden: true }
             }
@@ -436,9 +442,11 @@ export const LocalStateProvider = ({
       debugLog.log('task', 'setStatus', { id, status })
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
-        const parent = tasks.find((t) => t.id === updatedTask.parentId)
+        const parent = tasksRef.current.find(
+          (t) => t.id === updatedTask.parentId,
+        )
         if (parent?.inheritCompletionState) {
-          const siblings = tasks.filter(
+          const siblings = tasksRef.current.filter(
             (t) => t.parentId === parent.id && t.id !== id,
           )
           const allSiblingsCompleted = siblings.every(
@@ -457,8 +465,7 @@ export const LocalStateProvider = ({
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for autoHideCompleted/inheritCompletionState checks
-    [enqueue, updateTaskById, tasks],
+    [enqueue, updateTaskById],
   )
 
   const deleteTask = useCallback(
