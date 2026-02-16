@@ -27,6 +27,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/primitives/overlays/AlertDialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/primitives/overlays/Tooltip'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
@@ -224,29 +229,34 @@ export const ChangeStatusDialog = ({
               </>
             )}
 
-            <AlertDialogAction
-              onClick={() =>
-                onSetStatus(
-                  isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
-                )
-              }
-              disabled={!isCompleted && hasIncompleteSubtasks}
-              className={cn(
-                'w-full h-11 text-base font-semibold',
-                isCompleted
-                  ? 'bg-primary hover:bg-primary/90 text-white'
-                  : !isCompleted && hasIncompleteSubtasks
-                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+            <Tooltip>
+              <TooltipTrigger asChild disabled={!(!isCompleted && hasIncompleteSubtasks)}>
+                <AlertDialogAction
+                  onClick={() =>
+                    onSetStatus(
+                      isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
+                    )
+                  }
+                  disabled={!isCompleted && hasIncompleteSubtasks}
+                  className={cn(
+                    'w-full h-11 text-base font-semibold',
+                    isCompleted
+                      ? 'bg-primary hover:bg-primary/90 text-white'
+                      : !isCompleted && hasIncompleteSubtasks
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                  )}
+                  data-testid="button-complete-task"
+                >
+                  {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
+                </AlertDialogAction>
+              </TooltipTrigger>
+              {!isCompleted && hasIncompleteSubtasks && (
+                <TooltipContent>
+                  All subtasks must be completed first
+                </TooltipContent>
               )}
-              data-testid="button-complete-task"
-            >
-              {isCompleted
-                ? 'Restore Task to Open'
-                : hasIncompleteSubtasks
-                  ? 'Complete All Subtasks First'
-                  : 'Complete Task'}
-            </AlertDialogAction>
+            </Tooltip>
 
             {showTimeInputs && (
               <TimeSpentInput
