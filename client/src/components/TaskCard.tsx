@@ -14,7 +14,7 @@ import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { getTaskStatuses, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {
   type FieldConfig,
@@ -249,9 +249,7 @@ export const TaskCard = ({
 
   const hasSubtasks = task.subtasks.length > 0
   const isExpanded = checkExpanded(task.id)
-  const isInProgress = task.status === TaskStatus.IN_PROGRESS
-  const isPinned = task.status === TaskStatus.PINNED
-  const isCompleted = task.status === TaskStatus.COMPLETED
+  const { isInProgress, isPinned, isCompleted } = getTaskStatuses(task)
   const isNestedWithStatus = level > 0 && (isInProgress || isPinned)
   const isNestedCompleted = level > 0 && isCompleted
 
@@ -416,11 +414,17 @@ export const TaskCard = ({
         taskName={task.name}
         status={task.status}
         inProgressTime={getTotalAccumulatedTime(task)}
+        isSubtask={!!task.parentId}
+        isHidden={task.hidden}
+        hasIncompleteSubtasks={task.subtasks.some(
+          (s) => s.status !== TaskStatus.COMPLETED,
+        )}
         onSetStatus={handleSetStatus}
-        onUpdateTime={(timeMs) => {
+        onUpdateTime={(timeMs) =>
           updateTask({ id: task.id, inProgressTime: timeMs })
-        }}
+        }
         onDelete={() => deleteTask(task.id)}
+        onToggleHidden={() => updateTask({ id: task.id, hidden: !task.hidden })}
       />
     </div>
   )

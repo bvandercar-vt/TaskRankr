@@ -29,10 +29,11 @@ import {
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
 import { RankFieldSelect } from '@/components/RankFieldSelect'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskParentChain } from '@/hooks/useTasks'
-import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
+import { getDirectSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
@@ -65,6 +66,9 @@ const STUB_TASK: Task = {
   subtaskSortMode: SubtaskSortMode.INHERIT,
   subtaskOrder: [],
   subtasksShowNumbers: false,
+  hidden: false,
+  autoHideCompleted: false,
+  inheritCompletionState: false,
 }
 
 interface DateCreatedInputProps {
@@ -137,8 +141,15 @@ export const TaskForm = ({
   onMarkCompleted,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
+  const { data: allTasks } = useTasks()
   const { settings } = useSettings()
   const [markCompleted, setMarkCompleted] = useState(false)
+
+  const hasIncompleteSubtasks = initialData
+    ? getDirectSubtasks(allTasks, initialData.id).some(
+        (t) => t.status !== TaskStatus.COMPLETED,
+      )
+    : false
 
   const rankFieldConfig = useMemo(
     () =>
@@ -375,22 +386,30 @@ export const TaskForm = ({
               {initialData &&
                 initialData.status !== TaskStatus.COMPLETED &&
                 onMarkCompleted && (
-                  // biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input.
-                  <label
-                    className="flex items-center justify-between gap-4 cursor-pointer"
-                    data-testid="checkbox-mark-completed"
-                  >
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Completed
-                    </div>
-                    <Checkbox
-                      checked={markCompleted}
-                      onCheckedChange={(checked) =>
-                        setMarkCompleted(checked === true)
-                      }
-                      className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                    />
-                  </label>
+                  <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
+                    <label
+                      className={cn(
+                        'flex items-center justify-between gap-4',
+                        hasIncompleteSubtasks
+                          ? 'cursor-not-allowed opacity-50'
+                          : 'cursor-pointer',
+                      )}
+                      data-testid="checkbox-mark-completed"
+                    >
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Completed
+                      </div>
+                      <Checkbox
+                        checked={markCompleted}
+                        disabled={hasIncompleteSubtasks}
+                        onCheckedChange={(checked) =>
+                          setMarkCompleted(checked === true)
+                        }
+                        className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                      />
+                    </label>
+                  </SubtaskBlockedTooltip>
                 )}
             </div>
           </div>

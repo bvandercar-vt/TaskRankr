@@ -14,7 +14,7 @@ import {
 } from '@/components/primitives/overlays/Dialog'
 import { SearchInput } from '@/components/SearchInput'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { filterRootTasks } from '@/lib/sort-tasks'
+import { filterRootTasks } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
@@ -169,7 +169,7 @@ export const AssignSubtaskDialog = ({
           <Button
             className="flex-1"
             onClick={handleConfirm}
-            disabled={selectedId === null}
+            disabled={!selectedId}
             data-testid="button-confirm-assign"
           >
             Confirm
