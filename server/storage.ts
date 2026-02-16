@@ -285,6 +285,19 @@ export class DatabaseStorage implements IStorage {
 
     const updated = task as Task
 
+    if (finalUpdates.autoHideCompleted !== undefined) {
+      await db
+        .update(tasks)
+        .set({ hidden: finalUpdates.autoHideCompleted })
+        .where(
+          and(
+            eq(tasks.parentId, id),
+            eq(tasks.userId, userId),
+            eq(tasks.status, TaskStatus.COMPLETED),
+          ),
+        )
+    }
+
     if (
       finalUpdates.parentId != null &&
       updated.status !== TaskStatus.COMPLETED

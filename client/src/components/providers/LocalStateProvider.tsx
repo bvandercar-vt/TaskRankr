@@ -373,6 +373,16 @@ export const LocalStateProvider = ({
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
 
+      if (updates.autoHideCompleted !== undefined) {
+        setTasks((prev) =>
+          prev.map((t) => {
+            if (t.parentId !== id) return t
+            if (t.status !== TaskStatus.COMPLETED) return t
+            return { ...t, hidden: updates.autoHideCompleted as boolean }
+          }),
+        )
+      }
+
       if (updates.parentId != null && updatedTask) {
         const parent = tasksRef.current.find((t) => t.id === updates.parentId)
         if (
