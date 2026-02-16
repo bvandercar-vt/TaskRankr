@@ -32,6 +32,7 @@ import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
+import { Icon as LucideIconComponent } from './primitives/LucideIcon'
 
 const TimeSpentInput = ({
   onBlur,
@@ -269,11 +270,10 @@ export const ChangeStatusDialog = ({
                   }}
                   data-testid="button-toggle-hidden"
                 >
-                  {isHidden ? (
-                    <Eye className="size-3.5" />
-                  ) : (
-                    <EyeOff className="size-3.5" />
-                  )}
+                  <LucideIconComponent
+                    icon={isHidden ? Eye : EyeOff}
+                    className="size-3.5"
+                  />
                   <span className="text-xs font-medium">
                     {isHidden ? 'Unhide' : 'Hide'}
                   </span>

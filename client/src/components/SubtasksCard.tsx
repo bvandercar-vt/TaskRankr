@@ -38,7 +38,11 @@ import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
 import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { sortTasksByIdOrder } from '@/lib/sort-tasks'
+import {
+  getDirectSubtasks,
+  getTaskById,
+  sortTasksByIdOrder,
+} from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import type { DeleteTaskArgs } from './providers/LocalStateProvider'
@@ -278,8 +282,8 @@ const SubtaskItem = ({
   const isDirect = task.depth === 0
   const showDragHandle = isManualSortMode && isDirect
   const isCompleted = task.status === TaskStatus.COMPLETED
-  const hasIncompleteSubtasks = allTasks.some(
-    (t) => t.parentId === task.id && t.status !== TaskStatus.COMPLETED,
+  const hasIncompleteSubtasks = getDirectSubtasks(allTasks, task.id).some(
+    (t) => t.status !== TaskStatus.COMPLETED,
   )
   const disableComplete = !isCompleted && hasIncompleteSubtasks
 
@@ -290,7 +294,6 @@ const SubtaskItem = ({
       className={cn(
         'flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none',
         isDragging && 'opacity-50 bg-secondary/20',
-        isHiddenItem && 'opacity-60',
       )}
       data-testid={`subtask-row-${task.id}`}
     >
@@ -392,7 +395,7 @@ export const SubtasksCard = ({
   const { data: allTasks } = useTasks()
   const { setTaskStatus, reorderSubtasks } = useTaskActions()
 
-  const task = allTasks.find((t) => t.id === taskProp.id) ?? taskProp
+  const task = getTaskById(allTasks, taskProp.id) ?? taskProp
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
@@ -429,13 +432,13 @@ export const SubtasksCard = ({
       parentSortMode: SubtaskSortMode,
       parentShowNumbers: boolean,
     ): Subtask[] => {
-      let children = allTasks.filter((t) => t.parentId === parentId_)
+      let children = getDirectSubtasks(allTasks, parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
         const order =
           depth === 0 && localSubtaskOrder
             ? localSubtaskOrder
-            : (allTasks.find((t) => t.id === parentId_)?.subtaskOrder ?? [])
+            : (getTaskById(allTasks, parentId_)?.subtaskOrder ?? [])
         children = sortTasksByIdOrder(children, order)
       } else {
         children = [...children].sort((a, b) => {

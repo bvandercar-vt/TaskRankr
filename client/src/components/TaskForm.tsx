@@ -33,7 +33,7 @@ import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
-import { RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import { getDirectSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
 import {
   insertTaskSchema,
@@ -146,9 +146,8 @@ export const TaskForm = ({
   const [markCompleted, setMarkCompleted] = useState(false)
 
   const hasIncompleteSubtasks = initialData
-    ? allTasks.some(
-        (t) =>
-          t.parentId === initialData.id && t.status !== TaskStatus.COMPLETED,
+    ? getDirectSubtasks(allTasks, initialData.id).some(
+        (t) => t.status !== TaskStatus.COMPLETED,
       )
     : false
 

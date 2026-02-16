@@ -169,7 +169,7 @@ export const AssignSubtaskDialog = ({
           <Button
             className="flex-1"
             onClick={handleConfirm}
-            disabled={selectedId === null}
+            disabled={!selectedId}
             data-testid="button-confirm-assign"
           >
             Confirm

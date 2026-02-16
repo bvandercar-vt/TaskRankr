@@ -19,6 +19,7 @@ import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
+import { getDirectSubtasks, getTaskById } from '@/lib/sort-tasks'
 import {
   type CreateTask,
   SubtaskSortMode,
@@ -240,9 +241,7 @@ export const LocalStateProvider = ({
           }
           if (updateOtherTasks) {
             const otherUpdates = updateOtherTasks(task)
-            return Object.keys(otherUpdates).length > 0
-              ? { ...task, ...otherUpdates }
-              : task
+            return { ...task, ...otherUpdates }
           }
           return task
         }),
@@ -349,7 +348,7 @@ export const LocalStateProvider = ({
               changes.completedAt = null
               changes.inProgressStartedAt = null
             }
-            return Object.keys(changes).length > 0 ? { ...t, ...changes } : t
+            return { ...t, ...changes }
           })
         }
         return updated
@@ -373,13 +372,11 @@ export const LocalStateProvider = ({
       debugLog.log('task', 'update', { id, updates })
 
       if (updates.autoHideCompleted !== undefined) {
-        const hide = updates.autoHideCompleted as boolean
+        const hide = updates.autoHideCompleted
         setTasks((prev) => {
           const completedDirectIds = new Set(
-            prev
-              .filter(
-                (t) => t.parentId === id && t.status === TaskStatus.COMPLETED,
-              )
+            getDirectSubtasks(prev, id)
+              .filter((t) => t.status === TaskStatus.COMPLETED)
               .map((t) => t.id),
           )
           const toHide = new Set<number>(completedDirectIds)
@@ -406,7 +403,7 @@ export const LocalStateProvider = ({
       }
 
       if (updates.parentId != null && updatedTask) {
-        const parent = tasksRef.current.find((t) => t.id === updates.parentId)
+        const parent = getTaskById(tasksRef.current, updates.parentId)
         if (
           parent?.inheritCompletionState &&
           parent.status === TaskStatus.COMPLETED &&
@@ -429,16 +426,17 @@ export const LocalStateProvider = ({
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
       if (status === TaskStatus.COMPLETED) {
-        const hasIncompleteSubtasks = tasksRef.current.some(
-          (t) => t.parentId === id && t.status !== TaskStatus.COMPLETED,
-        )
+        const hasIncompleteSubtasks = getDirectSubtasks(
+          tasksRef.current,
+          id,
+        ).some((t) => t.status !== TaskStatus.COMPLETED)
         if (hasIncompleteSubtasks) {
           toast({
             title: 'Cannot complete task',
             description: 'All subtasks must be completed first.',
             variant: 'destructive',
           })
-          const existing = tasksRef.current.find((t) => t.id === id)
+          const existing = getTaskById(tasksRef.current, id)
           if (existing) return existing
         }
       }
@@ -468,7 +466,7 @@ export const LocalStateProvider = ({
           })()
 
           if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = tasksRef.current.find((t) => t.id === task.parentId)
+            const parent = getTaskById(tasksRef.current, task.parentId)
             if (parent?.autoHideCompleted) {
               return { ...base, hidden: true }
             }
@@ -517,13 +515,12 @@ export const LocalStateProvider = ({
       }
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
-        const parent = tasksRef.current.find(
-          (t) => t.id === updatedTask.parentId,
-        )
+        const parent = getTaskById(tasksRef.current, updatedTask.parentId)
         if (parent?.inheritCompletionState) {
-          const siblings = tasksRef.current.filter(
-            (t) => t.parentId === parent.id && t.id !== id,
-          )
+          const siblings = getDirectSubtasks(
+            tasksRef.current,
+            parent.id,
+          ).filter((t) => t.id !== id)
           const allSiblingsCompleted = siblings.every(
             (t) => t.status === TaskStatus.COMPLETED,
           )
@@ -546,7 +543,7 @@ export const LocalStateProvider = ({
   const deleteTask = useCallback(
     (id: number) => {
       setTasks((prev) => {
-        const taskToDelete = prev.find((t) => t.id === id)
+        const taskToDelete = getTaskById(prev, id)
         if (!taskToDelete) return prev
 
         const idsToDelete = new Set<number>()

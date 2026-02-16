@@ -14,7 +14,11 @@ import {
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
 import { useTasks } from '@/hooks/useTasks'
-import { filterAndSortTree, RANK_FIELDS_COLUMNS } from '@/lib/sort-tasks'
+import {
+  filterAndSortTree,
+  getDirectSubtasks,
+  RANK_FIELDS_COLUMNS,
+} from '@/lib/sort-tasks'
 import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
 
 const ColumnHeaders = () => (
@@ -53,8 +57,8 @@ const Completed = () => {
 
   const completedTasks = useMemo(() => {
     const buildSubtaskTree = (parentId: number): TaskWithSubtasks[] => {
-      const children = allTasks.filter(
-        (t) => t.parentId === parentId && !t.hidden,
+      const children = getDirectSubtasks(allTasks, parentId).filter(
+        (t) => !t.hidden,
       )
       return children.map((child) => ({
         ...child,

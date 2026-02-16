@@ -221,3 +221,13 @@ export const filterAndSortTree = (
     undefined,
     childSort,
   )
+
+// *****************************************************************************
+// General utils
+// *****************************************************************************
+
+export const getTaskById = (tasks: Task[], id: number): Task | undefined =>
+  tasks.find((task) => task.id === id)
+
+export const getDirectSubtasks = (tasks: Task[], id: number): Task[] =>
+  tasks.filter((task) => task.parentId === id)
