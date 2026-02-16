@@ -375,13 +375,33 @@ export const LocalStateProvider = ({
       debugLog.log('task', 'update', { id, updates })
 
       if (updates.autoHideCompleted !== undefined) {
-        setTasks((prev) =>
-          prev.map((t) => {
-            if (t.parentId !== id) return t
-            if (t.status !== TaskStatus.COMPLETED) return t
-            return { ...t, hidden: updates.autoHideCompleted as boolean }
-          }),
-        )
+        const hide = updates.autoHideCompleted as boolean
+        setTasks((prev) => {
+          const completedDirectIds = new Set(
+            prev
+              .filter(
+                (t) =>
+                  t.parentId === id && t.status === TaskStatus.COMPLETED,
+              )
+              .map((t) => t.id),
+          )
+          const toHide = new Set<number>(completedDirectIds)
+          const collectDescendants = (parentIds: Set<number>) => {
+            for (const t of prev) {
+              if (t.parentId !== null && parentIds.has(t.parentId) && !toHide.has(t.id)) {
+                toHide.add(t.id)
+              }
+            }
+          }
+          let prevSize = 0
+          while (toHide.size > prevSize) {
+            prevSize = toHide.size
+            collectDescendants(toHide)
+          }
+          return prev.map((t) =>
+            toHide.has(t.id) ? { ...t, hidden: hide } : t,
+          )
+        })
       }
 
       if (updates.parentId != null && updatedTask) {
@@ -471,6 +491,27 @@ export const LocalStateProvider = ({
 
       enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       debugLog.log('task', 'setStatus', { id, status })
+
+      if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
+        setTasks((prev) => {
+          const toHide = new Set<number>()
+          let frontier = new Set<number>([id])
+          while (frontier.size > 0) {
+            const next = new Set<number>()
+            for (const t of prev) {
+              if (t.parentId !== null && frontier.has(t.parentId) && !toHide.has(t.id)) {
+                toHide.add(t.id)
+                next.add(t.id)
+              }
+            }
+            frontier = next
+          }
+          if (toHide.size === 0) return prev
+          return prev.map((t) =>
+            toHide.has(t.id) ? { ...t, hidden: true } : t,
+          )
+        })
+      }
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
         const parent = tasksRef.current.find(
