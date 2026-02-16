@@ -6,8 +6,8 @@
 import { useMemo } from 'react'
 import { toMerged } from 'es-toolkit'
 
-import { useLocalStateSafe } from '@/components/providers/LocalStateProvider'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
+import { useLocalStateSafe } from '@/providers/LocalStateProvider'
 import type { FieldFlags, RankField, UserSettings } from '~/shared/schema'
 
 export type UserSettingsContent = Omit<UserSettings, 'userId'>

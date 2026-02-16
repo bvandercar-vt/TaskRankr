@@ -4,11 +4,11 @@
  * handles background server sync.
  */
 
+import { getTaskById } from '@/lib/task-utils'
 import {
   type CreateTaskContent,
   useLocalStateSafe,
-} from '@/components/providers/LocalStateProvider'
-import { getTaskById } from '@/lib/task-utils'
+} from '@/providers/LocalStateProvider'
 import type { Task, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {

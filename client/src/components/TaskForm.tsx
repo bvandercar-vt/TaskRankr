@@ -35,6 +35,10 @@ import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
 import { getDirectSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
+} from '@/providers/LocalStateProvider'
 import {
   insertTaskSchema,
   type MutateTask,
@@ -43,10 +47,6 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
-import type {
-  DeleteTaskArgs,
-  MutateTaskContent,
-} from './providers/LocalStateProvider'
 
 const STUB_TASK: Task = {
   id: 0,

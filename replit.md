@@ -63,18 +63,13 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
 │       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu, title + search
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
-│       │   ├── providers/        # Context providers
-│       │   │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
-│       │   │   ├── SyncProvider.tsx  # Background sync to API
-│       │   │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
-│       │   │   ├── ExpandedTasksProvider.tsx  # Task expansion state persistence
-│       │   │   └── TaskFormDialogProvider.tsx  # Context for task form dialog state
 │       │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
 │       │   ├── SortButton.tsx    # Sort option toggle button
 │       │   ├── StatusBanner.tsx  # Auth/guest status banner
 │       │   ├── SubtasksCard.tsx  # Subtask list with drag-and-drop and assign
 │       │   ├── TaskCard.tsx      # Task display with status indicators
 │       │   ├── TaskForm.tsx      # Full-screen task create/edit form
+|       |   ├── TaskFormDialogProvider.tsx  # Context for task form dialog state
 │       │   ├── TaskListPage.tsx  # TaskListPageWrapper, TaskListPageHeader, TaskListTreeLayout
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
 │       │   ├── ConfirmDeleteDialog.tsx  # Permanent delete confirmation dialog
@@ -97,6 +92,11 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── HowToInstall.tsx  # PWA install instructions (iOS, Android, Desktop)
 │       │   ├── Landing.tsx       # Unauthenticated landing page
 │       │   └── NotFound.tsx
+│       ├── providers/        # Context providers
+│       │   ├── LocalStateProvider.tsx  # Local-first state + sync queue
+│       │   ├── SyncProvider.tsx  # Background sync to API
+│       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
+│       │   └── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       ├── lib/
 │       │   ├── task-utils.ts     # Sorting + filtering logic, SORT_ORDER_MAP, RANK_FIELDS_COLUMNS
 │       │   ├── rank-field-styles.ts  # Rank field color mappings

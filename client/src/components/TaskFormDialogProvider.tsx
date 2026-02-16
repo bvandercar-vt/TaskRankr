@@ -18,8 +18,11 @@ import {
 import { SubtaskActionDialog } from '@/components/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 import { useTaskActions } from '@/hooks/useTasks'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
+} from '@/providers/LocalStateProvider'
 import { type CreateTask, type Task, TaskStatus } from '~/shared/schema'
-import type { DeleteTaskArgs, MutateTaskContent } from './LocalStateProvider'
 
 interface TaskFormDialogContextType {
   openCreateDialog: (parentId?: number) => void

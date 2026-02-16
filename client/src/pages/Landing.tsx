@@ -16,9 +16,9 @@ import {
 import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
-import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { useGuestMode } from '@/providers/GuestModeProvider'
 import { authPaths } from '~/shared/constants'
 
 const CaptionedIcon = ({

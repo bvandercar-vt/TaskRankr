@@ -1,7 +1,7 @@
 import { Download, Mail } from 'lucide-react'
 
-import { useGuestMode } from '@/components/providers/GuestModeProvider'
 import { debugLog } from '@/lib/debug-logger'
+import { useGuestMode } from '@/providers/GuestModeProvider'
 
 const ContactCardInner = ({
   className,

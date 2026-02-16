@@ -1,10 +1,10 @@
 import { useLocation } from 'wouter'
 
 import { Routes } from '@/lib/constants'
+import { useGuestMode } from '@/providers/GuestModeProvider'
+import { useSyncSafe } from '@/providers/SyncProvider'
 import { authPaths } from '~/shared/constants'
 import { Button } from './primitives/Button'
-import { useGuestMode } from './providers/GuestModeProvider'
-import { useSyncSafe } from './providers/SyncProvider'
 
 export const StatusBanner = () => {
   const { isGuestMode, exitGuestMode } = useGuestMode()
