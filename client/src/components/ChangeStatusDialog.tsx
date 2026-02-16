@@ -5,7 +5,15 @@
  */
 
 import { useEffect, useState } from 'react'
-import { Clock, type LucideIcon, Pin, PinOff, StopCircle } from 'lucide-react'
+import {
+  Clock,
+  Eye,
+  EyeOff,
+  type LucideIcon,
+  Pin,
+  PinOff,
+  StopCircle,
+} from 'lucide-react'
 
 import { Button } from '@/components/primitives/Button'
 import { TimeInput } from '@/components/primitives/forms/TimeInput'
@@ -19,10 +27,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/primitives/overlays/AlertDialog'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
+import { Icon as LucideIconComponent } from './primitives/LucideIcon'
 
 const TimeSpentInput = ({
   onBlur,
@@ -111,9 +121,13 @@ interface ChangeStatusDialogProps {
   taskName: string
   status: TaskStatus
   inProgressTime: number
+  isSubtask?: boolean
+  isHidden?: boolean
+  hasIncompleteSubtasks?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
   onDelete: () => void
+  onToggleHidden?: () => void
 }
 
 export const ChangeStatusDialog = ({
@@ -122,9 +136,13 @@ export const ChangeStatusDialog = ({
   taskName,
   status,
   inProgressTime,
+  isSubtask,
+  isHidden,
+  hasIncompleteSubtasks,
   onSetStatus,
   onUpdateTime,
   onDelete,
+  onToggleHidden,
 }: ChangeStatusDialogProps) => {
   const isCompleted = status === TaskStatus.COMPLETED
   const isInProgress = status === TaskStatus.IN_PROGRESS
@@ -208,22 +226,29 @@ export const ChangeStatusDialog = ({
               </>
             )}
 
-            <AlertDialogAction
-              onClick={() =>
-                onSetStatus(
-                  isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
-                )
-              }
-              className={cn(
-                'w-full h-11 text-base font-semibold',
-                isCompleted
-                  ? 'bg-primary hover:bg-primary/90 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white',
-              )}
-              data-testid="button-complete-task"
+            <SubtaskBlockedTooltip
+              blocked={!isCompleted && !!hasIncompleteSubtasks}
             >
-              {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
-            </AlertDialogAction>
+              <AlertDialogAction
+                onClick={() =>
+                  onSetStatus(
+                    isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
+                  )
+                }
+                disabled={!isCompleted && hasIncompleteSubtasks}
+                className={cn(
+                  'w-full h-11 text-base font-semibold',
+                  isCompleted
+                    ? 'bg-primary hover:bg-primary/90 text-white'
+                    : !isCompleted && hasIncompleteSubtasks
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                )}
+                data-testid="button-complete-task"
+              >
+                {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
+              </AlertDialogAction>
+            </SubtaskBlockedTooltip>
 
             {showTimeInputs && (
               <TimeSpentInput
@@ -233,7 +258,27 @@ export const ChangeStatusDialog = ({
               />
             )}
 
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-2">
+              {isSubtask && onToggleHidden && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 h-8"
+                  onClick={() => {
+                    onToggleHidden()
+                    onOpenChange(false)
+                  }}
+                  data-testid="button-toggle-hidden"
+                >
+                  <LucideIconComponent
+                    icon={isHidden ? Eye : EyeOff}
+                    className="size-3.5"
+                  />
+                  <span className="text-xs font-medium">
+                    {isHidden ? 'Unhide' : 'Hide'}
+                  </span>
+                </Button>
+              )}
               <DeleteButton
                 taskName={taskName}
                 onConfirm={() => {

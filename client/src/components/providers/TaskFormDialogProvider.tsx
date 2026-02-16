@@ -273,7 +273,11 @@ export const TaskFormDialogProvider = ({
         onDelete={() => setShowDeleteConfirm(true)}
         onRemoveAsSubtask={() => {
           if (subtaskToDelete) {
-            updateTask({ id: subtaskToDelete.id, parentId: null })
+            updateTask({
+              id: subtaskToDelete.id,
+              parentId: null,
+              hidden: false,
+            })
             if (activeTask) {
               updateTask({
                 id: activeTask.id,

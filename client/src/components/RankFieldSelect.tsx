@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/primitives/forms/Select'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import type { RankFieldValueMap } from '@/lib/sort-tasks'
+import type { RankFieldValueMap } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import type { MutateTask, RankField } from '~/shared/schema'
 

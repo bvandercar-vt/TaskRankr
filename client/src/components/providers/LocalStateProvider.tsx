@@ -15,9 +15,11 @@ import {
 } from 'react'
 import { omit, pick, toMerged } from 'es-toolkit'
 
+import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
+import { getDirectSubtasks, getTaskById } from '@/lib/task-utils'
 import {
   type CreateTask,
   SubtaskSortMode,
@@ -142,6 +144,7 @@ export const LocalStateProvider = ({
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
+  const tasksRef = useRef<Task[]>([])
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
@@ -190,6 +193,10 @@ export const LocalStateProvider = ({
   }, [tasks, isInitialized, storageKeys])
 
   useEffect(() => {
+    tasksRef.current = tasks
+  }, [tasks])
+
+  useEffect(() => {
     if (isInitialized) {
       localStorage.setItem(storageKeys.settings, JSON.stringify(settings))
     }
@@ -231,9 +238,12 @@ export const LocalStateProvider = ({
           if (task.id === id) {
             updatedTask = { ...task, ...updateThisTask(task) }
             return updatedTask
-          } else {
-            return { ...task, ...updateOtherTasks?.(task) }
           }
+          if (updateOtherTasks) {
+            const otherUpdates = updateOtherTasks(task)
+            return { ...task, ...otherUpdates }
+          }
+          return task
         }),
       )
       return updatedTask
@@ -303,6 +313,9 @@ export const LocalStateProvider = ({
         subtaskSortMode: SubtaskSortMode.INHERIT,
         subtaskOrder: [],
         subtasksShowNumbers: false,
+        hidden: false,
+        autoHideCompleted: false,
+        inheritCompletionState: false,
         ...pick(data, [
           'name',
           'description',
@@ -320,12 +333,23 @@ export const LocalStateProvider = ({
       setTasks((prev) => {
         let updated = [...prev, newTask]
         if (data.parentId) {
-          updated = updated.map((t) =>
-            t.id === data.parentId &&
-            t.subtaskSortMode === SubtaskSortMode.MANUAL
-              ? { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
-              : t,
-          )
+          updated = updated.map((t) => {
+            if (t.id !== data.parentId) return t
+            const changes: Partial<Task> = {}
+            if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
+              changes.subtaskOrder = [...t.subtaskOrder, tempId]
+            }
+            if (
+              t.inheritCompletionState &&
+              t.status === TaskStatus.COMPLETED &&
+              newTask.status !== TaskStatus.COMPLETED
+            ) {
+              changes.status = TaskStatus.OPEN
+              changes.completedAt = null
+              changes.inProgressStartedAt = null
+            }
+            return { ...t, ...changes }
+          })
         }
         return updated
       })
@@ -335,6 +359,7 @@ export const LocalStateProvider = ({
         name: data.name,
         parentId: data.parentId,
       })
+
       return newTask
     },
     [settings.autoPinNewTasks, enqueue, storageKeys],
@@ -345,6 +370,53 @@ export const LocalStateProvider = ({
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
+
+      if (updates.autoHideCompleted !== undefined) {
+        const hide = updates.autoHideCompleted
+        setTasks((prev) => {
+          const completedDirectIds = new Set(
+            getDirectSubtasks(prev, id)
+              .filter((t) => t.status === TaskStatus.COMPLETED)
+              .map((t) => t.id),
+          )
+          const toHide = new Set<number>(completedDirectIds)
+          const collectDescendants = (parentIds: Set<number>) => {
+            for (const t of prev) {
+              if (
+                t.parentId !== null &&
+                parentIds.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
+                toHide.add(t.id)
+              }
+            }
+          }
+          let prevSize = 0
+          while (toHide.size > prevSize) {
+            prevSize = toHide.size
+            collectDescendants(toHide)
+          }
+          return prev.map((t) =>
+            toHide.has(t.id) ? { ...t, hidden: hide } : t,
+          )
+        })
+      }
+
+      if (updates.parentId != null && updatedTask) {
+        const parent = getTaskById(tasksRef.current, updates.parentId)
+        if (
+          parent?.inheritCompletionState &&
+          parent.status === TaskStatus.COMPLETED &&
+          updatedTask.status !== TaskStatus.COMPLETED
+        ) {
+          updateTaskById(parent.id, () => ({
+            status: TaskStatus.OPEN,
+            completedAt: null,
+            inProgressStartedAt: null,
+          }))
+        }
+      }
+
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -353,27 +425,54 @@ export const LocalStateProvider = ({
 
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
+      if (status === TaskStatus.COMPLETED) {
+        const hasIncompleteSubtasks = getDirectSubtasks(
+          tasksRef.current,
+          id,
+        ).some((t) => t.status !== TaskStatus.COMPLETED)
+        if (hasIncompleteSubtasks) {
+          toast({
+            title: 'Cannot complete task',
+            description: 'All subtasks must be completed first.',
+            variant: 'destructive',
+          })
+          const existing = getTaskById(tasksRef.current, id)
+          if (existing) return existing
+        }
+      }
+
       const updatedTask = updateTaskById(
         id,
-        () => {
-          switch (status) {
-            case TaskStatus.IN_PROGRESS:
-              return {
-                status: TaskStatus.IN_PROGRESS,
-                inProgressStartedAt: new Date(),
-              }
-            case TaskStatus.COMPLETED:
-              return {
-                status: TaskStatus.COMPLETED,
-                completedAt: new Date(),
-                inProgressStartedAt: null,
-              }
-            default:
-              return {
-                status,
-                inProgressStartedAt: null,
-              }
+        (task) => {
+          const base = (() => {
+            switch (status) {
+              case TaskStatus.IN_PROGRESS:
+                return {
+                  status: TaskStatus.IN_PROGRESS,
+                  inProgressStartedAt: new Date(),
+                }
+              case TaskStatus.COMPLETED:
+                return {
+                  status: TaskStatus.COMPLETED,
+                  completedAt: new Date(),
+                  inProgressStartedAt: null,
+                }
+              default:
+                return {
+                  status,
+                  inProgressStartedAt: null,
+                }
+            }
+          })()
+
+          if (status === TaskStatus.COMPLETED && task.parentId) {
+            const parent = getTaskById(tasksRef.current, task.parentId)
+            if (parent?.autoHideCompleted) {
+              return { ...base, hidden: true }
+            }
           }
+
+          return base
         },
         // Clear IN_PROGRESS status from other tasks when setting a new task to IN_PROGRESS
         status === TaskStatus.IN_PROGRESS
@@ -389,6 +488,52 @@ export const LocalStateProvider = ({
 
       enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       debugLog.log('task', 'setStatus', { id, status })
+
+      if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
+        setTasks((prev) => {
+          const toHide = new Set<number>()
+          let frontier = new Set<number>([id])
+          while (frontier.size > 0) {
+            const next = new Set<number>()
+            for (const t of prev) {
+              if (
+                t.parentId !== null &&
+                frontier.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
+                toHide.add(t.id)
+                next.add(t.id)
+              }
+            }
+            frontier = next
+          }
+          if (toHide.size === 0) return prev
+          return prev.map((t) =>
+            toHide.has(t.id) ? { ...t, hidden: true } : t,
+          )
+        })
+      }
+
+      if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
+        const parent = getTaskById(tasksRef.current, updatedTask.parentId)
+        if (parent?.inheritCompletionState) {
+          const siblings = getDirectSubtasks(
+            tasksRef.current,
+            parent.id,
+          ).filter((t) => t.id !== id)
+          const allSiblingsCompleted = siblings.every(
+            (t) => t.status === TaskStatus.COMPLETED,
+          )
+          if (allSiblingsCompleted) {
+            updateTaskById(parent.id, () => ({
+              status: TaskStatus.COMPLETED,
+              completedAt: new Date(),
+              inProgressStartedAt: null,
+            }))
+          }
+        }
+      }
+
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
@@ -398,7 +543,7 @@ export const LocalStateProvider = ({
   const deleteTask = useCallback(
     (id: number) => {
       setTasks((prev) => {
-        const taskToDelete = prev.find((t) => t.id === id)
+        const taskToDelete = getTaskById(prev, id)
         if (!taskToDelete) return prev
 
         const idsToDelete = new Set<number>()
