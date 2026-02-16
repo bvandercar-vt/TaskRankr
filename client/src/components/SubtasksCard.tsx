@@ -40,6 +40,7 @@ import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
   getDirectSubtasks,
+  getHasIncompleteSubtasks,
   getTaskById,
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
@@ -282,10 +283,8 @@ const SubtaskItem = ({
   const isDirect = task.depth === 0
   const showDragHandle = isManualSortMode && isDirect
   const isCompleted = task.status === TaskStatus.COMPLETED
-  const hasIncompleteSubtasks = getDirectSubtasks(allTasks, task.id).some(
-    (t) => t.status !== TaskStatus.COMPLETED,
-  )
-  const disableComplete = !isCompleted && hasIncompleteSubtasks
+  const disableComplete =
+    !isCompleted && getHasIncompleteSubtasks(allTasks, task.id)
 
   return (
     <div
@@ -474,13 +473,10 @@ export const SubtasksCard = ({
     return collectDescendants(task.id, 0, sortMode, showNumbers)
   }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
 
-  const hiddenSubtaskIds = useMemo(() => {
-    const ids = new Set<number>()
-    for (const s of allSubtasks) {
-      if (s.hidden) ids.add(s.id)
-    }
-    return ids
-  }, [allSubtasks])
+  const hiddenSubtaskIds = useMemo(
+    () => new Set(allSubtasks.filter((s) => s.hidden).map((s) => s.id)),
+    [allSubtasks],
+  )
 
   const hiddenCount = hiddenSubtaskIds.size
 

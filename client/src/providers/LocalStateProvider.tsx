@@ -13,18 +13,23 @@ import {
   useRef,
   useState,
 } from 'react'
-import { omit, pick, toMerged } from 'es-toolkit'
+import { pick, toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
-import { getDirectSubtasks, getTaskById } from '@/lib/task-utils'
+import {
+  getDirectSubtasks,
+  getHasIncompleteSubtasks,
+  getTaskById,
+} from '@/lib/task-utils'
 import {
   type CreateTask,
   SubtaskSortMode,
   type Task,
   TaskStatus,
+  taskSchema,
   type UpdateTask,
   type UserSettings,
 } from '~/shared/schema'
@@ -105,14 +110,7 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
       const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
         const result: Task[] = []
         for (const t of tasks) {
-          result.push({
-            ...omit(t, ['subtasks']),
-            createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
-            completedAt: t.completedAt ? new Date(t.completedAt) : null,
-            inProgressStartedAt: t.inProgressStartedAt
-              ? new Date(t.inProgressStartedAt)
-              : null,
-          })
+          result.push(taskSchema.parse(t))
           if (t.subtasks?.length) {
             result.push(...flatten(t.subtasks))
           }
@@ -426,10 +424,10 @@ export const LocalStateProvider = ({
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
       if (status === TaskStatus.COMPLETED) {
-        const hasIncompleteSubtasks = getDirectSubtasks(
+        const hasIncompleteSubtasks = getHasIncompleteSubtasks(
           tasksRef.current,
           id,
-        ).some((t) => t.status !== TaskStatus.COMPLETED)
+        )
         if (hasIncompleteSubtasks) {
           toast({
             title: 'Cannot complete task',
