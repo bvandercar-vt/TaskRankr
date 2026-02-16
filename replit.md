@@ -32,7 +32,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Database**: PostgreSQL (Neon-backed).
 - **ORM**: Drizzle ORM with drizzle-zod for schema definition and validation.
 - **Data Model**:
-    - **Tasks**: Include `name`, `description`, `priority`, `ease`, `enjoyment`, `time`, `parentId` (for nesting), `status` (open, in_progress, pinned, completed), `subtaskSortMode` (inherit, manual), `subtaskOrder`, `hidden` (boolean, prevents task from appearing in tree views), `autoHideCompleted` (boolean, auto-hides direct children when completed), and time tracking fields. Root tasks cannot be hidden; removing a hidden subtask from its parent auto-unhides it.
+    - **Tasks**: Include `name`, `description`, `priority`, `ease`, `enjoyment`, `time`, `parentId` (for nesting), `status` (open, in_progress, pinned, completed), `subtaskSortMode` (inherit, manual), `subtaskOrder`, `hidden` (boolean, prevents task from appearing in tree views), `autoHideCompleted` (boolean, auto-hides direct children when completed), `inheritCompletionState` (boolean, auto-completes parent when all children are completed, reverts to open when a non-completed subtask is added), and time tracking fields. Root tasks cannot be hidden; removing a hidden subtask from its parent auto-unhides it.
     - **User Settings**: Stored per-user, including `autoPinNewTasks`, `enableInProgressStatus`, `enableInProgressTime`, `alwaysSortPinnedByPriority`, `sortBy`, and `fieldConfig` for customizable rank field visibility and requirements.
 
 ### Key Features

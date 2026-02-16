@@ -67,6 +67,7 @@ const STUB_TASK: Task = {
   subtasksShowNumbers: false,
   hidden: false,
   autoHideCompleted: false,
+  inheritCompletionState: false,
 }
 
 interface DateCreatedInputProps {

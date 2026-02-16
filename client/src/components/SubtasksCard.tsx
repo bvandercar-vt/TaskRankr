@@ -47,6 +47,7 @@ interface SubtaskSettingsProps {
   sortMode: SubtaskSortMode
   showNumbers: boolean
   autoHideCompleted: boolean
+  inheritCompletionState: boolean
   showHidden: boolean
   hiddenCount: number
   directChildIds: number[]
@@ -60,6 +61,7 @@ const SubtaskSettings = ({
   sortMode,
   showNumbers,
   autoHideCompleted,
+  inheritCompletionState,
   showHidden,
   hiddenCount,
   directChildIds,
@@ -186,6 +188,20 @@ const SubtaskSettings = ({
                 : 'Subtasks follow the same sort order as the main task list.'}
             </span>
           </div>
+
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-xs text-muted-foreground">
+              Auto-complete when all done
+            </span>
+            <Switch
+              checked={inheritCompletionState}
+              onCheckedChange={(checked) => {
+                updateTask({ id: taskId, inheritCompletionState: checked })
+              }}
+              data-testid="switch-inherit-completion-state"
+            />
+          </label>
 
           {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
           <label className="flex items-center justify-between cursor-pointer">
@@ -505,6 +521,7 @@ export const SubtasksCard = ({
             sortMode={sortMode}
             showNumbers={showNumbers}
             autoHideCompleted={task.autoHideCompleted}
+            inheritCompletionState={task.inheritCompletionState}
             showHidden={showHidden}
             hiddenCount={hiddenCount}
             directChildIds={directChildIds}

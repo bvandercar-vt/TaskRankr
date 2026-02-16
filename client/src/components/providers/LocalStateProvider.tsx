@@ -305,6 +305,7 @@ export const LocalStateProvider = ({
         subtasksShowNumbers: false,
         hidden: false,
         autoHideCompleted: false,
+        inheritCompletionState: false,
         ...pick(data, [
           'name',
           'description',
@@ -322,12 +323,25 @@ export const LocalStateProvider = ({
       setTasks((prev) => {
         let updated = [...prev, newTask]
         if (data.parentId) {
-          updated = updated.map((t) =>
-            t.id === data.parentId &&
-            t.subtaskSortMode === SubtaskSortMode.MANUAL
-              ? { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
-              : t,
-          )
+          updated = updated.map((t) => {
+            if (t.id !== data.parentId) return t
+            const changes: Partial<Task> = {}
+            if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
+              changes.subtaskOrder = [...t.subtaskOrder, tempId]
+            }
+            if (
+              t.inheritCompletionState &&
+              t.status === TaskStatus.COMPLETED &&
+              newTask.status !== TaskStatus.COMPLETED
+            ) {
+              changes.status = TaskStatus.OPEN
+              changes.completedAt = null
+              changes.inProgressStartedAt = null
+            }
+            return Object.keys(changes).length > 0
+              ? { ...t, ...changes }
+              : t
+          })
         }
         return updated
       })
@@ -337,9 +351,10 @@ export const LocalStateProvider = ({
         name: data.name,
         parentId: data.parentId,
       })
+
       return newTask
     },
-    [settings.autoPinNewTasks, enqueue, storageKeys],
+    [settings.autoPinNewTasks, enqueue, storageKeys, tasks],
   )
 
   const updateTask = useCallback(
@@ -347,10 +362,27 @@ export const LocalStateProvider = ({
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
+
+      if (updates.parentId != null && updatedTask) {
+        const parent = tasks.find((t) => t.id === updates.parentId)
+        if (
+          parent?.inheritCompletionState &&
+          parent.status === TaskStatus.COMPLETED &&
+          updatedTask.status !== TaskStatus.COMPLETED
+        ) {
+          updateTaskById(parent.id, () => ({
+            status: TaskStatus.OPEN,
+            completedAt: null,
+            inProgressStartedAt: null,
+          }))
+        }
+      }
+
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue, updateTaskById],
+    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for inheritCompletionState check
+    [enqueue, updateTaskById, tasks],
   )
 
   const setTaskStatus = useCallback(
@@ -402,10 +434,30 @@ export const LocalStateProvider = ({
 
       enqueue({ type: SyncOperationType.SET_STATUS, id, status })
       debugLog.log('task', 'setStatus', { id, status })
+
+      if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
+        const parent = tasks.find((t) => t.id === updatedTask.parentId)
+        if (parent?.inheritCompletionState) {
+          const siblings = tasks.filter(
+            (t) => t.parentId === parent.id && t.id !== id,
+          )
+          const allSiblingsCompleted = siblings.every(
+            (t) => t.status === TaskStatus.COMPLETED,
+          )
+          if (allSiblingsCompleted) {
+            updateTaskById(parent.id, () => ({
+              status: TaskStatus.COMPLETED,
+              completedAt: new Date(),
+              inProgressStartedAt: null,
+            }))
+          }
+        }
+      }
+
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for autoHideCompleted check
+    // biome-ignore lint/correctness/useExhaustiveDependencies: tasks ref needed for autoHideCompleted/inheritCompletionState checks
     [enqueue, updateTaskById, tasks],
   )
 

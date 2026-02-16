@@ -89,7 +89,19 @@ export class DatabaseStorage implements IStorage {
 
   async createTask(insertTask: InsertTask): Promise<Task> {
     const [task] = await db.insert(tasks).values(insertTask).returning()
-    return task as Task
+    const created = task as Task
+
+    if (
+      created.parentId &&
+      created.status !== TaskStatus.COMPLETED
+    ) {
+      await this.revertParentIfInheritCompletionState(
+        created.parentId,
+        created.userId,
+      )
+    }
+
+    return created
   }
 
   async setTaskStatus(
@@ -103,6 +115,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     const oldStatus = currentTask.status
+    if (oldStatus === newStatus) {
+      return currentTask
+    }
+
     const updates: Partial<InsertTask> & { completedAt?: Date | null } = {
       status: newStatus,
     }
@@ -184,7 +200,71 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    if (newStatus === TaskStatus.COMPLETED && currentTask.parentId) {
+      await this.checkInheritCompletionState(currentTask.parentId, userId, id)
+    }
+
     return task as Task
+  }
+
+  private async checkInheritCompletionState(
+    parentId: number,
+    userId: string,
+    justCompletedChildId: number,
+  ): Promise<void> {
+    const parent = await this.getTask(parentId, userId)
+    if (
+      !parent ||
+      !parent.inheritCompletionState ||
+      parent.status === TaskStatus.COMPLETED
+    ) {
+      return
+    }
+
+    const children = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.parentId, parentId), eq(tasks.userId, userId)))
+
+    const allCompleted = children.every(
+      (t) =>
+        t.id === justCompletedChildId ||
+        t.status === TaskStatus.COMPLETED,
+    )
+
+    if (allCompleted) {
+      await db
+        .update(tasks)
+        .set({
+          status: TaskStatus.COMPLETED,
+          completedAt: new Date(),
+          inProgressStartedAt: null,
+        })
+        .where(eq(tasks.id, parentId))
+    }
+  }
+
+  private async revertParentIfInheritCompletionState(
+    parentId: number,
+    userId: string,
+  ): Promise<void> {
+    const parent = await this.getTask(parentId, userId)
+    if (
+      !parent ||
+      !parent.inheritCompletionState ||
+      parent.status !== TaskStatus.COMPLETED
+    ) {
+      return
+    }
+
+    await db
+      .update(tasks)
+      .set({
+        status: TaskStatus.OPEN,
+        completedAt: null,
+        inProgressStartedAt: null,
+      })
+      .where(eq(tasks.id, parentId))
   }
 
   async updateTask(
@@ -203,7 +283,19 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning()
 
-    return task as Task
+    const updated = task as Task
+
+    if (
+      finalUpdates.parentId != null &&
+      updated.status !== TaskStatus.COMPLETED
+    ) {
+      await this.revertParentIfInheritCompletionState(
+        finalUpdates.parentId,
+        userId,
+      )
+    }
+
+    return updated
   }
 
   private async getTotalTimeForTask(

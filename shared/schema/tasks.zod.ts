@@ -93,6 +93,9 @@ export const tasks = pgTable('tasks', {
     .notNull(),
   hidden: boolean('hidden').default(false).notNull(),
   autoHideCompleted: boolean('auto_hide_completed').default(false).notNull(),
+  inheritCompletionState: boolean('inherit_completion_state')
+    .default(false)
+    .notNull(),
 })
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -121,6 +124,7 @@ const taskSchemaCommon = {
   subtasksShowNumbers: z.boolean().default(false),
   hidden: z.boolean().default(false),
   autoHideCompleted: z.boolean().default(false),
+  inheritCompletionState: z.boolean().default(false),
   createdAt: z.coerce.date(),
   completedAt: z.coerce.date().nullish(),
   inProgressStartedAt: z.coerce.date().nullish(),
