@@ -119,6 +119,19 @@ export class DatabaseStorage implements IStorage {
       return currentTask
     }
 
+    if (newStatus === TaskStatus.COMPLETED) {
+      const children = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+      const hasIncompleteSubtasks = children.some(
+        (t) => t.status !== TaskStatus.COMPLETED,
+      )
+      if (hasIncompleteSubtasks) {
+        throw new Error('All subtasks must be completed first')
+      }
+    }
+
     const updates: Partial<InsertTask> & { completedAt?: Date | null } = {
       status: newStatus,
     }

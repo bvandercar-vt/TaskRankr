@@ -15,6 +15,7 @@ import {
 } from 'react'
 import { omit, pick, toMerged } from 'es-toolkit'
 
+import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
@@ -406,6 +407,21 @@ export const LocalStateProvider = ({
 
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
+      if (status === TaskStatus.COMPLETED) {
+        const hasIncompleteSubtasks = tasksRef.current.some(
+          (t) => t.parentId === id && t.status !== TaskStatus.COMPLETED,
+        )
+        if (hasIncompleteSubtasks) {
+          toast({
+            title: 'Cannot complete task',
+            description: 'All subtasks must be completed first.',
+            variant: 'destructive',
+          })
+          const existing = tasksRef.current.find((t) => t.id === id)
+          if (existing) return existing
+        }
+      }
+
       const updatedTask = updateTaskById(
         id,
         (task) => {
