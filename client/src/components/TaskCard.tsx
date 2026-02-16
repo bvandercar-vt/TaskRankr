@@ -418,6 +418,9 @@ export const TaskCard = ({
         inProgressTime={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
+        hasIncompleteSubtasks={task.subtasks.some(
+          (s) => s.status !== TaskStatus.COMPLETED,
+        )}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => {
           updateTask({ id: task.id, inProgressTime: timeMs })

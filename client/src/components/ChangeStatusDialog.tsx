@@ -121,6 +121,7 @@ interface ChangeStatusDialogProps {
   inProgressTime: number
   isSubtask?: boolean
   isHidden?: boolean
+  hasIncompleteSubtasks?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
   onDelete: () => void
@@ -135,6 +136,7 @@ export const ChangeStatusDialog = ({
   inProgressTime,
   isSubtask,
   isHidden,
+  hasIncompleteSubtasks,
   onSetStatus,
   onUpdateTime,
   onDelete,
@@ -228,15 +230,22 @@ export const ChangeStatusDialog = ({
                   isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
                 )
               }
+              disabled={!isCompleted && hasIncompleteSubtasks}
               className={cn(
                 'w-full h-11 text-base font-semibold',
                 isCompleted
                   ? 'bg-primary hover:bg-primary/90 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                  : !isCompleted && hasIncompleteSubtasks
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white',
               )}
               data-testid="button-complete-task"
             >
-              {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
+              {isCompleted
+                ? 'Restore Task to Open'
+                : hasIncompleteSubtasks
+                  ? 'Complete All Subtasks First'
+                  : 'Complete Task'}
             </AlertDialogAction>
 
             {showTimeInputs && (
