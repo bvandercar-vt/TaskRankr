@@ -36,11 +36,7 @@ import {
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Switch } from '@/components/primitives/forms/Switch'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/primitives/overlays/Tooltip'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { sortTasksByIdOrder } from '@/lib/sort-tasks'
 import { cn } from '@/lib/utils'
@@ -315,30 +311,23 @@ const SubtaskItem = ({
             └
           </span>
         )}
-        <Tooltip>
-          <TooltipTrigger asChild disabled={!disableComplete}>
-            <button
-              type="button"
-              onClick={() => !disableComplete && onToggleComplete(task)}
-              className={cn(
-                'shrink-0 h-4 w-4 rounded-sm border transition-colors',
-                disableComplete
-                  ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
-                  : isCompleted
-                    ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
-                    : 'border-muted-foreground/40 hover:border-muted-foreground',
-              )}
-              data-testid={`checkbox-complete-subtask-${task.id}`}
-            >
-              {isCompleted && <Check className="size-3 mx-auto" />}
-            </button>
-          </TooltipTrigger>
-          {disableComplete && (
-            <TooltipContent>
-              All subtasks must be completed first
-            </TooltipContent>
-          )}
-        </Tooltip>
+        <SubtaskBlockedTooltip blocked={disableComplete}>
+          <button
+            type="button"
+            onClick={() => !disableComplete && onToggleComplete(task)}
+            className={cn(
+              'shrink-0 h-4 w-4 rounded-sm border transition-colors',
+              disableComplete
+                ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
+                : isCompleted
+                  ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
+                  : 'border-muted-foreground/40 hover:border-muted-foreground',
+            )}
+            data-testid={`checkbox-complete-subtask-${task.id}`}
+          >
+            {isCompleted && <Check className="size-3 mx-auto" />}
+          </button>
+        </SubtaskBlockedTooltip>
         <span
           className={cn(
             'text-sm break-words',

@@ -27,11 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/primitives/overlays/AlertDialog'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/primitives/overlays/Tooltip'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
@@ -229,37 +225,27 @@ export const ChangeStatusDialog = ({
               </>
             )}
 
-            <Tooltip>
-              <TooltipTrigger
-                asChild
-                disabled={!(!isCompleted && hasIncompleteSubtasks)}
+            <SubtaskBlockedTooltip blocked={!isCompleted && !!hasIncompleteSubtasks}>
+              <AlertDialogAction
+                onClick={() =>
+                  onSetStatus(
+                    isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
+                  )
+                }
+                disabled={!isCompleted && hasIncompleteSubtasks}
+                className={cn(
+                  'w-full h-11 text-base font-semibold',
+                  isCompleted
+                    ? 'bg-primary hover:bg-primary/90 text-white'
+                    : !isCompleted && hasIncompleteSubtasks
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white',
+                )}
+                data-testid="button-complete-task"
               >
-                <AlertDialogAction
-                  onClick={() =>
-                    onSetStatus(
-                      isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
-                    )
-                  }
-                  disabled={!isCompleted && hasIncompleteSubtasks}
-                  className={cn(
-                    'w-full h-11 text-base font-semibold',
-                    isCompleted
-                      ? 'bg-primary hover:bg-primary/90 text-white'
-                      : !isCompleted && hasIncompleteSubtasks
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                        : 'bg-emerald-600 hover:bg-emerald-700 text-white',
-                  )}
-                  data-testid="button-complete-task"
-                >
-                  {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
-                </AlertDialogAction>
-              </TooltipTrigger>
-              {!isCompleted && hasIncompleteSubtasks && (
-                <TooltipContent>
-                  All subtasks must be completed first
-                </TooltipContent>
-              )}
-            </Tooltip>
+                {isCompleted ? 'Restore Task to Open' : 'Complete Task'}
+              </AlertDialogAction>
+            </SubtaskBlockedTooltip>
 
             {showTimeInputs && (
               <TimeSpentInput

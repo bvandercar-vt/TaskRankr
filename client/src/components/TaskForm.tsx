@@ -27,11 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/primitives/overlays/Tooltip'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { TagChain } from '@/components/primitives/TagChain'
 import { RankFieldSelect } from '@/components/RankFieldSelect'
 import { SubtasksCard } from '@/components/SubtasksCard'
@@ -391,37 +387,30 @@ export const TaskForm = ({
               {initialData &&
                 initialData.status !== TaskStatus.COMPLETED &&
                 onMarkCompleted && (
-                  <Tooltip>
-                    <TooltipTrigger asChild disabled={!hasIncompleteSubtasks}>
-                      {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
-                      <label
-                        className={cn(
-                          'flex items-center justify-between gap-4',
-                          hasIncompleteSubtasks
-                            ? 'cursor-not-allowed opacity-50'
-                            : 'cursor-pointer',
-                        )}
-                        data-testid="checkbox-mark-completed"
-                      >
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Completed
-                        </div>
-                        <Checkbox
-                          checked={markCompleted}
-                          disabled={hasIncompleteSubtasks}
-                          onCheckedChange={(checked) =>
-                            setMarkCompleted(checked === true)
-                          }
-                          className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                        />
-                      </label>
-                    </TooltipTrigger>
-                    {hasIncompleteSubtasks && (
-                      <TooltipContent>
-                        All subtasks must be completed first
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
+                  <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
+                    <label
+                      className={cn(
+                        'flex items-center justify-between gap-4',
+                        hasIncompleteSubtasks
+                          ? 'cursor-not-allowed opacity-50'
+                          : 'cursor-pointer',
+                      )}
+                      data-testid="checkbox-mark-completed"
+                    >
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Completed
+                      </div>
+                      <Checkbox
+                        checked={markCompleted}
+                        disabled={hasIncompleteSubtasks}
+                        onCheckedChange={(checked) =>
+                          setMarkCompleted(checked === true)
+                        }
+                        className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                      />
+                    </label>
+                  </SubtaskBlockedTooltip>
                 )}
             </div>
           </div>
