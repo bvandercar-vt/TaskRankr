@@ -8,6 +8,7 @@ import {
   type CreateTaskContent,
   useLocalStateSafe,
 } from '@/components/providers/LocalStateProvider'
+import { getTaskById } from '@/lib/task-utils'
 import type { Task, UpdateTask } from '~/shared/schema'
 
 export const useTasks = () => {
@@ -30,7 +31,7 @@ export const useTaskParentChain = (parentId?: number) => {
   let currentId: number | null | undefined = parentId
 
   while (currentId) {
-    const parent = tasks.find((t) => t.id === currentId)
+    const parent = getTaskById(tasks, currentId)
     if (parent) {
       chain.unshift({ id: parent.id, name: parent.name })
       currentId = parent.parentId
@@ -45,7 +46,7 @@ export const useTaskParentChain = (parentId?: number) => {
 export const useTask = (id: number) => {
   const { data: tasks, isLoading } = useTasks()
   return {
-    data: tasks.find((t) => t.id === id),
+    data: getTaskById(tasks, id),
     isLoading,
     error: null,
   }

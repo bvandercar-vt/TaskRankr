@@ -23,9 +23,10 @@ import { useSettings } from '@/hooks/useSettings'
 import { useTasks } from '@/hooks/useTasks'
 import {
   filterAndSortTree,
+  getTaskStatuses,
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
-} from '@/lib/sort-tasks'
+} from '@/lib/task-utils'
 import {
   type FieldConfig,
   SortOption,
@@ -135,16 +136,16 @@ const Home = () => {
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
     const activeTasks = allTasks.filter(
-      (task) => task.status !== TaskStatus.COMPLETED || task.parentId !== null,
+      (task) =>
+        !task.hidden &&
+        (task.status !== TaskStatus.COMPLETED || task.parentId !== null),
     )
 
     const hoistedIds = new Set<number>()
 
     activeTasks.forEach((task) => {
-      if (
-        task.status === TaskStatus.IN_PROGRESS ||
-        task.status === TaskStatus.PINNED
-      ) {
+      const { isInProgress, isPinned } = getTaskStatuses(task)
+      if (isInProgress || isPinned) {
         hoistedIds.add(task.id)
       }
     })

@@ -11,7 +11,7 @@ import {
   SORT_LABELS,
   SORT_ORDER_MAP,
   SortDirection,
-} from '@/lib/sort-tasks'
+} from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SortOption } from '~/shared/schema'
 
