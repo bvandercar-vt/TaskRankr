@@ -34,7 +34,7 @@ import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
 import { SubtasksSettings } from './SubtasksSettings'
 
-const SUBTASK_ACTION_BTN_STYLE =
+const ADD_SUBTASK_BTN_CLASS =
   'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
 
 interface SubtasksCardProps {
@@ -229,7 +229,7 @@ export const SubtasksCard = ({
         <button
           type="button"
           onClick={() => onAddSubtask(task.id)}
-          className={cn(SUBTASK_ACTION_BTN_STYLE, 'flex-[4] gap-2')}
+          className={cn(ADD_SUBTASK_BTN_CLASS, 'flex-[4] gap-2')}
           data-testid="button-add-subtask"
         >
           <Plus className="size-4" />
@@ -239,7 +239,7 @@ export const SubtasksCard = ({
           type="button"
           onClick={() => onAssignSubtask?.(task)}
           className={cn(
-            SUBTASK_ACTION_BTN_STYLE,
+            ADD_SUBTASK_BTN_CLASS,
             'flex-1 gap-1.5 border-l border-white/5',
           )}
           data-testid="button-assign-subtask"
