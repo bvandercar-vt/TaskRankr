@@ -8,9 +8,12 @@ import {
   CheckCircle2,
   ChevronRight,
   Download,
+  EyeOff,
   GripVertical,
   Hand,
+  Hash,
   Layers,
+  Link2,
   MousePointer2,
   Pin,
   PlayCircle,
@@ -82,6 +85,24 @@ const HowToUse = () => {
             title="Manual Ordering"
             description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
             data-testid="card-manual-ordering"
+          />
+          <IconCard
+            icon={<Hash className="size-5" />}
+            title="Subtask Numbering"
+            description="Each subtask displays a number showing its position in the current sort order. These numbers update automatically when you change the sort mode or reorder subtasks manually."
+            data-testid="card-subtask-numbering"
+          />
+          <IconCard
+            icon={<EyeOff className="size-5" />}
+            title="Auto-Hide on Complete"
+            description="Enable Auto-Hide Completed in the subtask settings to automatically hide subtasks when they are marked as completed. Hidden subtasks can be revealed using the Show Hidden button. This keeps your subtask list focused on what still needs to be done."
+            data-testid="card-auto-hide-completed"
+          />
+          <IconCard
+            icon={<Link2 className="size-5" />}
+            title="Auto-Complete Parent"
+            description="Enable Inherit Completion State in the subtask settings to automatically mark the parent task as completed when all of its subtasks are done. If a subtask is later reopened, the parent will revert back to open as well. This works recursively through nested subtask chains."
+            data-testid="card-auto-complete-parent"
           />
         </CardSection>
 
