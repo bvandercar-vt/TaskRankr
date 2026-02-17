@@ -28,6 +28,10 @@ import { IconCard } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { Routes } from '@/lib/constants'
 
+const F = ({ children }: { children: React.ReactNode }) => (
+  <span className="font-medium text-foreground">{children}</span>
+)
+
 const HowToUse = () => {
   const isStandalone = isStandalonePWA()
 
@@ -43,13 +47,26 @@ const HowToUse = () => {
           <IconCard
             icon={<MousePointer2 className="size-5" />}
             title="Tap to Edit"
-            description="Tap a task to edit it, where you can change the name, description, and rank fields like priority, ease, enjoyment, and time, as well as create nested subtasks to assist with breaking down projects."
+            description={
+              <>
+                Tap a task to edit it, where you can change the name,
+                description, and rank fields like priority, ease, enjoyment, and
+                time, as well as create nested subtasks to assist with breaking
+                down projects.
+              </>
+            }
             data-testid="card-tap-to-edit"
           />
           <IconCard
             icon={<Hand className="size-5" />}
             title="Hold to Change Status"
-            description="Press and hold a task to open the status menu. From there you can mark it as Pinned, In Progress (if setting enabled), Completed, or Delete it."
+            description={
+              <>
+                Press and hold a task to open the status menu. From there you
+                can mark it as <F>Pinned</F>, <F>In Progress</F> (if setting
+                enabled), <F>Completed</F>, or <F>Delete</F> it.
+              </>
+            }
             data-testid="card-hold-to-change-status"
           />
         </CardSection>
@@ -63,7 +80,8 @@ const HowToUse = () => {
                 <div className="mb-4">
                   Use the sort buttons at the top of the task list to order
                   tasks by date created, priority, ease, enjoyment, or time. You
-                  can customize which rank fields are visible in Settings.
+                  can customize which rank fields are visible in{' '}
+                  <F>Settings</F>.
                 </div>
                 <SortInfo defaultExpanded={false} />
               </>
@@ -103,25 +121,56 @@ const HowToUse = () => {
           <IconCard
             icon={<Layers className="size-5" />}
             title="Nested Tasks"
-            description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
+            description={
+              <>
+                Break down large tasks into subtasks by tapping a task and using
+                the <F>Add Subtask</F> button. Subtasks can have their own
+                subtasks, creating a hierarchical structure for complex projects.
+              </>
+            }
             data-testid="card-nested-tasks"
           />
           <IconCard
             icon={<GripVertical className="size-5" />}
             title="Manual Ordering (Optional)"
-            description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in a task's subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows. Also allows for automatic numbering of subtasks as steps."
+            description={
+              <>
+                By default, subtasks follow the same sort order as the main
+                list. Toggle <F>Manual</F> mode in a task's subtasks panel to
+                drag and reorder subtasks in a custom sequence, perfect for
+                step-by-step workflows. Also allows for automatic numbering of
+                subtasks as steps.
+              </>
+            }
             data-testid="card-manual-ordering"
           />
           <IconCard
             icon={<EyeOff className="size-5" />}
             title="Hide Subtasks, & Auto-Hide on Complete (Optional)"
-            description="Hide and unhide subtasks as desired. Hidden subtasks can be revealed using the Show Hidden button. Enable Auto-Hide Completed in a task's subtask settings to automatically hide subtasks when they are marked as completed, keeping your subtask list focused on what still needs to be done."
+            description={
+              <>
+                Hide and unhide subtasks as desired. Hidden subtasks can be
+                revealed using the <F>Show Hidden</F> button. Enable{' '}
+                <F>Auto-Hide Completed</F> in a task's subtask settings to
+                automatically hide subtasks when they are marked as completed,
+                keeping your subtask list focused on what still needs to be
+                done.
+              </>
+            }
             data-testid="card-auto-hide-completed"
           />
           <IconCard
             icon={<Link2 className="size-5" />}
             title="Auto-Complete Parent"
-            description="Enable Inherit Completion State in the subtask settings to automatically mark the parent task as completed when all of its subtasks are completed. If a subtask is later added or reopened, the parent will revert back to open as well. This works recursively through nested subtask chains."
+            description={
+              <>
+                Enable <F>Inherit Completion State</F> in the subtask settings
+                to automatically mark the parent task as completed when all of
+                its subtasks are completed. If a subtask is later added or
+                reopened, the parent will revert back to open as well. This
+                works recursively through nested subtask chains.
+              </>
+            }
             data-testid="card-auto-complete-parent"
           />
         </CardSection>
@@ -135,7 +184,13 @@ const HowToUse = () => {
               titleRightIcon={
                 <ChevronRight className="size-4 text-muted-foreground" />
               }
-              description="Configure which rank fields are visible or required, toggle features like auto-pinning new tasks, In Progress status, time tracking, and more."
+              description={
+                <>
+                  Configure which rank fields are visible or required, toggle
+                  features like <F>Auto-Pin New Tasks</F>,{' '}
+                  <F>In Progress</F> status, time tracking, and more.
+                </>
+              }
               data-testid="card-settings"
             />
           </Link>
