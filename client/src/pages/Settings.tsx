@@ -7,8 +7,9 @@ import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { ContactCard } from '@/components/AppInfo/ContactCard'
+import { SortInfo } from '@/components/AppInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
-import { ContactCard } from '@/components/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { Checkbox } from '@/components/primitives/forms/Checkbox'
@@ -25,7 +26,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/primitives/overlays/AlertDialog'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
-import { SortInfo } from '@/components/SortInfo'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'

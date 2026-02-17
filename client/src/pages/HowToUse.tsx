@@ -18,12 +18,12 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { ContactCard } from '@/components/AppInfo/ContactCard'
+import { SortInfo } from '@/components/AppInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
-import { ContactCard } from '@/components/ContactCard'
 import { CardSection } from '@/components/primitives/CardSection'
 import { IconCard } from '@/components/primitives/IconCard'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
-import { SortInfo } from '@/components/SortInfo'
 import { Routes } from '@/lib/constants'
 
 const HowToUse = () => {
