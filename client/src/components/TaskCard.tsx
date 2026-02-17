@@ -20,13 +20,13 @@ import {
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
+import type { TaskWithSubtasks } from '@/types'
 import {
   type FieldConfig,
   type RankField,
   SubtaskSortMode,
   type Task,
   TaskStatus,
-  type TaskWithSubtasks,
 } from '~/shared/schema'
 import { Icon } from './primitives/LucideIcon'
 
