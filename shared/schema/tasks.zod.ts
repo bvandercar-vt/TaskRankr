@@ -1,7 +1,3 @@
-/**
- * @fileoverview Task-related Drizzle schema, Zod validation, types, and enums.
- */
-
 import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
@@ -18,6 +14,8 @@ import {
   createUpdateSchema,
 } from 'drizzle-zod'
 import { z } from 'zod'
+
+import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
 
 // Status constants and types
 export enum TaskStatus {
@@ -70,18 +68,18 @@ export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   userId: varchar('user_id').notNull(), // Owner of the task
   name: text('name').notNull(),
-  status: text('status').default(TaskStatus.OPEN).notNull(),
+  status: pgNativeEnum('status', TaskStatus).default(TaskStatus.OPEN).notNull(),
   description: text('description'),
-  priority: text('priority'),
-  ease: text('ease'),
-  enjoyment: text('enjoyment'),
-  time: text('time'),
+  priority: pgNativeEnum('priority', Priority),
+  ease: pgNativeEnum('ease', Ease),
+  enjoyment: pgNativeEnum('enjoyment', Enjoyment),
+  time: pgNativeEnum('time', Time),
   inProgressTime: integer('in_progress_time').default(0).notNull(), // Cumulative time in milliseconds
   inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   parentId: integer('parent_id'),
-  subtaskSortMode: text('subtask_sort_mode')
+  subtaskSortMode: pgNativeEnum('subtask_sort_mode', SubtaskSortMode)
     .default(SubtaskSortMode.INHERIT)
     .notNull(),
   subtaskOrder: integer('subtask_order')
@@ -109,32 +107,29 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
 }))
 
-const taskSchemaCommon = {
-  userId: z.string().min(1, 'User ID is required'),
-  name: z.string().min(1, 'Name is required'),
-  status: z.nativeEnum(TaskStatus),
-  priority: z.nativeEnum(Priority).nullable(),
-  ease: z.nativeEnum(Ease).nullable(),
-  enjoyment: z.nativeEnum(Enjoyment).nullable(),
-  time: z.nativeEnum(Time).nullable(),
-  subtaskSortMode: z
-    .nativeEnum(SubtaskSortMode)
-    .default(SubtaskSortMode.INHERIT),
-  subtaskOrder: z.array(z.number()).default([]),
-  subtasksShowNumbers: z.boolean().default(false),
-  hidden: z.boolean().default(false),
-  autoHideCompleted: z.boolean().default(false),
-  inheritCompletionState: z.boolean().default(false),
-  createdAt: z.coerce.date(),
-  completedAt: z.coerce.date().nullish(),
-  inProgressStartedAt: z.coerce.date().nullish(),
-} as const
+const taskSchemaRefine = {
+  // created schema from drizzle-zod does not apply zod default values.
+  // https://github.com/drizzle-team/drizzle-orm/issues/5384
+  status: (s) => s.default(TaskStatus.OPEN),
+  subtaskSortMode: (s) => s.default(SubtaskSortMode.INHERIT),
+  subtaskOrder: (s) => s.default([]),
+  subtasksShowNumbers: (s) => s.default(false),
+  hidden: (s) => s.default(false),
+  autoHideCompleted: (s) => s.default(false),
+  inheritCompletionState: (s) => s.default(false),
+  inProgressTime: (s) => s.default(0),
+  // not sure the created schema from drizzle-zod performs the coercion,
+  // so add here just in case / for safety.
+  createdAt: z.coerce.date().default(() => new Date()),
+  completedAt: z.coerce.date().nullable(),
+  inProgressStartedAt: z.coerce.date().nullable(),
+} satisfies DrizzleZodDefaultRefine<typeof tasks>
 
-export const taskSchema = createSelectSchema(tasks).extend(taskSchemaCommon)
+export const taskSchema = createSelectSchema(tasks, taskSchemaRefine)
 
 export type Task = z.infer<typeof taskSchema>
 
-export const insertTaskSchema = createInsertSchema(tasks, taskSchemaCommon)
+export const insertTaskSchema = createInsertSchema(tasks, taskSchemaRefine)
   .partial()
   .omit({ id: true })
   .required({
@@ -145,7 +140,7 @@ export const insertTaskSchema = createInsertSchema(tasks, taskSchemaCommon)
 export type InsertTask = z.infer<typeof insertTaskSchema>
 export type CreateTask = InsertTask
 
-export const updateTaskSchema = createUpdateSchema(tasks, taskSchemaCommon)
+export const updateTaskSchema = createUpdateSchema(tasks, taskSchemaRefine)
   .partial()
   .required({ id: true })
   .omit({ userId: true })

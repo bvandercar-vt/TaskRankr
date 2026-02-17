@@ -3,9 +3,11 @@
  * Includes per-field visibility/required config (fieldConfig JSONB column).
  */
 
-import { boolean, jsonb, pgTable, text, varchar } from 'drizzle-orm/pg-core'
+import { boolean, jsonb, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
+
+import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
 
 export enum SortOption {
   DATE_CREATED = 'date_created',
@@ -52,27 +54,34 @@ export const userSettings = pgTable('user_settings', {
   alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
     .default(true)
     .notNull(),
-  sortBy: text('sort_by').default(SortOption.DATE_CREATED).notNull(),
+  sortBy: pgNativeEnum('sort_by', SortOption)
+    .default(SortOption.DATE_CREATED)
+    .notNull(),
   fieldConfig: jsonb('field_config')
     .$type<FieldConfig>()
     .default(DEFAULT_FIELD_CONFIG)
     .notNull(),
 })
 
-const userSettingsCommon = {
-  userId: z.string().min(1),
-  sortBy: z.nativeEnum(SortOption).optional().default(SortOption.DATE_CREATED),
+const userSettingsSchemaRefine = {
+  // created schema from drizzle-zod does not apply zod default values.
+  // https://github.com/drizzle-team/drizzle-orm/issues/5384
+  autoPinNewTasks: (s) => s.default(true),
+  enableInProgressStatus: (s) => s.default(true),
+  enableInProgressTime: (s) => s.default(true),
+  alwaysSortPinnedByPriority: (s) => s.default(true),
+  sortBy: (s) => s.default(SortOption.DATE_CREATED),
   fieldConfig: fieldConfigSchema.default(DEFAULT_FIELD_CONFIG),
-}
+} satisfies DrizzleZodDefaultRefine<typeof userSettings>
 
 export const userSettingsSchema = createSelectSchema(
   userSettings,
-  userSettingsCommon,
+  userSettingsSchemaRefine,
 )
 
 export const insertUserSettingsSchema = createInsertSchema(
   userSettings,
-  userSettingsCommon,
+  userSettingsSchemaRefine,
 )
 
 export type UserSettings = z.infer<typeof userSettingsSchema>

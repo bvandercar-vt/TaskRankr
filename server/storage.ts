@@ -47,11 +47,11 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getTasks(userId: string): Promise<Task[]> {
-    const result = (await db
+    const result = await db
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId))
-      .orderBy(tasks.id)) as Task[]
+      .orderBy(tasks.id)
 
     const byId = new Map(result.map((t) => [t.id, t]))
     const fixes: { id: number; subtaskOrder: number[] }[] = []
@@ -81,17 +81,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTask(id: number, userId: string): Promise<Task | undefined> {
-    const [task] = (await db
+    const [task] = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))) as [Task?]
+      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
     return task
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const [task] = (await db.insert(tasks).values(insertTask).returning()) as [
-      Task,
-    ]
+    const [task] = await db.insert(tasks).values(insertTask).returning()
     const created = task
 
     if (created.parentId && created.status !== TaskStatus.COMPLETED) {
@@ -120,10 +118,10 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (newStatus === TaskStatus.COMPLETED) {
-      const children = (await db
+      const children = await db
         .select()
         .from(tasks)
-        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
       if (getHasIncomplete(children)) {
         throw new Error('All subtasks must be completed first')
       }
@@ -178,7 +176,7 @@ export class DatabaseStorage implements IStorage {
       if (currentTask.parentId) {
         const parent = await this.getTask(currentTask.parentId, userId)
         if (parent?.autoHideCompleted) {
-          ;(updates as Record<string, unknown>).hidden = true
+          updates.hidden = true
         }
       }
     }
@@ -190,21 +188,21 @@ export class DatabaseStorage implements IStorage {
       updates.completedAt = null
     }
 
-    const [task] = (await db
+    const [task] = await db
       .update(tasks)
       .set(updates)
       .where(eq(tasks.id, id))
-      .returning()) as [Task]
+      .returning()
 
     // Cascade status to children for completed/restored
     if (
       newStatus === TaskStatus.COMPLETED ||
       (oldStatus === TaskStatus.COMPLETED && newStatus === TaskStatus.OPEN)
     ) {
-      const childTasks = (await db
+      const childTasks = await db
         .select()
         .from(tasks)
-        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
       for (const child of childTasks) {
         await this.setTaskStatus(child.id, userId, newStatus)
       }
@@ -231,12 +229,10 @@ export class DatabaseStorage implements IStorage {
       return
     }
 
-    const children = (await db
+    const children = await db
       .select()
       .from(tasks)
-      .where(
-        and(eq(tasks.parentId, parentId), eq(tasks.userId, userId)),
-      )) as Task[]
+      .where(and(eq(tasks.parentId, parentId), eq(tasks.userId, userId)))
 
     const allCompleted = children.every(
       (t) => t.id === justCompletedChildId || t.status === TaskStatus.COMPLETED,
@@ -287,13 +283,13 @@ export class DatabaseStorage implements IStorage {
       finalUpdates.hidden = false
     }
 
-    const [task] = (await db
+    const [task] = await db
       .update(tasks)
       .set(finalUpdates)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-      .returning()) as [Task]
+      .returning()
 
-    const updated = task as Task
+    const updated = task
 
     if (finalUpdates.autoHideCompleted !== undefined) {
       await db
@@ -312,12 +308,12 @@ export class DatabaseStorage implements IStorage {
       finalUpdates.inheritCompletionState === true &&
       updated.status === TaskStatus.COMPLETED
     ) {
-      const children = (await db
+      const children = await db
         .select()
         .from(tasks)
-        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
       if (getHasIncomplete(children)) {
-        const [reverted] = (await db
+        const [reverted] = await db
           .update(tasks)
           .set({
             status: TaskStatus.OPEN,
@@ -325,7 +321,7 @@ export class DatabaseStorage implements IStorage {
             inProgressStartedAt: null,
           })
           .where(eq(tasks.id, id))
-          .returning()) as [Task]
+          .returning()
         return reverted
       }
     }
@@ -352,10 +348,10 @@ export class DatabaseStorage implements IStorage {
 
     let total = task.inProgressTime
 
-    const childTasks = (await db
+    const childTasks = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
 
     for (const child of childTasks) {
       total += await this.getTotalTimeForTask(child.id, userId)
@@ -387,10 +383,10 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    const childTasks = (await db
+    const childTasks = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
     for (const child of childTasks) {
       await this.deleteTaskWithoutTimeAccumulation(child.id, userId)
     }
@@ -404,10 +400,10 @@ export class DatabaseStorage implements IStorage {
     id: number,
     userId: string,
   ): Promise<void> {
-    const childTasks = (await db
+    const childTasks = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))) as Task[]
+      .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
     for (const child of childTasks) {
       await this.deleteTaskWithoutTimeAccumulation(child.id, userId)
     }
@@ -429,18 +425,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSettings(userId: string): Promise<UserSettings> {
-    const [settings] = (await db
+    const [settings] = await db
       .select()
       .from(userSettings)
-      .where(eq(userSettings.userId, userId))) as [UserSettings?]
+      .where(eq(userSettings.userId, userId))
     if (settings) {
       return settings
     }
     // Create default settings for new user
-    const [newSettings] = (await db
+    const [newSettings] = await db
       .insert(userSettings)
       .values({ userId })
-      .returning()) as [UserSettings]
+      .returning()
     return newSettings
   }
 
@@ -452,11 +448,11 @@ export class DatabaseStorage implements IStorage {
     await this.getSettings(userId)
 
     const { userId: _, ...updateData } = updates
-    const [settings] = (await db
+    const [settings] = await db
       .update(userSettings)
       .set(updateData)
       .where(eq(userSettings.userId, userId))
-      .returning()) as [UserSettings]
+      .returning()
     return settings
   }
 }
