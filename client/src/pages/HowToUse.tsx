@@ -11,7 +11,6 @@ import {
   EyeOff,
   GripVertical,
   Hand,
-  Hash,
   Layers,
   Link2,
   MousePointer2,
@@ -73,40 +72,7 @@ const HowToUse = () => {
           />
         </CardSection>
 
-        <CardSection title="Subtasks" data-testid="section-subtasks">
-          <IconCard
-            icon={<Layers className="size-5" />}
-            title="Nested Tasks"
-            description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
-            data-testid="card-nested-tasks"
-          />
-          <IconCard
-            icon={<GripVertical className="size-5" />}
-            title="Manual Ordering"
-            description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in the subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows."
-            data-testid="card-manual-ordering"
-          />
-          <IconCard
-            icon={<Hash className="size-5" />}
-            title="Subtask Numbering"
-            description="Each subtask displays a number showing its position in the current sort order. These numbers update automatically when you change the sort mode or reorder subtasks manually."
-            data-testid="card-subtask-numbering"
-          />
-          <IconCard
-            icon={<EyeOff className="size-5" />}
-            title="Auto-Hide on Complete"
-            description="Enable Auto-Hide Completed in the subtask settings to automatically hide subtasks when they are marked as completed. Hidden subtasks can be revealed using the Show Hidden button. This keeps your subtask list focused on what still needs to be done."
-            data-testid="card-auto-hide-completed"
-          />
-          <IconCard
-            icon={<Link2 className="size-5" />}
-            title="Auto-Complete Parent"
-            description="Enable Inherit Completion State in the subtask settings to automatically mark the parent task as completed when all of its subtasks are done. If a subtask is later reopened, the parent will revert back to open as well. This works recursively through nested subtask chains."
-            data-testid="card-auto-complete-parent"
-          />
-        </CardSection>
-
-        <CardSection title="Task Statuses" data-testid="section-task-statuses">
+        <CardSection title="Task Statuses" data-testid="section-ta">
           <IconCard
             icon={<Pin className="size-5" />}
             title="Pinned"
@@ -116,14 +82,47 @@ const HowToUse = () => {
           <IconCard
             icon={<PlayCircle className="size-5" />}
             title="In Progress (if setting enabled)"
-            description="Pins to the top of your list, while also accumulating time spent in progress."
+            description="Pins to the top of your list, while also accumulating time spent in this status (which can also be manually adjusted)."
             data-testid="card-in-progress"
           />
           <IconCard
             icon={<CheckCircle2 className="size-5" />}
             title="Completed"
-            description="Completed tasks are moved to a separate list you can access from the menu."
+            description={
+              <>
+                Completed top-level tasks are moved to a separate list you can
+                access from the menu. Completed <i>subtasks</i> are shown as
+                crossed out.
+              </>
+            }
             data-testid="card-completed"
+          />
+        </CardSection>
+
+        <CardSection title="Subtasks" data-testid="section-subtasks">
+          <IconCard
+            icon={<Layers className="size-5" />}
+            title="Nested Tasks"
+            description="Break down large tasks into subtasks by tapping a task and using the Add Subtask button. Subtasks can have their own subtasks, creating a hierarchical structure for complex projects."
+            data-testid="card-nested-tasks"
+          />
+          <IconCard
+            icon={<GripVertical className="size-5" />}
+            title="Manual Ordering (Optional)"
+            description="By default, subtasks follow the same sort order as the main list. Toggle Manual mode in a task's subtasks panel to drag and reorder subtasks in a custom sequence, perfect for step-by-step workflows. Also allows for automatic numbering of subtasks as steps."
+            data-testid="card-manual-ordering"
+          />
+          <IconCard
+            icon={<EyeOff className="size-5" />}
+            title="Hide Subtasks, & Auto-Hide on Complete (Optional)"
+            description="Hide and unhide subtasks as desired. Hidden subtasks can be revealed using the Show Hidden button. Enable Auto-Hide Completed in a task's subtask settings to automatically hide subtasks when they are marked as completed, keeping your subtask list focused on what still needs to be done."
+            data-testid="card-auto-hide-completed"
+          />
+          <IconCard
+            icon={<Link2 className="size-5" />}
+            title="Auto-Complete Parent"
+            description="Enable Inherit Completion State in the subtask settings to automatically mark the parent task as completed when all of its subtasks are completed. If a subtask is later added or reopened, the parent will revert back to open as well. This works recursively through nested subtask chains."
+            data-testid="card-auto-complete-parent"
           />
         </CardSection>
 

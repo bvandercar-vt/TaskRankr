@@ -562,8 +562,7 @@ export const LocalStateProvider = ({
             const siblings = updated.filter(
               (t) => t.parentId === parent.id && t.id !== currentTaskId,
             )
-            if (!siblings.every((t) => t.status === TaskStatus.COMPLETED))
-              break
+            if (!siblings.every((t) => t.status === TaskStatus.COMPLETED)) break
 
             const parentUpdate: Partial<Task> = {
               status: TaskStatus.COMPLETED,
@@ -572,9 +571,7 @@ export const LocalStateProvider = ({
             }
 
             if (parent.parentId) {
-              const grandparent = updated.find(
-                (t) => t.id === parent.parentId,
-              )
+              const grandparent = updated.find((t) => t.id === parent.parentId)
               if (grandparent?.autoHideCompleted) {
                 parentUpdate.hidden = true
               }
