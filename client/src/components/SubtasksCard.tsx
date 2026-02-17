@@ -3,6 +3,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   closestCenter,
   DndContext,
@@ -172,7 +173,7 @@ const SubtaskSettings = ({
               </div>
             </div>
             <span
-              className="text-[11px] text-muted-foreground/70 leading-snug text-right"
+              className="block text-[11px] text-muted-foreground/70 leading-snug text-right"
               data-testid="text-sort-caption"
             >
               {isManualSortMode
@@ -181,22 +182,32 @@ const SubtaskSettings = ({
             </span>
           </div>
 
-          {isManualSortMode && (
-            // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs text-muted-foreground">
-                Show numbers
-              </span>
-              <Switch
-                checked={showNumbers}
-                onCheckedChange={(checked) => {
-                  onShowNumbersChange(checked)
-                  updateTask({ id: taskId, subtasksShowNumbers: checked })
-                }}
-                data-testid="switch-show-numbers"
-              />
-            </label>
-          )}
+          <AnimatePresence>
+            {isManualSortMode && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="text-xs text-muted-foreground">
+                    Show numbers
+                  </span>
+                  <Switch
+                    checked={showNumbers}
+                    onCheckedChange={(checked) => {
+                      onShowNumbersChange(checked)
+                      updateTask({ id: taskId, subtasksShowNumbers: checked })
+                    }}
+                    data-testid="switch-show-numbers"
+                  />
+                </label>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
           <label className="flex items-center justify-between cursor-pointer">
