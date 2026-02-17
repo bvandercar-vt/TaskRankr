@@ -27,12 +27,8 @@ import {
   SORT_ORDER_MAP,
 } from '@/lib/task-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
-import {
-  type FieldConfig,
-  SortOption,
-  TaskStatus,
-  type TaskWithSubtasks,
-} from '~/shared/schema'
+import type { TaskWithSubtasks } from '@/types'
+import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
 
 const SortButtons = ({
   sortBy,

@@ -19,7 +19,8 @@ import {
   getDirectSubtasks,
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
-import { TaskStatus, type TaskWithSubtasks } from '~/shared/schema'
+import type { TaskWithSubtasks } from '@/types'
+import { TaskStatus } from '~/shared/schema'
 
 const ColumnHeaders = () => (
   <div className="flex items-center gap-1 shrink-0 justify-end">
