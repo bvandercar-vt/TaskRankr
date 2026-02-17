@@ -400,6 +400,24 @@ export const LocalStateProvider = ({
         })
       }
 
+      if (
+        updates.inheritCompletionState === true &&
+        updatedTask &&
+        updatedTask.status === TaskStatus.COMPLETED &&
+        getHasIncompleteSubtasks(tasksRef.current, id)
+      ) {
+        updateTaskById(id, () => ({
+          status: TaskStatus.OPEN,
+          completedAt: null,
+          inProgressStartedAt: null,
+        }))
+        enqueue({
+          type: SyncOperationType.SET_STATUS,
+          id,
+          status: TaskStatus.OPEN,
+        })
+      }
+
       if (updates.parentId != null && updatedTask) {
         const parent = getTaskById(tasksRef.current, updates.parentId)
         if (
