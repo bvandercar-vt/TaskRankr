@@ -239,14 +239,29 @@ export class DatabaseStorage implements IStorage {
     )
 
     if (allCompleted) {
+      const completionUpdate: Partial<InsertTask> & {
+        completedAt?: Date | null
+      } = {
+        status: TaskStatus.COMPLETED,
+        completedAt: new Date(),
+        inProgressStartedAt: null,
+      }
+
+      if (parent.parentId) {
+        const grandparent = await this.getTask(parent.parentId, userId)
+        if (grandparent?.autoHideCompleted) {
+          completionUpdate.hidden = true
+        }
+      }
+
       await db
         .update(tasks)
-        .set({
-          status: TaskStatus.COMPLETED,
-          completedAt: new Date(),
-          inProgressStartedAt: null,
-        })
+        .set(completionUpdate)
         .where(eq(tasks.id, parentId))
+
+      if (parent.parentId) {
+        await this.checkInheritCompletionState(parent.parentId, userId, parentId)
+      }
     }
   }
 
