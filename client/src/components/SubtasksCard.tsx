@@ -49,6 +49,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { Icon } from './primitives/LucideIcon'
 
 interface SubtaskSettingsProps {
   taskId: number
@@ -228,13 +229,13 @@ const SubtaskSettings = ({
               {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="text-xs text-muted-foreground">
-                  Auto-complete main task when all subtasks complete
+                  Auto-complete main task when all subtasks are complete
                 </span>
                 <Switch
                   checked={inheritCompletionState}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={(checked) =>
                     updateTask({ id: taskId, inheritCompletionState: checked })
-                  }}
+                  }
                   data-testid="switch-inherit-completion-state"
                 />
               </label>
@@ -242,13 +243,13 @@ const SubtaskSettings = ({
               {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="text-xs text-muted-foreground">
-                  Auto-hide completed
+                  Auto-hide completed subtasks
                 </span>
                 <Switch
                   checked={autoHideCompleted}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={(checked) =>
                     updateTask({ id: taskId, autoHideCompleted: checked })
-                  }}
+                  }
                   data-testid="switch-auto-hide-completed"
                 />
               </label>
@@ -263,14 +264,11 @@ const SubtaskSettings = ({
                     className="text-xs text-muted-foreground"
                     data-testid="button-show-hidden"
                   >
-                    {showHidden ? (
-                      <EyeOff className="size-3.5" />
-                    ) : (
-                      <Eye className="size-3.5" />
-                    )}
-                    {showHidden
-                      ? `Hide Hidden (${hiddenCount})`
-                      : `Show Hidden (${hiddenCount})`}
+                    <Icon
+                      icon={showHidden ? EyeOff : Eye}
+                      className="size-3.5"
+                    />
+                    {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
                   </Button>
                 </div>
               )}
