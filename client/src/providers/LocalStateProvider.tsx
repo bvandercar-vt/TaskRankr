@@ -544,22 +544,61 @@ export const LocalStateProvider = ({
       }
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
-        const parent = getTaskById(tasksRef.current, updatedTask.parentId)
-        if (parent?.inheritCompletionState) {
-          const siblings = getDirectSubtasks(
-            tasksRef.current,
-            parent.id,
-          ).filter((t) => t.id !== id)
-          const allSiblingsCompleted = siblings.every(
-            (t) => t.status === TaskStatus.COMPLETED,
-          )
-          if (allSiblingsCompleted) {
-            updateTaskById(parent.id, () => ({
+        const autoCompletedParents: number[] = []
+
+        setTasks((prev) => {
+          let updated = prev
+          let currentTaskId = id
+          let currentParentId: number | null = updatedTask.parentId
+
+          while (currentParentId !== null) {
+            const parent = updated.find((t) => t.id === currentParentId)
+            if (
+              !parent?.inheritCompletionState ||
+              parent.status === TaskStatus.COMPLETED
+            )
+              break
+
+            const siblings = updated.filter(
+              (t) => t.parentId === parent.id && t.id !== currentTaskId,
+            )
+            if (!siblings.every((t) => t.status === TaskStatus.COMPLETED))
+              break
+
+            const parentUpdate: Partial<Task> = {
               status: TaskStatus.COMPLETED,
               completedAt: new Date(),
               inProgressStartedAt: null,
-            }))
+            }
+
+            if (parent.parentId) {
+              const grandparent = updated.find(
+                (t) => t.id === parent.parentId,
+              )
+              if (grandparent?.autoHideCompleted) {
+                parentUpdate.hidden = true
+              }
+            }
+
+            updated = updated.map((t) =>
+              t.id === parent.id ? { ...t, ...parentUpdate } : t,
+            )
+            autoCompletedParents.push(parent.id)
+
+            currentTaskId = parent.id
+            currentParentId = parent.parentId
           }
+
+          return updated === prev ? prev : updated
+        })
+
+        for (const parentId of autoCompletedParents) {
+          enqueue({
+            type: SyncOperationType.SET_STATUS,
+            id: parentId,
+            status: TaskStatus.COMPLETED,
+          })
+          debugLog.log('task', 'inheritCompletion', { parentId })
         }
       }
 
