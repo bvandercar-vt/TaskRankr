@@ -4,7 +4,7 @@ import { Routes } from '@/lib/constants'
 import { useGuestMode } from '@/providers/GuestModeProvider'
 import { useSyncSafe } from '@/providers/SyncProvider'
 import { authPaths } from '~/shared/constants'
-import { Button } from './primitives/Button'
+import { Button } from '../primitives/Button'
 
 export const StatusBanner = () => {
   const { isGuestMode, exitGuestMode } = useGuestMode()

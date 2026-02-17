@@ -27,7 +27,7 @@ import { ExpandedTasksProvider } from '@/providers/ExpandedTasksProvider'
 import { GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
 import { LocalStateProvider, StorageMode } from '@/providers/LocalStateProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
-import { StatusBanner } from './components/StatusBanner'
+import { StatusBanner } from './components/AppInfo/StatusBanner'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 

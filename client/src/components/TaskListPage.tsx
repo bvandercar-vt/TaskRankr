@@ -2,9 +2,9 @@
 
 import type React from 'react'
 
+import { HowToUseBanner } from './AppInfo/HowToUseBanner'
+import { InstallBanner } from './AppInfo/InstallBanner'
 import { DropdownMenuHeader } from './DropdownMenuHeader'
-import { HowToUseBanner } from './HowToUseBanner'
-import { InstallBanner } from './InstallBanner'
 import { PageLoading } from './PageStates'
 
 export const TaskListPageHeader = ({
