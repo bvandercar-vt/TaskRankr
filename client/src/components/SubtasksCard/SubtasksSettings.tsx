@@ -9,6 +9,126 @@ import { cn } from '@/lib/utils'
 import { SubtaskSortMode } from '~/shared/schema'
 import { Icon } from '../primitives/LucideIcon'
 
+const SortingMethodSwitch = ({
+  taskId,
+  directChildIds,
+  sortMode,
+  onSortModeChange,
+}: {
+  taskId: number
+  directChildIds: number[]
+  sortMode: SubtaskSortMode
+  onSortModeChange: (mode: SubtaskSortMode) => void
+}) => {
+  const { updateTask, reorderSubtasks } = useTaskActions()
+
+  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
+
+  const handleSortToggle = () => {
+    const newMode: SubtaskSortMode = isManualSortMode
+      ? SubtaskSortMode.INHERIT
+      : SubtaskSortMode.MANUAL
+
+    onSortModeChange(newMode)
+
+    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
+      reorderSubtasks(taskId, directChildIds)
+    }
+
+    updateTask({ id: taskId, subtaskSortMode: newMode })
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className="text-xs text-muted-foreground"
+          data-testid="label-sorting-method"
+        >
+          Sorting Method
+        </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div
+            className="inline-flex rounded-md border border-white/10 overflow-hidden"
+            role="radiogroup"
+            aria-label="Subtask sort order"
+            data-testid="toggle-sort-mode"
+          >
+            <label
+              className={cn(
+                'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                isManualSortMode
+                  ? 'bg-transparent text-muted-foreground'
+                  : 'bg-primary text-primary-foreground',
+              )}
+              data-testid="toggle-sort-inherit"
+            >
+              <input
+                type="radio"
+                name="subtask-sort-mode"
+                value={SubtaskSortMode.INHERIT}
+                checked={!isManualSortMode}
+                onChange={() => isManualSortMode && handleSortToggle()}
+                className="sr-only"
+              />
+              Inherit
+            </label>
+            <label
+              className={cn(
+                'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                isManualSortMode
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-transparent text-muted-foreground',
+              )}
+              data-testid="toggle-sort-manual"
+            >
+              <input
+                type="radio"
+                name="subtask-sort-mode"
+                value={SubtaskSortMode.MANUAL}
+                checked={isManualSortMode}
+                onChange={() => !isManualSortMode && handleSortToggle()}
+                className="sr-only"
+              />
+              Manual
+            </label>
+          </div>
+        </div>
+      </div>
+      <span
+        className="block text-[11px] text-muted-foreground/70 leading-snug text-right"
+        data-testid="text-sort-caption"
+      >
+        {isManualSortMode
+          ? 'Drag subtasks into your preferred order using the grip handles.'
+          : 'Subtasks follow the same sort order as the main task list.'}
+      </span>
+    </div>
+  )
+}
+
+const SwitchRow = ({
+  label,
+  checked,
+  onCheckedChange,
+  'data-testid': dataTestId,
+}: {
+  label: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  'data-testid'?: string
+}) => (
+  // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
+  <label className="flex items-center justify-between cursor-pointer">
+    <span className="text-xs text-muted-foreground">{label}</span>
+    <Switch
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+      data-testid={dataTestId}
+    />
+  </label>
+)
+
 export interface SubtaskSettingsProps {
   taskId: number
   sortMode: SubtaskSortMode
@@ -36,92 +156,18 @@ const SubtasksSettingsMenu = ({
   onShowNumbersChange,
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
-  const { updateTask, reorderSubtasks } = useTaskActions()
+  const { updateTask } = useTaskActions()
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
-  const handleSortToggle = () => {
-    const newMode: SubtaskSortMode = isManualSortMode
-      ? SubtaskSortMode.INHERIT
-      : SubtaskSortMode.MANUAL
-
-    onSortModeChange(newMode)
-
-    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks(taskId, directChildIds)
-    }
-
-    updateTask({ id: taskId, subtaskSortMode: newMode })
-  }
-
   return (
     <div className="px-3 py-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-3">
-          <span
-            className="text-xs text-muted-foreground"
-            data-testid="label-sorting-method"
-          >
-            Sorting Method
-          </span>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div
-              className="inline-flex rounded-md border border-white/10 overflow-hidden"
-              role="radiogroup"
-              aria-label="Subtask sort order"
-              data-testid="toggle-sort-mode"
-            >
-              <label
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  isManualSortMode
-                    ? 'bg-transparent text-muted-foreground'
-                    : 'bg-primary text-primary-foreground',
-                )}
-                data-testid="toggle-sort-inherit"
-              >
-                <input
-                  type="radio"
-                  name="subtask-sort-mode"
-                  value={SubtaskSortMode.INHERIT}
-                  checked={!isManualSortMode}
-                  onChange={() => isManualSortMode && handleSortToggle()}
-                  className="sr-only"
-                />
-                Inherit
-              </label>
-              <label
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                  isManualSortMode
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-transparent text-muted-foreground',
-                )}
-                data-testid="toggle-sort-manual"
-              >
-                <input
-                  type="radio"
-                  name="subtask-sort-mode"
-                  value={SubtaskSortMode.MANUAL}
-                  checked={isManualSortMode}
-                  onChange={() => !isManualSortMode && handleSortToggle()}
-                  className="sr-only"
-                />
-                Manual
-              </label>
-            </div>
-          </div>
-        </div>
-        <span
-          className="block text-[11px] text-muted-foreground/70 leading-snug text-right"
-          data-testid="text-sort-caption"
-        >
-          {isManualSortMode
-            ? 'Drag subtasks into your preferred order using the grip handles.'
-            : 'Subtasks follow the same sort order as the main task list.'}
-        </span>
-      </div>
-
+      <SortingMethodSwitch
+        taskId={taskId}
+        directChildIds={directChildIds}
+        sortMode={sortMode}
+        onSortModeChange={onSortModeChange}
+      />
       <AnimatePresence>
         {isManualSortMode && (
           <motion.div
@@ -131,54 +177,39 @@ const SubtasksSettingsMenu = ({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs text-muted-foreground">
-                Show numbers
-              </span>
-              <Switch
-                checked={showNumbers}
-                onCheckedChange={(checked) => {
-                  onShowNumbersChange(checked)
-                  updateTask({
-                    id: taskId,
-                    subtasksShowNumbers: checked,
-                  })
-                }}
-                data-testid="switch-show-numbers"
-              />
-            </label>
+            <SwitchRow
+              label="Show numbers"
+              checked={showNumbers}
+              onCheckedChange={(checked) => {
+                onShowNumbersChange(checked)
+                updateTask({
+                  id: taskId,
+                  subtasksShowNumbers: checked,
+                })
+              }}
+              data-testid="switch-show-numbers"
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-xs text-muted-foreground">
-          Auto-complete main task when all subtasks are complete
-        </span>
-        <Switch
-          checked={inheritCompletionState}
-          onCheckedChange={(checked) =>
-            updateTask({ id: taskId, inheritCompletionState: checked })
-          }
-          data-testid="switch-inherit-completion-state"
-        />
-      </label>
+      <SwitchRow
+        label="Auto-complete main task when all subtasks are complete"
+        checked={inheritCompletionState}
+        onCheckedChange={(checked) =>
+          updateTask({ id: taskId, inheritCompletionState: checked })
+        }
+        data-testid="switch-inherit-completion-state"
+      />
 
-      {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-      <label className="flex items-center justify-between cursor-pointer">
-        <span className="text-xs text-muted-foreground">
-          Auto-hide completed subtasks
-        </span>
-        <Switch
-          checked={autoHideCompleted}
-          onCheckedChange={(checked) =>
-            updateTask({ id: taskId, autoHideCompleted: checked })
-          }
-          data-testid="switch-auto-hide-completed"
-        />
-      </label>
+      <SwitchRow
+        label="Auto-hide completed subtasks"
+        checked={autoHideCompleted}
+        onCheckedChange={(checked) =>
+          updateTask({ id: taskId, autoHideCompleted: checked })
+        }
+        data-testid="switch-auto-hide-completed"
+      />
 
       {hiddenCount > 0 && (
         <div className="flex justify-center">
@@ -190,7 +221,7 @@ const SubtasksSettingsMenu = ({
             className="text-xs text-muted-foreground"
             data-testid="button-show-hidden"
           >
-            <Icon icon={showHidden ? EyeOff : Eye} className="size-3.5" />
+            <Icon icon={showHidden ? EyeOff : Eye} className="size-3.5" aria-hidden/>
             {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
           </Button>
         </div>
