@@ -221,7 +221,11 @@ const SubtasksSettingsMenu = ({
             className="text-xs text-muted-foreground"
             data-testid="button-show-hidden"
           >
-            <Icon icon={showHidden ? EyeOff : Eye} className="size-3.5" aria-hidden/>
+            <Icon
+              icon={showHidden ? EyeOff : Eye}
+              className="size-3.5"
+              aria-hidden
+            />
             {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
           </Button>
         </div>

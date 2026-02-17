@@ -17,165 +17,22 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import {
-  Check,
-  EyeOff,
-  GripVertical,
-  Link,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react'
+import { Link, Plus } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
-import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
   getDirectSubtasks,
-  getHasIncompleteSubtasks,
   getTaskById,
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
 import { SubtasksSettings } from './SubtasksSettings'
-
-type Subtask = Task & { depth: number; subtaskIndex?: number }
-
-interface SubtaskItemProps {
-  task: Subtask
-  allTasks: Task[]
-  onEdit?: (task: Task) => void
-  onDelete: (task: DeleteTaskArgs) => void
-  onToggleComplete: (task: Task) => void
-  isManualSortMode: boolean
-  isDragDisabled?: boolean
-  isHiddenItem?: boolean
-}
-
-const SubtaskItem = ({
-  task,
-  allTasks,
-  onEdit,
-  onDelete,
-  onToggleComplete,
-  isManualSortMode,
-  isDragDisabled,
-  isHiddenItem,
-}: SubtaskItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id, disabled: isDragDisabled })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    paddingLeft: `${12 + task.depth * 16}px`,
-  }
-
-  const isDirect = task.depth === 0
-  const showDragHandle = isManualSortMode && isDirect
-  const isCompleted = task.status === TaskStatus.COMPLETED
-  const disableComplete =
-    !isCompleted && getHasIncompleteSubtasks(allTasks, task.id)
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        'flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none',
-        isDragging && 'opacity-50 bg-secondary/20',
-      )}
-      data-testid={`subtask-row-${task.id}`}
-    >
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        {showDragHandle && (
-          <button
-            type="button"
-            className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-muted-foreground"
-            {...attributes}
-            {...listeners}
-            data-testid={`drag-handle-${task.id}`}
-          >
-            <GripVertical className="size-4" />
-          </button>
-        )}
-        {task.depth > 0 && (
-          <span className="text-muted-foreground/50 text-xs leading-none">
-            └
-          </span>
-        )}
-        <SubtaskBlockedTooltip blocked={disableComplete}>
-          <button
-            type="button"
-            onClick={() => !disableComplete && onToggleComplete(task)}
-            className={cn(
-              'shrink-0 h-4 w-4 rounded-sm border transition-colors',
-              disableComplete
-                ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
-                : isCompleted
-                  ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
-                  : 'border-muted-foreground/40 hover:border-muted-foreground',
-            )}
-            data-testid={`checkbox-complete-subtask-${task.id}`}
-          >
-            {isCompleted && <Check className="size-3 mx-auto" />}
-          </button>
-        </SubtaskBlockedTooltip>
-        <span
-          className={cn(
-            'text-sm break-words',
-            isCompleted && 'line-through text-muted-foreground',
-          )}
-        >
-          {task.subtaskIndex !== undefined && (
-            <span className="text-muted-foreground mr-1">
-              {task.subtaskIndex + 1}.
-            </span>
-          )}
-          {task.name}
-        </span>
-        {isHiddenItem && (
-          <EyeOff className="size-3 text-muted-foreground/50 shrink-0 ml-1" />
-        )}
-      </div>
-      <div className="flex items-center gap-1">
-        {onEdit && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(task)}
-            data-testid={`button-edit-subtask-${task.id}`}
-          >
-            <Pencil className="size-4" />
-          </Button>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(task)}
-          data-testid={`button-delete-subtask-${task.id}`}
-        >
-          <Trash2 className="size-4 text-destructive" />
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 const SUBTASK_ACTION_BTN_STYLE =
   'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
@@ -196,14 +53,13 @@ export const SubtasksCard = ({
   onAssignSubtask,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
-  const { setTaskStatus, reorderSubtasks } = useTaskActions()
+  const { reorderSubtasks } = useTaskActions()
 
   const task = getTaskById(allTasks, taskProp.id) ?? taskProp
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
   )
-  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
   const [showNumbers, setShowNumbers] = useState(task.subtasksShowNumbers)
   const [showHidden, setShowHidden] = useState(false)
 
@@ -354,20 +210,12 @@ export const SubtasksCard = ({
             >
               <div className="divide-y divide-white/5">
                 {visibleSubtasks.map((subtask) => (
-                  <SubtaskItem
+                  <SubtaskRowItem
                     key={subtask.id}
                     task={subtask}
-                    allTasks={allTasks}
                     onEdit={onEditSubtask}
                     onDelete={(t) => onDeleteSubtask?.(t)}
-                    onToggleComplete={(t) => {
-                      const newStatus =
-                        t.status === TaskStatus.COMPLETED
-                          ? TaskStatus.OPEN
-                          : TaskStatus.COMPLETED
-                      setTaskStatus(t.id, newStatus)
-                    }}
-                    isManualSortMode={isManualSortMode}
+                    sortMode={sortMode}
                     isDragDisabled={false}
                     isHiddenItem={hiddenSubtaskIds.has(subtask.id)}
                   />

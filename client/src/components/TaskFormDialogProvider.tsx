@@ -6,7 +6,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { AssignSubtaskDialog } from '@/components/AssignSubtaskDialog'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import {
   Dialog,
@@ -15,7 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { SubtaskActionDialog } from '@/components/SubtaskActionDialog'
+import { AssignSubtaskDialog } from '@/components/SubtasksCard/AssignSubtaskDialog'
+import { SubtaskActionDialog } from '@/components/SubtasksCard/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
