@@ -386,32 +386,33 @@ export const TaskForm = ({
                 </div>
               )}
 
-              {(!initialData || initialData.status !== TaskStatus.COMPLETED) && (
-                  <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
-                    {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
-                    <label
-                      className={cn(
-                        'flex items-center justify-between gap-4',
-                        hasIncompleteSubtasks
-                          ? 'cursor-not-allowed opacity-50'
-                          : 'cursor-pointer',
-                      )}
-                      data-testid="checkbox-mark-completed"
-                    >
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Completed
-                      </div>
-                      <Checkbox
-                        checked={markCompleted}
-                        disabled={hasIncompleteSubtasks}
-                        onCheckedChange={(checked) =>
-                          setMarkCompleted(checked === true)
-                        }
-                        className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                      />
-                    </label>
-                  </SubtaskBlockedTooltip>
-                )}
+              {(!initialData ||
+                initialData.status !== TaskStatus.COMPLETED) && (
+                <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
+                  {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
+                  <label
+                    className={cn(
+                      'flex items-center justify-between gap-4',
+                      hasIncompleteSubtasks
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'cursor-pointer',
+                    )}
+                    data-testid="checkbox-mark-completed"
+                  >
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Completed
+                    </div>
+                    <Checkbox
+                      checked={markCompleted}
+                      disabled={hasIncompleteSubtasks}
+                      onCheckedChange={(checked) =>
+                        setMarkCompleted(checked === true)
+                      }
+                      className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    />
+                  </label>
+                </SubtaskBlockedTooltip>
+              )}
             </div>
           </div>
         </div>
