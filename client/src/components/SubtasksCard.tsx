@@ -102,7 +102,7 @@ const SubtaskSettings = ({
         onClick={() => setSettingsOpen(!settingsOpen)}
         data-testid="button-subtask-settings"
       >
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 text-foreground">
           <Settings2 className="size-3.5" />
           Settings
         </span>
@@ -151,7 +151,7 @@ const SubtaskSettings = ({
                       'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                       isManualSortMode
                         ? 'bg-transparent text-muted-foreground'
-                        : 'bg-secondary text-foreground',
+                        : 'bg-primary text-primary-foreground',
                     )}
                     data-testid="toggle-sort-inherit"
                   >
@@ -169,7 +169,7 @@ const SubtaskSettings = ({
                     className={cn(
                       'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                       isManualSortMode
-                        ? 'bg-secondary text-foreground'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-transparent text-muted-foreground',
                     )}
                     data-testid="toggle-sort-manual"
@@ -188,7 +188,7 @@ const SubtaskSettings = ({
               </div>
             </div>
             <span
-              className="text-[11px] text-muted-foreground/70 leading-snug"
+              className="text-[11px] text-muted-foreground/70 leading-snug text-right"
               data-testid="text-sort-caption"
             >
               {isManualSortMode
