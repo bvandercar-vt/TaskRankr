@@ -115,75 +115,77 @@ const SubtaskSettings = ({
       </button>
       {settingsOpen && (
         <div className="px-3 pb-2.5 space-y-3 bg-secondary/5">
-          <div className="flex flex-col gap-1.5">
-            <span
-              className="text-xs font-medium text-muted-foreground"
-              data-testid="label-sorting-method"
-            >
-              Sorting Method
-            </span>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div
-                className="inline-flex rounded-md border border-white/10 overflow-hidden"
-                role="radiogroup"
-                aria-label="Subtask sort order"
-                data-testid="toggle-sort-mode"
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <span
+                className="text-xs text-muted-foreground"
+                data-testid="label-sorting-method"
               >
-                <label
-                  className={cn(
-                    'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                    isManualSortMode
-                      ? 'bg-transparent text-muted-foreground'
-                      : 'bg-secondary text-foreground',
-                  )}
-                  data-testid="toggle-sort-inherit"
+                Sorting Method
+              </span>
+              <div className="flex items-center gap-3 flex-wrap">
+                {isManualSortMode && (
+                  // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-xs text-muted-foreground">
+                      Show numbers
+                    </span>
+                    <Switch
+                      checked={showNumbers}
+                      onCheckedChange={(checked) => {
+                        onShowNumbersChange(checked)
+                        updateTask({ id: taskId, subtasksShowNumbers: checked })
+                      }}
+                      data-testid="switch-show-numbers"
+                    />
+                  </label>
+                )}
+                <div
+                  className="inline-flex rounded-md border border-white/10 overflow-hidden"
+                  role="radiogroup"
+                  aria-label="Subtask sort order"
+                  data-testid="toggle-sort-mode"
                 >
-                  <input
-                    type="radio"
-                    name="subtask-sort-mode"
-                    value={SubtaskSortMode.INHERIT}
-                    checked={!isManualSortMode}
-                    onChange={() => isManualSortMode && handleSortToggle()}
-                    className="sr-only"
-                  />
-                  Inherit
-                </label>
-                <label
-                  className={cn(
-                    'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                    isManualSortMode
-                      ? 'bg-secondary text-foreground'
-                      : 'bg-transparent text-muted-foreground',
-                  )}
-                  data-testid="toggle-sort-manual"
-                >
-                  <input
-                    type="radio"
-                    name="subtask-sort-mode"
-                    value={SubtaskSortMode.MANUAL}
-                    checked={isManualSortMode}
-                    onChange={() => !isManualSortMode && handleSortToggle()}
-                    className="sr-only"
-                  />
-                  Manual
-                </label>
+                  <label
+                    className={cn(
+                      'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                      isManualSortMode
+                        ? 'bg-transparent text-muted-foreground'
+                        : 'bg-secondary text-foreground',
+                    )}
+                    data-testid="toggle-sort-inherit"
+                  >
+                    <input
+                      type="radio"
+                      name="subtask-sort-mode"
+                      value={SubtaskSortMode.INHERIT}
+                      checked={!isManualSortMode}
+                      onChange={() => isManualSortMode && handleSortToggle()}
+                      className="sr-only"
+                    />
+                    Inherit
+                  </label>
+                  <label
+                    className={cn(
+                      'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                      isManualSortMode
+                        ? 'bg-secondary text-foreground'
+                        : 'bg-transparent text-muted-foreground',
+                    )}
+                    data-testid="toggle-sort-manual"
+                  >
+                    <input
+                      type="radio"
+                      name="subtask-sort-mode"
+                      value={SubtaskSortMode.MANUAL}
+                      checked={isManualSortMode}
+                      onChange={() => !isManualSortMode && handleSortToggle()}
+                      className="sr-only"
+                    />
+                    Manual
+                  </label>
+                </div>
               </div>
-              {isManualSortMode && (
-                // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
-                <label className="flex items-center gap-1.5 flex-1 justify-end cursor-pointer">
-                  <span className="text-xs text-muted-foreground">
-                    Show numbers
-                  </span>
-                  <Switch
-                    checked={showNumbers}
-                    onCheckedChange={(checked) => {
-                      onShowNumbersChange(checked)
-                      updateTask({ id: taskId, subtasksShowNumbers: checked })
-                    }}
-                    data-testid="switch-show-numbers"
-                  />
-                </label>
-              )}
             </div>
             <span
               className="text-[11px] text-muted-foreground/70 leading-snug"
