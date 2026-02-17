@@ -114,7 +114,7 @@ const SubtaskSettings = ({
         />
       </button>
       {settingsOpen && (
-        <div className="px-3 pb-2.5 space-y-3 bg-secondary/5">
+        <div className="px-3 pb-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-3">
               <span
