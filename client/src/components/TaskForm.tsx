@@ -237,7 +237,12 @@ export const TaskForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          onSubmit(omit(data, ['subtaskSortMode', 'subtaskOrder']))
+          const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
+          if (markCompleted) {
+            submitted.status = TaskStatus.COMPLETED
+            submitted.completedAt = new Date()
+          }
+          onSubmit(submitted)
           if (markCompleted && initialData && onMarkCompleted) {
             onMarkCompleted(initialData.id)
           }
@@ -381,9 +386,7 @@ export const TaskForm = ({
                 </div>
               )}
 
-              {initialData &&
-                initialData.status !== TaskStatus.COMPLETED &&
-                onMarkCompleted && (
+              {(!initialData || initialData.status !== TaskStatus.COMPLETED) && (
                   <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
                     {/* biome-ignore lint/a11y/noLabelWithoutControl: Checkbox is an input. */}
                     <label
