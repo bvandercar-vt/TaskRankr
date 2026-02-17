@@ -15,7 +15,7 @@ import {
   Search,
   Settings,
 } from 'lucide-react'
-import { Link, useLocation } from 'wouter'
+import { useLocation } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import {
@@ -109,36 +109,32 @@ export const DropdownMenuHeader = ({
               data-testid="menu-item-search"
             />
             {isHome ? (
-              <Link href={Routes.COMPLETED}>
-                <DropdownMenuItem
-                  icon={CheckCircle2}
-                  label="Completed Tasks"
-                  data-testid="menu-item-completed"
-                />
-              </Link>
+              <DropdownMenuItem
+                icon={CheckCircle2}
+                label="Completed Tasks"
+                href={Routes.COMPLETED}
+                data-testid="menu-item-completed"
+              />
             ) : (
-              <Link href={Routes.HOME}>
-                <DropdownMenuItem
-                  icon={Home}
-                  label="Home (Open Tasks)"
-                  data-testid="menu-item-home"
-                />
-              </Link>
+              <DropdownMenuItem
+                icon={Home}
+                label="Home (Open Tasks)"
+                href={Routes.HOME}
+                data-testid="menu-item-home"
+              />
             )}
-            <Link href={Routes.SETTINGS}>
-              <DropdownMenuItem
-                icon={Settings}
-                label="Settings"
-                data-testid="menu-item-settings"
-              />
-            </Link>
-            <Link href={Routes.HOW_TO_USE}>
-              <DropdownMenuItem
-                icon={HelpCircle}
-                label="How To Use"
-                data-testid="menu-item-how-to-use"
-              />
-            </Link>
+            <DropdownMenuItem
+              icon={Settings}
+              label="Settings"
+              href={Routes.SETTINGS}
+              data-testid="menu-item-settings"
+            />
+            <DropdownMenuItem
+              icon={HelpCircle}
+              label="How To Use"
+              href={Routes.HOW_TO_USE}
+              data-testid="menu-item-how-to-use"
+            />
             {isGuestMode && (
               <>
                 <DropdownMenuSeparator />

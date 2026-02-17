@@ -80,8 +80,8 @@ const HowToUse = () => {
                 <div className="mb-4">
                   Use the sort buttons at the top of the task list to order
                   tasks by date created, priority, ease, enjoyment, or time. You
-                  can customize which rank fields are visible in{' '}
-                  <F>Settings</F>.
+                  can customize which rank fields are visible in <F>Settings</F>
+                  .
                 </div>
                 <SortInfo defaultExpanded={false} />
               </>
@@ -125,7 +125,8 @@ const HowToUse = () => {
               <>
                 Break down large tasks into subtasks by tapping a task and using
                 the <F>Add Subtask</F> button. Subtasks can have their own
-                subtasks, creating a hierarchical structure for complex projects.
+                subtasks, creating a hierarchical structure for complex
+                projects.
               </>
             }
             data-testid="card-nested-tasks"
@@ -187,8 +188,8 @@ const HowToUse = () => {
               description={
                 <>
                   Configure which rank fields are visible or required, toggle
-                  features like <F>Auto-Pin New Tasks</F>,{' '}
-                  <F>In Progress</F> status, time tracking, and more.
+                  features like <F>Auto-Pin New Tasks</F>, <F>In Progress</F>{' '}
+                  status, time tracking, and more.
                 </>
               }
               data-testid="card-settings"

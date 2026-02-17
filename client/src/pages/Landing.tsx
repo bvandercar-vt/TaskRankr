@@ -13,7 +13,6 @@ import {
   Star,
   WifiOff,
 } from 'lucide-react'
-import { Link } from 'wouter'
 
 import { Button } from '@/components/primitives/Button'
 import { Routes } from '@/lib/constants'
@@ -116,16 +115,15 @@ const Landing = () => {
 
         {!isStandalone && (
           <div className="mt-8 flex justify-center">
-            <Link href={Routes.HOW_TO_INSTALL}>
-              <Button
-                size="lg"
-                className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
-                data-testid="button-how-to-install"
-              >
-                <Download className="size-5" />
-                Install as App
-              </Button>
-            </Link>
+            <Button
+              href={Routes.HOW_TO_INSTALL}
+              size="lg"
+              className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
+              data-testid="button-how-to-install"
+            >
+              <Download className="size-5" />
+              Install as App
+            </Button>
           </div>
         )}
       </main>
