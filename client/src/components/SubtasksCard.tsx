@@ -114,8 +114,16 @@ const SubtaskSettings = ({
           )}
         />
       </button>
-      {settingsOpen && (
-        <div className="px-3 pb-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
+      <AnimatePresence>
+        {settingsOpen && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
+        >
+        <div className="px-3 py-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-3">
               <span
@@ -199,8 +207,8 @@ const SubtaskSettings = ({
                   <Switch
                     checked={showNumbers}
                     onCheckedChange={(checked) => {
-                      onShowNumbersChange(checked)
-                      updateTask({ id: taskId, subtasksShowNumbers: checked })
+                      onShowNumbersChange(checked);
+                      updateTask({ id: taskId, subtasksShowNumbers: checked });
                     }}
                     data-testid="switch-show-numbers"
                   />
@@ -238,20 +246,23 @@ const SubtaskSettings = ({
           </label>
 
           {hiddenCount > 0 && (
-            // biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch
-            <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs text-muted-foreground">
-                Show Hidden ({hiddenCount})
-              </span>
-              <Switch
-                checked={showHidden}
-                onCheckedChange={onShowHiddenChange}
-                data-testid="switch-show-hidden"
-              />
-            </label>
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onShowHiddenChange(!showHidden)}
+                className="text-xs"
+                data-testid="button-show-hidden"
+              >
+                {showHidden ? `Hide Hidden (${hiddenCount})` : `Show Hidden (${hiddenCount})`}
+              </Button>
+            </div>
           )}
         </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };
