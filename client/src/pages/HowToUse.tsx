@@ -25,12 +25,12 @@ import { SortInfo } from '@/components/AppInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
 import { CardSection } from '@/components/primitives/CardSection'
 import { IconCard } from '@/components/primitives/IconCard'
+import {
+  InlineEmphasized as Em,
+  InlineLink,
+} from '@/components/primitives/InlineText'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { Routes } from '@/lib/constants'
-
-const F = ({ children }: { children: React.ReactNode }) => (
-  <span className="font-medium text-amber-300">{children}</span>
-)
 
 const HowToUse = () => {
   const isStandalone = isStandalonePWA()
@@ -63,8 +63,8 @@ const HowToUse = () => {
             description={
               <>
                 Press and hold a task to open the status menu. From there you
-                can mark it as <F>Pinned</F>, <F>In Progress</F> (if setting
-                enabled), <F>Completed</F>, or <F>Delete</F> it.
+                can mark it as <Em>Pinned</Em>, <Em>In Progress</Em> (if setting
+                enabled), <Em>Completed</Em>, or <Em>Delete</Em> it.
               </>
             }
             data-testid="card-hold-to-change-status"
@@ -80,8 +80,8 @@ const HowToUse = () => {
                 <div className="mb-4">
                   Use the sort buttons at the top of the task list to order
                   tasks by date created, priority, ease, enjoyment, or time. You
-                  can customize which rank fields are visible in <F>Settings</F>
-                  .
+                  can customize which rank fields are visible in{' '}
+                  <InlineLink href={Routes.SETTINGS}>Settings</InlineLink>.
                 </div>
                 <SortInfo defaultExpanded={false} />
               </>
@@ -124,7 +124,7 @@ const HowToUse = () => {
             description={
               <>
                 Break down large tasks into subtasks by tapping a task and using
-                the <F>Add Subtask</F> button. Subtasks can have their own
+                the <Em>Add Subtask</Em> button. Subtasks can have their own
                 subtasks, creating a hierarchical structure for complex
                 projects.
               </>
@@ -137,7 +137,7 @@ const HowToUse = () => {
             description={
               <>
                 By default, subtasks follow the same sort order as the main
-                list. Toggle <F>Manual</F> mode in a task's subtasks panel to
+                list. Toggle <Em>Manual</Em> mode in a task's subtasks panel to
                 drag and reorder subtasks in a custom sequence, perfect for
                 step-by-step workflows. Also allows for automatic numbering of
                 subtasks as steps.
@@ -151,8 +151,8 @@ const HowToUse = () => {
             description={
               <>
                 Hide and unhide subtasks as desired. Hidden subtasks can be
-                revealed using the <F>Show Hidden</F> button. Enable{' '}
-                <F>Auto-Hide Completed</F> in a task's subtask settings to
+                revealed using the <Em>Show Hidden</Em> button. Enable{' '}
+                <Em>Auto-Hide Completed</Em> in a task's subtask settings to
                 automatically hide subtasks when they are marked as completed,
                 keeping your subtask list focused on what still needs to be
                 done.
@@ -165,7 +165,7 @@ const HowToUse = () => {
             title="Auto-Complete Parent"
             description={
               <>
-                Enable <F>Inherit Completion State</F> in the subtask settings
+                Enable <Em>Inherit Completion State</Em> in the subtask settings
                 to automatically mark the parent task as completed when all of
                 its subtasks are completed. If a subtask is later added or
                 reopened, the parent will revert back to open as well. This
@@ -188,8 +188,8 @@ const HowToUse = () => {
               description={
                 <>
                   Configure which rank fields are visible or required, toggle
-                  features like <F>Auto-Pin New Tasks</F>, <F>In Progress</F>{' '}
-                  status, time tracking, and more.
+                  features like <Em>Auto-Pin New Tasks</Em>,{' '}
+                  <Em>In Progress</Em> status, time tracking, and more.
                 </>
               }
               data-testid="card-settings"
