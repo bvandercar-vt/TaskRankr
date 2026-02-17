@@ -57,26 +57,33 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   ├── ScrollablePage.tsx  # Scrollable page wrapper for non-task-list pages
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
+│       │   ├── AppInfo/            # Informational/status components
+│       │   │   ├── ContactCard.tsx   # Contact/email card with optional debug download
+│       │   │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
+│       │   │   ├── InstallBanner.tsx  # PWA install prompt banner
+│       │   │   ├── SortInfo.tsx      # Reusable sort explanation component
+│       │   │   └── StatusBanner.tsx  # Auth/guest status banner
+│       │   ├── TaskForm/           # Task form and related components
+│       │   │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
+│       │   │   ├── TaskForm.tsx      # Full-screen task create/edit form
+│       │   │   ├── TaskFormDialogProvider.tsx  # Context for task form dialog state
+│       │   │   └── SubtasksCard/    # Subtask list with settings and drag-and-drop
+│       │   │       ├── index.ts          # Barrel export
+│       │   │       ├── SubtasksCard.tsx  # Main subtask list with DnD and hierarchy
+│       │   │       ├── SubtasksSettings.tsx  # Subtask settings panel (sort, hide, etc.)
+│       │   │       ├── SubtaskRowItem.tsx    # Individual subtask row with actions
+│       │   │       ├── AssignSubtaskDialog.tsx  # Dialog to assign existing task as subtask
+│       │   │       └── SubtaskActionDialog.tsx  # Cancel/Delete/Remove as Subtask dialog
 │       │   ├── BackButton.tsx    # Back navigation button to home
-│       │   ├── ContactCard.tsx   # Contact/email card with optional debug download
 │       │   ├── ErrorBoundary.tsx  # Global error boundary with red crash dialog
-│       │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
 │       │   ├── DropdownMenuHeader.tsx  # Page header with hamburger menu, title + search
 │       │   ├── PageStates.tsx    # Shared PageLoading, PageError, EmptyState
-│       │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
 │       │   ├── SortButton.tsx    # Sort option toggle button
-│       │   ├── StatusBanner.tsx  # Auth/guest status banner
-│       │   ├── SubtasksCard.tsx  # Subtask list with drag-and-drop and assign
 │       │   ├── TaskCard.tsx      # Task display with status indicators
-│       │   ├── TaskForm.tsx      # Full-screen task create/edit form
-|       |   ├── TaskFormDialogProvider.tsx  # Context for task form dialog state
 │       │   ├── TaskListPage.tsx  # TaskListPageWrapper, TaskListPageHeader, TaskListTreeLayout
 │       │   ├── ChangeStatusDialog.tsx  # Task status change modal
 │       │   ├── ConfirmDeleteDialog.tsx  # Permanent delete confirmation dialog
-│       │   ├── SubtaskActionDialog.tsx  # Cancel/Delete/Remove as Subtask dialog
-│       │   ├── AssignSubtaskDialog.tsx  # Dialog to assign existing task as subtask
-│       │   ├── SearchInput.tsx   # Reusable search input with icon
-│       │   └── SortInfo.tsx      # Reusable sort explanation component
+│       │   └── SearchInput.tsx   # Reusable search input with icon
 │       ├── hooks/
 │       │   ├── useAuth.ts        # Authentication state hook
 │       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
