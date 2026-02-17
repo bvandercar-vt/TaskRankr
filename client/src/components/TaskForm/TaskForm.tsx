@@ -28,9 +28,7 @@ import {
   PopoverTrigger,
 } from '@/components/primitives/overlays/Popover'
 import { TagChain } from '@/components/primitives/TagChain'
-import { RankFieldSelect } from '@/components/RankFieldSelect'
 import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
-import { SubtasksCard } from '@/components/SubtasksCard'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
@@ -47,6 +45,8 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
+import { RankFieldSelect } from './RankFieldSelect'
+import { SubtasksCard } from './SubtasksCard'
 
 const STUB_TASK: Task = {
   id: 0,

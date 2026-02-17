@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
-import { ContactCardStandalone } from '@/components/ContactCard'
+import { ContactCardStandalone } from '@/components/AppInfo/ContactCard'
 import { Button } from '@/components/primitives/Button'
 import { debugLog } from '@/lib/debug-logger'
 
