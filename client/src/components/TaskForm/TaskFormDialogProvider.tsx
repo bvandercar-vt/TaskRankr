@@ -14,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/overlays/Dialog'
-import { AssignSubtaskDialog } from '@/components/SubtasksCard/AssignSubtaskDialog'
-import { SubtaskActionDialog } from '@/components/SubtasksCard/SubtaskActionDialog'
-import { TaskForm, type TaskFormProps } from '@/components/TaskForm'
+import { AssignSubtaskDialog } from '@/components/TaskForm/SubtasksCard/AssignSubtaskDialog'
+import { SubtaskActionDialog } from '@/components/TaskForm/SubtasksCard/SubtaskActionDialog'
+import { TaskForm, type TaskFormProps } from '@/components/TaskForm/TaskForm'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
   DeleteTaskArgs,

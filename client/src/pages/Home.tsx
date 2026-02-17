@@ -12,7 +12,7 @@ import { Button } from '@/components/primitives/Button'
 import { Icon } from '@/components/primitives/LucideIcon'
 import { SortButton } from '@/components/SortButton'
 import { TaskCard } from '@/components/TaskCard'
-import { useTaskDialog } from '@/components/TaskFormDialogProvider'
+import { useTaskDialog } from '@/components/TaskForm/TaskFormDialogProvider'
 import {
   TaskListPageHeader,
   TaskListPageWrapper,

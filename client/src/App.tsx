@@ -9,7 +9,7 @@ import { Route, Switch, useLocation } from 'wouter'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
-import { TaskFormDialogProvider } from '@/components/TaskFormDialogProvider'
+import { TaskFormDialogProvider } from '@/components/TaskForm/TaskFormDialogProvider'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import {
