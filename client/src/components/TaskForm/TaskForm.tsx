@@ -238,13 +238,15 @@ export const TaskForm = ({
       <form
         onSubmit={form.handleSubmit((data) => {
           const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
-          if (markCompleted) {
+          if (markCompleted && initialData && onMarkCompleted) {
+            onSubmit(submitted)
+            onMarkCompleted(initialData.id)
+          } else if (markCompleted) {
             submitted.status = TaskStatus.COMPLETED
             submitted.completedAt = new Date()
-          }
-          onSubmit(submitted)
-          if (markCompleted && initialData && onMarkCompleted) {
-            onMarkCompleted(initialData.id)
+            onSubmit(submitted)
+          } else {
+            onSubmit(submitted)
           }
         })}
         className="flex flex-col h-full"
