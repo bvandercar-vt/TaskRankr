@@ -321,6 +321,8 @@ export const LocalStateProvider = ({
           'ease',
           'enjoyment',
           'time',
+          'status',
+          'completedAt',
           'subtaskSortMode',
           'subtaskOrder',
           'subtasksShowNumbers',
@@ -329,6 +331,15 @@ export const LocalStateProvider = ({
       }
 
       setTasks((prev) => {
+        const parent = data.parentId
+          ? prev.find((t) => t.id === data.parentId)
+          : undefined
+        if (
+          parent?.autoHideCompleted &&
+          newTask.status === TaskStatus.COMPLETED
+        ) {
+          newTask.hidden = true
+        }
         let updated = [...prev, newTask]
         if (data.parentId) {
           updated = updated.map((t) => {
@@ -351,7 +362,9 @@ export const LocalStateProvider = ({
         }
         return updated
       })
-      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data })
+      const syncData =
+        newTask.hidden && !data.hidden ? { ...data, hidden: true } : data
+      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data: syncData })
       debugLog.log('task', 'create', {
         tempId,
         name: data.name,

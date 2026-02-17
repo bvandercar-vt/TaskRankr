@@ -71,7 +71,7 @@ export const CollapsibleCard = ({
         {TitleElement}
         <ChevronDown
           className={cn(
-            'size-4 text-muted-foreground transition-transform duration-200',
+            'size-4 text-muted-foreground transition-transform duration-200 rotate-360',
             open && 'rotate-180',
           )}
         />
