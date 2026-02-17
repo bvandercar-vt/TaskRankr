@@ -98,7 +98,7 @@ const SubtaskSettings = ({
   }
 
   return (
-    <div className="border-b border-white/5">
+    <div className="border-y border-white/5">
       <button
         type="button"
         className="flex items-center justify-between w-full px-3 py-2 text-xs text-muted-foreground hover:bg-secondary/10 transition-colors"
@@ -111,7 +111,7 @@ const SubtaskSettings = ({
         </span>
         <ChevronDown
           className={cn(
-            'size-3.5 transition-transform duration-200',
+            'size-3.5 transition-transform duration-200 rotate-360',
             settingsOpen && 'rotate-180',
           )}
         />
@@ -560,7 +560,7 @@ export const SubtasksCard = ({
           defaultOpen
           noCard
           className="bg-secondary/10"
-          triggerClassName="p-3 hover:bg-secondary/20 transition-colors"
+          triggerClassName="p-3 border-b-1 border-white/10  hover:bg-secondary/20 transition-colors"
           contentClassName="mt-0"
           data-testid="button-toggle-subtasks"
         >
