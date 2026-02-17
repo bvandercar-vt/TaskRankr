@@ -560,7 +560,7 @@ export const SubtasksCard = ({
           defaultOpen
           noCard
           className="bg-secondary/10"
-          triggerClassName="p-3 border-b-1 border-white/10  hover:bg-secondary/20 transition-colors"
+          triggerClassName="p-3 hover:bg-secondary/20 transition-colors"
           contentClassName="mt-0"
           data-testid="button-toggle-subtasks"
         >
