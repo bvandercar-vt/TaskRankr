@@ -29,7 +29,7 @@ import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { Routes } from '@/lib/constants'
 
 const F = ({ children }: { children: React.ReactNode }) => (
-  <span className="font-medium text-foreground">{children}</span>
+  <span className="font-medium text-amber-300">{children}</span>
 )
 
 const HowToUse = () => {
