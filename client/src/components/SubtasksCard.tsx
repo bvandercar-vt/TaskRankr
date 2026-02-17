@@ -2,8 +2,7 @@
  * @fileoverview Subtask list with drag-and-drop reordering for the task form
  */
 
-import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from 'react'
 import {
   closestCenter,
   DndContext,
@@ -13,15 +12,16 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core'
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Check,
   ChevronDown,
@@ -33,35 +33,35 @@ import {
   Plus,
   Settings2,
   Trash2,
-} from "lucide-react";
+} from 'lucide-react'
 
-import { Button } from "@/components/primitives/Button";
-import { CollapsibleCard } from "@/components/primitives/CollapsibleCard";
-import { Switch } from "@/components/primitives/forms/Switch";
-import { SubtaskBlockedTooltip } from "@/components/SubtaskBlockedTooltip";
-import { useTaskActions, useTasks } from "@/hooks/useTasks";
+import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { Switch } from '@/components/primitives/forms/Switch'
+import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
   getDirectSubtasks,
   getHasIncompleteSubtasks,
   getTaskById,
   sortTasksByIdOrder,
-} from "@/lib/task-utils";
-import { cn } from "@/lib/utils";
-import type { DeleteTaskArgs } from "@/providers/LocalStateProvider";
-import { SubtaskSortMode, type Task, TaskStatus } from "~/shared/schema";
+} from '@/lib/task-utils'
+import { cn } from '@/lib/utils'
+import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
+import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
 interface SubtaskSettingsProps {
-  taskId: number;
-  sortMode: SubtaskSortMode;
-  showNumbers: boolean;
-  autoHideCompleted: boolean;
-  inheritCompletionState: boolean;
-  showHidden: boolean;
-  hiddenCount: number;
-  directChildIds: number[];
-  onSortModeChange: (mode: SubtaskSortMode) => void;
-  onShowNumbersChange: (show: boolean) => void;
-  onShowHiddenChange: (show: boolean) => void;
+  taskId: number
+  sortMode: SubtaskSortMode
+  showNumbers: boolean
+  autoHideCompleted: boolean
+  inheritCompletionState: boolean
+  showHidden: boolean
+  hiddenCount: number
+  directChildIds: number[]
+  onSortModeChange: (mode: SubtaskSortMode) => void
+  onShowNumbersChange: (show: boolean) => void
+  onShowHiddenChange: (show: boolean) => void
 }
 
 const SubtaskSettings = ({
@@ -77,24 +77,24 @@ const SubtaskSettings = ({
   onShowNumbersChange,
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
-  const { updateTask, reorderSubtasks } = useTaskActions();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { updateTask, reorderSubtasks } = useTaskActions()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
-  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL;
+  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
   const handleSortToggle = () => {
     const newMode: SubtaskSortMode = isManualSortMode
       ? SubtaskSortMode.INHERIT
-      : SubtaskSortMode.MANUAL;
+      : SubtaskSortMode.MANUAL
 
-    onSortModeChange(newMode);
+    onSortModeChange(newMode)
 
     if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks(taskId, directChildIds);
+      reorderSubtasks(taskId, directChildIds)
     }
 
-    updateTask({ id: taskId, subtaskSortMode: newMode });
-  };
+    updateTask({ id: taskId, subtaskSortMode: newMode })
+  }
 
   return (
     <div className="border-b border-white/5">
@@ -110,176 +110,189 @@ const SubtaskSettings = ({
         </span>
         <ChevronDown
           className={cn(
-            "size-3.5 transition-transform duration-200",
-            settingsOpen && "rotate-180",
+            'size-3.5 transition-transform duration-200',
+            settingsOpen && 'rotate-180',
           )}
         />
       </button>
       <AnimatePresence>
         {settingsOpen && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="overflow-hidden"
-        >
-        <div className="px-3 py-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <span
-                className="text-xs text-muted-foreground"
-                data-testid="label-sorting-method"
-              >
-                Sorting Method
-              </span>
-              <div className="flex items-center gap-3 flex-wrap">
-                <div
-                  className="inline-flex rounded-md border border-white/10 overflow-hidden"
-                  role="radiogroup"
-                  aria-label="Subtask sort order"
-                  data-testid="toggle-sort-mode"
-                >
-                  <label
-                    className={cn(
-                      "px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer",
-                      isManualSortMode
-                        ? "bg-transparent text-muted-foreground"
-                        : "bg-primary text-primary-foreground",
-                    )}
-                    data-testid="toggle-sort-inherit"
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 py-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span
+                    className="text-xs text-muted-foreground"
+                    data-testid="label-sorting-method"
                   >
-                    <input
-                      type="radio"
-                      name="subtask-sort-mode"
-                      value={SubtaskSortMode.INHERIT}
-                      checked={!isManualSortMode}
-                      onChange={() => isManualSortMode && handleSortToggle()}
-                      className="sr-only"
-                    />
-                    Inherit
-                  </label>
-                  <label
-                    className={cn(
-                      "px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer",
-                      isManualSortMode
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-transparent text-muted-foreground",
-                    )}
-                    data-testid="toggle-sort-manual"
-                  >
-                    <input
-                      type="radio"
-                      name="subtask-sort-mode"
-                      value={SubtaskSortMode.MANUAL}
-                      checked={isManualSortMode}
-                      onChange={() => !isManualSortMode && handleSortToggle()}
-                      className="sr-only"
-                    />
-                    Manual
-                  </label>
-                </div>
-              </div>
-            </div>
-            <span
-              className="block text-[11px] text-muted-foreground/70 leading-snug text-right"
-              data-testid="text-sort-caption"
-            >
-              {isManualSortMode
-                ? "Drag subtasks into your preferred order using the grip handles."
-                : "Subtasks follow the same sort order as the main task list."}
-            </span>
-          </div>
-
-          <AnimatePresence>
-            {isManualSortMode && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="text-xs text-muted-foreground">
-                    Show numbers
+                    Sorting Method
                   </span>
-                  <Switch
-                    checked={showNumbers}
-                    onCheckedChange={(checked) => {
-                      onShowNumbersChange(checked);
-                      updateTask({ id: taskId, subtasksShowNumbers: checked });
-                    }}
-                    data-testid="switch-show-numbers"
-                  />
-                </label>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div
+                      className="inline-flex rounded-md border border-white/10 overflow-hidden"
+                      role="radiogroup"
+                      aria-label="Subtask sort order"
+                      data-testid="toggle-sort-mode"
+                    >
+                      <label
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          isManualSortMode
+                            ? 'bg-transparent text-muted-foreground'
+                            : 'bg-primary text-primary-foreground',
+                        )}
+                        data-testid="toggle-sort-inherit"
+                      >
+                        <input
+                          type="radio"
+                          name="subtask-sort-mode"
+                          value={SubtaskSortMode.INHERIT}
+                          checked={!isManualSortMode}
+                          onChange={() =>
+                            isManualSortMode && handleSortToggle()
+                          }
+                          className="sr-only"
+                        />
+                        Inherit
+                      </label>
+                      <label
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          isManualSortMode
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-transparent text-muted-foreground',
+                        )}
+                        data-testid="toggle-sort-manual"
+                      >
+                        <input
+                          type="radio"
+                          name="subtask-sort-mode"
+                          value={SubtaskSortMode.MANUAL}
+                          checked={isManualSortMode}
+                          onChange={() =>
+                            !isManualSortMode && handleSortToggle()
+                          }
+                          className="sr-only"
+                        />
+                        Manual
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <span
+                  className="block text-[11px] text-muted-foreground/70 leading-snug text-right"
+                  data-testid="text-sort-caption"
+                >
+                  {isManualSortMode
+                    ? 'Drag subtasks into your preferred order using the grip handles.'
+                    : 'Subtasks follow the same sort order as the main task list.'}
+                </span>
+              </div>
 
-          {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-          <label className="flex items-center justify-between cursor-pointer">
-            <span className="text-xs text-muted-foreground">
-              Auto-complete main task when all subtasks complete
-            </span>
-            <Switch
-              checked={inheritCompletionState}
-              onCheckedChange={(checked) => {
-                updateTask({ id: taskId, inheritCompletionState: checked });
-              }}
-              data-testid="switch-inherit-completion-state"
-            />
-          </label>
+              <AnimatePresence>
+                {isManualSortMode && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <span className="text-xs text-muted-foreground">
+                        Show numbers
+                      </span>
+                      <Switch
+                        checked={showNumbers}
+                        onCheckedChange={(checked) => {
+                          onShowNumbersChange(checked)
+                          updateTask({
+                            id: taskId,
+                            subtasksShowNumbers: checked,
+                          })
+                        }}
+                        data-testid="switch-show-numbers"
+                      />
+                    </label>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
-          <label className="flex items-center justify-between cursor-pointer">
-            <span className="text-xs text-muted-foreground">
-              Auto-hide completed
-            </span>
-            <Switch
-              checked={autoHideCompleted}
-              onCheckedChange={(checked) => {
-                updateTask({ id: taskId, autoHideCompleted: checked });
-              }}
-              data-testid="switch-auto-hide-completed"
-            />
-          </label>
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-xs text-muted-foreground">
+                  Auto-complete main task when all subtasks complete
+                </span>
+                <Switch
+                  checked={inheritCompletionState}
+                  onCheckedChange={(checked) => {
+                    updateTask({ id: taskId, inheritCompletionState: checked })
+                  }}
+                  data-testid="switch-inherit-completion-state"
+                />
+              </label>
 
-          {hiddenCount > 0 && (
-            <div className="flex justify-center">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onShowHiddenChange(!showHidden)}
-                className="text-xs text-muted-foreground"
-                data-testid="button-show-hidden"
-              >
-                {showHidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                {showHidden ? `Hide Hidden (${hiddenCount})` : `Show Hidden (${hiddenCount})`}
-              </Button>
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: is present in the switch */}
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-xs text-muted-foreground">
+                  Auto-hide completed
+                </span>
+                <Switch
+                  checked={autoHideCompleted}
+                  onCheckedChange={(checked) => {
+                    updateTask({ id: taskId, autoHideCompleted: checked })
+                  }}
+                  data-testid="switch-auto-hide-completed"
+                />
+              </label>
+
+              {hiddenCount > 0 && (
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onShowHiddenChange(!showHidden)}
+                    className="text-xs text-muted-foreground"
+                    data-testid="button-show-hidden"
+                  >
+                    {showHidden ? (
+                      <EyeOff className="size-3.5" />
+                    ) : (
+                      <Eye className="size-3.5" />
+                    )}
+                    {showHidden
+                      ? `Hide Hidden (${hiddenCount})`
+                      : `Show Hidden (${hiddenCount})`}
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
-type Subtask = Task & { depth: number; subtaskIndex?: number };
+type Subtask = Task & { depth: number; subtaskIndex?: number }
 
 interface SubtaskItemProps {
-  task: Subtask;
-  allTasks: Task[];
-  onEdit?: (task: Task) => void;
-  onDelete: (task: DeleteTaskArgs) => void;
-  onToggleComplete: (task: Task) => void;
-  isManualSortMode: boolean;
-  isDragDisabled?: boolean;
-  isHiddenItem?: boolean;
+  task: Subtask
+  allTasks: Task[]
+  onEdit?: (task: Task) => void
+  onDelete: (task: DeleteTaskArgs) => void
+  onToggleComplete: (task: Task) => void
+  isManualSortMode: boolean
+  isDragDisabled?: boolean
+  isHiddenItem?: boolean
 }
 
 const SubtaskItem = ({
@@ -299,27 +312,27 @@ const SubtaskItem = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id, disabled: isDragDisabled });
+  } = useSortable({ id: task.id, disabled: isDragDisabled })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     paddingLeft: `${12 + task.depth * 16}px`,
-  };
+  }
 
-  const isDirect = task.depth === 0;
-  const showDragHandle = isManualSortMode && isDirect;
-  const isCompleted = task.status === TaskStatus.COMPLETED;
+  const isDirect = task.depth === 0
+  const showDragHandle = isManualSortMode && isDirect
+  const isCompleted = task.status === TaskStatus.COMPLETED
   const disableComplete =
-    !isCompleted && getHasIncompleteSubtasks(allTasks, task.id);
+    !isCompleted && getHasIncompleteSubtasks(allTasks, task.id)
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none",
-        isDragging && "opacity-50 bg-secondary/20",
+        'flex items-center justify-between gap-2 px-3 py-1.5 bg-secondary/5 select-none',
+        isDragging && 'opacity-50 bg-secondary/20',
       )}
       data-testid={`subtask-row-${task.id}`}
     >
@@ -345,12 +358,12 @@ const SubtaskItem = ({
             type="button"
             onClick={() => !disableComplete && onToggleComplete(task)}
             className={cn(
-              "shrink-0 h-4 w-4 rounded-sm border transition-colors",
+              'shrink-0 h-4 w-4 rounded-sm border transition-colors',
               disableComplete
-                ? "border-muted-foreground/20 opacity-50 cursor-not-allowed"
+                ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
                 : isCompleted
-                  ? "bg-muted-foreground/60 border-muted-foreground/60 text-white"
-                  : "border-muted-foreground/40 hover:border-muted-foreground",
+                  ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
+                  : 'border-muted-foreground/40 hover:border-muted-foreground',
             )}
             data-testid={`checkbox-complete-subtask-${task.id}`}
           >
@@ -359,8 +372,8 @@ const SubtaskItem = ({
         </SubtaskBlockedTooltip>
         <span
           className={cn(
-            "text-sm break-words",
-            isCompleted && "line-through text-muted-foreground",
+            'text-sm break-words',
+            isCompleted && 'line-through text-muted-foreground',
           )}
         >
           {task.subtaskIndex !== undefined && (
@@ -397,18 +410,18 @@ const SubtaskItem = ({
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const SUBTASK_ACTION_BTN_STYLE =
-  "flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground";
+  'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
 
 interface SubtasksCardProps {
-  task: Task;
-  onAddSubtask: (parentId: number) => void;
-  onEditSubtask?: (task: Task) => void;
-  onDeleteSubtask?: (task: DeleteTaskArgs) => void;
-  onAssignSubtask?: (task: Task) => void;
+  task: Task
+  onAddSubtask: (parentId: number) => void
+  onEditSubtask?: (task: Task) => void
+  onDeleteSubtask?: (task: DeleteTaskArgs) => void
+  onAssignSubtask?: (task: Task) => void
 }
 
 export const SubtasksCard = ({
@@ -418,21 +431,21 @@ export const SubtasksCard = ({
   onDeleteSubtask,
   onAssignSubtask,
 }: SubtasksCardProps) => {
-  const { data: allTasks } = useTasks();
-  const { setTaskStatus, reorderSubtasks } = useTaskActions();
+  const { data: allTasks } = useTasks()
+  const { setTaskStatus, reorderSubtasks } = useTaskActions()
 
-  const task = getTaskById(allTasks, taskProp.id) ?? taskProp;
+  const task = getTaskById(allTasks, taskProp.id) ?? taskProp
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
-  );
-  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL;
-  const [showNumbers, setShowNumbers] = useState(task.subtasksShowNumbers);
-  const [showHidden, setShowHidden] = useState(false);
+  )
+  const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
+  const [showNumbers, setShowNumbers] = useState(task.subtasksShowNumbers)
+  const [showHidden, setShowHidden] = useState(false)
 
   const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
     null,
-  );
+  )
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -449,7 +462,7 @@ export const SubtasksCard = ({
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
-  );
+  )
 
   const allSubtasks = useMemo(() => {
     const collectDescendants = (
@@ -458,25 +471,25 @@ export const SubtasksCard = ({
       parentSortMode: SubtaskSortMode,
       parentShowNumbers: boolean,
     ): Subtask[] => {
-      let children = getDirectSubtasks(allTasks, parentId_);
+      let children = getDirectSubtasks(allTasks, parentId_)
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
         const order =
           depth === 0 && localSubtaskOrder
             ? localSubtaskOrder
-            : (getTaskById(allTasks, parentId_)?.subtaskOrder ?? []);
-        children = sortTasksByIdOrder(children, order);
+            : (getTaskById(allTasks, parentId_)?.subtaskOrder ?? [])
+        children = sortTasksByIdOrder(children, order)
       } else {
         children = [...children].sort((a, b) => {
-          const ac = a.status === TaskStatus.COMPLETED ? 1 : 0;
-          const bc = b.status === TaskStatus.COMPLETED ? 1 : 0;
-          return ac - bc;
-        });
+          const ac = a.status === TaskStatus.COMPLETED ? 1 : 0
+          const bc = b.status === TaskStatus.COMPLETED ? 1 : 0
+          return ac - bc
+        })
       }
 
-      const result: Subtask[] = [];
+      const result: Subtask[] = []
       for (let i = 0; i < children.length; i++) {
-        const child = children[i];
+        const child = children[i]
         result.push({
           ...child,
           depth,
@@ -484,7 +497,7 @@ export const SubtasksCard = ({
             parentShowNumbers && parentSortMode === SubtaskSortMode.MANUAL
               ? i
               : undefined,
-        });
+        })
         result.push(
           ...collectDescendants(
             child.id,
@@ -492,52 +505,52 @@ export const SubtasksCard = ({
             child.subtaskSortMode,
             child.subtasksShowNumbers,
           ),
-        );
+        )
       }
-      return result;
-    };
+      return result
+    }
 
-    return collectDescendants(task.id, 0, sortMode, showNumbers);
-  }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers]);
+    return collectDescendants(task.id, 0, sortMode, showNumbers)
+  }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
 
   const hiddenSubtaskIds = useMemo(
     () => new Set(allSubtasks.filter((s) => s.hidden).map((s) => s.id)),
     [allSubtasks],
-  );
+  )
 
-  const hiddenCount = hiddenSubtaskIds.size;
+  const hiddenCount = hiddenSubtaskIds.size
 
   const visibleSubtasks = useMemo(() => {
-    if (showHidden) return allSubtasks;
-    return allSubtasks.filter((s) => !s.hidden);
-  }, [allSubtasks, showHidden]);
+    if (showHidden) return allSubtasks
+    return allSubtasks.filter((s) => !s.hidden)
+  }, [allSubtasks, showHidden])
 
-  const totalCount = allSubtasks.length;
+  const totalCount = allSubtasks.length
 
   const directChildIds = useMemo(
     () => visibleSubtasks.filter((t) => t.depth === 0).map((t) => t.id),
     [visibleSubtasks],
-  );
+  )
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+    const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = directChildIds.indexOf(active.id as number);
-      const newIndex = directChildIds.indexOf(over.id as number);
+      const oldIndex = directChildIds.indexOf(active.id as number)
+      const newIndex = directChildIds.indexOf(over.id as number)
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(directChildIds, oldIndex, newIndex);
-        setLocalSubtaskOrder(newOrder);
-        reorderSubtasks(task.id, newOrder);
+        const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
+        setLocalSubtaskOrder(newOrder)
+        reorderSubtasks(task.id, newOrder)
       }
     }
-  };
+  }
 
   const handleSortModeChange = (newMode: SubtaskSortMode) => {
-    setSortMode(newMode);
-    setLocalSubtaskOrder(null);
-  };
+    setSortMode(newMode)
+    setLocalSubtaskOrder(null)
+  }
 
   return (
     <div className="border border-white/10 rounded-lg overflow-hidden">
@@ -587,8 +600,8 @@ export const SubtasksCard = ({
                       const newStatus =
                         t.status === TaskStatus.COMPLETED
                           ? TaskStatus.OPEN
-                          : TaskStatus.COMPLETED;
-                      setTaskStatus(t.id, newStatus);
+                          : TaskStatus.COMPLETED
+                      setTaskStatus(t.id, newStatus)
                     }}
                     isManualSortMode={isManualSortMode}
                     isDragDisabled={false}
@@ -604,7 +617,7 @@ export const SubtasksCard = ({
         <button
           type="button"
           onClick={() => onAddSubtask(task.id)}
-          className={cn(SUBTASK_ACTION_BTN_STYLE, "flex-[4] gap-2")}
+          className={cn(SUBTASK_ACTION_BTN_STYLE, 'flex-[4] gap-2')}
           data-testid="button-add-subtask"
         >
           <Plus className="size-4" />
@@ -615,7 +628,7 @@ export const SubtasksCard = ({
           onClick={() => onAssignSubtask?.(task)}
           className={cn(
             SUBTASK_ACTION_BTN_STYLE,
-            "flex-1 gap-1.5 border-l border-white/5",
+            'flex-1 gap-1.5 border-l border-white/5',
           )}
           data-testid="button-assign-subtask"
         >
@@ -624,5 +637,5 @@ export const SubtasksCard = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
