@@ -25,6 +25,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Check,
   ChevronDown,
+  Eye,
   EyeOff,
   GripVertical,
   Link,
@@ -249,12 +250,13 @@ const SubtaskSettings = ({
             <div className="flex justify-center">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => onShowHiddenChange(!showHidden)}
-                className="text-xs"
+                className="text-xs text-muted-foreground"
                 data-testid="button-show-hidden"
               >
+                {showHidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                 {showHidden ? `Hide Hidden (${hiddenCount})` : `Show Hidden (${hiddenCount})`}
               </Button>
             </div>
