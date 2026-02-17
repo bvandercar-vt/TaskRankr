@@ -306,6 +306,30 @@ export class DatabaseStorage implements IStorage {
         )
     }
 
+    if (finalUpdates.inheritCompletionState === true) {
+      if (updated.status === TaskStatus.COMPLETED) {
+        const children = await db
+          .select()
+          .from(tasks)
+          .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+        const hasIncomplete = children.some(
+          (t) => t.status !== TaskStatus.COMPLETED,
+        )
+        if (hasIncomplete) {
+          const [reverted] = await db
+            .update(tasks)
+            .set({
+              status: TaskStatus.OPEN,
+              completedAt: null,
+              inProgressStartedAt: null,
+            })
+            .where(eq(tasks.id, id))
+            .returning()
+          return reverted as Task
+        }
+      }
+    }
+
     if (
       finalUpdates.parentId != null &&
       updated.status !== TaskStatus.COMPLETED
