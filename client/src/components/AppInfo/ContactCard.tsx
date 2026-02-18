@@ -1,21 +1,21 @@
-import { Download, Mail } from 'lucide-react'
+import { Download, Mail } from "lucide-react";
 
-import { debugLog } from '@/lib/debug-logger'
-import { useGuestMode } from '@/providers/GuestModeProvider'
-import { Button } from '../primitives/Button'
-import { InlineLink } from '../primitives/InlineText'
+import { debugLog } from "@/lib/debug-logger";
+import { useGuestMode } from "@/providers/GuestModeProvider";
+import { Button } from "../primitives/Button";
+import { InlineLink } from "../primitives/InlineText";
 
 const ContactCardInner = ({
   className,
   showDebugDownload,
   isGuestMode,
 }: {
-  className?: string
-  showDebugDownload?: boolean
-  isGuestMode: boolean
+  className?: string;
+  showDebugDownload?: boolean;
+  isGuestMode: boolean;
 }) => (
   <div
-    className={`p-3 bg-card rounded-lg border border-white/10 ${className ?? ''}`}
+    className={`p-3 bg-card rounded-lg border border-white/10 ${className ?? ""}`}
     data-testid="card-contact"
   >
     <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -40,7 +40,7 @@ const ContactCardInner = ({
           <Button
             variant="outline"
             size="sm"
-            className="text-[11px] text-muted-foreground/60 gap-1.5"
+            className="text-[11px] text-muted-foreground/60 gap-1.5 p-0 m-0 py-0 "
             onClick={() => debugLog.download(isGuestMode)}
             data-testid="button-download-debug-logs"
           >
@@ -51,16 +51,16 @@ const ContactCardInner = ({
       </div>
     </div>
   </div>
-)
+);
 
 export const ContactCard = ({
   className,
   showDebugDownload,
 }: {
-  className?: string
-  showDebugDownload?: boolean
+  className?: string;
+  showDebugDownload?: boolean;
 }) => {
-  const { isGuestMode } = useGuestMode()
+  const { isGuestMode } = useGuestMode();
 
   return (
     <ContactCardInner
@@ -68,21 +68,21 @@ export const ContactCard = ({
       showDebugDownload={showDebugDownload}
       isGuestMode={isGuestMode}
     />
-  )
-}
+  );
+};
 
 export const ContactCardStandalone = ({
   className,
   showDebugDownload,
   isGuestMode = true,
 }: {
-  className?: string
-  showDebugDownload?: boolean
-  isGuestMode?: boolean
+  className?: string;
+  showDebugDownload?: boolean;
+  isGuestMode?: boolean;
 }) => (
   <ContactCardInner
     className={className}
     showDebugDownload={showDebugDownload}
     isGuestMode={isGuestMode}
   />
-)
+);
