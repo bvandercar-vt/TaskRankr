@@ -5,9 +5,9 @@
 
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { Link } from 'wouter'
 
 import { cn, forwardRefHelper } from '@/lib/utils'
+import { Link } from './Link'
 
 export const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0' +
@@ -33,6 +33,7 @@ export const buttonVariants = cva(
       // but will expand to fit large amounts of content.
       size: {
         default: 'min-h-9 px-4 py-2',
+        xs: 'min-h-6 rounded-md px-2 text-[11px]',
         sm: 'min-h-8 rounded-md px-3 text-xs',
         lg: 'min-h-10 rounded-md px-8',
         icon: 'h-9 w-9',
@@ -63,7 +64,7 @@ export const Button = forwardRefHelper<HTMLButtonElement, ButtonProps>(
       />
     )
 
-    return href ? <Link to={href}>{button}</Link> : button
+    return href ? <Link href={href}>{button}</Link> : button
   },
   'Button',
 )

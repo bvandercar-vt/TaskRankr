@@ -113,6 +113,8 @@ export const AssignSubtaskDialog = ({
           Show Completed
         </label>
         <div
+          role="listbox"
+          aria-label="Available tasks"
           className="h-64 overflow-y-auto divide-y divide-white/5"
           data-testid="list-orphan-tasks"
         >
@@ -124,21 +126,29 @@ export const AssignSubtaskDialog = ({
             </p>
           ) : (
             filteredTasks.map((t) => (
-              <button
+              <div
                 key={t.id}
-                type="button"
+                role="option"
+                aria-selected={selectedId === t.id}
+                tabIndex={0}
                 onClick={() => setSelectedId(t.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedId(t.id)
+                  }
+                }}
                 className={cn(
-                  'w-full text-left px-3 py-2.5 text-sm transition-colors',
+                  'w-full text-left px-3 py-2.5 text-sm transition-colors cursor-pointer',
                   selectedId === t.id
                     ? 'bg-primary/20 text-foreground'
                     : 'hover-elevate text-muted-foreground',
                   t.status === TaskStatus.COMPLETED && 'opacity-50',
                 )}
-                data-testid={`button-assign-task-${t.id}`}
+                data-testid={`option-assign-task-${t.id}`}
               >
                 {t.name}
-              </button>
+              </div>
             ))
           )}
         </div>
