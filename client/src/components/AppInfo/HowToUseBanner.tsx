@@ -1,8 +1,8 @@
 import { HelpCircle } from 'lucide-react'
-import { Link } from 'wouter'
 
-import { NotificationBanner } from '@/components/primitives/NotificationBanner'
 import { Routes } from '@/lib/constants'
+import { InlineLink } from '../primitives/InlineText'
+import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const HowToUseBanner = () => (
   <NotificationBanner
@@ -11,13 +11,8 @@ export const HowToUseBanner = () => (
     data-testid="banner-how-to-use"
   >
     New here?{' '}
-    <Link href={Routes.HOW_TO_USE}>
-      <span
-        className="text-primary underline underline-offset-2 cursor-pointer"
-        data-testid="link-how-to-use-banner"
-      >
-        Learn how to use the app
-      </span>
-    </Link>
+    <InlineLink href={Routes.HOW_TO_USE} data-testid="link-how-to-use-banner">
+      Learn how to use the app
+    </InlineLink>
   </NotificationBanner>
 )

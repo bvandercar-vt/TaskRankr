@@ -5,6 +5,7 @@
 
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronRight, Circle, type LucideIcon } from 'lucide-react'
+import { Link } from 'wouter'
 
 import { cn, forwardRefHelper } from '@/lib/utils'
 
@@ -69,9 +70,9 @@ export const DropdownMenuContent = forwardRefHelper(
 
 export const DropdownMenuItem = forwardRefHelper<
   typeof DropdownMenuPrimitive.Item,
-  { inset?: boolean; label: React.ReactNode; icon?: LucideIcon }
->(
-  ({ className, inset, label, icon: IconComponent, ...props }, ref) => (
+  { inset?: boolean; label: React.ReactNode; icon?: LucideIcon; href?: string }
+>(({ className, inset, label, icon: IconComponent, href, ...props }, ref) => {
+  const dropdownMenuItem = (
     <DropdownMenuPrimitive.Item
       {...props}
       ref={ref}
@@ -84,9 +85,10 @@ export const DropdownMenuItem = forwardRefHelper<
       {IconComponent && <IconComponent className="size-4 mr-2" />}
       {label}
     </DropdownMenuPrimitive.Item>
-  ),
-  DropdownMenuPrimitive.Item,
-)
+  )
+
+  return href ? <Link to={href}>{dropdownMenuItem}</Link> : dropdownMenuItem
+}, DropdownMenuPrimitive.Item)
 
 export const DropdownMenuCheckboxItem = forwardRefHelper(
   ({ className, children, checked, ...props }, ref) => (

@@ -1,4 +1,4 @@
-import { Input } from '@/components/primitives/forms/Input'
+import { Input } from './Input'
 
 type TimeInputProps = {
   durationMs: number

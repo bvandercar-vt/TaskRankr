@@ -1,9 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
-import { ContactCardStandalone } from '@/components/AppInfo/ContactCard'
-import { Button } from '@/components/primitives/Button'
 import { debugLog } from '@/lib/debug-logger'
+import { ContactCardStandalone } from './AppInfo/ContactCard'
+import { Button } from './primitives/Button'
 
 const ErrorDialog = ({ errorText }: { errorText: string }) => (
   <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4">

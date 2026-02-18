@@ -2,8 +2,8 @@
  * @fileoverview Card with a circular icon/number and title + description.
  */
 
-import { Card, CardContent } from '@/components/primitives/Card'
 import { cn } from '@/lib/utils'
+import { Card, CardContent } from './Card'
 
 export interface IconCardProps {
   icon: React.ReactNode

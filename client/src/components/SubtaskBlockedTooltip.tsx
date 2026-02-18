@@ -4,7 +4,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/primitives/overlays/Tooltip'
+} from './primitives/overlays/Tooltip'
 
 interface SubtaskBlockedTooltipProps {
   blocked: boolean

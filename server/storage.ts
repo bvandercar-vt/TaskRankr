@@ -254,13 +254,14 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      await db
-        .update(tasks)
-        .set(completionUpdate)
-        .where(eq(tasks.id, parentId))
+      await db.update(tasks).set(completionUpdate).where(eq(tasks.id, parentId))
 
       if (parent.parentId) {
-        await this.checkInheritCompletionState(parent.parentId, userId, parentId)
+        await this.checkInheritCompletionState(
+          parent.parentId,
+          userId,
+          parentId,
+        )
       }
     }
   }

@@ -2,7 +2,6 @@
  * @fileoverview Collapsible sort order info component showing primary/secondary sort criteria.
  */
 
-import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
   RANK_FIELD_ENUMS,
@@ -14,6 +13,7 @@ import {
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SortOption } from '~/shared/schema'
+import { CollapsibleCard } from '../primitives/CollapsibleCard'
 
 const SORT_INFO_CONFIG = Object.values(SortOption).map((key) => ({
   name: SORT_LABELS[key],
@@ -34,14 +34,11 @@ interface SortInfoProps {
 
 export const SortInfo = ({ defaultExpanded = false }: SortInfoProps) => (
   <CollapsibleCard
-    title={<h3 className="font-semibold text-foreground">Sort Info</h3>}
+    title={<h3 className="font-semibold text-foreground">Sort Order Info</h3>}
     defaultOpen={defaultExpanded}
     contentClassName="mt-3"
     data-testid="button-sort-info-toggle"
   >
-    <p className="text-xs text-muted-foreground mb-3 text-center">
-      When tasks have the same value, they are sorted by secondary attributes.
-    </p>
     <div
       className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm"
       data-testid="sort-info-content"

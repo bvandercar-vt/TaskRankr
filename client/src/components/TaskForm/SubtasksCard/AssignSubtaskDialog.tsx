@@ -4,19 +4,19 @@
 
 import { useMemo, useState } from 'react'
 
-import { Button } from '@/components/primitives/Button'
-import { Checkbox } from '@/components/primitives/forms/Checkbox'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { filterRootTasks, getAllDescendantIds } from '@/lib/task-utils'
+import { cn } from '@/lib/utils'
+import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { Button } from '../../primitives/Button'
+import { Checkbox } from '../../primitives/forms/Checkbox'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/primitives/overlays/Dialog'
-import { SearchInput } from '@/components/SearchInput'
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
-import { filterRootTasks, getAllDescendantIds } from '@/lib/task-utils'
-import { cn } from '@/lib/utils'
-import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+} from '../../primitives/overlays/Dialog'
+import { SearchInput } from '../../SearchInput'
 
 const LAYER_CLASS = 'z-[200]'
 

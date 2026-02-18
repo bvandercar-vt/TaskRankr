@@ -2,13 +2,13 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
-import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { getHasIncompleteSubtasks } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { Button } from '../../primitives/Button'
+import { SubtaskBlockedTooltip } from '../../SubtaskBlockedTooltip'
 
 export type Subtask = Task & { depth: number; subtaskIndex?: number }
 
