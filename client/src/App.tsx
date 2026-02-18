@@ -44,6 +44,18 @@ const Router = () => (
   </div>
 )
 
+const GuestRedirect = () => {
+  const { enterGuestMode } = useGuestMode()
+  const [, setLocation] = useLocation()
+
+  useEffect(() => {
+    enterGuestMode()
+    setLocation(Routes.HOME)
+  }, [enterGuestMode, setLocation])
+
+  return null
+}
+
 const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
   const { isGuestMode } = useGuestMode()
@@ -76,6 +88,9 @@ const AuthenticatedApp = () => {
   if (!isAuthenticated && !isGuestMode) {
     if (location === Routes.HOW_TO_INSTALL) {
       return <HowToInstall />
+    }
+    if (location === Routes.GUEST) {
+      return <GuestRedirect />
     }
     return <Landing />
   }
