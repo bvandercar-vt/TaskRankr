@@ -2,7 +2,6 @@
  * @fileoverview Collapsible sort order info component showing primary/secondary sort criteria.
  */
 
-import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
   RANK_FIELD_ENUMS,
@@ -14,6 +13,7 @@ import {
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { SortOption } from '~/shared/schema'
+import { CollapsibleCard } from '../primitives/CollapsibleCard'
 
 const SORT_INFO_CONFIG = Object.values(SortOption).map((key) => ({
   name: SORT_LABELS[key],

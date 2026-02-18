@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { X } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
+import { Button } from './Button'
 
 interface NotificationBannerProps {
   storageKey: string

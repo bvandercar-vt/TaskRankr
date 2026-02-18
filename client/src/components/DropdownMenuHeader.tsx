@@ -17,19 +17,19 @@ import {
 } from 'lucide-react'
 import { useLocation } from 'wouter'
 
-import { Button } from '@/components/primitives/Button'
+import { Routes } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+import { useGuestMode } from '@/providers/GuestModeProvider'
+import { authPaths } from '~/shared/constants'
+import { Button } from './primitives/Button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/primitives/DropdownMenu'
-import { SearchInput } from '@/components/SearchInput'
-import { Routes } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+} from './primitives/DropdownMenu'
+import { SearchInput } from './SearchInput'
 
 const Title = ({
   title,

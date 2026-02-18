@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
-import { Switch } from '@/components/primitives/forms/Switch'
-import { Icon } from '@/components/primitives/LucideIcon'
 import { useTaskActions } from '@/hooks/useTasks'
 import { cn } from '@/lib/utils'
 import { SubtaskSortMode } from '~/shared/schema'
+import { Button } from '../../primitives/Button'
+import { Switch } from '../../primitives/forms/Switch'
+import { Icon } from '../../primitives/LucideIcon'
 
 const SortingMethodSwitch = ({
   taskId,

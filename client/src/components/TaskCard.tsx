@@ -7,9 +7,6 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
-import { ChangeStatusDialog } from '@/components/ChangeStatusDialog'
-import { Badge } from '@/components/primitives/Badge'
-import { useTaskDialog } from '@/components/TaskForm/TaskFormDialogProvider'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
@@ -28,7 +25,10 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
+import { ChangeStatusDialog } from './ChangeStatusDialog'
+import { Badge } from './primitives/Badge'
 import { Icon } from './primitives/LucideIcon'
+import { useTaskDialog } from './TaskForm/TaskFormDialogProvider'
 
 const Title = ({
   name,

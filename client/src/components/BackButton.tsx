@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
 import { Routes } from '@/lib/constants'
+import { Button } from './primitives/Button'
 
 export const BackButton = ({ route = Routes.HOME }: { route?: string }) => (
   <Button variant="ghost" size="icon" data-testid="button-back" href={route}>

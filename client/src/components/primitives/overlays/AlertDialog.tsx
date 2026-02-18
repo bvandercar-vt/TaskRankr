@@ -6,8 +6,8 @@
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 import { X } from 'lucide-react'
 
-import { Button, buttonVariants } from '@/components/primitives/Button'
 import { cn, forwardRefHelper } from '@/lib/utils'
+import { Button, buttonVariants } from '../Button'
 
 export const AlertDialog = AlertDialogPrimitive.Root
 export const AlertDialogTrigger = AlertDialogPrimitive.Trigger

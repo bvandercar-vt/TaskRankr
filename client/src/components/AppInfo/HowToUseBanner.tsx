@@ -1,8 +1,8 @@
 import { HelpCircle } from 'lucide-react'
 
-import { NotificationBanner } from '@/components/primitives/NotificationBanner'
 import { Routes } from '@/lib/constants'
 import { InlineLink } from '../primitives/InlineText'
+import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const HowToUseBanner = () => (
   <NotificationBanner
