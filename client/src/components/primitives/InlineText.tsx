@@ -10,7 +10,12 @@ export const InlineLink = ({
   href,
 }: React.PropsWithChildren<{ className?: string; href: string }>) => (
   <Link to={href}>
-    <span className={cn('font-medium text-purple-300', className)}>
+    <span
+      className={cn(
+        'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400',
+        className,
+      )}
+    >
       {children}
     </span>
   </Link>
@@ -20,5 +25,7 @@ export const InlineEmphasized = ({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) => (
-  <span className={cn('font-medium text-teal-300', className)}>{children}</span>
+  <strong className={cn('font-medium text-slate-300', className)}>
+    {children}
+  </strong>
 )

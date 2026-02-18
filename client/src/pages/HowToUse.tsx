@@ -49,10 +49,16 @@ const HowToUse = () => {
             title="Tap to Edit"
             description={
               <>
-                Tap a task to edit it, where you can change the name,
-                description, and rank fields like priority, ease, enjoyment, and
-                time, as well as create nested subtasks to assist with breaking
-                down projects.
+                <p className="mb-2">
+                  Tap a task to edit it, where you can change the name,
+                  description, and rank fields like priority, ease, enjoyment,
+                  and time, as well as create nested subtasks to assist with
+                  breaking down projects.
+                </p>
+                <p>
+                  You can customize which rank fields are visible in{' '}
+                  <InlineLink href={Routes.SETTINGS}>Settings</InlineLink>.
+                </p>
               </>
             }
             data-testid="card-tap-to-edit"
@@ -62,9 +68,9 @@ const HowToUse = () => {
             title="Hold to Change Status"
             description={
               <>
-                Press and hold a task to open the status menu. From there you
-                can mark it as <Em>Pinned</Em>, <Em>In Progress</Em> (if setting
-                enabled), <Em>Completed</Em>, or <Em>Delete</Em> it.
+                Press and hold a task to open the <Em>Status Menu</Em>. From
+                there you can mark it as <Em>Pinned</Em>, <Em>In Progress</Em>{' '}
+                (if setting enabled), <Em>Completed</Em>, or delete it.
               </>
             }
             data-testid="card-hold-to-change-status"
@@ -78,10 +84,9 @@ const HowToUse = () => {
             description={
               <>
                 <div className="mb-4">
-                  Use the sort buttons at the top of the task list to order
-                  tasks by date created, priority, ease, enjoyment, or time. You
-                  can customize which rank fields are visible in{' '}
-                  <InlineLink href={Routes.SETTINGS}>Settings</InlineLink>.
+                  Use the <Em>sort buttons</Em> at the top of the task list to
+                  order tasks by date created, priority, ease, enjoyment, or
+                  time.
                 </div>
                 <SortInfo defaultExpanded={false} />
               </>
@@ -94,13 +99,24 @@ const HowToUse = () => {
           <IconCard
             icon={<Pin className="size-5" />}
             title="Pinned"
-            description="Pin important tasks to keep them at the top of your list."
+            description={
+              <>
+                <Em>Pin</Em> important tasks to keep them at the top of your
+                list.
+              </>
+            }
             data-testid="card-pinned"
           />
           <IconCard
             icon={<PlayCircle className="size-5" />}
             title="In Progress (if setting enabled)"
-            description="Pins to the top of your list, while also accumulating time spent in this status (which can also be manually adjusted)."
+            description={
+              <>
+                <Em>In Progress</Em> pins to the top of your list, while also
+                accumulating time spent in this status (which can also be
+                manually set/adjusted).
+              </>
+            }
             data-testid="card-in-progress"
           />
           <IconCard
@@ -108,9 +124,9 @@ const HowToUse = () => {
             title="Completed"
             description={
               <>
-                Completed top-level tasks are moved to a separate list you can
-                access from the menu. Completed <i>subtasks</i> are shown as
-                crossed out.
+                <Em>Completed</Em> top-level tasks are moved to a separate list
+                you can access from the menu. Completed <i>subtasks</i> are
+                shown as crossed out (or hidden, if configured).
               </>
             }
             data-testid="card-completed"
@@ -125,7 +141,7 @@ const HowToUse = () => {
               <>
                 Break down large tasks into subtasks by tapping a task and using
                 the <Em>Add Subtask</Em> button. Subtasks can have their own
-                subtasks, creating a hierarchical structure for complex
+                subtasks, etc, creating a hierarchical structure for complex
                 projects.
               </>
             }
@@ -137,10 +153,10 @@ const HowToUse = () => {
             description={
               <>
                 By default, subtasks follow the same sort order as the main
-                list. Toggle <Em>Manual</Em> mode in a task's subtasks panel to
+                list. Toggle <Em>Manual Mode</Em> in a task's subtasks panel to
                 drag and reorder subtasks in a custom sequence, perfect for
-                step-by-step workflows. Also allows for automatic numbering of
-                subtasks as steps.
+                step-by-step workflows. This mode also allows for{' '}
+                <i>automatic numbering</i> of subtasks as steps.
               </>
             }
             data-testid="card-manual-ordering"
@@ -150,11 +166,11 @@ const HowToUse = () => {
             title="Hide Subtasks, & Auto-Hide on Complete (Optional)"
             description={
               <>
-                Hide and unhide subtasks as desired. Hidden subtasks can be
-                revealed using the <Em>Show Hidden</Em> button. Enable{' '}
-                <Em>Auto-Hide Completed</Em> in a task's subtask settings to
-                automatically hide subtasks when they are marked as completed,
-                keeping your subtask list focused on what still needs to be
+                <Em>Hide</Em> and <Em>Unhide</Em> subtasks as desired. Hidden
+                subtasks can be revealed using the <Em>Show Hidden</Em> button.
+                Enable <Em>Auto-Hide Completed</Em> in a task's subtask settings
+                to automatically hide subtasks when they are marked as
+                completed, keeping your list focused on what still needs to be
                 done.
               </>
             }
@@ -165,11 +181,10 @@ const HowToUse = () => {
             title="Auto-Complete Parent"
             description={
               <>
-                Enable <Em>Inherit Completion State</Em> in the subtask settings
-                to automatically mark the parent task as completed when all of
-                its subtasks are completed. If a subtask is later added or
-                reopened, the parent will revert back to open as well. This
-                works recursively through nested subtask chains.
+                Enable <Em>Inherit Completion State</Em> in a task's subtask
+                settings to automatically mark the parent task as completed when
+                all of its subtasks are completed. If a subtask is later added
+                or reopened, the parent will revert back to open as well.
               </>
             }
             data-testid="card-auto-complete-parent"
@@ -189,7 +204,8 @@ const HowToUse = () => {
                 <>
                   Configure which rank fields are visible or required, toggle
                   features like <Em>Auto-Pin New Tasks</Em>,{' '}
-                  <Em>In Progress</Em> status, time tracking, and more.
+                  <Em>In Progress</Em> status, time tracking, and more in the{' '}
+                  <InlineLink href={Routes.SETTINGS}>Settings</InlineLink>.
                 </>
               }
               data-testid="card-settings"
@@ -207,7 +223,12 @@ const HowToUse = () => {
                 titleRightIcon={
                   <ChevronRight className="size-4 text-muted-foreground" />
                 }
-                description="Add TaskRankr to your home screen for offline access and a full-screen experience."
+                description={
+                  <Em>
+                    Add TaskRankr to your home screen for offline access and a
+                    full-screen experience.
+                  </Em>
+                }
                 data-testid="card-how-to-install"
               />
             </Link>

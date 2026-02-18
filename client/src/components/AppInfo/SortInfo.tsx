@@ -34,14 +34,11 @@ interface SortInfoProps {
 
 export const SortInfo = ({ defaultExpanded = false }: SortInfoProps) => (
   <CollapsibleCard
-    title={<h3 className="font-semibold text-foreground">Sort Info</h3>}
+    title={<h3 className="font-semibold text-foreground">Sort Order Info</h3>}
     defaultOpen={defaultExpanded}
     contentClassName="mt-3"
     data-testid="button-sort-info-toggle"
   >
-    <p className="text-xs text-muted-foreground mb-3 text-center">
-      When tasks have the same value, they are sorted by secondary attributes.
-    </p>
     <div
       className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm"
       data-testid="sort-info-content"
