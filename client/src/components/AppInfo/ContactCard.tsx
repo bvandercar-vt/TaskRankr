@@ -2,6 +2,7 @@ import { Download, Mail } from 'lucide-react'
 
 import { debugLog } from '@/lib/debug-logger'
 import { useGuestMode } from '@/providers/GuestModeProvider'
+import { Button } from '../primitives/Button'
 import { InlineLink } from '../primitives/InlineText'
 
 const ContactCardInner = ({
@@ -36,15 +37,16 @@ const ContactCardInner = ({
           taskrankr@gmail.com
         </InlineLink>
         {showDebugDownload && (
-          <button
-            type="button"
-            className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors px-1 border border-muted-foreground/20 rounded-md py-0.5"
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[11px] text-muted-foreground/60 gap-1.5"
             onClick={() => debugLog.download(isGuestMode)}
             data-testid="button-download-debug-logs"
           >
             <Download className="size-3" />
             Download Debug Logs
-          </button>
+          </Button>
         )}
       </div>
     </div>

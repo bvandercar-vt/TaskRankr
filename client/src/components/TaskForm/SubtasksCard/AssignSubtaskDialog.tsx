@@ -124,21 +124,21 @@ export const AssignSubtaskDialog = ({
             </p>
           ) : (
             filteredTasks.map((t) => (
-              <button
+              <Button
                 key={t.id}
-                type="button"
+                variant="ghost"
                 onClick={() => setSelectedId(t.id)}
                 className={cn(
-                  'w-full text-left px-3 py-2.5 text-sm transition-colors',
+                  'w-full justify-start rounded-none px-3 py-2.5 text-sm h-auto',
                   selectedId === t.id
                     ? 'bg-primary/20 text-foreground'
-                    : 'hover-elevate text-muted-foreground',
+                    : 'text-muted-foreground',
                   t.status === TaskStatus.COMPLETED && 'opacity-50',
                 )}
                 data-testid={`button-assign-task-${t.id}`}
               >
                 {t.name}
-              </button>
+              </Button>
             ))
           )}
         </div>
