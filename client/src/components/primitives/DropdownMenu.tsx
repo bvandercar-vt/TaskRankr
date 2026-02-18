@@ -5,9 +5,9 @@
 
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check, ChevronRight, Circle, type LucideIcon } from 'lucide-react'
-import { Link } from 'wouter'
 
 import { cn, forwardRefHelper } from '@/lib/utils'
+import { Link } from './Link'
 
 export const DropdownMenu = DropdownMenuPrimitive.Root
 export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
@@ -87,7 +87,7 @@ export const DropdownMenuItem = forwardRefHelper<
     </DropdownMenuPrimitive.Item>
   )
 
-  return href ? <Link to={href}>{dropdownMenuItem}</Link> : dropdownMenuItem
+  return href ? <Link href={href}>{dropdownMenuItem}</Link> : dropdownMenuItem
 }, DropdownMenuPrimitive.Item)
 
 export const DropdownMenuCheckboxItem = forwardRefHelper(

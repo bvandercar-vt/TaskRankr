@@ -1,17 +1,9 @@
 // biome-ignore lint/style/useFilenamingConvention: is fine
 
-import { Link } from 'wouter'
+import type { SetRequired } from 'type-fest'
 
 import { cn } from '@/lib/utils'
-
-const isExternalHref = (href: string) =>
-  /^(https?:|mailto:|tel:|#)/.test(href)
-
-const linkClassName = (className?: string) =>
-  cn(
-    'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400',
-    className,
-  )
+import { Link } from './Link'
 
 export const InlineLink = ({
   children,
@@ -19,26 +11,19 @@ export const InlineLink = ({
   href,
   ...rest
 }: React.PropsWithChildren<
-  { className?: string; href: string } & Omit<
-    React.AnchorHTMLAttributes<HTMLAnchorElement>,
-    'className' | 'href'
+  SetRequired<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
+>) => (
+  <Link
+    href={href}
+    className={cn(
+      'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400',
+      className,
+    )}
+    {...rest}
   >
->) =>
-  isExternalHref(href) ? (
-    <a
-      href={href}
-      className={linkClassName(className)}
-      target="_blank"
-      rel="noopener noreferrer"
-      {...rest}
-    >
-      {children}
-    </a>
-  ) : (
-    <Link to={href} className={linkClassName(className)} {...rest}>
-      {children}
-    </Link>
-  )
+    {children}
+  </Link>
+)
 
 export const InlineEmphasized = ({
   children,
