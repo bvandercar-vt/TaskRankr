@@ -4,22 +4,18 @@
 
 import type { ControllerRenderProps } from 'react-hook-form'
 
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-} from '@/components/primitives/forms/Form'
+import { getRankFieldStyle } from '@/lib/rank-field-styles'
+import type { RankFieldValueMap } from '@/lib/task-utils'
+import { cn } from '@/lib/utils'
+import type { MutateTask, RankField } from '~/shared/schema'
+import { FormControl, FormItem, FormLabel } from '../primitives/forms/Form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/primitives/forms/Select'
-import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import type { RankFieldValueMap } from '@/lib/task-utils'
-import { cn } from '@/lib/utils'
-import type { MutateTask, RankField } from '~/shared/schema'
+} from '../primitives/forms/Select'
 
 interface RankFieldSelectProps {
   name: RankField

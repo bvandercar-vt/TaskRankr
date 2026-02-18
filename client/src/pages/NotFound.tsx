@@ -3,7 +3,7 @@
  */
 
 import { AlertCircle, Home } from 'lucide-react'
-import { Link, useLocation } from 'wouter'
+import { useLocation } from 'wouter'
 
 import { Badge } from '@/components/primitives/Badge'
 import { Button } from '@/components/primitives/Button'
@@ -29,12 +29,10 @@ export default function NotFound() {
             <Badge variant="secondary">{location}</Badge>
           </p>
           <div className="flex justify-center">
-            <Link href="/">
-              <Button data-testid="link-home">
-                <Home className="size-4" />
-                Home
-              </Button>
-            </Link>
+            <Button href="/" data-testid="link-home">
+              <Home className="size-4" />
+              Home
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -17,8 +17,8 @@ import {
   useFormContext,
 } from 'react-hook-form'
 
-import { Label } from '@/components/primitives/forms/Label'
 import { cn, forwardRefHelper } from '@/lib/utils'
+import { Label } from './Label'
 
 export const Form = FormProvider
 

@@ -2,6 +2,7 @@ import { Download, Mail } from 'lucide-react'
 
 import { debugLog } from '@/lib/debug-logger'
 import { useGuestMode } from '@/providers/GuestModeProvider'
+import { InlineLink } from '../primitives/InlineText'
 
 const ContactCardInner = ({
   className,
@@ -26,14 +27,14 @@ const ContactCardInner = ({
         </p>
       </div>
       <div className="flex flex-col items-end gap-2 pt-1">
-        <a
+        <InlineLink
           href="mailto:taskrankr@gmail.com"
-          className="inline-flex items-center gap-1.5 text-sm text-purple-400 hover-elevate rounded-md px-1"
+          className="inline-flex items-center gap-1.5 text-sm px-1"
           data-testid="link-contact-email"
         >
-          <Mail className="size-3" />
+          <Mail className="size-4" />
           taskrankr@gmail.com
-        </a>
+        </InlineLink>
         {showDebugDownload && (
           <button
             type="button"

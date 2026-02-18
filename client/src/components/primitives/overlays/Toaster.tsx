@@ -3,6 +3,7 @@
  * notifications with viewport positioning.
  */
 
+import { useToast } from '@/hooks/useToast'
 import {
   Toast,
   ToastClose,
@@ -10,8 +11,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from '@/components/primitives/overlays/Toast'
-import { useToast } from '@/hooks/useToast'
+} from './Toast'
 
 export const Toaster = () => {
   const { toasts } = useToast()

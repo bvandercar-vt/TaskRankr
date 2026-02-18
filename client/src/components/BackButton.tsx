@@ -1,15 +1,12 @@
 import { ArrowLeft } from 'lucide-react'
-import { Link } from 'wouter'
 
-import { Button } from '@/components/primitives/Button'
 import { Routes } from '@/lib/constants'
+import { Button } from './primitives/Button'
 
 export const BackButton = ({ route = Routes.HOME }: { route?: string }) => (
-  <Link href={route}>
-    <Button variant="ghost" size="icon" data-testid="button-back">
-      <ArrowLeft className="size-5" />
-    </Button>
-  </Link>
+  <Button variant="ghost" size="icon" data-testid="button-back" href={route}>
+    <ArrowLeft className="size-5" />
+  </Button>
 )
 
 export const BackButtonHeader = ({ title }: { title: string }) => (

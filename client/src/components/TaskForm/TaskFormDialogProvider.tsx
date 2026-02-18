@@ -6,23 +6,23 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/primitives/overlays/Dialog'
-import { AssignSubtaskDialog } from '@/components/TaskForm/SubtasksCard/AssignSubtaskDialog'
-import { SubtaskActionDialog } from '@/components/TaskForm/SubtasksCard/SubtaskActionDialog'
-import { TaskForm, type TaskFormProps } from '@/components/TaskForm/TaskForm'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
   DeleteTaskArgs,
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { type CreateTask, type Task, TaskStatus } from '~/shared/schema'
+import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../primitives/overlays/Dialog'
+import { AssignSubtaskDialog } from '../TaskForm/SubtasksCard/AssignSubtaskDialog'
+import { SubtaskActionDialog } from '../TaskForm/SubtasksCard/SubtaskActionDialog'
+import { TaskForm, type TaskFormProps } from '../TaskForm/TaskForm'
 
 interface TaskFormDialogContextType {
   openCreateDialog: (parentId?: number) => void

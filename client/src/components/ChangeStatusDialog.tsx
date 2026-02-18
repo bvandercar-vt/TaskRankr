@@ -15,8 +15,13 @@ import {
   StopCircle,
 } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
-import { TimeInput } from '@/components/primitives/forms/TimeInput'
+import { useSettings } from '@/hooks/useSettings'
+import { cn } from '@/lib/utils'
+import { TaskStatus } from '~/shared/schema'
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
+import { Button } from './primitives/Button'
+import { TimeInput } from './primitives/forms/TimeInput'
+import { Icon as LucideIconComponent } from './primitives/LucideIcon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,13 +31,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/primitives/overlays/AlertDialog'
-import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
-import { useSettings } from '@/hooks/useSettings'
-import { cn } from '@/lib/utils'
-import { TaskStatus } from '~/shared/schema'
-import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
-import { Icon as LucideIconComponent } from './primitives/LucideIcon'
+} from './primitives/overlays/AlertDialog'
+import { SubtaskBlockedTooltip } from './SubtaskBlockedTooltip'
 
 const TimeSpentInput = ({
   onBlur,
