@@ -9,26 +9,6 @@ import { omit, pick } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
-import { Button } from '@/components/primitives/Button'
-import { Calendar } from '@/components/primitives/forms/Calendar'
-import { Checkbox } from '@/components/primitives/forms/Checkbox'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/primitives/forms/Form'
-import { Textarea } from '@/components/primitives/forms/Textarea'
-import { TimeInput } from '@/components/primitives/forms/TimeInput'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/primitives/overlays/Popover'
-import { TagChain } from '@/components/primitives/TagChain'
-import { SubtaskBlockedTooltip } from '@/components/SubtaskBlockedTooltip'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
@@ -45,6 +25,26 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
+import { Button } from '../primitives/Button'
+import { Calendar } from '../primitives/forms/Calendar'
+import { Checkbox } from '../primitives/forms/Checkbox'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../primitives/forms/Form'
+import { Textarea } from '../primitives/forms/Textarea'
+import { TimeInput } from '../primitives/forms/TimeInput'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../primitives/overlays/Popover'
+import { TagChain } from '../primitives/TagChain'
+import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
 import { SubtasksCard } from './SubtasksCard'
 

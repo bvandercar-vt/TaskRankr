@@ -21,7 +21,6 @@ import {
 } from '@dnd-kit/sortable'
 import { Link, Plus } from 'lucide-react'
 
-import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
   getDirectSubtasks,
@@ -31,6 +30,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
 import { SubtasksSettings } from './SubtasksSettings'
 

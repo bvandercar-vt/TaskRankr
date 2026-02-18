@@ -4,6 +4,7 @@
 
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
 
+import { cn } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +15,7 @@ import {
   AlertDialogOverlay,
   AlertDialogPortal,
   AlertDialogTitle,
-} from '@/components/primitives/overlays/AlertDialog'
-import { cn } from '@/lib/utils'
+} from '../../primitives/overlays/AlertDialog'
 
 interface SubtaskActionDialogProps {
   open: boolean

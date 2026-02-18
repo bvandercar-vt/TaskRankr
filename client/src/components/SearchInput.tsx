@@ -4,8 +4,8 @@
 
 import { Search } from 'lucide-react'
 
-import { Input } from '@/components/primitives/forms/Input'
 import { cn } from '@/lib/utils'
+import { Input } from './primitives/forms/Input'
 
 interface SearchInputProps {
   value: string
