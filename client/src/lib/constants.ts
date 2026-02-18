@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 
 export const Routes = {
   HOME: '/',
+  GUEST: '/guest',
   SETTINGS: '/settings',
   HOW_TO_USE: '/how-to-use',
   HOW_TO_INSTALL: '/how-to-install',
