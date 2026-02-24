@@ -43,7 +43,7 @@ export const TimeInput = ({
           type="number"
           min={0}
           step={1}
-          value={Number(hours).toString()}
+          value={hours.toString()}
           onChange={(e) => {
             const h = parseNumericOnChange(e)
             onDurationChange(getDurationMs(h, minutes))
@@ -61,7 +61,7 @@ export const TimeInput = ({
           min={0}
           max={MAX_MINUTES}
           step={1}
-          value={Number(minutes).toString()}
+          value={minutes.toString()}
           onChange={(e) => {
             const m = Math.min(MAX_MINUTES, parseNumericOnChange(e))
             onDurationChange(getDurationMs(hours, m))
