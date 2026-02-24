@@ -35,14 +35,16 @@ export const TimeInput = ({
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     const input = e.target
     const value = Number.parseInt(input.value) || 0
-    if (value === 0) {
-      requestAnimationFrame(() => input.select())
-    } else {
-      requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (value === 0) {
+        input.select()
+      } else {
+        input.type = 'text'
         const len = input.value.length
         input.setSelectionRange(len, len)
-      })
-    }
+        input.type = 'number'
+      }
+    })
   }
 
   return (
