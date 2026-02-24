@@ -1,5 +1,12 @@
-import { FocusEvent, KeyboardEvent } from 'react'
 import { Input } from './Input'
+
+const MS_PER_MINUTE = 60 * 1000
+const MINUTES_PER_HOUR = 60
+const MS_PER_HOUR = MS_PER_MINUTE * MINUTES_PER_HOUR
+const MAX_MINUTES = MINUTES_PER_HOUR - 1
+
+const getDurationMs = (hours: number, minutes: number) =>
+  hours * MS_PER_HOUR + minutes * MS_PER_MINUTE
 
 type TimeInputProps = {
   durationMs: number
@@ -16,34 +23,13 @@ export const TimeInput = ({
   className = 'w-16 h-8 text-center text-sm',
   'data-testid': testId = 'time-input',
 }: TimeInputProps) => {
-  const hours = Math.floor(durationMs / 3_600_000)
-  const minutes = Math.floor((durationMs % 3_600_000) / 60_000)
+  const hours = Math.floor(durationMs / MS_PER_HOUR)
+  const minutes = Math.floor((durationMs % MS_PER_HOUR) / MS_PER_MINUTE)
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const allowedKeys = [
-      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-      'Home', 'End',
-    ]
-    if (allowedKeys.includes(e.key)) return
-    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z'].includes(e.key)) return
-    if (!/^[0-9]$/.test(e.key)) {
-      e.preventDefault()
-    }
-  }
-
-  const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     const input = e.target
-    const value = Number.parseInt(input.value) || 0
     requestAnimationFrame(() => {
-      if (value === 0) {
-        input.select()
-      } else {
-        input.type = 'text'
-        const len = input.value.length
-        input.setSelectionRange(len, len)
-        input.type = 'number'
-      }
+      input.select()
     })
   }
 
@@ -53,12 +39,15 @@ export const TimeInput = ({
         <Input
           type="number"
           min={0}
+          step={0.01}
           value={hours}
           onChange={(e) => {
-            const h = Math.max(0, Number.parseInt(e.target.value) || 0)
-            onDurationChange(h * 3_600_000 + minutes * 60_000)
+            const value = Math.max(0, Number.parseFloat(e.target.value) || 0)
+            const h = Math.floor(value)
+            const fractionalHours = value - h
+            const m = Math.round(fractionalHours * MINUTES_PER_HOUR)
+            onDurationChange(getDurationMs(h, m))
           }}
-          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
@@ -70,16 +59,16 @@ export const TimeInput = ({
         <Input
           type="number"
           min={0}
-          max={59}
+          max={MAX_MINUTES}
+          step={1}
           value={minutes}
           onChange={(e) => {
             const m = Math.min(
-              59,
+              MAX_MINUTES,
               Math.max(0, Number.parseInt(e.target.value) || 0),
             )
-            onDurationChange(hours * 3_600_000 + m * 60_000)
+            onDurationChange(getDurationMs(hours, m))
           }}
-          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={onBlur}
           className={className}

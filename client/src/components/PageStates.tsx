@@ -3,8 +3,6 @@
  * @fileoverview Shared UI components for page loading, error, and empty states.
  */
 
-import type { ReactNode } from 'react'
-
 export const PageLoading = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="flex flex-col items-center gap-4 animate-pulse">
@@ -20,10 +18,10 @@ export const EmptyState = ({
   description,
   action,
 }: {
-  icon: ReactNode
+  icon: React.ReactNode
   title: string
   description: string
-  action?: ReactNode
+  action?: React.ReactNode
 }) => (
   <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
     <div className="w-16 h-16 rounded-full bg-secondary/50 flex items-center justify-center mb-2">

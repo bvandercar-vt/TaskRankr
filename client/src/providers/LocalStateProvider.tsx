@@ -5,7 +5,6 @@
 
 import {
   createContext,
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -126,7 +125,7 @@ const loadFromStorage = <T,>(key: string, fallback: T): T => {
 }
 
 interface LocalStateProviderProps {
-  children: ReactNode
+  children: React.ReactNode
   shouldSync: boolean
   storageMode: StorageMode
 }
