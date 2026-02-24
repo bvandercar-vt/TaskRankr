@@ -8,6 +8,9 @@ const MAX_MINUTES = MINUTES_PER_HOUR - 1
 const getDurationMs = (hours: number, minutes: number) =>
   hours * MS_PER_HOUR + minutes * MS_PER_MINUTE
 
+const parseNumericOnChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  Math.max(0, Number.parseInt(e.target.value) || 0)
+
 type TimeInputProps = {
   durationMs: number
   onDurationChange: (durationMs: number) => void
@@ -39,14 +42,11 @@ export const TimeInput = ({
         <Input
           type="number"
           min={0}
-          step={0.01}
+          step={1}
           value={Number(hours).toString()}
           onChange={(e) => {
-            const value = Math.max(0, Number.parseFloat(e.target.value) || 0)
-            const h = Math.floor(value)
-            const fractionalHours = value - h
-            const m = Math.round(fractionalHours * MINUTES_PER_HOUR)
-            onDurationChange(getDurationMs(h, m))
+            const h = parseNumericOnChange(e)
+            onDurationChange(getDurationMs(h, minutes))
           }}
           onFocus={handleFocus}
           onBlur={onBlur}
@@ -63,10 +63,7 @@ export const TimeInput = ({
           step={1}
           value={Number(minutes).toString()}
           onChange={(e) => {
-            const m = Math.min(
-              MAX_MINUTES,
-              Math.max(0, Number.parseInt(e.target.value) || 0),
-            )
+            const m = Math.min(MAX_MINUTES, parseNumericOnChange(e))
             onDurationChange(getDurationMs(hours, m))
           }}
           onFocus={handleFocus}
