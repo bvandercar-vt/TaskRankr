@@ -1,5 +1,16 @@
 import { Input } from './Input'
 
+const MS_PER_MINUTE = 60 * 1000
+const MINUTES_PER_HOUR = 60
+const MS_PER_HOUR = MS_PER_MINUTE * MINUTES_PER_HOUR
+const MAX_MINUTES = MINUTES_PER_HOUR - 1
+
+const getDurationMs = (hours: number, minutes: number) =>
+  hours * MS_PER_HOUR + minutes * MS_PER_MINUTE
+
+const parseNumericOnChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  Math.max(0, Number.parseInt(e.target.value) || 0)
+
 type TimeInputProps = {
   durationMs: number
   onDurationChange: (durationMs: number) => void
@@ -15,8 +26,15 @@ export const TimeInput = ({
   className = 'w-16 h-8 text-center text-sm',
   'data-testid': testId = 'time-input',
 }: TimeInputProps) => {
-  const hours = Math.floor(durationMs / 3_600_000)
-  const minutes = Math.floor((durationMs % 3_600_000) / 60_000)
+  const hours = Math.floor(durationMs / MS_PER_HOUR)
+  const minutes = Math.floor((durationMs % MS_PER_HOUR) / MS_PER_MINUTE)
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    const input = e.target
+    requestAnimationFrame(() => {
+      input.select()
+    })
+  }
 
   return (
     <div className="flex items-center gap-2" data-testid={testId}>
@@ -24,11 +42,13 @@ export const TimeInput = ({
         <Input
           type="number"
           min={0}
-          value={hours}
+          step={1}
+          value={hours.toString()}
           onChange={(e) => {
-            const h = Math.max(0, Number.parseInt(e.target.value) || 0)
-            onDurationChange(h * 3_600_000 + minutes * 60_000)
+            const h = parseNumericOnChange(e)
+            onDurationChange(getDurationMs(h, minutes))
           }}
+          onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
           data-testid={`${testId}-hours`}
@@ -39,15 +59,14 @@ export const TimeInput = ({
         <Input
           type="number"
           min={0}
-          max={59}
-          value={minutes}
+          max={MAX_MINUTES}
+          step={1}
+          value={minutes.toString()}
           onChange={(e) => {
-            const m = Math.min(
-              59,
-              Math.max(0, Number.parseInt(e.target.value) || 0),
-            )
-            onDurationChange(hours * 3_600_000 + m * 60_000)
+            const m = Math.min(MAX_MINUTES, parseNumericOnChange(e))
+            onDurationChange(getDurationMs(hours, m))
           }}
+          onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
           data-testid={`${testId}-minutes`}
