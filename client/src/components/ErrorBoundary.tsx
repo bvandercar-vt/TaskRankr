@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 import { debugLog } from '@/lib/debug-logger'
@@ -53,7 +53,7 @@ const ErrorDialog = ({ errorText }: { errorText: string }) => (
 )
 
 interface Props {
-  children: ReactNode
+  children: React.ReactNode
 }
 
 interface State {
@@ -71,7 +71,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
     debugLog.log('ErrorBoundary', 'uncaught_error', {
       message: error.message,
       stack: error.stack,
