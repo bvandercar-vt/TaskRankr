@@ -1,3 +1,4 @@
+import { FocusEvent } from 'react'
 import { Input } from './Input'
 
 type TimeInputProps = {
@@ -18,6 +19,19 @@ export const TimeInput = ({
   const hours = Math.floor(durationMs / 3_600_000)
   const minutes = Math.floor((durationMs % 3_600_000) / 60_000)
 
+  const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+    const input = e.target
+    const value = Number.parseInt(input.value) || 0
+    if (value === 0) {
+      requestAnimationFrame(() => input.select())
+    } else {
+      requestAnimationFrame(() => {
+        const len = input.value.length
+        input.setSelectionRange(len, len)
+      })
+    }
+  }
+
   return (
     <div className="flex items-center gap-2" data-testid={testId}>
       <div className="flex items-center gap-1">
@@ -29,6 +43,7 @@ export const TimeInput = ({
             const h = Math.max(0, Number.parseInt(e.target.value) || 0)
             onDurationChange(h * 3_600_000 + minutes * 60_000)
           }}
+          onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
           data-testid={`${testId}-hours`}
@@ -48,6 +63,7 @@ export const TimeInput = ({
             )
             onDurationChange(hours * 3_600_000 + m * 60_000)
           }}
+          onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
           data-testid={`${testId}-minutes`}
