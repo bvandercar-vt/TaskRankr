@@ -1,4 +1,4 @@
-import { FocusEvent } from 'react'
+import { FocusEvent, KeyboardEvent } from 'react'
 import { Input } from './Input'
 
 type TimeInputProps = {
@@ -18,6 +18,19 @@ export const TimeInput = ({
 }: TimeInputProps) => {
   const hours = Math.floor(durationMs / 3_600_000)
   const minutes = Math.floor((durationMs % 3_600_000) / 60_000)
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const allowedKeys = [
+      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End',
+    ]
+    if (allowedKeys.includes(e.key)) return
+    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z'].includes(e.key)) return
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault()
+    }
+  }
 
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     const input = e.target
@@ -43,6 +56,7 @@ export const TimeInput = ({
             const h = Math.max(0, Number.parseInt(e.target.value) || 0)
             onDurationChange(h * 3_600_000 + minutes * 60_000)
           }}
+          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
@@ -63,6 +77,7 @@ export const TimeInput = ({
             )
             onDurationChange(hours * 3_600_000 + m * 60_000)
           }}
+          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={onBlur}
           className={className}
