@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react'
-
 import {
   Tooltip,
   TooltipContent,
@@ -8,7 +6,7 @@ import {
 
 interface SubtaskBlockedTooltipProps {
   blocked: boolean
-  children: ReactNode
+  children: React.ReactNode
 }
 
 export const SubtaskBlockedTooltip = ({

@@ -6,7 +6,6 @@
 
 import {
   createContext,
-  type ReactNode,
   useCallback,
   useContext,
   useMemo,
@@ -21,7 +20,11 @@ interface GuestModeContextValue {
 
 const GuestModeContext = createContext<GuestModeContextValue | null>(null)
 
-export const GuestModeProvider = ({ children }: { children: ReactNode }) => {
+export const GuestModeProvider = ({
+  children,
+}: {
+  children: React.ReactNode
+}) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
 
   const enterGuestMode = useCallback(() => setIsGuestMode(true), [])

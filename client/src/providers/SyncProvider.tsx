@@ -5,7 +5,6 @@
 
 import {
   createContext,
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -29,7 +28,7 @@ interface SyncContextValue {
 const SyncContext = createContext<SyncContextValue | null>(null)
 
 interface SyncProviderProps {
-  children: ReactNode
+  children: React.ReactNode
   isAuthenticated: boolean
 }
 
