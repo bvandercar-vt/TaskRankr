@@ -40,7 +40,7 @@ export const TimeInput = ({
           type="number"
           min={0}
           step={0.01}
-          value={hours}
+          value={Number(hours).toString()}
           onChange={(e) => {
             const value = Math.max(0, Number.parseFloat(e.target.value) || 0)
             const h = Math.floor(value)
@@ -61,7 +61,7 @@ export const TimeInput = ({
           min={0}
           max={MAX_MINUTES}
           step={1}
-          value={minutes}
+          value={Number(minutes).toString()}
           onChange={(e) => {
             const m = Math.min(
               MAX_MINUTES,
