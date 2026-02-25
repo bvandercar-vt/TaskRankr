@@ -2,11 +2,15 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
+import {
+  ChangelogDialog,
+  WhatsNewButton,
+} from '@/components/AppInfo/WhatsNewDialog'
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
@@ -36,6 +40,7 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
+import { APP_VERSION } from '@/lib/changelog'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, TaskStatus } from '~/shared/schema'
@@ -309,6 +314,8 @@ const Settings = () => {
   const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
+  const [changelogOpen, setChangelogOpen] = useState(false)
+  const openChangelog = useCallback(() => setChangelogOpen(true), [])
 
   return (
     <ScrollablePage>
@@ -415,6 +422,9 @@ const Settings = () => {
           </Link>
         )}
 
+        <WhatsNewButton onClick={openChangelog} />
+        <ChangelogDialog open={changelogOpen} onOpenChange={setChangelogOpen} />
+
         {!isGuestMode && <UserInfoCard />}
 
         <ContactCard showDebugDownload />
@@ -454,6 +464,9 @@ const Settings = () => {
         </p>
         <p className="text-xs mt-1" data-testid="text-app-description">
           Track tasks with priority, ease, enjoyment, and time ratings.
+        </p>
+        <p className="text-xs mt-1" data-testid="text-app-version">
+          v{APP_VERSION}
         </p>
       </div>
     </ScrollablePage>

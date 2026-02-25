@@ -42,6 +42,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Configurable Rank Fields**: Priority, ease, enjoyment, and time fields have 6 levels and customizable visibility/required settings via `fieldConfig`.
 - **Task Status System**: A clear workflow with `open`, `in_progress`, `pinned`, and `completed` statuses, including automatic demotion of `in_progress` tasks and time tracking.
 - **Subtask Ordering**: Supports both inherited sorting from parent tasks and manual drag-and-drop reordering.
+- **Changelog & Version Tracking**: A "What's New" dialog automatically appears when users open the app after an update with new changelog entries. Users can also view the full changelog from Settings. Version number is displayed at the bottom of Settings. Changelog data lives in `client/src/lib/changelog.ts` — add new entries at the top of the `changelog` array.
 - **Sorting & Filtering Architecture**: All sorting and filtering logic lives in `client/src/lib/task-utils.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
 - **Task Hooks Architecture**: `useTasks.ts` exports data hooks (`useTasks`, `useTask`, `useTaskParentChain`) and `useTaskActions()` which returns direct calls to `LocalStateProvider` methods. All mutations are synchronous local-first operations — no `useMutation` wrappers or `isPending` states.
 
@@ -62,7 +63,8 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
 │       │   │   ├── InstallBanner.tsx  # PWA install prompt banner
 │       │   │   ├── SortInfo.tsx      # Reusable sort explanation component
-│       │   │   └── StatusBanner.tsx  # Auth/guest status banner
+│       │   │   ├── StatusBanner.tsx  # Auth/guest status banner
+│       │   │   └── WhatsNewDialog.tsx  # Changelog dialog (auto-shows on new version) + settings button
 │       │   ├── TaskForm/           # Task form and related components
 │       │   │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
 │       │   │   ├── TaskForm.tsx      # Full-screen task create/edit form
@@ -111,6 +113,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── query-client.ts   # @tanstack/react-query client
 │       │   ├── utils.ts          # Utility functions (cn, time conversions, etc.)
 │       │   ├── auth-utils.ts     # Authentication helpers
+│       │   ├── changelog.ts      # Changelog entries, version tracking, unseen detection
 │       │   ├── constants.ts      # DEFAULT_SETTINGS
 │       │   ├── demo-tasks.ts     # Demo task data for guest mode
 │       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
