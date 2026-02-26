@@ -440,7 +440,10 @@ const Settings = () => {
           </div>
           <Sparkles className="size-5 text-muted-foreground shrink-0" />
         </button>
-        <FullChangelogDialog open={changelogOpen} onOpenChange={setChangelogOpen} />
+        <FullChangelogDialog
+          open={changelogOpen}
+          onOpenChange={setChangelogOpen}
+        />
 
         {!isGuestMode && <UserInfoCard />}
 
