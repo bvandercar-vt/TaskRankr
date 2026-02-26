@@ -48,8 +48,8 @@ export const WhyDifferentDialog = ({
                 More priority levels.
               </span>{' '}
               Other apps let you sort by priority, but they only have 3 levels.
-              TaskRankr gives you 5, so you can be much more specific about
-              what matters most.
+              TaskRankr gives you 5, so you can be much more specific about what
+              matters most.
             </div>
           </li>
 
@@ -61,10 +61,9 @@ export const WhyDifferentDialog = ({
               </span>{' '}
               No other app has this. You've been grinding through high-priority
               tasks all day. Now it's evening and you want to stay productive
-              but enjoy yourself — sort by Ease or Enjoyment. Or you have a
-              free moment and want to knock things out — sort by Time to find
-              quick 10–30 minute tasks. You can disable any of these in your
-              settings.
+              but enjoy yourself — sort by Ease or Enjoyment. Or you have a free
+              moment and want to knock things out — sort by Time to find quick
+              10–30 minute tasks. You can disable any of these in your settings.
             </div>
           </li>
 
@@ -104,8 +103,7 @@ export const WhyDifferentDialog = ({
             you.
           </p>
           <p className="text-muted-foreground">
-            If you find any bugs or have feature suggestions, please email me
-            at{' '}
+            If you find any bugs or have feature suggestions, please email me at{' '}
             <a
               href="mailto:taskrankr@gmail.com"
               className="text-primary underline underline-offset-2 hover:text-primary/80"

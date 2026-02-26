@@ -3,6 +3,7 @@
  * Provides login/signup call-to-action for new users.
  */
 
+import { useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -14,7 +15,6 @@ import {
   Star,
   WifiOff,
 } from 'lucide-react'
-import { useState } from 'react'
 
 import { WhyDifferentDialog } from '@/components/AppInfo/WhyDifferentDialog'
 import { Button } from '@/components/primitives/Button'
