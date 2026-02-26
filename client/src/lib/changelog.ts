@@ -1,13 +1,19 @@
+import { z } from 'zod'
+
 import changelogData from '../../../CHANGELOG.json'
 
-export interface ChangelogEntry {
-  version: string
-  date: string
-  title: string
-  changes: string[]
-}
+const changelogEntrySchema = z.object({
+  version: z.string(),
+  date: z.string(),
+  title: z.string(),
+  changes: z.array(z.string()),
+})
 
-export const changelog: ChangelogEntry[] = changelogData
+export type ChangelogEntry = z.infer<typeof changelogEntrySchema>
+
+export const changelog: ChangelogEntry[] = z
+  .array(changelogEntrySchema)
+  .parse(changelogData)
 
 export const APP_VERSION = changelog[0].version
 
