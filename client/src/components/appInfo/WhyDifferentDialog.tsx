@@ -1,5 +1,5 @@
 import { CheckCircle, ListTodo, Star } from "lucide-react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 
 import { Routes } from "@/lib/constants";
 
@@ -21,7 +21,18 @@ export const WhyDifferentDialog = ({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}) => (
+}) => {
+  const [, setLocation] = useLocation()
+
+  const goToSettings = (e: React.MouseEvent) => {
+    e.preventDefault()
+    onOpenChange(false)
+    setLocation(Routes.SETTINGS)
+  }
+
+  const settingsLinkClass = "text-primary underline underline-offset-2 hover:text-primary/80 cursor-pointer"
+
+  return (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
       className="max-h-[85vh] overflow-y-auto sm:max-w-lg"
@@ -89,7 +100,7 @@ export const WhyDifferentDialog = ({
                 </li>
               </ul>
               And, you can disable any of these in your{" "}
-              <Link href={Routes.SETTINGS} onClick={() => onOpenChange(false)} className="text-primary underline underline-offset-2 hover:text-primary/80">settings</Link>
+              <a onClick={goToSettings} className={settingsLinkClass}>settings</a>
               {" "}to your needs.
             </div>
           </li>
@@ -125,7 +136,7 @@ export const WhyDifferentDialog = ({
         <div className="border-t border-border pt-4 space-y-3">
           <p>
             I encourage you to give it a shot. Check out{" "}
-            <Link href={Routes.SETTINGS} onClick={() => onOpenChange(false)} className="text-primary underline underline-offset-2 hover:text-primary/80">Settings</Link>
+            <a onClick={goToSettings} className={settingsLinkClass}>Settings</a>
             {" "}to see what you can customize. I built this to help me, and if you're someone
             who can use some organization of their tasks, I think it can help
             you too.
@@ -144,4 +155,5 @@ export const WhyDifferentDialog = ({
       </div>
     </DialogContent>
   </Dialog>
-);
+  )
+}
