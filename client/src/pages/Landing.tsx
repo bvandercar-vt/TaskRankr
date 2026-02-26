@@ -129,10 +129,10 @@ const Landing = () => {
 
         <InlineLink
           onClick={() => setShowWhyDialog(true)}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm"
+          className="mb-6 inline-flex items-start gap-1.5 text-sm"
           data-testid="button-why-different"
         >
-          <Info className="size-4" />
+          <Info className="size-4 mt-0.5 shrink-0" />
           What makes this app different, and how it can help you.
         </InlineLink>
 
