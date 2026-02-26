@@ -3,10 +3,10 @@
  * Provides login/signup call-to-action for new users.
  */
 
-import { useState } from 'react'
-import type { VariantProps } from 'class-variance-authority'
-import { isStandalonePWA } from 'is-standalone-pwa'
-import type { LucideIcon } from 'lucide-react'
+import { useState } from "react";
+import type { VariantProps } from "class-variance-authority";
+import { isStandalonePWA } from "is-standalone-pwa";
+import type { LucideIcon } from "lucide-react";
 import {
   CheckCircle,
   Clock,
@@ -15,69 +15,69 @@ import {
   ListTodo,
   Star,
   WifiOff,
-} from 'lucide-react'
-import { Link } from 'wouter'
+} from "lucide-react";
+import { Link } from "wouter";
 
-import { WhyDifferentDialog } from '@/components/appInfo/WhyDifferentDialog'
-import { Button, type buttonVariants } from '@/components/primitives/Button'
-import { InlineLink } from '@/components/primitives/InlineText'
-import { Routes } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+import { WhyDifferentDialog } from "@/components/appInfo/WhyDifferentDialog";
+import { Button, type buttonVariants } from "@/components/primitives/Button";
+import { InlineLink } from "@/components/primitives/InlineText";
+import { Routes } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { useGuestMode } from "@/providers/GuestModeProvider";
+import { authPaths } from "~/shared/constants";
 
 const CaptionedIcon = ({
   icon: Icon,
   color,
   label,
 }: {
-  icon: LucideIcon
-  color: string
-  label: string
+  icon: LucideIcon;
+  color: string;
+  label: string;
 }) => (
   <div className="flex flex-col items-center gap-2">
-    <Icon className={cn('size-6', color)} />
+    <Icon className={cn("size-6", color)} />
     <span className="text-sm">{label}</span>
   </div>
-)
+);
 
 type InitializeButtonProps = {
-  title: string
-  caption: string
-  onClick?: () => void
-  variant?: VariantProps<typeof buttonVariants>['variant']
-  className?: string
-  'data-testid'?: string
-}
+  title: string;
+  caption: string;
+  onClick?: () => void;
+  variant?: VariantProps<typeof buttonVariants>["variant"];
+  className?: string;
+  "data-testid"?: string;
+};
 
 export const InitializeButton = ({
   title,
   caption,
   onClick,
-  variant = 'default',
+  variant = "default",
   className,
-  'data-testid': testId,
+  "data-testid": testId,
 }: InitializeButtonProps) => (
   <div className="flex flex-col items-center w-[220px]">
     <Button
       size="lg"
       variant={variant}
-      className={cn('text-lg px-8 w-full', className)}
+      className={cn("text-lg px-8 w-full", className)}
       data-testid={testId}
       onClick={onClick}
     >
       {title}
-    </Button>{' '}
+    </Button>{" "}
     <p className="text-xs text-muted-foreground mt-1.5 text-center">
       {caption}
     </p>
   </div>
-)
+);
 
 const Landing = () => {
-  const { enterGuestMode } = useGuestMode()
-  const isStandalone = isStandalonePWA()
-  const [showWhyDialog, setShowWhyDialog] = useState(false)
+  const { enterGuestMode } = useGuestMode();
+  const isStandalone = isStandalonePWA();
+  const [showWhyDialog, setShowWhyDialog] = useState(false);
 
   return (
     <div className="max-h-screen bg-background text-foreground flex flex-col">
@@ -129,10 +129,10 @@ const Landing = () => {
 
         <InlineLink
           onClick={() => setShowWhyDialog(true)}
-          className="mb-6 inline-flex items-start gap-1.5 text-sm"
+          className="mb-6 text-sm"
           data-testid="button-why-different"
         >
-          <Info className="size-4 mt-0.5 shrink-0" />
+          <Info className="size-4 inline -translate-y-px mr-1" />
           What makes this app different, and how it can help you.
         </InlineLink>
 
@@ -173,7 +173,7 @@ const Landing = () => {
         onOpenChange={setShowWhyDialog}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Landing
+export default Landing;
