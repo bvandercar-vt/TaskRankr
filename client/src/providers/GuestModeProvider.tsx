@@ -12,14 +12,12 @@ import {
   useState,
 } from 'react'
 
-export const BANNER_KEYS = [
-  'status',
-  'why-different',
-  'how-to-use',
-  'install',
-] as const
-
-export type BannerKey = (typeof BANNER_KEYS)[number]
+export enum BannerKey {
+  STATUS = 'status',
+  WHY_DIFFERENT = 'why-different',
+  HOW_TO_USE = 'how-to-use',
+  INSTALL = 'install',
+}
 
 interface GuestModeContextValue {
   isGuestMode: boolean

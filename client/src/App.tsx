@@ -24,7 +24,7 @@ import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
 import { ExpandedTasksProvider } from '@/providers/ExpandedTasksProvider'
-import { BANNER_KEYS, type BannerKey, GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
 import { LocalStateProvider, StorageMode } from '@/providers/LocalStateProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
@@ -52,8 +52,9 @@ const GuestRedirect = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const hideParam = params.get('hide')
+    const validKeys = Object.values(BannerKey) as string[]
     const hideBanners = hideParam
-      ? (hideParam.split(',').filter((k) => BANNER_KEYS.includes(k as BannerKey)) as BannerKey[])
+      ? (hideParam.split(',').filter((k) => validKeys.includes(k)) as BannerKey[])
       : undefined
     enterGuestMode(hideBanners)
     setLocation(Routes.HOME)

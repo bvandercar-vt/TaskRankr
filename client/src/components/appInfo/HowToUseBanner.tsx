@@ -1,14 +1,14 @@
 import { HelpCircle } from 'lucide-react'
 
 import { Routes } from '@/lib/constants'
-import { useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const HowToUseBanner = () => {
   const { hiddenBanners } = useGuestMode()
 
-  if (hiddenBanners.has('how-to-use')) return null
+  if (hiddenBanners.has(BannerKey.HOW_TO_USE)) return null
 
   return (
     <NotificationBanner

@@ -1,7 +1,7 @@
 import { useLocation } from 'wouter'
 
 import { Routes } from '@/lib/constants'
-import { useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
 import { useSyncSafe } from '@/providers/SyncProvider'
 import { authPaths } from '~/shared/constants'
 import { Button } from '../primitives/Button'
@@ -15,7 +15,7 @@ export const StatusBanner = () => {
     return null
   }
 
-  if (isGuestMode && hiddenBanners.has('status')) {
+  if (isGuestMode && hiddenBanners.has(BannerKey.STATUS)) {
     return null
   }
 
