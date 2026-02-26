@@ -308,32 +308,73 @@ const ClearLocalStorageConfirmDialog = () => {
   )
 }
 
-const HowToUseCard = () => (
-  <Link href={Routes.HOW_TO_USE}>
+const InfoCard = ({
+  title,
+  description,
+  icon: IconComponent,
+  href,
+  onClick,
+  'data-testid': testId,
+  children,
+}: {
+  title: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  href?: string
+  onClick?: () => void
+  'data-testid'?: string
+  children?: React.ReactNode
+}) => {
+  const content = (
     <Card className="flex items-center justify-between hover-elevate cursor-pointer">
       <div>
-        <h3 className="font-semibold text-foreground/80">How To Use</h3>
-        <p className="text-sm text-muted-foreground">
-          Learn how to get the most out of TaskRankr
-        </p>
+        <h3 className="font-semibold text-foreground/80">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+      <IconComponent className="size-5 text-muted-foreground shrink-0" />
     </Card>
-  </Link>
+  )
+
+  if (href) {
+    return (
+      <Link href={href} data-testid={testId}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full text-left"
+        data-testid={testId}
+      >
+        {content}
+      </button>
+      {children}
+    </>
+  )
+}
+
+const HowToUseCard = () => (
+  <InfoCard
+    title="How To Use"
+    description="Learn how to get the most out of TaskRankr"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_USE}
+  />
 )
 
 const InstallAsAppCard = () => (
-  <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-    <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-      <div>
-        <h3 className="font-semibold text-foreground/80">Install as App</h3>
-        <p className="text-sm text-muted-foreground">
-          Add to your home screen for offline access
-        </p>
-      </div>
-      <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-    </Card>
-  </Link>
+  <InfoCard
+    title="Install as App"
+    description="Add to your home screen for offline access"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_INSTALL}
+    data-testid="link-how-to-install"
+  />
 )
 
 const ChangelogCard = ({
@@ -345,23 +386,15 @@ const ChangelogCard = ({
   onOpen: () => void
   onOpenChange: (open: boolean) => void
 }) => (
-  <>
-    <button
-      type="button"
-      onClick={onOpen}
-      className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
-      data-testid="button-view-changelog"
-    >
-      <div>
-        <h3 className="font-semibold text-foreground/80">Change History</h3>
-        <p className="text-sm text-muted-foreground">
-          See what's been added and improved
-        </p>
-      </div>
-      <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
-    </button>
+  <InfoCard
+    title="Change History"
+    description="See what's been added and improved"
+    icon={ChangelogIcon}
+    onClick={onOpen}
+    data-testid="button-view-changelog"
+  >
     <FullChangelogDialog open={open} onOpenChange={onOpenChange} />
-  </>
+  </InfoCard>
 )
 
 const Settings = () => {
