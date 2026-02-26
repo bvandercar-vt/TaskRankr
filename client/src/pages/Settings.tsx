@@ -308,6 +308,62 @@ const ClearLocalStorageConfirmDialog = () => {
   )
 }
 
+const HowToUseCard = () => (
+  <Link href={Routes.HOW_TO_USE}>
+    <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+      <div>
+        <h3 className="font-semibold text-foreground/80">How To Use</h3>
+        <p className="text-sm text-muted-foreground">
+          Learn how to get the most out of TaskRankr
+        </p>
+      </div>
+      <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+    </Card>
+  </Link>
+)
+
+const InstallAsAppCard = () => (
+  <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
+    <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+      <div>
+        <h3 className="font-semibold text-foreground/80">Install as App</h3>
+        <p className="text-sm text-muted-foreground">
+          Add to your home screen for offline access
+        </p>
+      </div>
+      <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+    </Card>
+  </Link>
+)
+
+const ChangelogCard = ({
+  open,
+  onOpen,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpen: () => void
+  onOpenChange: (open: boolean) => void
+}) => (
+  <>
+    <button
+      type="button"
+      onClick={onOpen}
+      className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
+      data-testid="button-view-changelog"
+    >
+      <div>
+        <h3 className="font-semibold text-foreground/80">Change History</h3>
+        <p className="text-sm text-muted-foreground">
+          See what's been added and improved
+        </p>
+      </div>
+      <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
+    </button>
+    <FullChangelogDialog open={open} onOpenChange={onOpenChange} />
+  </>
+)
+
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
@@ -394,50 +450,11 @@ const Settings = () => {
       </div>
 
       <div className="flex flex-col gap-3 py-2">
-        <Link href={Routes.HOW_TO_USE}>
-          <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-            <div>
-              <h3 className="font-semibold text-foreground/80">How To Use</h3>
-              <p className="text-sm text-muted-foreground">
-                Learn how to get the most out of TaskRankr
-              </p>
-            </div>
-            <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-          </Card>
-        </Link>
-
-        {!isStandalone && (
-          <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-            <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-              <div>
-                <h3 className="font-semibold text-foreground/80">
-                  Install as App
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Add to your home screen for offline access
-                </p>
-              </div>
-              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-            </Card>
-          </Link>
-        )}
-
-        <button
-          type="button"
-          onClick={openChangelog}
-          className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
-          data-testid="button-view-changelog"
-        >
-          <div>
-            <h3 className="font-semibold text-foreground/80">Change History</h3>
-            <p className="text-sm text-muted-foreground">
-              See what's been added and improved
-            </p>
-          </div>
-          <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
-        </button>
-        <FullChangelogDialog
+        <HowToUseCard />
+        {!isStandalone && <InstallAsAppCard />}
+        <ChangelogCard
           open={changelogOpen}
+          onOpen={openChangelog}
           onOpenChange={setChangelogOpen}
         />
 
