@@ -102,11 +102,11 @@ const Landing = () => {
         </InlineLink>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={authPaths.login}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
+            <a href={authPaths.login} className="w-[220px]">
               <Button
                 size="lg"
-                className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col gap-0"
+                className="text-lg px-8 w-full h-full py-2 flex-col gap-0"
                 data-testid="button-get-started"
               >
                 <span>Log In / Sign Up</span>
@@ -118,7 +118,7 @@ const Landing = () => {
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col gap-0"
+              className="text-lg px-8 w-[220px] h-auto py-2 flex-col gap-0"
               data-testid="button-try-guest"
               onClick={enterGuestMode}
             >
@@ -131,7 +131,7 @@ const Landing = () => {
         </div>
 
         {!isStandalone && (
-          <div className="mt-auto pb-8 flex justify-center">
+          <div className="mt-auto py-8 flex justify-center">
             <Button
               href={Routes.HOW_TO_INSTALL}
               size="lg"
