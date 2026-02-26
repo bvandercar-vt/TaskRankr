@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import changelogData from '../../../CHANGELOG.json'
+import changelogData from '../../../CHANGELOG.json' with { type: 'json' }
 
 const changelogEntrySchema = z.object({
   version: z.string(),

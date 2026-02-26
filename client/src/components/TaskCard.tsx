@@ -10,13 +10,13 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
+import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
   getHasIncomplete,
   getTaskStatuses,
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
-import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { TaskWithSubtasks } from '@/types'
 import {
