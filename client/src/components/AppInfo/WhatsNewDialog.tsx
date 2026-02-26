@@ -97,23 +97,6 @@ export const WhatsNewDialog = () => {
   )
 }
 
-export const WhatsNewButton = ({ onClick }: { onClick: () => void }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
-    data-testid="button-view-changelog"
-  >
-    <div>
-      <h3 className="font-semibold text-foreground">What's New</h3>
-      <p className="text-sm text-muted-foreground">
-        See recent updates and changes
-      </p>
-    </div>
-    <Sparkles className="size-5 text-muted-foreground shrink-0" />
-  </button>
-)
-
 export const ChangelogDialog = ({
   open,
   onOpenChange,

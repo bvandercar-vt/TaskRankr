@@ -4,15 +4,19 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  LogOut,
+  Sparkles,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
-import {
-  ChangelogDialog,
-  WhatsNewButton,
-} from '@/components/AppInfo/WhatsNewDialog'
+import { ChangelogDialog } from '@/components/AppInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -422,7 +426,20 @@ const Settings = () => {
           </Link>
         )}
 
-        <WhatsNewButton onClick={openChangelog} />
+        <button
+          type="button"
+          onClick={openChangelog}
+          className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
+          data-testid="button-view-changelog"
+        >
+          <div>
+            <h3 className="font-semibold text-foreground">What's New</h3>
+            <p className="text-sm text-muted-foreground">
+              See recent updates and changes
+            </p>
+          </div>
+          <Sparkles className="size-5 text-muted-foreground shrink-0" />
+        </button>
         <ChangelogDialog open={changelogOpen} onOpenChange={setChangelogOpen} />
 
         {!isGuestMode && <UserInfoCard />}
