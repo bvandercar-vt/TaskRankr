@@ -1,4 +1,7 @@
 import { CheckCircle, ListTodo, Star } from "lucide-react";
+import { Link } from "wouter";
+
+import { Routes } from "@/lib/constants";
 
 import {
   Dialog,
@@ -85,7 +88,9 @@ export const WhyDifferentDialog = ({
                   </span>
                 </li>
               </ul>
-              And, you can disable any of these in your settings to your needs.
+              And, you can disable any of these in your{" "}
+              <Link href={Routes.SETTINGS} onClick={() => onOpenChange(false)} className="text-primary underline underline-offset-2 hover:text-primary/80">settings</Link>
+              {" "}to your needs.
             </div>
           </li>
 
@@ -119,8 +124,9 @@ export const WhyDifferentDialog = ({
 
         <div className="border-t border-border pt-4 space-y-3">
           <p>
-            I encourage you to give it a shot. Check out Settings to see what
-            you can customize. I built this to help me, and if you're someone
+            I encourage you to give it a shot. Check out{" "}
+            <Link href={Routes.SETTINGS} onClick={() => onOpenChange(false)} className="text-primary underline underline-offset-2 hover:text-primary/80">Settings</Link>
+            {" "}to see what you can customize. I built this to help me, and if you're someone
             who can use some organization of their tasks, I think it can help
             you too.
           </p>
