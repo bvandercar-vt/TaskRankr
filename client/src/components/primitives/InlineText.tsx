@@ -1,9 +1,12 @@
 // biome-ignore lint/style/useFilenamingConvention: is fine
 
-import type { SetRequired } from 'type-fest'
+import type { MergeExclusive, SetRequired } from 'type-fest'
 
 import { cn } from '@/lib/utils'
 import { Link } from './Link'
+
+const inlineLinkClass =
+  'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400'
 
 export const InlineLink = ({
   children,
@@ -11,19 +14,28 @@ export const InlineLink = ({
   href,
   ...rest
 }: React.PropsWithChildren<
-  SetRequired<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
->) => (
-  <Link
-    href={href}
-    className={cn(
-      'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400',
-      className,
-    )}
-    {...rest}
+  MergeExclusive<
+    SetRequired<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
+    SetRequired<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>
   >
-    {children}
-  </Link>
-)
+>) =>
+  href ? (
+    <Link
+      href={href}
+      className={cn(inlineLinkClass, className)}
+      {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+    >
+      {children}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      className={cn(inlineLinkClass, className)}
+      {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+    >
+      {children}
+    </button>
+  )
 
 export const InlineEmphasized = ({
   children,

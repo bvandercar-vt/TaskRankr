@@ -2,7 +2,7 @@ import { Component } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 import { debugLog } from '@/lib/debug-logger'
-import { ContactCardStandalone } from './AppInfo/ContactCard'
+import { ContactCardStandalone } from './appInfo/ContactCard'
 import { Button } from './primitives/Button'
 
 const ErrorDialog = ({ errorText }: { errorText: string }) => (

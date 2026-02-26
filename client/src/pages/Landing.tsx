@@ -3,18 +3,23 @@
  * Provides login/signup call-to-action for new users.
  */
 
+import { useState } from 'react'
+import type { VariantProps } from 'class-variance-authority'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import type { LucideIcon } from 'lucide-react'
 import {
   CheckCircle,
   Clock,
   Download,
+  Info,
   ListTodo,
   Star,
   WifiOff,
 } from 'lucide-react'
 
-import { Button } from '@/components/primitives/Button'
+import { WhyDifferentDialog } from '@/components/appInfo/WhyDifferentDialog'
+import { Button, type buttonVariants } from '@/components/primitives/Button'
+import { InlineLink } from '@/components/primitives/InlineText'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
@@ -35,9 +40,50 @@ const CaptionedIcon = ({
   </div>
 )
 
+type LandingButtonProps = {
+  href?: string
+  onClick?: () => void
+  variant?: VariantProps<typeof buttonVariants>['variant']
+  className?: string
+  'data-testid'?: string
+} & React.PropsWithChildren
+
+const LandingButton = ({
+  children,
+  href,
+  onClick,
+  variant = 'default',
+  className,
+  'data-testid': testId,
+}: LandingButtonProps) => (
+  <Button
+    size="lg"
+    variant={variant}
+    href={href}
+    className={cn('text-lg px-8 w-[220px] max-w-[220px]', className)}
+    data-testid={testId}
+    onClick={onClick}
+  >
+    {children}
+  </Button>
+)
+
+const LandingButtonWithCaption = ({
+  caption,
+  ...props
+}: LandingButtonProps & { caption: string }) => (
+  <div className="flex flex-col items-center w-[220px]">
+    <LandingButton {...props} />
+    <p className="text-xs text-muted-foreground mt-1.5 text-center">
+      {caption}
+    </p>
+  </div>
+)
+
 const Landing = () => {
   const { enterGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
+  const [showWhyDialog, setShowWhyDialog] = useState(false)
 
   return (
     <div className="max-h-screen bg-background text-foreground flex flex-col">
@@ -55,7 +101,7 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="flex flex-col items-center gap-6 text-sm text-muted-foreground mb-8">
+        <div className="flex flex-col items-center gap-3 pt-2 pb-6 text-sm text-muted-foreground">
           <div className="flex justify-center gap-6">
             <CaptionedIcon
               icon={Star}
@@ -67,13 +113,13 @@ const Landing = () => {
               color="text-emerald-500"
               label="Ease levels"
             />
-          </div>
-          <div className="flex justify-center gap-6">
             <CaptionedIcon
               icon={Clock}
               color="text-blue-500"
               label="Time tracking"
             />
+          </div>
+          <div className="flex justify-center gap-6">
             <CaptionedIcon
               icon={ListTodo}
               color="text-amber-500"
@@ -87,53 +133,51 @@ const Landing = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={authPaths.login}>
-              <Button
-                size="lg"
-                className="text-lg px-8 min-w-[200px]"
-                data-testid="button-get-started"
-              >
-                Log In / Sign Up*
-              </Button>
-            </a>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 min-w-[200px]"
-              data-testid="button-try-guest"
-              onClick={enterGuestMode}
-            >
-              Try as Guest
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            <sup>*</sup>Log in to back up your data and sync across devices.
-          </p>
+        <InlineLink
+          onClick={() => setShowWhyDialog(true)}
+          className="mb-6 text-sm"
+          data-testid="button-why-different"
+        >
+          <Info className="size-4 inline -translate-y-px mr-1" />
+          What makes this app different, and how it can help you.
+        </InlineLink>
+
+        <div className="flex flex-col items-center sm:flex-row sm:items-start sm:gap-4 gap-2 justify-center">
+          <LandingButtonWithCaption
+            href={authPaths.login}
+            caption="To back up your data and sync across devices"
+            data-testid="button-get-started"
+          >
+            Log In / Sign Up
+          </LandingButtonWithCaption>
+          <LandingButtonWithCaption
+            caption="No signup required"
+            variant="outline"
+            onClick={enterGuestMode}
+            data-testid="button-try-guest"
+          >
+            Try as Guest
+          </LandingButtonWithCaption>
         </div>
 
         {!isStandalone && (
-          <div className="mt-8 flex justify-center">
-            <Button
+          <div className="mt-auto py-[8vh] flex justify-center">
+            <LandingButton
               href={Routes.HOW_TO_INSTALL}
-              size="lg"
-              className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
+              className="gap-2 bg-accent text-accent-foreground border border-accent-border"
               data-testid="button-how-to-install"
             >
               <Download className="size-5" />
               Install as App
-            </Button>
+            </LandingButton>
           </div>
         )}
       </main>
 
-      <footer
-        className="p-6 text-center text-sm text-muted-foreground"
-        data-testid="footer"
-      >
-        <p data-testid="text-footer-brand">TaskRankr</p>
-      </footer>
+      <WhyDifferentDialog
+        open={showWhyDialog}
+        onOpenChange={setShowWhyDialog}
+      />
     </div>
   );
 };
