@@ -2,17 +2,17 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useRef, useState, useCallback } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
+import { ContactCard } from '@/components/AppInfo/ContactCard'
+import { SortInfo } from '@/components/AppInfo/SortInfo'
 import {
   ChangelogDialog,
   WhatsNewButton,
 } from '@/components/AppInfo/WhatsNewDialog'
-import { ContactCard } from '@/components/AppInfo/ContactCard'
-import { SortInfo } from '@/components/AppInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -34,13 +34,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
+import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { APP_VERSION } from '@/lib/changelog'
 import { authPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, TaskStatus } from '~/shared/schema'
