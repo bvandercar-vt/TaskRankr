@@ -12,9 +12,17 @@ import {
   useState,
 } from 'react'
 
+export enum BannerKey {
+  LOG_IN = 'log-in',
+  WHY_DIFFERENT = 'why-different',
+  HOW_TO_USE = 'how-to-use',
+  INSTALL = 'install',
+}
+
 interface GuestModeContextValue {
   isGuestMode: boolean
-  enterGuestMode: () => void
+  hiddenBanners: Set<BannerKey>
+  enterGuestMode: (hideBanners?: BannerKey[]) => void
   exitGuestMode: () => void
 }
 
@@ -26,17 +34,25 @@ export const GuestModeProvider = ({
   children: React.ReactNode
 }) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
+  const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(new Set())
 
-  const enterGuestMode = useCallback(() => setIsGuestMode(true), [])
-  const exitGuestMode = useCallback(() => setIsGuestMode(false), [])
+  const enterGuestMode = useCallback((hideBanners?: BannerKey[]) => {
+    setIsGuestMode(true)
+    setHiddenBanners(new Set(hideBanners ?? []))
+  }, [])
+  const exitGuestMode = useCallback(() => {
+    setIsGuestMode(false)
+    setHiddenBanners(new Set())
+  }, [])
 
   const value = useMemo(
     () => ({
       isGuestMode,
+      hiddenBanners,
       enterGuestMode,
       exitGuestMode,
     }),
-    [isGuestMode, enterGuestMode, exitGuestMode],
+    [isGuestMode, hiddenBanners, enterGuestMode, exitGuestMode],
   )
 
   return (
