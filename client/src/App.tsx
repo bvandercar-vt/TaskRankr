@@ -28,6 +28,7 @@ import { GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
 import { LocalStateProvider, StorageMode } from '@/providers/LocalStateProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { StatusBanner } from './components/AppInfo/StatusBanner'
+import { WhatsNewDialog } from './components/AppInfo/WhatsNewDialog'
 import { Routes } from './lib/constants'
 import { queryClient } from './lib/query-client'
 
@@ -106,6 +107,7 @@ const AuthenticatedApp = () => {
             <div className="h-dvh flex flex-col overflow-hidden">
               <StatusBanner />
               <Router />
+              <WhatsNewDialog />
             </div>
           </TaskFormDialogProvider>
         </ExpandedTasksProvider>

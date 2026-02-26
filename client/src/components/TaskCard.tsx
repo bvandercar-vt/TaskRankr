@@ -10,6 +10,7 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions } from '@/hooks/useTasks'
+import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
   getHasIncomplete,
@@ -202,11 +203,7 @@ const CompletedTimeDisplay = ({
   completedAt && (
     <span className="text-[10px] text-muted-foreground">
       Completed:{' '}
-      {new Date(completedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })}
+      {new Date(completedAt).toLocaleDateString('en-US', STANDARD_DATE_FORMAT)}
     </span>
   )
 
