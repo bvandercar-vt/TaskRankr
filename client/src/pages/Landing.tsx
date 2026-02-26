@@ -102,7 +102,7 @@ const Landing = () => {
           What makes this app different, and how it can help you.
         </InlineLink>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-start">
           <InitializeButton
             title="Log In / Sign Up"
             caption="To back up your data and sync across devices"
