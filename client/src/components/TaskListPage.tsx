@@ -2,9 +2,9 @@
 
 import type React from 'react'
 
-import { HowToUseBanner } from './AppInfo/HowToUseBanner'
-import { InstallBanner } from './AppInfo/InstallBanner'
-import { WhyDifferentBanner } from './AppInfo/WhyDifferentBanner'
+import { HowToUseBanner } from './appInfo/HowToUseBanner'
+import { InstallBanner } from './appInfo/InstallBanner'
+import { WhyDifferentBanner } from './appInfo/WhyDifferentBanner'
 import { DropdownMenuHeader } from './DropdownMenuHeader'
 import { PageLoading } from './PageStates'
 

@@ -29,17 +29,17 @@ const ChangelogEntryList = ({ entries }: { entries: ChangelogEntry[] }) => (
   <div className="space-y-6 py-2">
     {entries.map((entry) => (
       <div key={entry.version}>
-        <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
+        <div className="flex items-baseline gap-2 mb-2">
           <span className="text-sm font-semibold text-foreground">
             v{entry.version}
           </span>
           <span className="text-xs text-muted-foreground">
             {formatDate(entry.date)}
           </span>
-          <span className="text-sm font-medium text-foreground">
-            — {entry.title}
-          </span>
         </div>
+        <h3 className="text-sm font-medium text-foreground mb-1.5">
+          {entry.title}
+        </h3>
         <ul className="space-y-1">
           {entry.changes.map((change, i) => (
             <li

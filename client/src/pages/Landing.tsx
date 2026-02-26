@@ -16,7 +16,7 @@ import {
   WifiOff,
 } from 'lucide-react'
 
-import { WhyDifferentDialog } from '@/components/AppInfo/WhyDifferentDialog'
+import { WhyDifferentDialog } from '@/components/appInfo/WhyDifferentDialog'
 import { Button } from '@/components/primitives/Button'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
