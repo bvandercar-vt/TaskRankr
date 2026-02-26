@@ -41,6 +41,8 @@ const CaptionedIcon = ({
   </div>
 );
 
+const landingButtonClass = "text-lg px-8 min-w-[200px]";
+
 type InitializeButtonProps = {
   title: string;
   caption: string;
@@ -62,7 +64,7 @@ export const InitializeButton = ({
     <Button
       size="lg"
       variant={variant}
-      className={cn("text-lg px-8 w-full", className)}
+      className={cn(landingButtonClass, "w-full", className)}
       data-testid={testId}
       onClick={onClick}
     >
@@ -95,7 +97,7 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground mb-4">
+        <div className="flex flex-col items-center gap-4 py-4 text-sm text-muted-foreground mb-4">
           <div className="flex justify-center gap-6">
             <CaptionedIcon
               icon={Star}
@@ -158,7 +160,7 @@ const Landing = () => {
             <Button
               href={Routes.HOW_TO_INSTALL}
               size="lg"
-              className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
+              className={cn(landingButtonClass, "gap-2 bg-accent text-accent-foreground border border-accent-border")}
               data-testid="button-how-to-install"
             >
               <Download className="size-5" />
