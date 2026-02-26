@@ -10,12 +10,13 @@ export const WhyDifferentBanner = () => {
   const { hiddenBanners } = useGuestMode()
   const [showDialog, setShowDialog] = useState(false)
 
+  if (hiddenBanners.has('why-different')) return null
+
   return (
     <>
       <NotificationBanner
         storageKey="taskrankr-why-different-dismissed"
         icon={Sparkles}
-        hidden={hiddenBanners.has('why-different')}
         data-testid="banner-why-different"
       >
         Curious?{' '}

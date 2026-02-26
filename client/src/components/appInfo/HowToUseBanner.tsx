@@ -8,11 +8,12 @@ import { NotificationBanner } from '../primitives/NotificationBanner'
 export const HowToUseBanner = () => {
   const { hiddenBanners } = useGuestMode()
 
+  if (hiddenBanners.has('how-to-use')) return null
+
   return (
     <NotificationBanner
       storageKey="taskrankr-how-to-use-dismissed"
       icon={HelpCircle}
-      hidden={hiddenBanners.has('how-to-use')}
       data-testid="banner-how-to-use"
     >
       New here?{' '}

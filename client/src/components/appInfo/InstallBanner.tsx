@@ -9,11 +9,13 @@ import { NotificationBanner } from '../primitives/NotificationBanner'
 export const InstallBanner = () => {
   const { hiddenBanners } = useGuestMode()
 
+  if (hiddenBanners.has('install')) return null
+
   return (
     <NotificationBanner
       storageKey="taskrankr-install-dismissed"
       icon={Download}
-      hidden={isStandalonePWA() || hiddenBanners.has('install')}
+      hidden={isStandalonePWA()}
       data-testid="banner-install"
     >
       Install the app!{' '}
