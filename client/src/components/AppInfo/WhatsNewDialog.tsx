@@ -60,7 +60,6 @@ const ChangelogDialog = ({
   entries,
   buttonLabel,
   buttonVariant = 'default',
-  testIdPrefix,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -68,12 +67,11 @@ const ChangelogDialog = ({
   entries: ChangelogEntry[]
   buttonLabel: string
   buttonVariant?: 'default' | 'outline'
-  testIdPrefix: string
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
       className="max-w-md max-h-[80vh] overflow-y-auto"
-      data-testid={`dialog-${testIdPrefix}`}
+      data-testid="dialog-changelog"
     >
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
@@ -89,7 +87,7 @@ const ChangelogDialog = ({
           onClick={() => onOpenChange(false)}
           variant={buttonVariant}
           className="w-full"
-          data-testid={`button-${testIdPrefix}-dismiss`}
+          data-testid="button-changelog-dismiss"
         >
           {buttonLabel}
         </Button>
@@ -130,7 +128,6 @@ export const WhatsNewDialog = () => {
       title="What's New"
       entries={entries}
       buttonLabel="Got it"
-      testIdPrefix="whats-new"
     />
   )
 }
@@ -149,6 +146,5 @@ export const FullChangelogDialog = ({
     entries={changelog}
     buttonLabel="Close"
     buttonVariant="outline"
-    testIdPrefix="changelog"
   />
 )
