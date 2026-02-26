@@ -106,7 +106,7 @@ const Landing = () => {
             <a href={authPaths.login}>
               <Button
                 size="lg"
-                className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col"
+                className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col gap-0"
                 data-testid="button-get-started"
               >
                 <span>Log In / Sign Up</span>
@@ -118,7 +118,7 @@ const Landing = () => {
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col"
+              className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col gap-0"
               data-testid="button-try-guest"
               onClick={enterGuestMode}
             >
