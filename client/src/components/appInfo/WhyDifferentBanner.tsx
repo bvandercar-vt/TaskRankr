@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 
+import { useGuestMode } from '@/providers/GuestModeProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 import { WhyDifferentDialog } from './WhyDifferentDialog'
 
 export const WhyDifferentBanner = () => {
+  const { hiddenBanners } = useGuestMode()
   const [showDialog, setShowDialog] = useState(false)
 
   return (
@@ -13,6 +15,7 @@ export const WhyDifferentBanner = () => {
       <NotificationBanner
         storageKey="taskrankr-why-different-dismissed"
         icon={Sparkles}
+        hidden={hiddenBanners.has('why-different')}
         data-testid="banner-why-different"
       >
         Curious?{' '}

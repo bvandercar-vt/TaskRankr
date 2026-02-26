@@ -12,9 +12,19 @@ import {
   useState,
 } from 'react'
 
+export const BANNER_KEYS = [
+  'status',
+  'why-different',
+  'how-to-use',
+  'install',
+] as const
+
+export type BannerKey = (typeof BANNER_KEYS)[number]
+
 interface GuestModeContextValue {
   isGuestMode: boolean
-  enterGuestMode: () => void
+  hiddenBanners: Set<BannerKey>
+  enterGuestMode: (hideBanners?: BannerKey[]) => void
   exitGuestMode: () => void
 }
 
@@ -26,17 +36,25 @@ export const GuestModeProvider = ({
   children: React.ReactNode
 }) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
+  const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(new Set())
 
-  const enterGuestMode = useCallback(() => setIsGuestMode(true), [])
-  const exitGuestMode = useCallback(() => setIsGuestMode(false), [])
+  const enterGuestMode = useCallback((hideBanners?: BannerKey[]) => {
+    setIsGuestMode(true)
+    setHiddenBanners(hideBanners?.length ? new Set(hideBanners) : new Set())
+  }, [])
+  const exitGuestMode = useCallback(() => {
+    setIsGuestMode(false)
+    setHiddenBanners(new Set())
+  }, [])
 
   const value = useMemo(
     () => ({
       isGuestMode,
+      hiddenBanners,
       enterGuestMode,
       exitGuestMode,
     }),
-    [isGuestMode, enterGuestMode, exitGuestMode],
+    [isGuestMode, hiddenBanners, enterGuestMode, exitGuestMode],
   )
 
   return (

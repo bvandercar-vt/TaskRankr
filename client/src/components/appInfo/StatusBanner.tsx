@@ -7,12 +7,15 @@ import { authPaths } from '~/shared/constants'
 import { Button } from '../primitives/Button'
 
 export const StatusBanner = () => {
-  const { isGuestMode, exitGuestMode } = useGuestMode()
+  const { isGuestMode, hiddenBanners, exitGuestMode } = useGuestMode()
   const sync = useSyncSafe()
   const [location] = useLocation()
 
-  // Hide guest mode banner on How To Use page
   if (isGuestMode && location === Routes.HOW_TO_USE) {
+    return null
+  }
+
+  if (isGuestMode && hiddenBanners.has('status')) {
     return null
   }
 
