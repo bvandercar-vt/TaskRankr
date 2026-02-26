@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles as ChangelogIcon } from 'lucide-react'
+export { ChangelogIcon }
 
 import { Button } from '@/components/primitives/Button'
 import {
@@ -76,7 +77,7 @@ const ChangelogDialog = ({
     >
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          <Sparkles className="size-5 text-primary" />
+          <ChangelogIcon className="size-5 text-primary" />
           {title}
         </DialogTitle>
       </DialogHeader>

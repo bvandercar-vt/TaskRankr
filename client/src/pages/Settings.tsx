@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Download,
   LogOut,
-  Sparkles,
   Trash2,
   Upload,
 } from 'lucide-react'
@@ -16,7 +15,10 @@ import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
-import { FullChangelogDialog } from '@/components/AppInfo/WhatsNewDialog'
+import {
+  ChangelogIcon,
+  FullChangelogDialog,
+} from '@/components/AppInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -438,7 +440,7 @@ const Settings = () => {
               See recent updates and changes
             </p>
           </div>
-          <Sparkles className="size-5 text-muted-foreground shrink-0" />
+          <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
         </button>
         <FullChangelogDialog
           open={changelogOpen}
