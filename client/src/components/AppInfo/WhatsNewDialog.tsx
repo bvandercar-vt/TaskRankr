@@ -58,14 +58,14 @@ const ChangelogDialog = ({
   onOpenChange,
   title,
   entries,
-  buttonLabel,
+  buttonText,
   buttonVariant = 'default',
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   entries: ChangelogEntry[]
-  buttonLabel: string
+  buttonText: string
   buttonVariant?: 'default' | 'outline'
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
@@ -89,7 +89,7 @@ const ChangelogDialog = ({
           className="w-full"
           data-testid="button-changelog-dismiss"
         >
-          {buttonLabel}
+          {buttonText}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -127,7 +127,7 @@ export const WhatsNewDialog = () => {
       onOpenChange={handleClose}
       title="What's New"
       entries={entries}
-      buttonLabel="Got it"
+      buttonText="Got it"
     />
   )
 }
@@ -144,7 +144,7 @@ export const FullChangelogDialog = ({
     onOpenChange={onOpenChange}
     title="Changelog"
     entries={changelog}
-    buttonLabel="Close"
+    buttonText="Close"
     buttonVariant="outline"
   />
 )
