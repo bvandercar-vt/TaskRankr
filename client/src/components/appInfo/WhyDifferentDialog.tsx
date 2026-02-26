@@ -1,4 +1,4 @@
-import { CheckCircle, ListTodo, Star } from 'lucide-react'
+import { CheckCircle, ListTodo, Star } from "lucide-react";
 
 import {
   Dialog,
@@ -6,14 +6,18 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/primitives/overlays/Dialog'
+} from "@/components/primitives/overlays/Dialog";
+import { cn } from "@/lib/utils";
+
+const TEXT_SECTION_STYLE = "text-emerald-300";
+const TEXT_PARAGRAPH_LEAD_STYLE = cn(TEXT_SECTION_STYLE, "font-medium");
 
 export const WhyDifferentDialog = ({
   open,
   onOpenChange,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
@@ -24,19 +28,19 @@ export const WhyDifferentDialog = ({
         <DialogTitle data-testid="text-why-different-title">
           Why TaskRankr?
         </DialogTitle>
-        <DialogDescription>
+        <DialogDescription className={TEXT_SECTION_STYLE}>
           What makes this app different from the rest.
         </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4 text-sm text-foreground/90 text-left">
         <p>
-          Hi, my name is Blake and I have tried over 30 task/to-do apps, and
+          Hi, my name is Blake. I have tried over 30 task/to-do list apps, and
           couldn't find a single one that helped me organize my tasks the way I
-          wanted. I hope this app helps you too.
+          wanted. I think this app can help everyone in the same way!
         </p>
 
-        <h3 className="font-semibold text-foreground pt-1">
+        <h3 className={cn(TEXT_SECTION_STYLE, "font-semibold pt-1")}>
           What sets TaskRankr apart:
         </h3>
 
@@ -44,11 +48,11 @@ export const WhyDifferentDialog = ({
           <li className="flex gap-2">
             <Star className="size-4 text-yellow-500 mt-0.5 shrink-0" />
             <div>
-              <span className="font-medium text-foreground">
+              <span className={TEXT_PARAGRAPH_LEAD_STYLE}>
                 More priority levels.
-              </span>{' '}
-              Other apps let you sort by priority, but they only have 3 levels.
-              TaskRankr gives you 5, so you can be much more specific about what
+              </span>{" "}
+              Other apps let you sort by priority, but only have 3 levels.
+              TaskRankr gives you 5, so you can be more specific about what
               matters most.
             </div>
           </li>
@@ -56,58 +60,59 @@ export const WhyDifferentDialog = ({
           <li className="flex gap-2">
             <CheckCircle className="size-4 text-emerald-500 mt-0.5 shrink-0" />
             <div>
-              <span className="font-medium text-foreground">
+              <span className={TEXT_PARAGRAPH_LEAD_STYLE}>
                 Sort by ease, enjoyment, and time.
-              </span>{' '}
-              No other app has this. You can disable any of these in your
-              settings.
-              <ul className="mt-1.5 space-y-1.5 ml-1">
+              </span>{" "}
+              No other app has this. Here are some examples for why this is
+              useful:
+              <ul className="my-1.5 space-y-1.5 ml-1">
                 <li className="flex gap-2">
                   <span className="text-emerald-500 shrink-0">•</span>
                   <span>
-                    <span className="font-medium text-foreground">Ease or Enjoyment</span>
-                    {' '}— You've been grinding through high-priority tasks all
-                    day. Now it's evening and you want to stay productive but
-                    enjoy yourself — sort by Ease or Enjoyment.
+                    <strong>Ease or Enjoyment</strong> — You've been working on
+                    high-priority tasks all day. Now it's evening and you want
+                    to stay productive but enjoy yourself — sort by{" "}
+                    <strong>Enjoyment</strong> for something fun, or{" "}
+                    <strong>Ease</strong> to knock out something easy.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-emerald-500 shrink-0">•</span>
                   <span>
-                    <span className="font-medium text-foreground">Time</span>
-                    {' '}— You have a free moment and want to knock things out —
-                    sort by Time to find quick 10–30 minute tasks.
+                    <strong>Time</strong> — You have a free moment and want to
+                    knock things out on your list — sort by{" "}
+                    <strong>Time</strong> to find quick 10–30 minute tasks.
                   </span>
                 </li>
               </ul>
+              And, you can disable any of these in your settings to your needs.
             </div>
           </li>
 
           <li className="flex gap-2">
             <ListTodo className="size-4 text-amber-500 mt-0.5 shrink-0" />
             <div>
-              <span className="font-medium text-foreground">
+              <span className={TEXT_PARAGRAPH_LEAD_STYLE}>
                 Jot down ideas without clutter.
-              </span>{' '}
-              More specific sorting means you can freely jot down random ideas
-              or projects — set priority to lowest, enjoyment to high, etc.
-              You'll still find what's important when you need to, and discover
-              that fun idea when you're looking for something enjoyable.
+              </span>{" "}
+              More-specific sorting means you can freely jot down random ideas
+              or projects — as "low importance" as they are — without the worry
+              of bogging down your list from what is more important.
             </div>
           </li>
 
           <li className="flex gap-2">
             <ListTodo className="size-4 text-blue-500 mt-0.5 shrink-0" />
             <div>
-              <span className="font-medium text-foreground">
+              <span className={TEXT_PARAGRAPH_LEAD_STYLE}>
                 Subtask sort order.
-              </span>{' '}
+              </span>{" "}
               Create subtasks, subtasks of subtasks, and so on. Within each
-              level, you can manually sort them as a step-by-step process and
-              optionally display auto-numbered steps — they'll be crossed out as
-              you complete them. Or leave a level un-ordered, and subtasks will
-              inherit the overall sort order of your view (e.g. highest priority
-              first).
+              level, you can manually sort them as a step-by-step process (and
+              optionally display them as auto-numbered). Or, leave a subtask
+              level un-ordered, and subtasks will inherit the overall sort order
+              of your view (e.g. highest priority/highest ease/etc.). Subtasks
+              will be crossed out as you complete them.
             </div>
           </li>
         </ul>
@@ -115,11 +120,12 @@ export const WhyDifferentDialog = ({
         <div className="border-t border-border pt-4 space-y-3">
           <p>
             I encourage you to give it a shot. Check out Settings to see what
-            you can customize. I built this to help me, and I hope it can help
-            you.
+            you can customize. I built this to help me, and if you're someone
+            who can use some organization of their tasks, I think it can help
+            you too.
           </p>
           <p className="text-muted-foreground">
-            If you find any bugs or have feature suggestions, please email me at{' '}
+            If you find any bugs or have feature suggestions, please email me at{" "}
             <a
               href="mailto:taskrankr@gmail.com"
               className="text-primary underline underline-offset-2 hover:text-primary/80"
@@ -132,4 +138,4 @@ export const WhyDifferentDialog = ({
       </div>
     </DialogContent>
   </Dialog>
-)
+);
