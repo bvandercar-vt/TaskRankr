@@ -28,7 +28,7 @@ export const InitializeButton = ({
       size="lg"
       variant={variant}
       className={cn(
-        'text-lg px-8 w-full h-full py-2 flex-col gap-0 whitespace-normal',
+        'text-lg px-8 w-full h-full py-2 flex-col gap-0 whitespace-normal justify-start',
         className,
       )}
       data-testid={testId}
