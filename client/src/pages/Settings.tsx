@@ -403,7 +403,7 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="flex items-center justify-between hover-elevate cursor-pointer">
             <div>
-              <h3 className="font-semibold text-foreground">How To Use</h3>
+              <h3 className="font-semibold text-muted-foreground">How To Use</h3>
               <p className="text-sm text-muted-foreground">
                 Learn how to get the most out of TaskRankr
               </p>
@@ -416,7 +416,7 @@ const Settings = () => {
           <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
             <Card className="flex items-center justify-between hover-elevate cursor-pointer">
               <div>
-                <h3 className="font-semibold text-foreground">
+                <h3 className="font-semibold text-muted-foreground">
                   Install as App
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -435,7 +435,7 @@ const Settings = () => {
           data-testid="button-view-changelog"
         >
           <div>
-            <h3 className="font-semibold text-foreground">Change History</h3>
+            <h3 className="font-semibold text-muted-foreground">Change History</h3>
             <p className="text-sm text-muted-foreground">
               See what's been added and improved
             </p>
