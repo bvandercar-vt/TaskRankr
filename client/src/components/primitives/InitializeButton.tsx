@@ -27,25 +27,26 @@ export const InitializeButton = ({
     <Button
       size="lg"
       variant={variant}
-      className={cn(
-        'text-lg px-8 w-full h-full py-2 flex-col gap-0 whitespace-normal justify-start',
-        className,
-      )}
+      className={cn('text-lg px-8 w-full', className)}
       data-testid={testId}
       onClick={onClick}
     >
-      <span>{title}</span>
-      <span className="text-xs text-muted-foreground font-normal">
-        {caption}
-      </span>
+      {title}
     </Button>
   )
 
-  return href ? (
-    <Link href={href} className="w-[220px]">
-      {button}
-    </Link>
-  ) : (
-    <div className="w-[220px]">{button}</div>
+  return (
+    <div className="flex flex-col items-center w-[220px]">
+      {href ? (
+        <Link href={href} className="w-full">
+          {button}
+        </Link>
+      ) : (
+        button
+      )}
+      <p className="text-xs text-muted-foreground mt-1.5 text-center">
+        {caption}
+      </p>
+    </div>
   )
 }
