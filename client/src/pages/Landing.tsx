@@ -3,9 +3,9 @@
  * Provides login/signup call-to-action for new users.
  */
 
-import { useState } from 'react'
-import { isStandalonePWA } from 'is-standalone-pwa'
-import type { LucideIcon } from 'lucide-react'
+import { useState } from "react";
+import { isStandalonePWA } from "is-standalone-pwa";
+import type { LucideIcon } from "lucide-react";
 import {
   CheckCircle,
   Clock,
@@ -14,35 +14,35 @@ import {
   ListTodo,
   Star,
   WifiOff,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { WhyDifferentDialog } from '@/components/appInfo/WhyDifferentDialog'
-import { Button } from '@/components/primitives/Button'
-import { InlineLink } from '@/components/primitives/InlineText'
-import { Routes } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+import { WhyDifferentDialog } from "@/components/appInfo/WhyDifferentDialog";
+import { Button } from "@/components/primitives/Button";
+import { InlineLink } from "@/components/primitives/InlineText";
+import { Routes } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { useGuestMode } from "@/providers/GuestModeProvider";
+import { authPaths } from "~/shared/constants";
 
 const CaptionedIcon = ({
   icon: Icon,
   color,
   label,
 }: {
-  icon: LucideIcon
-  color: string
-  label: string
+  icon: LucideIcon;
+  color: string;
+  label: string;
 }) => (
   <div className="flex flex-col items-center gap-2">
-    <Icon className={cn('size-6', color)} />
+    <Icon className={cn("size-6", color)} />
     <span className="text-sm">{label}</span>
   </div>
-)
+);
 
 const Landing = () => {
-  const { enterGuestMode } = useGuestMode()
-  const isStandalone = isStandalonePWA()
-  const [showWhyDialog, setShowWhyDialog] = useState(false)
+  const { enterGuestMode } = useGuestMode();
+  const isStandalone = isStandalonePWA();
+  const [showWhyDialog, setShowWhyDialog] = useState(false);
 
   return (
     <div className="max-h-screen bg-background text-foreground flex flex-col">
@@ -92,6 +92,15 @@ const Landing = () => {
           </div>
         </div>
 
+        <InlineLink
+          onClick={() => setShowWhyDialog(true)}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm"
+          data-testid="button-why-different"
+        >
+          <Info className="size-4" />
+          What makes this app different, and how it can help you
+        </InlineLink>
+
         <div className="flex flex-col items-center gap-3">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href={authPaths.login}>
@@ -117,15 +126,6 @@ const Landing = () => {
             <sup>*</sup>Log in to back up your data and sync across devices.
           </p>
         </div>
-
-        <InlineLink
-          onClick={() => setShowWhyDialog(true)}
-          className="mt-6 inline-flex items-center gap-1.5 text-sm"
-          data-testid="button-why-different"
-        >
-          <Info className="size-4" />
-          What makes this app different?
-        </InlineLink>
 
         {!isStandalone && (
           <div className="mt-6 flex justify-center">
@@ -154,7 +154,7 @@ const Landing = () => {
         onOpenChange={setShowWhyDialog}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Landing
+export default Landing;
