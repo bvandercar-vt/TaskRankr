@@ -1,3 +1,5 @@
+import changelogData from '../../../CHANGELOG.json'
+
 export interface ChangelogEntry {
   version: string
   date: string
@@ -5,18 +7,7 @@ export interface ChangelogEntry {
   changes: string[]
 }
 
-export const changelog: ChangelogEntry[] = [
-  {
-    version: '1.0.0',
-    date: '2026-02-25',
-    title: 'Changelog & Version Tracking',
-    changes: [
-      'Added "What\'s New" dialog to highlight updates after each release',
-      'Version number now displayed in Settings',
-      'Sessions now persist across app updates — no more unexpected logouts',
-    ],
-  },
-]
+export const changelog: ChangelogEntry[] = changelogData
 
 export const APP_VERSION = changelog[0].version
 
