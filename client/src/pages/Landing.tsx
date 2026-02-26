@@ -68,6 +68,18 @@ const LandingButton = ({
   </Button>
 );
 
+const LandingButtonWithCaption = ({
+  caption,
+  ...props
+}: LandingButtonProps & { caption: string }) => (
+  <div className="flex flex-col items-center">
+    <LandingButton {...props} />
+    <p className="text-xs text-muted-foreground mt-1.5 text-center">
+      {caption}
+    </p>
+  </div>
+);
+
 const Landing = () => {
   const { enterGuestMode } = useGuestMode();
   const isStandalone = isStandalonePWA();
@@ -131,29 +143,21 @@ const Landing = () => {
         </InlineLink>
 
         <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 justify-center">
-          <div className="flex flex-col items-center">
-            <LandingButton
-              href={authPaths.login}
-              data-testid="button-get-started"
-            >
-              Log In / Sign Up
-            </LandingButton>
-            <p className="text-xs text-muted-foreground mt-1.5 text-center">
-              To back up your data and sync across devices
-            </p>
-          </div>
-          <div className="flex flex-col items-center">
-            <LandingButton
-              variant="outline"
-              onClick={enterGuestMode}
-              data-testid="button-try-guest"
-            >
-              Try as Guest
-            </LandingButton>
-            <p className="text-xs text-muted-foreground mt-1.5 text-center">
-              No signup required
-            </p>
-          </div>
+          <LandingButtonWithCaption
+            href={authPaths.login}
+            caption="To back up your data and sync across devices"
+            data-testid="button-get-started"
+          >
+            Log In / Sign Up
+          </LandingButtonWithCaption>
+          <LandingButtonWithCaption
+            caption="No signup required"
+            variant="outline"
+            onClick={enterGuestMode}
+            data-testid="button-try-guest"
+          >
+            Try as Guest
+          </LandingButtonWithCaption>
         </div>
 
         {!isStandalone && (
