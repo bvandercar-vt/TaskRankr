@@ -60,32 +60,36 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="flex justify-center gap-6 flex-wrap text-sm text-muted-foreground mb-8">
-          <CaptionedIcon
-            icon={Star}
-            color="text-yellow-500"
-            label="Priority levels"
-          />
-          <CaptionedIcon
-            icon={CheckCircle}
-            color="text-emerald-500"
-            label="Ease levels"
-          />
-          <CaptionedIcon
-            icon={Clock}
-            color="text-blue-500"
-            label="Time tracking"
-          />
-          <CaptionedIcon
-            icon={ListTodo}
-            color="text-amber-500"
-            label="Nested tasks"
-          />
-          <CaptionedIcon
-            icon={WifiOff}
-            color="text-violet-600"
-            label="Works offline"
-          />
+        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground mb-8">
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={Star}
+              color="text-yellow-500"
+              label="Priority levels"
+            />
+            <CaptionedIcon
+              icon={CheckCircle}
+              color="text-emerald-500"
+              label="Ease levels"
+            />
+            <CaptionedIcon
+              icon={Clock}
+              color="text-blue-500"
+              label="Time tracking"
+            />
+          </div>
+          <div className="flex justify-center gap-6">
+            <CaptionedIcon
+              icon={ListTodo}
+              color="text-amber-500"
+              label="Nested tasks"
+            />
+            <CaptionedIcon
+              icon={WifiOff}
+              color="text-violet-600"
+              label="Works offline"
+            />
+          </div>
         </div>
 
         <InlineLink
