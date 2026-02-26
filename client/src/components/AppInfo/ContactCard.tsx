@@ -20,7 +20,7 @@ const ContactCardInner = ({
   >
     <div className="flex items-start justify-between gap-2 flex-wrap">
       <div>
-        <h3 className="text-base font-semibold text-foreground pb-1">
+        <h3 className="text-base font-semibold text-foreground/80 pb-1">
           Help & Feedback
         </h3>
         <p className="text-sm text-muted-foreground">
