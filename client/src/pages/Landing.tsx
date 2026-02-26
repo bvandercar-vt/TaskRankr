@@ -158,7 +158,7 @@ const Landing = () => {
         </div>
 
         {!isStandalone && (
-          <div className="mt-auto py-8 flex justify-center">
+          <div className="mt-auto py-14 flex justify-center">
             <LandingButton
               href={Routes.HOW_TO_INSTALL}
               className="gap-2 bg-accent text-accent-foreground border border-accent-border"
