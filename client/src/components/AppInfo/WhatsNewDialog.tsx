@@ -36,7 +36,7 @@ const ChangelogEntryList = ({ entries }: { entries: ChangelogEntry[] }) => (
           <span className="text-xs text-muted-foreground">
             {formatDate(entry.date)}
           </span>
-          <span className="text-sm font-medium text-foreground/70">
+          <span className="text-sm font-medium text-foreground">
             — {entry.title}
           </span>
         </div>
