@@ -16,7 +16,6 @@ import {
   Star,
   WifiOff,
 } from "lucide-react";
-import { Link } from "wouter";
 
 import { WhyDifferentDialog } from "@/components/appInfo/WhyDifferentDialog";
 import { Button, type buttonVariants } from "@/components/primitives/Button";
@@ -41,38 +40,40 @@ const CaptionedIcon = ({
   </div>
 );
 
-const landingButtonClass = "text-lg px-8 min-w-[200px]";
-
-type InitializeButtonProps = {
-  title: string;
-  caption: string;
+type LandingButtonProps = {
+  caption?: string;
+  href?: string;
   onClick?: () => void;
   variant?: VariantProps<typeof buttonVariants>["variant"];
   className?: string;
   "data-testid"?: string;
-};
+} & React.PropsWithChildren;
 
-export const InitializeButton = ({
-  title,
+const LandingButton = ({
+  children,
   caption,
+  href,
   onClick,
   variant = "default",
   className,
   "data-testid": testId,
-}: InitializeButtonProps) => (
+}: LandingButtonProps) => (
   <div className="flex flex-col items-center w-[220px]">
     <Button
       size="lg"
       variant={variant}
-      className={cn(landingButtonClass, "w-full", className)}
+      href={href}
+      className={cn("text-lg px-8 w-full", className)}
       data-testid={testId}
       onClick={onClick}
     >
-      {title}
-    </Button>{" "}
-    <p className="text-xs text-muted-foreground mt-1.5 text-center">
-      {caption}
-    </p>
+      {children}
+    </Button>
+    {caption && (
+      <p className="text-xs text-muted-foreground mt-1.5 text-center">
+        {caption}
+      </p>
+    )}
   </div>
 );
 
@@ -139,33 +140,33 @@ const Landing = () => {
         </InlineLink>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-start">
-          <Link href={authPaths.login} className="w-full">
-            <InitializeButton
-              title="Log In / Sign Up"
-              caption="To back up your data and sync across devices"
-              data-testid="button-get-started"
-            />
-          </Link>
-          <InitializeButton
-            title="Try as Guest"
+          <LandingButton
+            href={authPaths.login}
+            caption="To back up your data and sync across devices"
+            data-testid="button-get-started"
+          >
+            Log In / Sign Up
+          </LandingButton>
+          <LandingButton
             caption="No signup required"
             variant="outline"
             onClick={enterGuestMode}
             data-testid="button-try-guest"
-          />
+          >
+            Try as Guest
+          </LandingButton>
         </div>
 
         {!isStandalone && (
           <div className="mt-auto py-8 flex justify-center">
-            <Button
+            <LandingButton
               href={Routes.HOW_TO_INSTALL}
-              size="lg"
-              className={cn(landingButtonClass, "gap-2 bg-accent text-accent-foreground border border-accent-border")}
+              className="gap-2 bg-accent text-accent-foreground border border-accent-border"
               data-testid="button-how-to-install"
             >
               <Download className="size-5" />
               Install as App
-            </Button>
+            </LandingButton>
           </div>
         )}
       </main>
