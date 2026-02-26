@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 
+import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 import { WhyDifferentDialog } from './WhyDifferentDialog'
 
@@ -15,14 +16,12 @@ export const WhyDifferentBanner = () => {
         data-testid="banner-why-different"
       >
         Curious?{' '}
-        <button
-          type="button"
+        <InlineLink
           onClick={() => setShowDialog(true)}
-          className="font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400"
           data-testid="link-why-different-banner"
         >
           See what makes this app different
-        </button>
+        </InlineLink>
       </NotificationBanner>
       <WhyDifferentDialog open={showDialog} onOpenChange={setShowDialog} />
     </>
