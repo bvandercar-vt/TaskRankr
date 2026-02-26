@@ -59,11 +59,27 @@ export const WhyDifferentDialog = ({
               <span className="font-medium text-foreground">
                 Sort by ease, enjoyment, and time.
               </span>{' '}
-              No other app has this. You've been grinding through high-priority
-              tasks all day. Now it's evening and you want to stay productive
-              but enjoy yourself — sort by Ease or Enjoyment. Or you have a free
-              moment and want to knock things out — sort by Time to find quick
-              10–30 minute tasks. You can disable any of these in your settings.
+              No other app has this. You can disable any of these in your
+              settings.
+              <ul className="mt-1.5 space-y-1.5 ml-1">
+                <li className="flex gap-2">
+                  <span className="text-emerald-500 shrink-0">•</span>
+                  <span>
+                    <span className="font-medium text-foreground">Ease or Enjoyment</span>
+                    {' '}— You've been grinding through high-priority tasks all
+                    day. Now it's evening and you want to stay productive but
+                    enjoy yourself — sort by Ease or Enjoyment.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-emerald-500 shrink-0">•</span>
+                  <span>
+                    <span className="font-medium text-foreground">Time</span>
+                    {' '}— You have a free moment and want to knock things out —
+                    sort by Time to find quick 10–30 minute tasks.
+                  </span>
+                </li>
+              </ul>
             </div>
           </li>
 
