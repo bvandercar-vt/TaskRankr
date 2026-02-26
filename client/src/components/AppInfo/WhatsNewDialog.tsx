@@ -52,7 +52,7 @@ const ChangelogEntryList = ({ entries }: { entries: ChangelogEntry[] }) => (
   </div>
 )
 
-const ChangelogShell = ({
+const ChangelogDialog = ({
   open,
   onOpenChange,
   title,
@@ -123,7 +123,7 @@ export const WhatsNewDialog = () => {
   if (entries.length === 0) return null
 
   return (
-    <ChangelogShell
+    <ChangelogDialog
       open={open}
       onOpenChange={handleClose}
       title="What's New"
@@ -134,14 +134,14 @@ export const WhatsNewDialog = () => {
   )
 }
 
-export const ChangelogDialog = ({
+export const FullChangelogDialog = ({
   open,
   onOpenChange,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
 }) => (
-  <ChangelogShell
+  <ChangelogDialog
     open={open}
     onOpenChange={onOpenChange}
     title="Changelog"

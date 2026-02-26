@@ -16,7 +16,7 @@ import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
-import { ChangelogDialog } from '@/components/AppInfo/WhatsNewDialog'
+import { FullChangelogDialog } from '@/components/AppInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -440,7 +440,7 @@ const Settings = () => {
           </div>
           <Sparkles className="size-5 text-muted-foreground shrink-0" />
         </button>
-        <ChangelogDialog open={changelogOpen} onOpenChange={setChangelogOpen} />
+        <FullChangelogDialog open={changelogOpen} onOpenChange={setChangelogOpen} />
 
         {!isGuestMode && <UserInfoCard />}
 
