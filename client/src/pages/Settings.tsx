@@ -4,13 +4,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
-import {
-  ChevronRight,
-  Download,
-  LogOut,
-  Trash2,
-  Upload,
-} from 'lucide-react'
+import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
@@ -403,7 +397,7 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="flex items-center justify-between hover-elevate cursor-pointer">
             <div>
-              <h3 className="font-semibold text-foreground/60">How To Use</h3>
+              <h3 className="font-semibold text-foreground/80">How To Use</h3>
               <p className="text-sm text-muted-foreground">
                 Learn how to get the most out of TaskRankr
               </p>
@@ -416,7 +410,7 @@ const Settings = () => {
           <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
             <Card className="flex items-center justify-between hover-elevate cursor-pointer">
               <div>
-                <h3 className="font-semibold text-foreground/60">
+                <h3 className="font-semibold text-foreground/80">
                   Install as App
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -435,7 +429,7 @@ const Settings = () => {
           data-testid="button-view-changelog"
         >
           <div>
-            <h3 className="font-semibold text-foreground/60">Change History</h3>
+            <h3 className="font-semibold text-foreground/80">Change History</h3>
             <p className="text-sm text-muted-foreground">
               See what's been added and improved
             </p>
