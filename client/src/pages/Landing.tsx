@@ -109,7 +109,7 @@ const Landing = () => {
                 className="text-lg px-8 min-w-[200px] h-auto py-2 flex-col"
                 data-testid="button-get-started"
               >
-                <span>Log In / Sign Up*</span>
+                <span>Log In / Sign Up</span>
                 <span className="text-xs text-muted-foreground font-normal">
                   To back up your data and sync across devices
                 </span>
@@ -128,9 +128,6 @@ const Landing = () => {
               </span>
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            <sup>*</sup>Log in to back up your data and sync across devices.
-          </p>
         </div>
 
         {!isStandalone && (
