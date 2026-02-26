@@ -58,12 +58,12 @@ const LandingButton = ({
   className,
   "data-testid": testId,
 }: LandingButtonProps) => (
-  <div className="flex flex-col items-center w-[220px]">
+  <div className="flex flex-col items-center w-[220px] max-w-[220px]">
     <Button
       size="lg"
       variant={variant}
       href={href}
-      className={cn("text-lg px-8 w-full", className)}
+      className={cn("text-lg px-8 w-[220px] max-w-[220px]", className)}
       data-testid={testId}
       onClick={onClick}
     >
