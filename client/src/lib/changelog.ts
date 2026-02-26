@@ -35,7 +35,3 @@ export function getUnseenEntries(): ChangelogEntry[] {
   if (lastSeenIndex === 0) return []
   return changelog.slice(0, lastSeenIndex)
 }
-
-export function hasUnseenChanges(): boolean {
-  return getLastSeenVersion() !== APP_VERSION
-}

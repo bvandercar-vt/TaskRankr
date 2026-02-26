@@ -14,8 +14,8 @@ import {
   APP_VERSION,
   type ChangelogEntry,
   changelog,
+  getLastSeenVersion,
   getUnseenEntries,
-  hasUnseenChanges,
   setLastSeenVersion,
 } from '@/lib/changelog'
 import { STANDARD_DATE_FORMAT } from '@/lib/constants'
@@ -104,7 +104,7 @@ export const WhatsNewDialog = () => {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
 
   useEffect(() => {
-    if (hasUnseenChanges()) {
+    if (getLastSeenVersion() !== APP_VERSION) {
       const unseen = getUnseenEntries()
       if (unseen.length > 0) {
         setEntries(unseen)

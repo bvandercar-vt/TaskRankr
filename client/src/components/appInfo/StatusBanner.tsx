@@ -1,25 +1,39 @@
 import { useLocation } from 'wouter'
 
 import { Routes } from '@/lib/constants'
-import { useGuestMode } from '@/providers/GuestModeProvider'
+import { cn } from '@/lib/utils'
+import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
 import { useSyncSafe } from '@/providers/SyncProvider'
 import { authPaths } from '~/shared/constants'
 import { Button } from '../primitives/Button'
 
+const TopBanner = ({
+  children,
+  className,
+  ...rest
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      'sticky top-0 z-50 px-4 py-2 flex items-center justify-center text-sm',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </div>
+)
+
 export const StatusBanner = () => {
-  const { isGuestMode, exitGuestMode } = useGuestMode()
+  const { isGuestMode, hiddenBanners, exitGuestMode } = useGuestMode()
   const sync = useSyncSafe()
   const [location] = useLocation()
 
-  // Hide guest mode banner on How To Use page
-  if (isGuestMode && location === Routes.HOW_TO_USE) {
-    return null
-  }
-
   if (isGuestMode) {
+    if (hiddenBanners.has(BannerKey.LOG_IN)) return null
+    if (location === Routes.HOW_TO_USE) return null
     return (
-      <div
-        className="sticky top-0 z-50 bg-primary/90 text-primary-foreground px-4 py-2 flex items-center justify-center gap-4 text-sm"
+      <TopBanner
+        className="bg-primary/90 text-primary-foreground gap-4"
         data-testid="banner-guest-mode"
       >
         <span>Log in to back up your data and use it across devices.</span>
@@ -42,21 +56,19 @@ export const StatusBanner = () => {
         >
           Exit
         </Button>
-      </div>
+      </TopBanner>
     )
-  }
-
-  if (sync && !sync.isOnline) {
+  } else if (sync && !sync.isOnline) {
     return (
-      <div
-        className="sticky top-0 z-50 bg-yellow-600/90 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm"
+      <TopBanner
+        className="bg-yellow-600/90 text-white gap-2"
         data-testid="banner-offline"
       >
         <span>You are offline. Changes will sync when you reconnect.</span>
         {sync.pendingCount > 0 && (
           <span className="opacity-75">({sync.pendingCount} pending)</span>
         )}
-      </div>
+      </TopBanner>
     )
   }
 
