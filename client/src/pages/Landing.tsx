@@ -139,7 +139,7 @@ const Landing = () => {
           What makes this app different, and how it can help you.
         </InlineLink>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-start">
+        <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 justify-center">
           <LandingButton
             href={authPaths.login}
             caption="To back up your data and sync across devices"
