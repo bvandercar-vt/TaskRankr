@@ -18,6 +18,7 @@ import {
 
 import { WhyDifferentDialog } from "@/components/appInfo/WhyDifferentDialog";
 import { Button } from "@/components/primitives/Button";
+import { InitializeButton } from "@/components/primitives/InitializeButton";
 import { InlineLink } from "@/components/primitives/InlineText";
 import { Routes } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -101,33 +102,20 @@ const Landing = () => {
           What makes this app different, and how it can help you.
         </InlineLink>
 
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
-            <a href={authPaths.login} className="w-[220px]">
-              <Button
-                size="lg"
-                className="text-lg px-8 w-full h-full py-2 flex-col gap-0"
-                data-testid="button-get-started"
-              >
-                <span>Log In / Sign Up</span>
-                <span className="text-xs text-muted-foreground font-normal">
-                  To back up your data and sync across devices
-                </span>
-              </Button>
-            </a>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 w-[220px] h-auto py-2 flex-col gap-0"
-              data-testid="button-try-guest"
-              onClick={enterGuestMode}
-            >
-              <span>Try as Guest</span>
-              <span className="text-xs text-muted-foreground font-normal">
-                No signup required
-              </span>
-            </Button>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
+          <InitializeButton
+            title="Log In / Sign Up"
+            caption="To back up your data and sync across devices"
+            href={authPaths.login}
+            data-testid="button-get-started"
+          />
+          <InitializeButton
+            title="Try as Guest"
+            caption="No signup required"
+            variant="outline"
+            onClick={enterGuestMode}
+            data-testid="button-try-guest"
+          />
         </div>
 
         {!isStandalone && (
