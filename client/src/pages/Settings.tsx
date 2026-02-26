@@ -4,11 +4,22 @@
 
 import { useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  LogOut,
+  type LucideIcon,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
+import {
+  ChangelogIcon,
+  FullChangelogDialog,
+} from '@/components/AppInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -30,6 +41,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
+import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
@@ -303,6 +315,83 @@ const ClearLocalStorageConfirmDialog = () => {
   )
 }
 
+const InfoCard = ({
+  title,
+  description,
+  icon: IconComponent,
+  href,
+  onClick,
+  'data-testid': testId,
+}: {
+  title: string
+  description: string
+  icon: LucideIcon
+  href?: string
+  onClick?: () => void
+  'data-testid'?: string
+}) => {
+  const content = (
+    <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+      <div>
+        <h3 className="font-semibold text-foreground/80">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <IconComponent className="size-5 text-muted-foreground shrink-0" />
+    </Card>
+  )
+
+  return href ? (
+    <Link href={href} data-testid={testId}>
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left"
+      data-testid={testId}
+    >
+      {content}
+    </button>
+  )
+}
+
+const HowToUseCard = () => (
+  <InfoCard
+    title="How To Use"
+    description="Learn how to get the most out of TaskRankr"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_USE}
+  />
+)
+
+const InstallAsAppCard = () => (
+  <InfoCard
+    title="Install as App"
+    description="Add to your home screen for offline access"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_INSTALL}
+    data-testid="link-how-to-install"
+  />
+)
+
+const ChangelogCard = () => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <InfoCard
+        title="Change History"
+        description="See what's been added and improved"
+        icon={ChangelogIcon}
+        onClick={() => setOpen(true)}
+        data-testid="button-view-changelog"
+      />
+      <FullChangelogDialog open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
@@ -387,33 +476,9 @@ const Settings = () => {
       </div>
 
       <div className="flex flex-col gap-3 py-2">
-        <Link href={Routes.HOW_TO_USE}>
-          <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-            <div>
-              <h3 className="font-semibold text-foreground">How To Use</h3>
-              <p className="text-sm text-muted-foreground">
-                Learn how to get the most out of TaskRankr
-              </p>
-            </div>
-            <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-          </Card>
-        </Link>
-
-        {!isStandalone && (
-          <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-            <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-              <div>
-                <h3 className="font-semibold text-foreground">
-                  Install as App
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Add to your home screen for offline access
-                </p>
-              </div>
-              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-            </Card>
-          </Link>
-        )}
+        <HowToUseCard />
+        {!isStandalone && <InstallAsAppCard />}
+        <ChangelogCard />
 
         {!isGuestMode && <UserInfoCard />}
 
@@ -454,6 +519,9 @@ const Settings = () => {
         </p>
         <p className="text-xs mt-1" data-testid="text-app-description">
           Track tasks with priority, ease, enjoyment, and time ratings.
+        </p>
+        <p className="text-xs mt-1" data-testid="text-app-version">
+          v{APP_VERSION}
         </p>
       </div>
     </ScrollablePage>
