@@ -130,21 +130,20 @@ const Landing = () => {
           </div>
         </div>
 
+        {!isStandalone && (
+          <div className="mt-auto pb-8 flex justify-center">
+            <Button
+              href={Routes.HOW_TO_INSTALL}
+              size="lg"
+              className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
+              data-testid="button-how-to-install"
+            >
+              <Download className="size-5" />
+              Install as App
+            </Button>
+          </div>
+        )}
       </main>
-
-      {!isStandalone && (
-        <div className="pb-8 flex justify-center">
-          <Button
-            href={Routes.HOW_TO_INSTALL}
-            size="lg"
-            className="gap-2 text-lg px-8 min-w-[200px] bg-accent text-accent-foreground border border-accent-border"
-            data-testid="button-how-to-install"
-          >
-            <Download className="size-5" />
-            Install as App
-          </Button>
-        </div>
-      )}
 
       <WhyDifferentDialog
         open={showWhyDialog}
