@@ -4,7 +4,14 @@
 
 import { useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  LogOut,
+  type LucideIcon,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
@@ -315,15 +322,13 @@ const InfoCard = ({
   href,
   onClick,
   'data-testid': testId,
-  children,
 }: {
   title: string
   description: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: LucideIcon
   href?: string
   onClick?: () => void
   'data-testid'?: string
-  children?: React.ReactNode
 }) => {
   const content = (
     <Card className="flex items-center justify-between hover-elevate cursor-pointer">
@@ -335,26 +340,19 @@ const InfoCard = ({
     </Card>
   )
 
-  if (href) {
-    return (
-      <Link href={href} data-testid={testId}>
-        {content}
-      </Link>
-    )
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={onClick}
-        className="w-full text-left"
-        data-testid={testId}
-      >
-        {content}
-      </button>
-      {children}
-    </>
+  return href ? (
+    <Link href={href} data-testid={testId}>
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left"
+      data-testid={testId}
+    >
+      {content}
+    </button>
   )
 }
 
@@ -381,15 +379,16 @@ const ChangelogCard = () => {
   const [open, setOpen] = useState(false)
 
   return (
-    <InfoCard
-      title="Change History"
-      description="See what's been added and improved"
-      icon={ChangelogIcon}
-      onClick={() => setOpen(true)}
-      data-testid="button-view-changelog"
-    >
+    <>
+      <InfoCard
+        title="Change History"
+        description="See what's been added and improved"
+        icon={ChangelogIcon}
+        onClick={() => setOpen(true)}
+        data-testid="button-view-changelog"
+      />
       <FullChangelogDialog open={open} onOpenChange={setOpen} />
-    </InfoCard>
+    </>
   )
 }
 
@@ -399,7 +398,6 @@ const Settings = () => {
   const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
-
 
   return (
     <ScrollablePage>
