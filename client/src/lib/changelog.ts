@@ -29,7 +29,7 @@ export function setLastSeenVersion(version: string) {
 
 export function getUnseenEntries(): ChangelogEntry[] {
   const lastSeen = getLastSeenVersion()
-  if (!lastSeen) return changelog
+  if (!lastSeen) return []
   const lastSeenIndex = changelog.findIndex((e) => e.version === lastSeen)
   if (lastSeenIndex === -1) return changelog
   if (lastSeenIndex === 0) return []
