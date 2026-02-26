@@ -42,7 +42,10 @@ const ChangelogEntryList = ({ entries }: { entries: ChangelogEntry[] }) => (
         </h3>
         <ul className="space-y-1">
           {entry.changes.map((change, i) => (
-            <li key={i} className="text-sm text-muted-foreground flex gap-2">
+            <li
+              key={`changelog-${entry.version}-${i}`}
+              className="text-sm text-muted-foreground flex gap-2"
+            >
               <span className="text-primary mt-0.5 shrink-0">•</span>
               {change}
             </li>
