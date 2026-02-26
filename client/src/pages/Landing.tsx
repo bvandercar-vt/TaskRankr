@@ -18,6 +18,7 @@ import {
 
 import { WhyDifferentDialog } from '@/components/appInfo/WhyDifferentDialog'
 import { Button } from '@/components/primitives/Button'
+import { InlineLink } from '@/components/primitives/InlineText'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
@@ -117,15 +118,14 @@ const Landing = () => {
           </p>
         </div>
 
-        <button
-          type="button"
+        <InlineLink
           onClick={() => setShowWhyDialog(true)}
-          className="mt-6 inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
+          className="mt-6 inline-flex items-center gap-1.5 text-sm"
           data-testid="button-why-different"
         >
           <Info className="size-4" />
           What makes this app different?
-        </button>
+        </InlineLink>
 
         {!isStandalone && (
           <div className="mt-6 flex justify-center">
