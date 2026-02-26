@@ -19,7 +19,10 @@ export const InstallBanner = () => {
       data-testid="banner-install"
     >
       Install the app!{' '}
-      <InlineLink href={Routes.HOW_TO_INSTALL} data-testid="link-install-banner">
+      <InlineLink
+        href={Routes.HOW_TO_INSTALL}
+        data-testid="link-install-banner"
+      >
         Learn how to install
       </InlineLink>
     </NotificationBanner>

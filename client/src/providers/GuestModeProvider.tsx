@@ -13,7 +13,7 @@ import {
 } from 'react'
 
 export enum BannerKey {
-  STATUS = 'status',
+  LOG_IN = 'log-in',
   WHY_DIFFERENT = 'why-different',
   HOW_TO_USE = 'how-to-use',
   INSTALL = 'install',
