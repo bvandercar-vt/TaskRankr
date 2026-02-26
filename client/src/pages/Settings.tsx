@@ -2,7 +2,7 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
@@ -377,25 +377,21 @@ const InstallAsAppCard = () => (
   />
 )
 
-const ChangelogCard = ({
-  open,
-  onOpen,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpen: () => void
-  onOpenChange: (open: boolean) => void
-}) => (
-  <InfoCard
-    title="Change History"
-    description="See what's been added and improved"
-    icon={ChangelogIcon}
-    onClick={onOpen}
-    data-testid="button-view-changelog"
-  >
-    <FullChangelogDialog open={open} onOpenChange={onOpenChange} />
-  </InfoCard>
-)
+const ChangelogCard = () => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <InfoCard
+      title="Change History"
+      description="See what's been added and improved"
+      icon={ChangelogIcon}
+      onClick={() => setOpen(true)}
+      data-testid="button-view-changelog"
+    >
+      <FullChangelogDialog open={open} onOpenChange={setOpen} />
+    </InfoCard>
+  )
+}
 
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
@@ -403,8 +399,7 @@ const Settings = () => {
   const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
-  const [changelogOpen, setChangelogOpen] = useState(false)
-  const openChangelog = useCallback(() => setChangelogOpen(true), [])
+
 
   return (
     <ScrollablePage>
@@ -485,11 +480,7 @@ const Settings = () => {
       <div className="flex flex-col gap-3 py-2">
         <HowToUseCard />
         {!isStandalone && <InstallAsAppCard />}
-        <ChangelogCard
-          open={changelogOpen}
-          onOpen={openChangelog}
-          onOpenChange={setChangelogOpen}
-        />
+        <ChangelogCard />
 
         {!isGuestMode && <UserInfoCard />}
 
