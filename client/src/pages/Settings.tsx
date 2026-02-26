@@ -435,9 +435,9 @@ const Settings = () => {
           data-testid="button-view-changelog"
         >
           <div>
-            <h3 className="font-semibold text-foreground">What's New</h3>
+            <h3 className="font-semibold text-foreground">Change History</h3>
             <p className="text-sm text-muted-foreground">
-              See recent updates and changes
+              See what's been added and improved
             </p>
           </div>
           <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
