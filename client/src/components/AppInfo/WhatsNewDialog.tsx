@@ -17,14 +17,11 @@ import {
   hasUnseenChanges,
   setLastSeenVersion,
 } from '@/lib/changelog'
+import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 
 function formatDate(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00`)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  return date.toLocaleDateString('en-US', STANDARD_DATE_FORMAT)
 }
 
 const ChangelogEntryList = ({ entries }: { entries: ChangelogEntry[] }) => (

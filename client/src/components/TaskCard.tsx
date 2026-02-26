@@ -16,6 +16,7 @@ import {
   getTaskStatuses,
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
+import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { TaskWithSubtasks } from '@/types'
 import {
@@ -202,11 +203,7 @@ const CompletedTimeDisplay = ({
   completedAt && (
     <span className="text-[10px] text-muted-foreground">
       Completed:{' '}
-      {new Date(completedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })}
+      {new Date(completedAt).toLocaleDateString('en-US', STANDARD_DATE_FORMAT)}
     </span>
   )
 
