@@ -2,8 +2,9 @@
 
 import type React from 'react'
 
-import { HowToUseBanner } from './AppInfo/HowToUseBanner'
-import { InstallBanner } from './AppInfo/InstallBanner'
+import { HowToUseBanner } from './appInfo/HowToUseBanner'
+import { InstallBanner } from './appInfo/InstallBanner'
+import { WhyDifferentBanner } from './appInfo/WhyDifferentBanner'
 import { DropdownMenuHeader } from './DropdownMenuHeader'
 import { PageLoading } from './PageStates'
 
@@ -21,6 +22,7 @@ export const TaskListPageHeader = ({
   setSearchVal: (value: string) => void
 }) => (
   <div className="shrink-0 max-w-5xl w-full mx-auto px-2 sm:px-4 pt-3">
+    <WhyDifferentBanner />
     <HowToUseBanner />
     <InstallBanner />
 

@@ -20,8 +20,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'wouter'
 
-import { ContactCard } from '@/components/AppInfo/ContactCard'
-import { SortInfo } from '@/components/AppInfo/SortInfo'
+import { ContactCard } from '@/components/appInfo/ContactCard'
+import { SortInfo } from '@/components/appInfo/SortInfo'
 import { BackButtonHeader } from '@/components/BackButton'
 import { CardSection } from '@/components/primitives/CardSection'
 import { IconCard } from '@/components/primitives/IconCard'

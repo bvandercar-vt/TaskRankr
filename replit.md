@@ -58,7 +58,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   ├── ScrollablePage.tsx  # Scrollable page wrapper for non-task-list pages
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
-│       │   ├── AppInfo/            # Informational/status components
+│       │   ├── appInfo/            # Informational/status components
 │       │   │   ├── ContactCard.tsx   # Contact/email card with optional debug download
 │       │   │   ├── HowToUseBanner.tsx  # Dismissible banner linking to How To Use page
 │       │   │   ├── InstallBanner.tsx  # PWA install prompt banner
