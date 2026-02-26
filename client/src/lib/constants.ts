@@ -18,6 +18,12 @@ export const DEFAULT_SETTINGS: UserSettings = {
   fieldConfig: DEFAULT_FIELD_CONFIG,
 }
 
+export const STANDARD_DATE_FORMAT = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+} as const satisfies Intl.DateTimeFormatOptions
+
 export const Routes = {
   HOME: '/',
   GUEST: '/guest',

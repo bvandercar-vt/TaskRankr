@@ -47,7 +47,7 @@ export const NotificationBanner = ({
 
   return (
     <div
-      className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 mb-2 flex items-center justify-between gap-3"
+      className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-1 mb-2 flex items-center justify-between gap-3"
       data-testid={testId}
     >
       <div className="flex items-center gap-3 min-w-0">

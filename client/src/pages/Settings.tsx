@@ -2,13 +2,17 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
 import { SortInfo } from '@/components/AppInfo/SortInfo'
+import {
+  ChangelogIcon,
+  FullChangelogDialog,
+} from '@/components/AppInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -30,6 +34,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
+import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
 import { queryClient } from '@/lib/query-client'
 import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
@@ -309,6 +314,8 @@ const Settings = () => {
   const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
+  const [changelogOpen, setChangelogOpen] = useState(false)
+  const openChangelog = useCallback(() => setChangelogOpen(true), [])
 
   return (
     <ScrollablePage>
@@ -390,7 +397,7 @@ const Settings = () => {
         <Link href={Routes.HOW_TO_USE}>
           <Card className="flex items-center justify-between hover-elevate cursor-pointer">
             <div>
-              <h3 className="font-semibold text-foreground">How To Use</h3>
+              <h3 className="font-semibold text-foreground/80">How To Use</h3>
               <p className="text-sm text-muted-foreground">
                 Learn how to get the most out of TaskRankr
               </p>
@@ -403,7 +410,7 @@ const Settings = () => {
           <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
             <Card className="flex items-center justify-between hover-elevate cursor-pointer">
               <div>
-                <h3 className="font-semibold text-foreground">
+                <h3 className="font-semibold text-foreground/80">
                   Install as App
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -414,6 +421,25 @@ const Settings = () => {
             </Card>
           </Link>
         )}
+
+        <button
+          type="button"
+          onClick={openChangelog}
+          className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
+          data-testid="button-view-changelog"
+        >
+          <div>
+            <h3 className="font-semibold text-foreground/80">Change History</h3>
+            <p className="text-sm text-muted-foreground">
+              See what's been added and improved
+            </p>
+          </div>
+          <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
+        </button>
+        <FullChangelogDialog
+          open={changelogOpen}
+          onOpenChange={setChangelogOpen}
+        />
 
         {!isGuestMode && <UserInfoCard />}
 
@@ -454,6 +480,9 @@ const Settings = () => {
         </p>
         <p className="text-xs mt-1" data-testid="text-app-description">
           Track tasks with priority, ease, enjoyment, and time ratings.
+        </p>
+        <p className="text-xs mt-1" data-testid="text-app-version">
+          v{APP_VERSION}
         </p>
       </div>
     </ScrollablePage>
