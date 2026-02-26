@@ -4,9 +4,7 @@
     "date": "2026-02-25",
     "title": "Changelog & Version Tracking",
     "changes": [
-      "Added \"What's New\" dialog to highlight updates after each release",
-      "Version number now displayed in Settings",
-      "Sessions now persist across app updates — no more unexpected logouts"
+      "Initial Release! Most features outlined on the How to Use page."
     ]
   }
 ]

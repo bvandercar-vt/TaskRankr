@@ -2,9 +2,16 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { isStandalonePWA } from 'is-standalone-pwa'
-import { ChevronRight, Download, LogOut, Trash2, Upload } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  LogOut,
+  type LucideIcon,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/AppInfo/ContactCard'
@@ -308,14 +315,89 @@ const ClearLocalStorageConfirmDialog = () => {
   )
 }
 
+const InfoCard = ({
+  title,
+  description,
+  icon: IconComponent,
+  href,
+  onClick,
+  'data-testid': testId,
+}: {
+  title: string
+  description: string
+  icon: LucideIcon
+  href?: string
+  onClick?: () => void
+  'data-testid'?: string
+}) => {
+  const content = (
+    <Card className="flex items-center justify-between hover-elevate cursor-pointer">
+      <div>
+        <h3 className="font-semibold text-foreground/80">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <IconComponent className="size-5 text-muted-foreground shrink-0" />
+    </Card>
+  )
+
+  return href ? (
+    <Link href={href} data-testid={testId}>
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left"
+      data-testid={testId}
+    >
+      {content}
+    </button>
+  )
+}
+
+const HowToUseCard = () => (
+  <InfoCard
+    title="How To Use"
+    description="Learn how to get the most out of TaskRankr"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_USE}
+  />
+)
+
+const InstallAsAppCard = () => (
+  <InfoCard
+    title="Install as App"
+    description="Add to your home screen for offline access"
+    icon={ChevronRight}
+    href={Routes.HOW_TO_INSTALL}
+    data-testid="link-how-to-install"
+  />
+)
+
+const ChangelogCard = () => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <InfoCard
+        title="Change History"
+        description="See what's been added and improved"
+        icon={ChangelogIcon}
+        onClick={() => setOpen(true)}
+        data-testid="button-view-changelog"
+      />
+      <FullChangelogDialog open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
 const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
   const { data: allTasks } = useTasks()
   const { setTaskStatus } = useTaskActions()
-  const [changelogOpen, setChangelogOpen] = useState(false)
-  const openChangelog = useCallback(() => setChangelogOpen(true), [])
 
   return (
     <ScrollablePage>
@@ -394,55 +476,10 @@ const Settings = () => {
       </div>
 
       <div className="flex flex-col gap-3 py-2">
-        <Link href={Routes.HOW_TO_USE}>
-          <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-            <div>
-              <h3 className="font-semibold text-foreground/80">How To Use</h3>
-              <p className="text-sm text-muted-foreground">
-                Learn how to get the most out of TaskRankr
-              </p>
-            </div>
-            <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-          </Card>
-        </Link>
-
-        {!isStandalone && (
-          <Link href={Routes.HOW_TO_INSTALL} data-testid="link-how-to-install">
-            <Card className="flex items-center justify-between hover-elevate cursor-pointer">
-              <div>
-                <h3 className="font-semibold text-foreground/80">
-                  Install as App
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Add to your home screen for offline access
-                </p>
-              </div>
-              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
-            </Card>
-          </Link>
-        )}
-
-        <button
-          type="button"
-          onClick={openChangelog}
-          className="p-4 bg-card rounded-lg border border-white/10 flex items-center justify-between hover-elevate cursor-pointer w-full text-left"
-          data-testid="button-view-changelog"
-        >
-          <div>
-            <h3 className="font-semibold text-foreground/80">Change History</h3>
-            <p className="text-sm text-muted-foreground">
-              See what's been added and improved
-            </p>
-          </div>
-          <ChangelogIcon className="size-5 text-muted-foreground shrink-0" />
-        </button>
-        <FullChangelogDialog
-          open={changelogOpen}
-          onOpenChange={setChangelogOpen}
-        />
-
+        <HowToUseCard />
+        {!isStandalone && <InstallAsAppCard />}
+        <ChangelogCard />
         {!isGuestMode && <UserInfoCard />}
-
         <ContactCard showDebugDownload />
       </div>
 
