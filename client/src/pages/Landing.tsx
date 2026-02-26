@@ -41,7 +41,6 @@ const CaptionedIcon = ({
 );
 
 type LandingButtonProps = {
-  caption?: string;
   href?: string;
   onClick?: () => void;
   variant?: VariantProps<typeof buttonVariants>["variant"];
@@ -51,30 +50,22 @@ type LandingButtonProps = {
 
 const LandingButton = ({
   children,
-  caption,
   href,
   onClick,
   variant = "default",
   className,
   "data-testid": testId,
 }: LandingButtonProps) => (
-  <div className="flex flex-col items-center w-[220px] max-w-[220px]">
-    <Button
-      size="lg"
-      variant={variant}
-      href={href}
-      className={cn("text-lg px-8 w-[220px] max-w-[220px]", className)}
-      data-testid={testId}
-      onClick={onClick}
-    >
-      {children}
-    </Button>
-    {caption && (
-      <p className="text-xs text-muted-foreground mt-1.5 text-center">
-        {caption}
-      </p>
-    )}
-  </div>
+  <Button
+    size="lg"
+    variant={variant}
+    href={href}
+    className={cn("text-lg px-8 w-[220px] max-w-[220px]", className)}
+    data-testid={testId}
+    onClick={onClick}
+  >
+    {children}
+  </Button>
 );
 
 const Landing = () => {
@@ -140,21 +131,29 @@ const Landing = () => {
         </InlineLink>
 
         <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 justify-center">
-          <LandingButton
-            href={authPaths.login}
-            caption="To back up your data and sync across devices"
-            data-testid="button-get-started"
-          >
-            Log In / Sign Up
-          </LandingButton>
-          <LandingButton
-            caption="No signup required"
-            variant="outline"
-            onClick={enterGuestMode}
-            data-testid="button-try-guest"
-          >
-            Try as Guest
-          </LandingButton>
+          <div className="flex flex-col items-center">
+            <LandingButton
+              href={authPaths.login}
+              data-testid="button-get-started"
+            >
+              Log In / Sign Up
+            </LandingButton>
+            <p className="text-xs text-muted-foreground mt-1.5 text-center">
+              To back up your data and sync across devices
+            </p>
+          </div>
+          <div className="flex flex-col items-center">
+            <LandingButton
+              variant="outline"
+              onClick={enterGuestMode}
+              data-testid="button-try-guest"
+            >
+              Try as Guest
+            </LandingButton>
+            <p className="text-xs text-muted-foreground mt-1.5 text-center">
+              No signup required
+            </p>
+          </div>
         </div>
 
         {!isStandalone && (
