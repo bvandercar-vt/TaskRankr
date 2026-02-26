@@ -16,10 +16,7 @@ export const WhyDifferentBanner = () => {
         data-testid="banner-why-different"
       >
         Curious?{' '}
-        <InlineLink
-          onClick={() => setShowDialog(true)}
-          data-testid="link-why-different-banner"
-        >
+        <InlineLink onClick={() => setShowDialog(true)}>
           See what makes this app different
         </InlineLink>
       </NotificationBanner>

@@ -479,9 +479,7 @@ const Settings = () => {
         <HowToUseCard />
         {!isStandalone && <InstallAsAppCard />}
         <ChangelogCard />
-
         {!isGuestMode && <UserInfoCard />}
-
         <ContactCard showDebugDownload />
       </div>
 
