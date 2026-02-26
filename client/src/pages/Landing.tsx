@@ -60,7 +60,7 @@ const Landing = () => {
           Rate and sort by priority, ease, enjoyment, and time for each task.
         </p>
 
-        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground mb-8">
+        <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex justify-center gap-6">
             <CaptionedIcon
               icon={Star}
@@ -98,7 +98,7 @@ const Landing = () => {
           data-testid="button-why-different"
         >
           <Info className="size-4" />
-          What makes this app different, and how it can help you
+          What makes this app different, and how it can help you.
         </InlineLink>
 
         <div className="flex flex-col items-center gap-3">
@@ -115,11 +115,14 @@ const Landing = () => {
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-8 min-w-[200px]"
+              className="text-lg px-8 min-w-[200px] h-auto py-2"
               data-testid="button-try-guest"
               onClick={enterGuestMode}
             >
-              Try as Guest
+              <div className="flex flex-col items-center">
+                <span>Try as Guest</span>
+                <span className="text-xs text-muted-foreground font-normal">No signup required</span>
+              </div>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
