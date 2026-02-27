@@ -15,6 +15,7 @@ import {
 import { pick, toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
+import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
@@ -229,21 +230,26 @@ export const LocalStateProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      const { tasks: reconciled, corrections } =
-        reconcileInheritCompletionState(loadedTasks)
-      setTasks(reconciled)
-      if (corrections.length > 0) {
-        debugLog.log('reconcile', 'inheritCompletionState', { corrections })
-        if (shouldSync) {
-          setSyncQueue(() => [
-            ...loadedQueue,
-            ...corrections.map((c) => ({
-              type: SyncOperationType.SET_STATUS as const,
-              id: c.id,
-              status: c.status,
-            })),
-          ])
+      const lastSeen = getLastSeenVersion()
+      if (lastSeen !== APP_VERSION) {
+        const { tasks: reconciled, corrections } =
+          reconcileInheritCompletionState(loadedTasks)
+        setTasks(reconciled)
+        if (corrections.length > 0) {
+          debugLog.log('reconcile', 'inheritCompletionState', { corrections })
+          if (shouldSync) {
+            setSyncQueue(() => [
+              ...loadedQueue,
+              ...corrections.map((c) => ({
+                type: SyncOperationType.SET_STATUS as const,
+                id: c.id,
+                status: c.status,
+              })),
+            ])
+          }
         }
+      } else {
+        setTasks(loadedTasks)
       }
     }
 
