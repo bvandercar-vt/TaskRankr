@@ -140,6 +140,17 @@ TaskRankr is a multi-user task management application designed for tracking task
 └── migrations/           # Database migrations
 ```
 
+## Shared Task Utilities (`shared/utils/task-utils.ts`)
+Always prefer these over inline implementations:
+- `getTaskById(allTasks, id)` — Find a task by ID. Returns `Task | undefined`.
+- `getDirectSubtasks(allTasks, id)` — Get immediate children of a task.
+- `updateTaskInList(allTasks, taskId, updater)` — Immutably update a single task in an array via an updater function. Use instead of `.map(t => t.id === id ? {...t, ...changes} : t)`.
+- `getAllDescendantIds(allTasks, taskId)` — Get all nested descendant IDs (including the task itself) as a `Set<number>`. Useful for cascading operations like hide/delete.
+- `getTaskStatuses(task)` — Returns `{ isInProgress, isPinned, isCompleted }` booleans.
+- `getHasIncomplete(tasks)` — Whether any task in the array is not completed.
+- `getHasIncompleteSubtasks(allTasks, taskId)` — Whether any direct subtask of the given task is not completed.
+- `getChildrenLatestCompletedAt(children)` — Returns the most recent `completedAt` date among the given tasks, or `null`. Handles string-to-Date conversion.
+
 ## External Dependencies
 
 ### Database
