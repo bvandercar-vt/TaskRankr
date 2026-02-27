@@ -18,6 +18,7 @@ import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
+import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import {
   getDirectSubtasks,
   getHasIncompleteSubtasks,
@@ -130,6 +131,63 @@ interface LocalStateProviderProps {
   storageMode: StorageMode
 }
 
+interface ReconcileResult {
+  tasks: Task[]
+  corrections: { id: number; status: TaskStatus }[]
+}
+
+function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
+  const corrections: { id: number; status: TaskStatus }[] = []
+  let updated = tasks
+  let changed = true
+
+  while (changed) {
+    changed = false
+    const parents = updated.filter((t) => t.inheritCompletionState)
+    for (const parent of parents) {
+      const children = getDirectSubtasks(updated, parent.id)
+      if (children.length === 0) continue
+
+      const allChildrenCompleted = children.every(
+        (c) => c.status === TaskStatus.COMPLETED,
+      )
+
+      if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
+        updated = updated.map((t) =>
+          t.id === parent.id
+            ? {
+                ...t,
+                status: TaskStatus.COMPLETED,
+                completedAt: new Date(),
+                inProgressStartedAt: null,
+              }
+            : t,
+        )
+        corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
+        changed = true
+      } else if (
+        !allChildrenCompleted &&
+        parent.status === TaskStatus.COMPLETED
+      ) {
+        updated = updated.map((t) =>
+          t.id === parent.id
+            ? {
+                ...t,
+                status: TaskStatus.OPEN,
+                completedAt: null,
+                inProgressStartedAt: null,
+              }
+            : t,
+        )
+        corrections.push({ id: parent.id, status: TaskStatus.OPEN })
+        changed = true
+      }
+    }
+  }
+
+  return { tasks: updated, corrections }
+}
+
 export const LocalStateProvider = ({
   children,
   shouldSync,
@@ -177,11 +235,31 @@ export const LocalStateProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      setTasks(loadedTasks)
+      const lastSeen = getLastSeenVersion()
+      if (lastSeen !== APP_VERSION) {
+        const { tasks: reconciled, corrections } =
+          reconcileInheritCompletionState(loadedTasks)
+        setTasks(reconciled)
+        if (corrections.length > 0) {
+          debugLog.log('reconcile', 'inheritCompletionState', { corrections })
+          if (shouldSync) {
+            setSyncQueue((prev) => [
+              ...loadedQueue,
+              ...corrections.map((c) => ({
+                type: SyncOperationType.SET_STATUS as const,
+                id: c.id,
+                status: c.status,
+              })),
+            ])
+          }
+        }
+      } else {
+        setTasks(loadedTasks)
+      }
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode])
+  }, [storageKeys, storageMode, shouldSync])
 
   useEffect(() => {
     if (isInitialized) {
