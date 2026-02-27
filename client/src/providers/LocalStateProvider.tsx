@@ -620,7 +620,6 @@ export const LocalStateProvider = ({
 
         setTasks((prev) => {
           let updated = prev
-          let currentTaskId = id
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
@@ -631,18 +630,10 @@ export const LocalStateProvider = ({
             )
               break
 
-            const children = updated.filter((t) => t.parentId === parent.id)
-            if (!children.every((t) => t.status === TaskStatus.COMPLETED)) break
+            const thisChildren = updated.filter((t) => t.parentId === parent.id)
+            if (!thisChildren.every((t) => t.status === TaskStatus.COMPLETED)) break
 
-            const latestCompletedAt = children.reduce<Date | null>(
-              (latest, c) => {
-                const d = c.completedAt ? new Date(c.completedAt) : null
-                if (!d) return latest
-                if (!latest) return d
-                return d > latest ? d : latest
-              },
-              null,
-            )
+            const latestCompletedAt = getChildrenLatestCompletedAt(thisChildren)
 
             const parentUpdate: Partial<Task> = {
               status: TaskStatus.COMPLETED,
@@ -663,7 +654,6 @@ export const LocalStateProvider = ({
             }))
             autoCompletedParents.push(parent.id)
 
-            currentTaskId = parent.id
             currentParentId = parent.parentId
           }
 
