@@ -15,7 +15,6 @@ import {
 import { pick, toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
-import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
@@ -229,6 +228,30 @@ export const LocalStateProvider = ({
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
+  const reconcileAndSetTasks = useCallback(
+    (incomingTasks: Task[], source: string) => {
+      const { tasks: reconciled, corrections } =
+        reconcileInheritCompletionState(incomingTasks)
+      setTasks(reconciled)
+      if (corrections.length > 0) {
+        debugLog.log('reconcile', `inheritCompletionState:${source}`, {
+          corrections,
+        })
+        if (shouldSync) {
+          setSyncQueue((prev) => [
+            ...prev,
+            ...corrections.map((c) => ({
+              type: SyncOperationType.SET_STATUS as const,
+              id: c.id,
+              status: c.status,
+            })),
+          ])
+        }
+      }
+    },
+    [shouldSync],
+  )
+
   useEffect(() => {
     const loadedSettings: UserSettings = toMerged(
       DEFAULT_SETTINGS,
@@ -261,27 +284,7 @@ export const LocalStateProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      const lastSeen = getLastSeenVersion()
-      if (lastSeen !== APP_VERSION) {
-        const { tasks: reconciled, corrections } =
-          reconcileInheritCompletionState(loadedTasks)
-        setTasks(reconciled)
-        if (corrections.length > 0) {
-          debugLog.log('reconcile', 'inheritCompletionState', { corrections })
-          if (shouldSync) {
-            setSyncQueue(() => [
-              ...loadedQueue,
-              ...corrections.map((c) => ({
-                type: SyncOperationType.SET_STATUS as const,
-                id: c.id,
-                status: c.status,
-              })),
-            ])
-          }
-        }
-      } else {
-        setTasks(loadedTasks)
-      }
+      reconcileAndSetTasks(loadedTasks, 'init')
     }
 
     setIsInitialized(true)
@@ -819,22 +822,7 @@ export const LocalStateProvider = ({
       if (serverTasks.length > 0) {
         setDemoTaskIds([])
       }
-      const { tasks: reconciled, corrections } =
-        reconcileInheritCompletionState(serverTasks)
-      setTasks(reconciled)
-      if (corrections.length > 0) {
-        debugLog.log('reconcile', 'inheritCompletionState:fromServer', {
-          corrections,
-        })
-        setSyncQueue((prev) => [
-          ...prev,
-          ...corrections.map((c) => ({
-            type: SyncOperationType.SET_STATUS as const,
-            id: c.id,
-            status: c.status,
-          })),
-        ])
-      }
+      reconcileAndSetTasks(serverTasks, 'fromServer')
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
