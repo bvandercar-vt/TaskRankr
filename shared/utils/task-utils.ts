@@ -6,6 +6,12 @@ export const getTaskById = (allTasks: Task[], id: number): Task | undefined =>
 export const getDirectSubtasks = (allTasks: Task[], id: number): Task[] =>
   allTasks.filter((task) => task.parentId === id)
 
+export const updateTaskInList = (
+  allTasks: Task[],
+  taskId: number,
+  updater: (task: Task) => Task,
+): Task[] => allTasks.map((task) => (task.id === taskId ? updater(task) : task))
+
 export const getAllDescendantIds = (
   allTasks: Task[],
   taskId: number,
@@ -34,3 +40,10 @@ export const getHasIncompleteSubtasks = (
   allTasks: Task[],
   taskId: number,
 ): boolean => getHasIncomplete(getDirectSubtasks(allTasks, taskId))
+
+export const getChildrenLatestCompletedAt = (children: Task[]): Date | null =>
+  children.reduce<Date | null>((latest, { completedAt }) => {
+    if (!completedAt) return latest
+    if (!latest) return completedAt
+    return completedAt > latest ? completedAt : latest
+  }, null)
