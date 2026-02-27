@@ -20,9 +20,11 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
+  getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
   getTaskById,
+  updateTaskInList,
 } from '@/lib/task-utils'
 import {
   type CreateTask,
@@ -153,38 +155,25 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
       )
 
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
-        const latestCompletedAt = children.reduce<Date | null>((latest, c) => {
-          const d = c.completedAt ? new Date(c.completedAt) : null
-          if (!d) return latest
-          if (!latest) return d
-          return d > latest ? d : latest
-        }, null)
-        updated = updated.map((t) =>
-          t.id === parent.id
-            ? {
-                ...t,
-                status: TaskStatus.COMPLETED,
-                completedAt: latestCompletedAt ?? new Date(),
-                inProgressStartedAt: null,
-              }
-            : t,
-        )
+        const latestCompletedAt = getChildrenLatestCompletedAt(children)
+        updated = updateTaskInList(updated, parent.id, (t) => ({
+          ...t,
+          status: TaskStatus.COMPLETED,
+          completedAt: latestCompletedAt ?? new Date(),
+          inProgressStartedAt: null,
+        }))
         corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
         changed = true
       } else if (
         !allChildrenCompleted &&
         parent.status === TaskStatus.COMPLETED
       ) {
-        updated = updated.map((t) =>
-          t.id === parent.id
-            ? {
-                ...t,
-                status: TaskStatus.OPEN,
-                completedAt: null,
-                inProgressStartedAt: null,
-              }
-            : t,
-        )
+        updated = updateTaskInList(updated, parent.id, (t) => ({
+          ...t,
+          status: TaskStatus.OPEN,
+          completedAt: null,
+          inProgressStartedAt: null,
+        }))
         corrections.push({ id: parent.id, status: TaskStatus.OPEN })
         changed = true
       }
@@ -249,7 +238,7 @@ export const LocalStateProvider = ({
         if (corrections.length > 0) {
           debugLog.log('reconcile', 'inheritCompletionState', { corrections })
           if (shouldSync) {
-            setSyncQueue((prev) => [
+            setSyncQueue(() => [
               ...loadedQueue,
               ...corrections.map((c) => ({
                 type: SyncOperationType.SET_STATUS as const,
@@ -415,7 +404,7 @@ export const LocalStateProvider = ({
 
       setTasks((prev) => {
         const parent = data.parentId
-          ? prev.find((t) => t.id === data.parentId)
+          ? getTaskById(prev, data.parentId)
           : undefined
         if (
           parent?.autoHideCompleted &&
@@ -635,7 +624,7 @@ export const LocalStateProvider = ({
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
-            const parent = updated.find((t) => t.id === currentParentId)
+            const parent = getTaskById(updated, currentParentId)
             if (
               !parent?.inheritCompletionState ||
               parent.status === TaskStatus.COMPLETED
@@ -654,15 +643,16 @@ export const LocalStateProvider = ({
             }
 
             if (parent.parentId) {
-              const grandparent = updated.find((t) => t.id === parent.parentId)
+              const grandparent = getTaskById(updated, parent.parentId)
               if (grandparent?.autoHideCompleted) {
                 parentUpdate.hidden = true
               }
             }
 
-            updated = updated.map((t) =>
-              t.id === parent.id ? { ...t, ...parentUpdate } : t,
-            )
+            updated = updateTaskInList(updated, parent.id, (t) => ({
+              ...t,
+              ...parentUpdate,
+            }))
             autoCompletedParents.push(parent.id)
 
             currentTaskId = parent.id
@@ -711,21 +701,15 @@ export const LocalStateProvider = ({
         let updated = prev.filter((t) => !idsToDelete.has(t.id))
 
         if (taskToDelete.parentId) {
-          updated = updated.map((t) =>
-            t.id === taskToDelete.parentId
+          updated = updateTaskInList(updated, taskToDelete.parentId, (t) => ({
+            ...t,
+            ...(totalTime > 0
               ? {
-                  ...t,
-                  ...(totalTime > 0
-                    ? {
-                        inProgressTime: (t.inProgressTime ?? 0) + totalTime,
-                      }
-                    : {}),
-                  subtaskOrder: t.subtaskOrder.filter(
-                    (sid) => !idsToDelete.has(sid),
-                  ),
+                  inProgressTime: (t.inProgressTime ?? 0) + totalTime,
                 }
-              : t,
-          )
+              : {}),
+            subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
+          }))
         }
 
         return updated
