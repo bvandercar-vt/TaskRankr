@@ -42,7 +42,8 @@ export const getHasIncompleteSubtasks = (
 ): boolean => getHasIncomplete(getDirectSubtasks(allTasks, taskId))
 
 export const getChildrenLatestCompletedAt = (children: Task[]): Date | null =>
-  children.reduce<Date | null>((latest, { completedAt }) => {
+  children.reduce<Date | null>((latest, c) => {
+    const completedAt = c.completedAt ? new Date(c.completedAt) : null
     if (!completedAt) return latest
     if (!latest) return completedAt
     return completedAt > latest ? completedAt : latest

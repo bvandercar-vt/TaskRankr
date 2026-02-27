@@ -15,7 +15,6 @@ import {
 import { pick, toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
-import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
@@ -156,12 +155,43 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
 
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
+
+        const shouldHide = parent.parentId
+          ? (getTaskById(updated, parent.parentId)?.autoHideCompleted ?? false)
+          : false
+
         updated = updateTaskInList(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
           inProgressStartedAt: null,
+          ...(shouldHide ? { hidden: true } : {}),
         }))
+
+        if (shouldHide) {
+          const toHide = new Set<number>()
+          let currentLevel = new Set<number>([parent.id])
+          while (currentLevel.size > 0) {
+            const nextLevel = new Set<number>()
+            for (const t of updated) {
+              if (
+                t.parentId !== null &&
+                currentLevel.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
+                toHide.add(t.id)
+                nextLevel.add(t.id)
+              }
+            }
+            currentLevel = nextLevel
+          }
+          if (toHide.size > 0) {
+            updated = updated.map((t) =>
+              toHide.has(t.id) ? { ...t, hidden: true } : t,
+            )
+          }
+        }
+
         corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
         changed = true
       } else if (
@@ -198,6 +228,33 @@ export const LocalStateProvider = ({
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
+  const reconcileAndSetTasks = useCallback(
+    (incomingTasks: Task[], source: string) => {
+      const { tasks: reconciled, corrections } =
+        reconcileInheritCompletionState(incomingTasks)
+      setTasks(reconciled)
+      if (corrections.length > 0) {
+        debugLog.log('reconcile', `inheritCompletionState:${source}`, {
+          corrections,
+        })
+        if (shouldSync) {
+          setSyncQueue((prev) => [
+            ...prev,
+            ...corrections.map(
+              (c) =>
+                ({
+                  type: SyncOperationType.SET_STATUS,
+                  id: c.id,
+                  status: c.status,
+                }) as const,
+            ),
+          ])
+        }
+      }
+    },
+    [shouldSync],
+  )
+
   useEffect(() => {
     const loadedSettings: UserSettings = toMerged(
       DEFAULT_SETTINGS,
@@ -230,31 +287,11 @@ export const LocalStateProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      const lastSeen = getLastSeenVersion()
-      if (lastSeen !== APP_VERSION) {
-        const { tasks: reconciled, corrections } =
-          reconcileInheritCompletionState(loadedTasks)
-        setTasks(reconciled)
-        if (corrections.length > 0) {
-          debugLog.log('reconcile', 'inheritCompletionState', { corrections })
-          if (shouldSync) {
-            setSyncQueue(() => [
-              ...loadedQueue,
-              ...corrections.map((c) => ({
-                type: SyncOperationType.SET_STATUS as const,
-                id: c.id,
-                status: c.status,
-              })),
-            ])
-          }
-        }
-      } else {
-        setTasks(loadedTasks)
-      }
+      reconcileAndSetTasks(loadedTasks, 'init')
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, shouldSync])
+  }, [storageKeys, storageMode, reconcileAndSetTasks])
 
   useEffect(() => {
     if (isInitialized) {
@@ -593,20 +630,20 @@ export const LocalStateProvider = ({
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
         setTasks((prev) => {
           const toHide = new Set<number>()
-          let frontier = new Set<number>([id])
-          while (frontier.size > 0) {
-            const next = new Set<number>()
+          let currentLevel = new Set<number>([id])
+          while (currentLevel.size > 0) {
+            const nextLevel = new Set<number>()
             for (const t of prev) {
               if (
                 t.parentId !== null &&
-                frontier.has(t.parentId) &&
+                currentLevel.has(t.parentId) &&
                 !toHide.has(t.id)
               ) {
                 toHide.add(t.id)
-                next.add(t.id)
+                nextLevel.add(t.id)
               }
             }
-            frontier = next
+            currentLevel = nextLevel
           }
           if (toHide.size === 0) return prev
           return prev.map((t) =>
@@ -620,7 +657,6 @@ export const LocalStateProvider = ({
 
         setTasks((prev) => {
           let updated = prev
-          let currentTaskId = id
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
@@ -631,14 +667,15 @@ export const LocalStateProvider = ({
             )
               break
 
-            const siblings = updated.filter(
-              (t) => t.parentId === parent.id && t.id !== currentTaskId,
-            )
-            if (!siblings.every((t) => t.status === TaskStatus.COMPLETED)) break
+            const thisChildren = getDirectSubtasks(updated, parent.id)
+            if (!thisChildren.every((t) => t.status === TaskStatus.COMPLETED))
+              break
+
+            const latestCompletedAt = getChildrenLatestCompletedAt(thisChildren)
 
             const parentUpdate: Partial<Task> = {
               status: TaskStatus.COMPLETED,
-              completedAt: new Date(),
+              completedAt: latestCompletedAt ?? new Date(),
               inProgressStartedAt: null,
             }
 
@@ -655,7 +692,6 @@ export const LocalStateProvider = ({
             }))
             autoCompletedParents.push(parent.id)
 
-            currentTaskId = parent.id
             currentParentId = parent.parentId
           }
 
@@ -669,6 +705,42 @@ export const LocalStateProvider = ({
             status: TaskStatus.COMPLETED,
           })
           debugLog.log('task', 'inheritCompletion', { parentId })
+        }
+      }
+
+      if (status !== TaskStatus.COMPLETED && updatedTask?.parentId) {
+        const autoRevertedParents: number[] = []
+
+        setTasks((prev) => {
+          let updated = prev
+          let currentParentId: number | null = updatedTask.parentId
+
+          while (currentParentId !== null) {
+            const parent = getTaskById(updated, currentParentId)
+            if (!parent?.inheritCompletionState) break
+            if (parent.status !== TaskStatus.COMPLETED) break
+
+            updated = updateTaskInList(updated, parent.id, (t) => ({
+              ...t,
+              status: TaskStatus.OPEN,
+              completedAt: null,
+              inProgressStartedAt: null,
+            }))
+            autoRevertedParents.push(parent.id)
+
+            currentParentId = parent.parentId
+          }
+
+          return updated === prev ? prev : updated
+        })
+
+        for (const parentId of autoRevertedParents) {
+          enqueue({
+            type: SyncOperationType.SET_STATUS,
+            id: parentId,
+            status: TaskStatus.OPEN,
+          })
+          debugLog.log('task', 'inheritCompletion:revert', { parentId })
         }
       }
 
@@ -753,12 +825,12 @@ export const LocalStateProvider = ({
       if (serverTasks.length > 0) {
         setDemoTaskIds([])
       }
-      setTasks(serverTasks)
+      reconcileAndSetTasks(serverTasks, 'fromServer')
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
-    [storageKeys, demoTaskIds],
+    [storageKeys, demoTaskIds, reconcileAndSetTasks],
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
