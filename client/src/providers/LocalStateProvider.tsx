@@ -753,7 +753,22 @@ export const LocalStateProvider = ({
       if (serverTasks.length > 0) {
         setDemoTaskIds([])
       }
-      setTasks(serverTasks)
+      const { tasks: reconciled, corrections } =
+        reconcileInheritCompletionState(serverTasks)
+      setTasks(reconciled)
+      if (corrections.length > 0) {
+        debugLog.log('reconcile', 'inheritCompletionState:fromServer', {
+          corrections,
+        })
+        setSyncQueue((prev) => [
+          ...prev,
+          ...corrections.map((c) => ({
+            type: SyncOperationType.SET_STATUS as const,
+            id: c.id,
+            status: c.status,
+          })),
+        ])
+      }
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
