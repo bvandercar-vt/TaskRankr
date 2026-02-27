@@ -631,7 +631,8 @@ export const LocalStateProvider = ({
               break
 
             const thisChildren = updated.filter((t) => t.parentId === parent.id)
-            if (!thisChildren.every((t) => t.status === TaskStatus.COMPLETED)) break
+            if (!thisChildren.every((t) => t.status === TaskStatus.COMPLETED))
+              break
 
             const latestCompletedAt = getChildrenLatestCompletedAt(thisChildren)
 
@@ -670,10 +671,7 @@ export const LocalStateProvider = ({
         }
       }
 
-      if (
-        status !== TaskStatus.COMPLETED &&
-        updatedTask?.parentId
-      ) {
+      if (status !== TaskStatus.COMPLETED && updatedTask?.parentId) {
         const autoRevertedParents: number[] = []
 
         setTasks((prev) => {
