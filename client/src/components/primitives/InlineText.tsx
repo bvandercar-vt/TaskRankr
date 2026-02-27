@@ -3,7 +3,7 @@
 import type { MergeExclusive, SetRequired } from 'type-fest'
 
 import { cn } from '@/lib/utils'
-import { Link } from './Link'
+import { Link, type LinkProps } from './Link'
 
 const inlineLinkClass =
   'font-medium text-cyan-400 underline underline-offset-2 cursor-pointer hover:text-sky-400'
@@ -15,15 +15,15 @@ export const InlineLink = ({
   ...rest
 }: React.PropsWithChildren<
   MergeExclusive<
-    SetRequired<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
+    SetRequired<LinkProps, 'href'>,
     SetRequired<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>
   >
 >) =>
   href ? (
     <Link
-      href={href}
+      {...(rest as LinkProps)}
       className={cn(inlineLinkClass, className)}
-      {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      href={href}
     >
       {children}
     </Link>

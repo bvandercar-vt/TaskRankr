@@ -138,13 +138,12 @@ export const DropdownMenuHeader = ({
             {isGuestMode && (
               <>
                 <DropdownMenuSeparator />
-                <a href={authPaths.login}>
-                  <DropdownMenuItem
-                    icon={LogIn}
-                    label="Sign Up"
-                    data-testid="menu-item-signup"
-                  />
-                </a>
+                <DropdownMenuItem
+                  icon={LogIn}
+                  label="Sign Up"
+                  data-testid="menu-item-signup"
+                  href={authPaths.LOGIN}
+                />
                 <DropdownMenuItem
                   icon={LogOut}
                   label="Exit Guest Mode"

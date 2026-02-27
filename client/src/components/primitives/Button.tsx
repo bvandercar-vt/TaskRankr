@@ -5,9 +5,10 @@
 
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import type { MergeExclusive } from 'type-fest'
 
 import { cn, forwardRefHelper } from '@/lib/utils'
-import { Link } from './Link'
+import { Link, type LinkProps } from './Link'
 
 export const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0' +
@@ -46,15 +47,17 @@ export const buttonVariants = cva(
   },
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  href?: string
-}
-
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants> &
+  // biome-ignore lint/complexity/noBannedTypes: needed
+  MergeExclusive<Pick<LinkProps, 'href' | 'newTab'>, {}> & {
+    asChild?: boolean
+  }
 export const Button = forwardRefHelper<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, href, ...props }, ref) => {
+  (
+    { className, variant, size, asChild = false, href, newTab, ...props },
+    ref,
+  ) => {
     const Component = asChild ? Slot : 'button'
     const button = (
       <Component
@@ -64,7 +67,13 @@ export const Button = forwardRefHelper<HTMLButtonElement, ButtonProps>(
       />
     )
 
-    return href ? <Link href={href}>{button}</Link> : button
+    return href ? (
+      <Link href={href} newTab={newTab}>
+        {button}
+      </Link>
+    ) : (
+      button
+    )
   },
   'Button',
 )

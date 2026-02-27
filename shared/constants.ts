@@ -3,8 +3,8 @@
  */
 
 export const authPaths = {
-  login: '/api/login',
-  logout: '/api/logout',
-  callback: '/api/callback',
-  user: '/api/auth/user',
+  LOGIN: '/api/login',
+  LOGOUT: '/api/logout',
+  CALLBACK: '/api/callback',
+  USER: '/api/auth/user',
 } as const

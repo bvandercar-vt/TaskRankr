@@ -24,6 +24,6 @@ export function redirectToLogin(
     })
   }
   setTimeout(() => {
-    window.location.href = authPaths.login
+    window.location.href = authPaths.LOGIN
   }, 500)
 }

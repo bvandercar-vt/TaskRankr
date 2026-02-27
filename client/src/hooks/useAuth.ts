@@ -9,7 +9,7 @@ import { authPaths } from '~/shared/constants'
 import type { User } from '~/shared/models/auth'
 
 async function fetchUser(): Promise<User | null> {
-  const response = await fetch(authPaths.user, {
+  const response = await fetch(authPaths.USER, {
     credentials: 'include',
   })
 
@@ -26,13 +26,13 @@ async function fetchUser(): Promise<User | null> {
 
 // biome-ignore lint/suspicious/useAwait: involved window.href logging out, allow it.
 async function logout(): Promise<void> {
-  window.location.href = authPaths.logout
+  window.location.href = authPaths.LOGOUT
 }
 
 export function useAuth() {
   const queryClient = useQueryClient()
   const { data: user, isLoading } = useQuery<User | null>({
-    queryKey: [authPaths.user],
+    queryKey: [authPaths.USER],
     queryFn: fetchUser,
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -41,7 +41,7 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.setQueryData([authPaths.user], null)
+      queryClient.setQueryData([authPaths.USER], null)
     },
   })
 

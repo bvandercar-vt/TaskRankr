@@ -144,7 +144,7 @@ const Landing = () => {
 
         <div className="flex flex-col items-center sm:flex-row sm:items-start sm:gap-4 gap-2 justify-center">
           <LandingButtonWithCaption
-            href={authPaths.login}
+            href={authPaths.LOGIN}
             caption="To back up your data and sync across devices"
             data-testid="button-get-started"
           >
@@ -153,7 +153,7 @@ const Landing = () => {
           <LandingButtonWithCaption
             caption="No signup required"
             variant="outline"
-            onClick={enterGuestMode}
+            onClick={() => enterGuestMode()}
             data-testid="button-try-guest"
           >
             Try as Guest

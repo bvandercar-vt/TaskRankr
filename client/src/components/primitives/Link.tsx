@@ -2,19 +2,27 @@ import type { SetRequired } from 'type-fest'
 import { Link as WouterLink } from 'wouter'
 
 const isExternalHref = (href: string) => /^(https?:|mailto:|tel:|#)/.test(href)
+const isApiRef = (href: string) => href.startsWith('/api/')
+
+export type LinkProps = SetRequired<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  'href'
+> & {
+  newTab?: boolean
+}
 
 export const Link = ({
   children,
   href,
+  newTab = false,
   className,
-}: SetRequired<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>) =>
-  isExternalHref(href) ? (
+}: LinkProps) =>
+  isExternalHref(href) || isApiRef(href) ? (
     <a
       href={href}
       className={className}
-      //   New tab
-      target="_blank"
-      rel="noopener noreferrer"
+      target={newTab ? '_blank' : undefined}
+      rel={newTab ? 'noopener noreferrer' : undefined}
     >
       {children}
     </a>

@@ -82,16 +82,15 @@ const UserInfoCard = () => {
           {user?.email}
         </p>
       </div>
-      <a href={authPaths.logout}>
-        <Button
-          variant="outline"
-          className="gap-2 border-muted-foreground/30 text-muted-foreground"
-          data-testid="button-logout"
-        >
-          <LogOut className="size-4" />
-          Log Out
-        </Button>
-      </a>
+      <Button
+        href={authPaths.LOGOUT}
+        variant="outline"
+        className="gap-2 border-muted-foreground/30 text-muted-foreground"
+        data-testid="button-logout"
+      >
+        <LogOut className="size-4" />
+        Log Out
+      </Button>
     </Card>
   )
 }

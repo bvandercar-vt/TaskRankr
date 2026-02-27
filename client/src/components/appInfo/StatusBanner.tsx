@@ -37,16 +37,15 @@ export const StatusBanner = () => {
         data-testid="banner-guest-mode"
       >
         <span>Log in to back up your data and use it across devices.</span>
-        <a href={authPaths.login}>
-          <Button
-            size="sm"
-            variant="secondary"
-            className="h-7"
-            data-testid="button-banner-signup"
-          >
-            Sign Up
-          </Button>
-        </a>
+        <Button
+          href={authPaths.LOGIN}
+          size="sm"
+          variant="secondary"
+          className="h-7"
+          data-testid="button-banner-signup"
+        >
+          Sign Up
+        </Button>
         <Button
           size="sm"
           variant="ghost"
