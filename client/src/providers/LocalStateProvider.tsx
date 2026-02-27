@@ -158,8 +158,7 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
         const shouldHide = parent.parentId
-          ? updated.find((t) => t.id === parent.parentId)?.autoHideCompleted ??
-            false
+          ? (getTaskById(updated, parent.parentId)?.autoHideCompleted ?? false)
           : false
 
         updated = updateTaskInList(updated, parent.id, (t) => ({
@@ -662,7 +661,7 @@ export const LocalStateProvider = ({
             )
               break
 
-            const thisChildren = updated.filter((t) => t.parentId === parent.id)
+            const thisChildren = getDirectSubtasks(updated, parent.id)
             if (!thisChildren.every((t) => t.status === TaskStatus.COMPLETED))
               break
 
