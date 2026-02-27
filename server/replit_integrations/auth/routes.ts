@@ -11,7 +11,7 @@ import { authStorage } from './storage'
 // Register auth-specific routes
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
-  app.get(authPaths.user, isAuthenticated, async (req, res) => {
+  app.get(authPaths.USER, isAuthenticated, async (req, res) => {
     try {
       // biome-ignore lint/style/noNonNullAssertion: is always present
       const userId = (req.user as UserSession)!.claims!.sub

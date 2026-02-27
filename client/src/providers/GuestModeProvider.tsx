@@ -38,7 +38,7 @@ export const GuestModeProvider = ({
 
   const enterGuestMode = useCallback((hideBanners?: BannerKey[]) => {
     setIsGuestMode(true)
-    setHiddenBanners(new Set(hideBanners ?? []))
+    setHiddenBanners(new Set(Array.isArray(hideBanners) ? hideBanners : []))
   }, [])
   const exitGuestMode = useCallback(() => {
     setIsGuestMode(false)

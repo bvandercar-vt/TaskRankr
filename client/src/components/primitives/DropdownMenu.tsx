@@ -87,7 +87,13 @@ export const DropdownMenuItem = forwardRefHelper<
     </DropdownMenuPrimitive.Item>
   )
 
-  return href ? <Link href={href}>{dropdownMenuItem}</Link> : dropdownMenuItem
+  return href ? (
+    <Link href={href} newTab={false}>
+      {dropdownMenuItem}
+    </Link>
+  ) : (
+    dropdownMenuItem
+  )
 }, DropdownMenuPrimitive.Item)
 
 export const DropdownMenuCheckboxItem = forwardRefHelper(
