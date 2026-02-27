@@ -240,11 +240,14 @@ export const LocalStateProvider = ({
         if (shouldSync) {
           setSyncQueue((prev) => [
             ...prev,
-            ...corrections.map((c) => ({
-              type: SyncOperationType.SET_STATUS as const,
-              id: c.id,
-              status: c.status,
-            })),
+            ...corrections.map(
+              (c) =>
+                ({
+                  type: SyncOperationType.SET_STATUS,
+                  id: c.id,
+                  status: c.status,
+                }) as const,
+            ),
           ])
         }
       }
@@ -288,7 +291,7 @@ export const LocalStateProvider = ({
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, shouldSync])
+  }, [storageKeys, storageMode, reconcileAndSetTasks])
 
   useEffect(() => {
     if (isInitialized) {
@@ -827,7 +830,7 @@ export const LocalStateProvider = ({
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
-    [storageKeys, demoTaskIds],
+    [storageKeys, demoTaskIds, reconcileAndSetTasks],
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
