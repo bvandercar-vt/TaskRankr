@@ -15,10 +15,10 @@ import {
 import { pick, toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
+import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
-import { APP_VERSION, getLastSeenVersion } from '@/lib/changelog'
 import {
   getDirectSubtasks,
   getHasIncompleteSubtasks,
@@ -153,12 +153,18 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
       )
 
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
+        const latestCompletedAt = children.reduce<Date | null>((latest, c) => {
+          const d = c.completedAt ? new Date(c.completedAt) : null
+          if (!d) return latest
+          if (!latest) return d
+          return d > latest ? d : latest
+        }, null)
         updated = updated.map((t) =>
           t.id === parent.id
             ? {
                 ...t,
                 status: TaskStatus.COMPLETED,
-                completedAt: new Date(),
+                completedAt: latestCompletedAt ?? new Date(),
                 inProgressStartedAt: null,
               }
             : t,
