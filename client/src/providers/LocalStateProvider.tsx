@@ -631,14 +631,22 @@ export const LocalStateProvider = ({
             )
               break
 
-            const siblings = updated.filter(
-              (t) => t.parentId === parent.id && t.id !== currentTaskId,
+            const children = updated.filter((t) => t.parentId === parent.id)
+            if (!children.every((t) => t.status === TaskStatus.COMPLETED)) break
+
+            const latestCompletedAt = children.reduce<Date | null>(
+              (latest, c) => {
+                const d = c.completedAt ? new Date(c.completedAt) : null
+                if (!d) return latest
+                if (!latest) return d
+                return d > latest ? d : latest
+              },
+              null,
             )
-            if (!siblings.every((t) => t.status === TaskStatus.COMPLETED)) break
 
             const parentUpdate: Partial<Task> = {
               status: TaskStatus.COMPLETED,
-              completedAt: new Date(),
+              completedAt: latestCompletedAt ?? new Date(),
               inProgressStartedAt: null,
             }
 
@@ -669,6 +677,45 @@ export const LocalStateProvider = ({
             status: TaskStatus.COMPLETED,
           })
           debugLog.log('task', 'inheritCompletion', { parentId })
+        }
+      }
+
+      if (
+        status !== TaskStatus.COMPLETED &&
+        updatedTask?.parentId
+      ) {
+        const autoRevertedParents: number[] = []
+
+        setTasks((prev) => {
+          let updated = prev
+          let currentParentId: number | null = updatedTask.parentId
+
+          while (currentParentId !== null) {
+            const parent = getTaskById(updated, currentParentId)
+            if (!parent?.inheritCompletionState) break
+            if (parent.status !== TaskStatus.COMPLETED) break
+
+            updated = updateTaskInList(updated, parent.id, (t) => ({
+              ...t,
+              status: TaskStatus.OPEN,
+              completedAt: null,
+              inProgressStartedAt: null,
+            }))
+            autoRevertedParents.push(parent.id)
+
+            currentParentId = parent.parentId
+          }
+
+          return updated === prev ? prev : updated
+        })
+
+        for (const parentId of autoRevertedParents) {
+          enqueue({
+            type: SyncOperationType.SET_STATUS,
+            id: parentId,
+            status: TaskStatus.OPEN,
+          })
+          debugLog.log('task', 'inheritCompletion:revert', { parentId })
         }
       }
 
