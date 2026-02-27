@@ -156,12 +156,44 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
 
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
+
+        const shouldHide = parent.parentId
+          ? updated.find((t) => t.id === parent.parentId)?.autoHideCompleted ??
+            false
+          : false
+
         updated = updateTaskInList(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
           inProgressStartedAt: null,
+          ...(shouldHide ? { hidden: true } : {}),
         }))
+
+        if (shouldHide) {
+          const toHide = new Set<number>()
+          let frontier = new Set<number>([parent.id])
+          while (frontier.size > 0) {
+            const next = new Set<number>()
+            for (const t of updated) {
+              if (
+                t.parentId !== null &&
+                frontier.has(t.parentId) &&
+                !toHide.has(t.id)
+              ) {
+                toHide.add(t.id)
+                next.add(t.id)
+              }
+            }
+            frontier = next
+          }
+          if (toHide.size > 0) {
+            updated = updated.map((t) =>
+              toHide.has(t.id) ? { ...t, hidden: true } : t,
+            )
+          }
+        }
+
         corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
         changed = true
       } else if (
