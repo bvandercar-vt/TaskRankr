@@ -170,20 +170,20 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
 
         if (shouldHide) {
           const toHide = new Set<number>()
-          let frontier = new Set<number>([parent.id])
-          while (frontier.size > 0) {
-            const next = new Set<number>()
+          let currentLevel = new Set<number>([parent.id])
+          while (currentLevel.size > 0) {
+            const nextLevel = new Set<number>()
             for (const t of updated) {
               if (
                 t.parentId !== null &&
-                frontier.has(t.parentId) &&
+                currentLevel.has(t.parentId) &&
                 !toHide.has(t.id)
               ) {
                 toHide.add(t.id)
-                next.add(t.id)
+                nextLevel.add(t.id)
               }
             }
-            frontier = next
+            currentLevel = nextLevel
           }
           if (toHide.size > 0) {
             updated = updated.map((t) =>
@@ -627,20 +627,20 @@ export const LocalStateProvider = ({
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
         setTasks((prev) => {
           const toHide = new Set<number>()
-          let frontier = new Set<number>([id])
-          while (frontier.size > 0) {
-            const next = new Set<number>()
+          let currentLevel = new Set<number>([id])
+          while (currentLevel.size > 0) {
+            const nextLevel = new Set<number>()
             for (const t of prev) {
               if (
                 t.parentId !== null &&
-                frontier.has(t.parentId) &&
+                currentLevel.has(t.parentId) &&
                 !toHide.has(t.id)
               ) {
                 toHide.add(t.id)
-                next.add(t.id)
+                nextLevel.add(t.id)
               }
             }
-            frontier = next
+            currentLevel = nextLevel
           }
           if (toHide.size === 0) return prev
           return prev.map((t) =>
