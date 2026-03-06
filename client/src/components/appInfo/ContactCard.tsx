@@ -27,7 +27,7 @@ const ContactCardInner = ({
           Support / Bug Report / Feature Suggestions
         </p>
       </div>
-      <div className="flex flex-col items-end gap-2 pt-1">
+      <div className="flex flex-col items-center sm:items-end gap-2 pt-1 w-full sm:w-auto">
         <InlineLink
           href="mailto:taskrankr@gmail.com"
           className="inline-flex items-center gap-1.5 text-sm px-1"
