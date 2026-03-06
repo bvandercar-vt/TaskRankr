@@ -131,7 +131,10 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     const allSyncOps = [...existingSyncQueue, ...newSyncOps]
 
     localStorage.setItem(AUTH_STORAGE_KEYS.tasks, JSON.stringify(allTasks))
-    localStorage.setItem(AUTH_STORAGE_KEYS.syncQueue, JSON.stringify(allSyncOps))
+    localStorage.setItem(
+      AUTH_STORAGE_KEYS.syncQueue,
+      JSON.stringify(allSyncOps),
+    )
     localStorage.setItem(AUTH_STORAGE_KEYS.nextId, JSON.stringify(nextId))
 
     return { migratedCount, tasks: migratedTasks }

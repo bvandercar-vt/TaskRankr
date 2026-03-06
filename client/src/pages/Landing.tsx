@@ -179,7 +179,7 @@ const Landing = () => {
         onOpenChange={setShowWhyDialog}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Landing;
+export default Landing
