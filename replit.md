@@ -18,7 +18,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter
 - **State Management**: Offline-first architecture using `LocalStateProvider` for immediate local updates and `SyncProvider` for background synchronization with the server. `GuestModeProvider` enables a full-featured guest experience with demo data.
-- **Styling**: Tailwind CSS with custom themes and CSS variables.
+- **Styling**: Tailwind CSS v4 with `@tailwindcss/vite` plugin, custom themes via `@theme` directive, and CSS variables.
 - **UI Components**: shadcn/ui library (Radix UI primitives integrated with Tailwind).
 - **Animations**: Framer Motion for interactive elements and transitions.
 

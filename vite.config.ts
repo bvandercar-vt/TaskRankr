@@ -1,4 +1,5 @@
 import path from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -6,6 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react(),
     runtimeErrorOverlay(),
     tsconfigPaths(),
