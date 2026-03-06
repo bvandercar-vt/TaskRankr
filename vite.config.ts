@@ -6,6 +6,24 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
+const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
+const FONT_CACHE_OPTIONS = {
+  expiration: { maxEntries: 10, maxAgeSeconds: ONE_YEAR_IN_SECONDS } as const,
+  cacheableResponse: { statuses: [0, 200] },
+}
+
+const fontCache = (cacheName: string, urlPattern: RegExp) =>
+  ({
+    urlPattern,
+    handler: 'CacheFirst',
+    options: { cacheName, ...FONT_CACHE_OPTIONS },
+  }) as const
+
+const runtimeCaching = [
+  fontCache('google-fonts-cache', /^https:\/\/fonts\.googleapis\.com\/.*/i),
+  fontCache('gstatic-fonts-cache', /^https:\/\/fonts\.gstatic\.com\/.*/i),
+]
+
 export default defineConfig({
   plugins: [
     tailwindcss(),
@@ -20,36 +38,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackAllowlist: [/^\/(?!api\/|login|callback)/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-        ],
+        runtimeCaching,
       },
       devOptions: {
         enabled: true,

@@ -9,7 +9,7 @@ import App from './App'
 import './index.css'
 
 registerSW({
-  onRegisteredSW(swUrl, registration) {
+  onRegisteredSW(_swUrl, registration) {
     if (registration) {
       setInterval(
         () => {
