@@ -114,6 +114,12 @@
     }
   },
   "files": {
-    "includes": ["**", "!!**/coverage", "!!**/dist", "!**/node_modules"]
+    "includes": [
+      "**",
+      "!!**/coverage",
+      "!!**/dist",
+      "!!**/dev-dist",
+      "!**/node_modules"
+    ]
   }
 }
