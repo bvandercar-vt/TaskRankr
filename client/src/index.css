@@ -20,31 +20,24 @@
 
   --color-card: hsl(222 47% 11%);
   --color-card-foreground: hsl(210 40% 98%);
-  --color-card-border: hsl(217 19% 27%);
 
   --color-popover: hsl(222 47% 11%);
   --color-popover-foreground: hsl(210 40% 98%);
-  --color-popover-border: hsl(217 19% 27%);
 
   --color-primary: hsl(263 70% 50%);
   --color-primary-foreground: hsl(210 40% 98%);
-  --color-primary-border: hsl(263 70% 40%);
 
   --color-secondary: hsl(217 19% 27%);
   --color-secondary-foreground: hsl(210 40% 98%);
-  --color-secondary-border: hsl(217 19% 22%);
 
   --color-muted: hsl(217 19% 27%);
   --color-muted-foreground: hsl(215 20% 65%);
-  --color-muted-border: hsl(217 19% 22%);
 
   --color-accent: hsl(222 47% 16%);
   --color-accent-foreground: hsl(210 40% 98%);
-  --color-accent-border: hsl(222 47% 12%);
 
   --color-destructive: hsl(0 62% 30%);
   --color-destructive-foreground: hsl(210 40% 98%);
-  --color-destructive-border: hsl(0 62% 25%);
 
   --color-chart-1: hsl(263 70% 50%);
   --color-chart-2: hsl(160 60% 45%);
@@ -58,10 +51,8 @@
   --color-sidebar-ring: hsl(263 70% 50%);
   --color-sidebar-primary: hsl(263 70% 50%);
   --color-sidebar-primary-foreground: hsl(210 40% 98%);
-  --color-sidebar-primary-border: hsl(263 70% 40%);
   --color-sidebar-accent: hsl(222 47% 16%);
   --color-sidebar-accent-foreground: hsl(210 40% 98%);
-  --color-sidebar-accent-border: hsl(222 47% 12%);
 
   --color-status-online: rgb(34 197 94);
   --color-status-away: rgb(245 158 11);
