@@ -36,7 +36,7 @@ TaskRankr is a multi-user task management application designed for tracking task
     - **User Settings**: Stored per-user, including `autoPinNewTasks`, `enableInProgressStatus`, `enableInProgressTime`, `alwaysSortPinnedByPriority`, `sortBy`, and `fieldConfig` for customizable rank field visibility and requirements.
 
 ### Key Features
-- **Offline-First**: All data changes are applied locally first for an instant UI experience, then synchronized to the server in the background.
+- **Offline-First**: All data changes are applied locally first for an instant UI experience, then synchronized to the server in the background. A service worker (via `vite-plugin-pwa` / Workbox) precaches the app shell and caches Google Fonts, enabling the app to load even without an internet connection.
 - **Guest Mode**: Allows users to try the app with persistent local storage and demo data without authentication. Guest task migration to user accounts upon login is supported.
 - **Hierarchical Tasks**: Tasks can have `parentId` to create nested structures.
 - **Configurable Rank Fields**: Priority, ease, enjoyment, and time fields have 6 levels and customizable visibility/required settings via `fieldConfig`.
@@ -163,6 +163,9 @@ Always prefer these over inline implementations:
 - **React Day Picker**: Component for date selection.
 - **CMDK**: Command palette interface.
 - **Vaul**: Drawer component for React.
+
+### PWA / Service Worker
+- **vite-plugin-pwa**: Generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
 
 ### Development Utilities
 - **Vite**: Fast frontend build tool. Path aliases are resolved via `vite-tsconfig-paths` (reads from `tsconfig.json` paths).

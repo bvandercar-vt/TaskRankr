@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.1.0",
+    "date": "2026-03-06",
+    "title": "Offline Support",
+    "changes": [
+      "Added service worker for offline asset caching — the app now loads even without an internet connection",
+      "Automatic background updates ensure you always get the latest version"
+    ]
+  },
+  {
     "version": "1.0.0",
     "date": "2026-02-25",
     "title": "Changelog & Version Tracking",
