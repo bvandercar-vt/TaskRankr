@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { pick, toMerged } from 'es-toolkit'
+import { toMerged } from 'es-toolkit'
 
 import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
@@ -401,43 +401,19 @@ export const LocalStateProvider = ({
         JSON.stringify(nextIdRef.current),
       )
 
-      const newTask: Task = {
+      const newStatus = (() => {
+        if (data.status && data.status !== TaskStatus.OPEN) return data.status
+        const pinNew = settings.autoPinNewTasks && !data.parentId
+        return pinNew ? TaskStatus.PINNED : TaskStatus.OPEN
+      })()
+
+      const newTask: Task = taskSchema.parse({
+        ...data,
         id: tempId,
         userId: 'local',
-        description: null,
-        priority: null,
-        ease: null,
-        enjoyment: null,
-        time: null,
-        status:
-          settings.autoPinNewTasks && !data.parentId
-            ? TaskStatus.PINNED
-            : TaskStatus.OPEN,
-        inProgressTime: 0,
-        inProgressStartedAt: null,
-        createdAt: new Date(),
-        completedAt: null,
-        subtaskSortMode: SubtaskSortMode.INHERIT,
-        subtaskOrder: [],
-        subtasksShowNumbers: false,
-        hidden: false,
-        autoHideCompleted: false,
-        inheritCompletionState: false,
-        ...pick(data, [
-          'name',
-          'description',
-          'priority',
-          'ease',
-          'enjoyment',
-          'time',
-          'status',
-          'completedAt',
-          'subtaskSortMode',
-          'subtaskOrder',
-          'subtasksShowNumbers',
-        ]),
+        status: newStatus,
         parentId: data.parentId ?? null,
-      }
+      })
 
       setTasks((prev) => {
         const parent = data.parentId
