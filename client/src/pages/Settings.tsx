@@ -16,10 +16,7 @@ import { Link } from 'wouter'
 
 import { ContactCard } from '@/components/appInfo/ContactCard'
 import { SortInfo } from '@/components/appInfo/SortInfo'
-import {
-  ChangelogIcon,
-  FullChangelogDialog,
-} from '@/components/appInfo/WhatsNewDialog'
+import { FullChangelogDialog } from '@/components/appInfo/WhatsNewDialog'
 import { BackButtonHeader } from '@/components/BackButton'
 import { Button } from '@/components/primitives/Button'
 import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
@@ -382,7 +379,7 @@ const ChangelogCard = () => {
       <InfoCard
         title="Change History"
         description="See what's been added and improved"
-        icon={ChangelogIcon}
+        icon={ChevronRight}
         onClick={() => setOpen(true)}
         data-testid="button-view-changelog"
       />
