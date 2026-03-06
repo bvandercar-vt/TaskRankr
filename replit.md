@@ -165,7 +165,7 @@ Always prefer these over inline implementations:
 - **Vaul**: Drawer component for React.
 
 ### Development Utilities
-- **Vite**: Fast frontend build tool.
+- **Vite**: Fast frontend build tool. Path aliases are resolved via `vite-tsconfig-paths` (reads from `tsconfig.json` paths).
 - **esbuild**: Used for server-side bundling.
 - **Drizzle Kit**: Tooling for database schema migrations.
 - **TypeScript**: Ensures type safety across the entire codebase.
