@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
-import { omit, pick } from 'es-toolkit'
+import { omit } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
@@ -58,6 +58,21 @@ const STUB_TASK: Task = taskSchema.parse({
   description: null,
   parentId: null,
 } satisfies z.input<typeof taskSchema>)
+
+const taskFormDefaultsSchema = taskSchema.pick({
+  description: true,
+  name: true,
+  priority: true,
+  ease: true,
+  enjoyment: true,
+  time: true,
+  parentId: true,
+  inProgressTime: true,
+  createdAt: true,
+  completedAt: true,
+})
+
+type TaskFormDefaults = z.infer<typeof taskFormDefaultsSchema>
 
 interface DateCreatedInputProps {
   value: Date | undefined
@@ -173,30 +188,15 @@ export const TaskForm = ({
   )
 
   const getFormDefaults = useCallback(
-    (data: Task | undefined): MutateTaskContent =>
-      data
-        ? {
-            ...pick(data, [
-              'description',
-              'name',
-              'priority',
-              'ease',
-              'enjoyment',
-              'time',
-              'parentId',
-              'inProgressTime',
-            ]),
-            createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
-            completedAt: data.completedAt ? new Date(data.completedAt) : null,
-          }
-        : {
-            name: '',
-            description: '',
-            ...allRankFieldsNull,
-            parentId: parentId ?? null,
-            createdAt: new Date(),
-            inProgressTime: 0,
-          },
+    (data: TaskFormDefaults | undefined): TaskFormDefaults =>
+      taskFormDefaultsSchema.parse(
+        (data ?? {
+          description: null,
+          name: '',
+          ...allRankFieldsNull,
+          parentId: parentId ?? null,
+        }) satisfies z.input<typeof taskFormDefaultsSchema>,
+      ),
     [parentId],
   )
 
