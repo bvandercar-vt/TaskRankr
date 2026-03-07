@@ -6,6 +6,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import { useRethrow } from '@/hooks/useRethrow'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
   DeleteTaskArgs,
@@ -147,6 +148,7 @@ export const TaskFormDialogProvider = ({
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
 
   const { createTask, updateTask, deleteTask, setTaskStatus } = useTaskActions()
+  const rethrow = useRethrow()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -193,41 +195,57 @@ export const TaskFormDialogProvider = ({
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
-    if (mode === 'create') {
-      createTask({ ...data, parentId } as CreateTask)
-      closeDialog()
-    } else if (mode === 'edit' && activeTask) {
-      updateTask({ id: activeTask.id, ...data })
-      closeDialog()
+    try {
+      if (mode === 'create') {
+        createTask({ ...data, parentId } as CreateTask)
+        closeDialog()
+      } else if (mode === 'edit' && activeTask) {
+        updateTask({ id: activeTask.id, ...data })
+        closeDialog()
+      }
+    } catch (err) {
+      rethrow(err)
     }
   }
 
   const handleMarkCompleted = (taskId: number) => {
-    setTaskStatus(taskId, TaskStatus.COMPLETED)
+    try {
+      setTaskStatus(taskId, TaskStatus.COMPLETED)
+    } catch (err) {
+      rethrow(err)
+    }
   }
 
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
-    if (formData) {
-      const newTask = createTask({ ...formData, parentId } as CreateTask)
-      setReturnToTask(newTask)
-      setMode('create')
-      setActiveTask(undefined)
-      setParentId(newTask.id)
-    } else {
-      openCreateDialog(pid)
+    try {
+      if (formData) {
+        const newTask = createTask({ ...formData, parentId } as CreateTask)
+        setReturnToTask(newTask)
+        setMode('create')
+        setActiveTask(undefined)
+        setParentId(newTask.id)
+      } else {
+        openCreateDialog(pid)
+      }
+    } catch (err) {
+      rethrow(err)
     }
   }
 
   const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
-    if (formData) {
-      const newTask = createTask({ ...formData, parentId } as CreateTask)
-      setMode('edit')
-      setActiveTask(newTask)
-      setParentId(newTask.parentId ?? undefined)
-      setReturnToTask(undefined)
-      setAssignParentTask(newTask)
-    } else {
-      setAssignParentTask(task)
+    try {
+      if (formData) {
+        const newTask = createTask({ ...formData, parentId } as CreateTask)
+        setMode('edit')
+        setActiveTask(newTask)
+        setParentId(newTask.parentId ?? undefined)
+        setReturnToTask(undefined)
+        setAssignParentTask(newTask)
+      } else {
+        setAssignParentTask(task)
+      }
+    } catch (err) {
+      rethrow(err)
     }
   }
 
@@ -275,21 +293,25 @@ export const TaskFormDialogProvider = ({
         taskName={subtaskToDelete?.name ?? ''}
         onDelete={() => setShowDeleteConfirm(true)}
         onRemoveAsSubtask={() => {
-          if (subtaskToDelete) {
-            updateTask({
-              id: subtaskToDelete.id,
-              parentId: null,
-              hidden: false,
-            })
-            if (activeTask) {
+          try {
+            if (subtaskToDelete) {
               updateTask({
-                id: activeTask.id,
-                subtaskOrder: activeTask.subtaskOrder.filter(
-                  (sid) => sid !== subtaskToDelete.id,
-                ),
+                id: subtaskToDelete.id,
+                parentId: null,
+                hidden: false,
               })
+              if (activeTask) {
+                updateTask({
+                  id: activeTask.id,
+                  subtaskOrder: activeTask.subtaskOrder.filter(
+                    (sid) => sid !== subtaskToDelete.id,
+                  ),
+                })
+              }
+              setSubtaskToDelete(null)
             }
-            setSubtaskToDelete(null)
+          } catch (err) {
+            rethrow(err)
           }
         }}
       />
@@ -304,10 +326,14 @@ export const TaskFormDialogProvider = ({
         }}
         taskName={subtaskToDelete?.name ?? ''}
         onConfirm={() => {
-          if (subtaskToDelete) {
-            deleteTask(subtaskToDelete.id)
-            setShowDeleteConfirm(false)
-            setSubtaskToDelete(null)
+          try {
+            if (subtaskToDelete) {
+              deleteTask(subtaskToDelete.id)
+              setShowDeleteConfirm(false)
+              setSubtaskToDelete(null)
+            }
+          } catch (err) {
+            rethrow(err)
           }
         }}
       />
