@@ -449,8 +449,11 @@ export const LocalStateProvider = ({
         }
         return updated
       })
-      const syncData =
-        newTask.hidden && !data.hidden ? { ...data, hidden: true } : data
+      const syncData = (() => {
+        let d = { ...data, status: newStatus }
+        if (newTask.hidden && !data.hidden) d = { ...d, hidden: true }
+        return d
+      })()
       enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data: syncData })
       debugLog.log('task', 'create', {
         tempId,

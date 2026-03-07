@@ -65,40 +65,44 @@ export const SyncProvider = ({
     }
   }, [])
 
-  const loadServerData = useCallback(async () => {
-    if (!isAuthenticated || !isOnline || hasLoadedServerData.current) return
-    if (syncQueue.length > 0) return
+  const loadServerData = useCallback(
+    async (force = false) => {
+      if (!isAuthenticated || !isOnline) return
+      if (!force && hasLoadedServerData.current) return
+      if (!force && syncQueue.length > 0) return
 
-    try {
-      debugLog.log('sync', 'loadServerData:start')
-      const [tasksResult, settingsResult] = await Promise.all([
-        tsr.tasks.list.query(),
-        tsr.settings.get.query(),
-      ])
+      try {
+        debugLog.log('sync', 'loadServerData:start', { force })
+        const [tasksResult, settingsResult] = await Promise.all([
+          tsr.tasks.list.query(),
+          tsr.settings.get.query(),
+        ])
 
-      if (tasksResult.status === 200) {
-        setTasksFromServer(tasksResult.body)
+        if (tasksResult.status === 200) {
+          setTasksFromServer(tasksResult.body)
+        }
+        if (settingsResult.status === 200) {
+          setSettingsFromServer(settingsResult.body)
+        }
+
+        hasLoadedServerData.current = true
+        debugLog.log('sync', 'loadServerData:complete', {
+          tasksStatus: tasksResult.status,
+          settingsStatus: settingsResult.status,
+        })
+      } catch (err) {
+        debugLog.log('sync', 'loadServerData:error', { error: String(err) })
+        console.error('Failed to load server data:', err)
       }
-      if (settingsResult.status === 200) {
-        setSettingsFromServer(settingsResult.body)
-      }
-
-      hasLoadedServerData.current = true
-      debugLog.log('sync', 'loadServerData:complete', {
-        tasksStatus: tasksResult.status,
-        settingsStatus: settingsResult.status,
-      })
-    } catch (err) {
-      debugLog.log('sync', 'loadServerData:error', { error: String(err) })
-      console.error('Failed to load server data:', err)
-    }
-  }, [
-    isAuthenticated,
-    isOnline,
-    syncQueue.length,
-    setTasksFromServer,
-    setSettingsFromServer,
-  ])
+    },
+    [
+      isAuthenticated,
+      isOnline,
+      syncQueue.length,
+      setTasksFromServer,
+      setSettingsFromServer,
+    ],
+  )
 
   useEffect(() => {
     if (
@@ -124,6 +128,21 @@ export const SyncProvider = ({
       hasLoadedServerData.current = false
     }
   }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadServerData(true)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isAuthenticated, loadServerData])
 
   const flushQueue = useCallback(async () => {
     if (isSyncingRef.current || !isOnline || !isAuthenticated) return
@@ -267,7 +286,8 @@ export const SyncProvider = ({
 
   const forceSync = useCallback(async () => {
     await flushQueue()
-  }, [flushQueue])
+    await loadServerData(true)
+  }, [flushQueue, loadServerData])
 
   const value = useMemo(
     () => ({
