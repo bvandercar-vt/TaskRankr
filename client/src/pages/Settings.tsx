@@ -37,6 +37,7 @@ import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { useRethrow } from '@/hooks/useRethrow'
 import { useToast } from '@/hooks/useToast'
 import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
@@ -213,6 +214,7 @@ const ExportButton = () => {
 
 const ImportButton = () => {
   const { toast } = useToast()
+  const rethrow = useRethrow()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isImporting, setIsImporting] = useState(false)
 
@@ -234,8 +236,16 @@ const ImportButton = () => {
 
       queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
       toast({ title: 'Tasks imported successfully' })
-    } catch (_error) {
-      toast({ title: 'Failed to import tasks', variant: 'destructive' })
+    } catch (err) {
+      if (
+        err instanceof SyntaxError ||
+        err instanceof TypeError ||
+        (err instanceof Error && err.message === 'Import failed')
+      ) {
+        toast({ title: 'Failed to import tasks', variant: 'destructive' })
+      } else {
+        rethrow(err)
+      }
     } finally {
       setIsImporting(false)
       if (fileInputRef.current) {
