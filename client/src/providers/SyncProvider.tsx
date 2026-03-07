@@ -132,9 +132,9 @@ export const SyncProvider = ({
   useEffect(() => {
     if (!isAuthenticated) return
 
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible') {
-        loadServerData(true)
+        await loadServerData(true)
       }
     }
 
