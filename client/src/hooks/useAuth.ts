@@ -8,24 +8,61 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authPaths } from '~/shared/constants'
 import type { User } from '~/shared/models/auth'
 
-async function fetchUser(): Promise<User | null> {
-  const response = await fetch(authPaths.USER, {
-    credentials: 'include',
-  })
+const CACHED_USER_KEY = 'taskrankr-cached-user'
 
-  if (response.status === 401) {
+function getCachedUser(): User | null {
+  try {
+    const cached = localStorage.getItem(CACHED_USER_KEY)
+    return cached ? JSON.parse(cached) : null
+  } catch {
     return null
   }
+}
 
-  if (!response.ok) {
-    throw new Error(`${response.status}: ${response.statusText}`)
+function setCachedUser(user: User | null): void {
+  try {
+    if (user) {
+      localStorage.setItem(CACHED_USER_KEY, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(CACHED_USER_KEY)
+    }
+  } catch {
+    // localStorage may be unavailable
   }
+}
 
-  return response.json()
+async function fetchUser(): Promise<User | null> {
+  try {
+    const response = await fetch(authPaths.USER, {
+      credentials: 'include',
+    })
+
+    if (response.status === 401) {
+      setCachedUser(null)
+      return null
+    }
+
+    if (!response.ok) {
+      throw new Error(`${response.status}: ${response.statusText}`)
+    }
+
+    const user = await response.json()
+    setCachedUser(user)
+    return user
+  } catch (error) {
+    if (error instanceof TypeError || !navigator.onLine) {
+      const cached = getCachedUser()
+      if (cached) {
+        return cached
+      }
+    }
+    throw error
+  }
 }
 
 // biome-ignore lint/suspicious/useAwait: involved window.href logging out, allow it.
 async function logout(): Promise<void> {
+  setCachedUser(null)
   window.location.href = authPaths.LOGOUT
 }
 
