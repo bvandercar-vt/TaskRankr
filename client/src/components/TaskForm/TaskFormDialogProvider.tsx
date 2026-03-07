@@ -6,7 +6,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-import { useRethrow } from '@/hooks/useRethrow'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
   DeleteTaskArgs,
@@ -148,7 +147,6 @@ export const TaskFormDialogProvider = ({
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
 
   const { createTask, updateTask, deleteTask, setTaskStatus } = useTaskActions()
-  const rethrow = useRethrow()
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -195,25 +193,17 @@ export const TaskFormDialogProvider = ({
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
-    try {
-      if (mode === 'create') {
-        createTask({ ...data, parentId } as CreateTask)
-        closeDialog()
-      } else if (mode === 'edit' && activeTask) {
-        updateTask({ id: activeTask.id, ...data })
-        closeDialog()
-      }
-    } catch (err) {
-      rethrow(err)
+    if (mode === 'create') {
+      createTask({ ...data, parentId } as CreateTask)
+      closeDialog()
+    } else if (mode === 'edit' && activeTask) {
+      updateTask({ id: activeTask.id, ...data })
+      closeDialog()
     }
   }
 
   const handleMarkCompleted = (taskId: number) => {
-    try {
-      setTaskStatus(taskId, TaskStatus.COMPLETED)
-    } catch (err) {
-      rethrow(err)
-    }
+    setTaskStatus(taskId, TaskStatus.COMPLETED)
   }
 
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
