@@ -5,6 +5,8 @@ import { debugLog } from '@/lib/debug-logger'
 import { ContactCardStandalone } from './appInfo/ContactCard'
 import { Button } from './primitives/Button'
 
+const IGNORED_ERRORS = [/ResizeObserver loop/]
+
 const ErrorDialog = ({ errorText }: { errorText: string }) => (
   <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4">
     <div
@@ -71,8 +73,54 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
+  componentDidMount() {
+    window.addEventListener('error', this.handleGlobalError)
+    window.addEventListener('unhandledrejection', this.handleUnhandledRejection)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('error', this.handleGlobalError)
+    window.removeEventListener(
+      'unhandledrejection',
+      this.handleUnhandledRejection,
+    )
+  }
+
+  private isIgnored(message: string): boolean {
+    return IGNORED_ERRORS.some((pattern) => pattern.test(message))
+  }
+
+  private surfaceError(error: Error, action: string) {
+    if (this.isIgnored(error.message)) return
+    debugLog.log('ErrorBoundary', action, {
+      message: error.message,
+      stack: error.stack,
+    })
+    this.setState({ hasError: true, error })
+  }
+
+  handleGlobalError = (event: ErrorEvent) => {
+    const error =
+      event.error instanceof Error
+        ? event.error
+        : new Error(event.message || 'Unknown error')
+    if (this.isIgnored(error.message)) return
+    event.preventDefault()
+    this.surfaceError(error, 'uncaught_error')
+  }
+
+  handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason))
+    if (this.isIgnored(error.message)) return
+    event.preventDefault()
+    this.surfaceError(error, 'unhandled_rejection')
+  }
+
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    debugLog.log('ErrorBoundary', 'uncaught_error', {
+    debugLog.log('ErrorBoundary', 'component_error', {
       message: error.message,
       stack: error.stack,
       componentStack: info.componentStack,
