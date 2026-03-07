@@ -170,7 +170,7 @@ export const TaskForm = ({
     [rankFieldConfig],
   )
 
-  const requiredRankFields = useMemo(
+  const requiredRankFields: RankField[] = useMemo(
     () =>
       RANK_FIELDS_COLUMNS.filter(
         ({ name }) => rankFieldConfig.get(name)?.required,
@@ -180,19 +180,17 @@ export const TaskForm = ({
 
   const formSchema = useMemo(
     () =>
-      insertTaskSchema
-        .omit({ userId: true })
-        .superRefine((data, ctx) => {
-          for (const field of requiredRankFields) {
-            if (data[field] == null) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: [field],
-                message: 'This field is required',
-              })
-            }
+      insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
+        for (const field of requiredRankFields) {
+          if (data[field] == null) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: [field],
+              message: 'This field is required',
+            })
           }
-        }),
+        }
+      }),
     [requiredRankFields],
   )
 
