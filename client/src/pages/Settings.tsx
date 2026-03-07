@@ -35,7 +35,6 @@ import {
 } from '@/components/primitives/overlays/AlertDialog'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { useAuth } from '@/hooks/useAuth'
-import { useRethrow } from '@/hooks/useRethrow'
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
@@ -214,7 +213,6 @@ const ExportButton = () => {
 
 const ImportButton = () => {
   const { toast } = useToast()
-  const rethrow = useRethrow()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isImporting, setIsImporting] = useState(false)
 
@@ -244,7 +242,7 @@ const ImportButton = () => {
       ) {
         toast({ title: 'Failed to import tasks', variant: 'destructive' })
       } else {
-        rethrow(err)
+        throw err
       }
     } finally {
       setIsImporting(false)

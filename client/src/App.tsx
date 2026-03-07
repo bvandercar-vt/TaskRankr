@@ -11,7 +11,6 @@ import { Toaster } from '@/components/primitives/overlays/Toaster'
 import { TooltipProvider } from '@/components/primitives/overlays/Tooltip'
 import { TaskFormDialogProvider } from '@/components/TaskForm/TaskFormDialogProvider'
 import { useAuth } from '@/hooks/useAuth'
-import { useRethrow } from '@/hooks/useRethrow'
 import { useToast } from '@/hooks/useToast'
 import {
   clearGuestStorage,
@@ -74,27 +73,22 @@ const AuthenticatedApp = () => {
   const { isLoading, isAuthenticated } = useAuth()
   const { isGuestMode } = useGuestMode()
   const { toast } = useToast()
-  const rethrow = useRethrow()
   const hasMigrated = useRef(false)
   const [location] = useLocation()
 
   useEffect(() => {
     if (isAuthenticated && !isGuestMode && !hasMigrated.current) {
       hasMigrated.current = true
-      try {
-        const result = migrateGuestTasksToAuth()
-        if (result.migratedCount > 0) {
-          clearGuestStorage()
-          toast({
-            title: 'Tasks imported',
-            description: `${result.migratedCount} tasks from guest mode have been added to your account.`,
-          })
-        }
-      } catch (err) {
-        rethrow(err)
+      const result = migrateGuestTasksToAuth()
+      if (result.migratedCount > 0) {
+        clearGuestStorage()
+        toast({
+          title: 'Tasks imported',
+          description: `${result.migratedCount} tasks from guest mode have been added to your account.`,
+        })
       }
     }
-  }, [isAuthenticated, isGuestMode, toast, rethrow])
+  }, [isAuthenticated, isGuestMode, toast])
 
   if (isLoading && !isGuestMode) {
     return (
