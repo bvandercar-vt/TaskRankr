@@ -30,7 +30,7 @@ type DrizzleZodDefaultRefineInner<
 } & {
   [K in keyof T as Defaults[K] extends false ? K : never]?: MaybeCallback<
     T[K],
-    T[K]
+    T[K] | z.ZodDefault<T[K]>
   >
 }
 

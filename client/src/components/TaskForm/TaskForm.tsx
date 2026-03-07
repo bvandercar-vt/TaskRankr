@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { omit, pick } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import type { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
@@ -18,12 +19,13 @@ import type {
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import {
+  allRankFieldsNull,
   insertTaskSchema,
   type MutateTask,
   type RankField,
-  SubtaskSortMode,
   type Task,
   TaskStatus,
+  taskSchema,
 } from '~/shared/schema'
 import { Button } from '../primitives/Button'
 import { Calendar } from '../primitives/forms/Calendar'
@@ -48,28 +50,14 @@ import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
 import { SubtasksCard } from './SubtasksCard'
 
-const STUB_TASK: Task = {
+const STUB_TASK: Task = taskSchema.parse({
   id: 0,
   userId: '',
   name: '',
+  ...allRankFieldsNull,
   description: null,
-  priority: null,
-  ease: null,
-  enjoyment: null,
-  time: null,
   parentId: null,
-  status: TaskStatus.OPEN,
-  inProgressTime: 0,
-  inProgressStartedAt: null,
-  createdAt: new Date(),
-  completedAt: null,
-  subtaskSortMode: SubtaskSortMode.INHERIT,
-  subtaskOrder: [],
-  subtasksShowNumbers: false,
-  hidden: false,
-  autoHideCompleted: false,
-  inheritCompletionState: false,
-}
+} satisfies z.input<typeof taskSchema>)
 
 interface DateCreatedInputProps {
   value: Date | undefined
@@ -188,8 +176,8 @@ export const TaskForm = ({
     (data: Task | undefined): MutateTaskContent =>
       data
         ? {
-            description: data.description ?? '',
             ...pick(data, [
+              'description',
               'name',
               'priority',
               'ease',
@@ -204,10 +192,7 @@ export const TaskForm = ({
         : {
             name: '',
             description: '',
-            priority: null,
-            ease: null,
-            enjoyment: null,
-            time: null,
+            ...allRankFieldsNull,
             parentId: parentId ?? null,
             createdAt: new Date(),
             inProgressTime: 0,

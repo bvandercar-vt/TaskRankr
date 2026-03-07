@@ -121,8 +121,8 @@ const taskSchemaRefine = {
   // not sure the created schema from drizzle-zod performs the coercion,
   // so add here just in case / for safety.
   createdAt: z.coerce.date().default(() => new Date()),
-  completedAt: z.coerce.date().nullable(),
-  inProgressStartedAt: z.coerce.date().nullable(),
+  completedAt: z.coerce.date().nullable().default(null),
+  inProgressStartedAt: z.coerce.date().nullable().default(null),
 } satisfies DrizzleZodDefaultRefine<typeof tasks>
 
 export const taskSchema = createSelectSchema(tasks, taskSchemaRefine)
@@ -148,3 +148,10 @@ export const updateTaskSchema = createUpdateSchema(tasks, taskSchemaRefine)
 export type UpdateTask = z.infer<typeof updateTaskSchema>
 
 export type MutateTask = CreateTask | UpdateTask
+
+export const allRankFieldsNull = {
+  priority: null,
+  ease: null,
+  enjoyment: null,
+  time: null,
+}
