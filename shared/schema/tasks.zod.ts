@@ -132,7 +132,10 @@ export const taskSchema = createSelectSchema(tasks, taskSchemaRefine)
 
 export type Task = z.infer<typeof taskSchema>
 
-export const insertTaskSchema = createInsertSchema(tasks, taskSchemaRefine)
+export const insertTaskSchema = createInsertSchema(tasks, {
+  ...taskSchemaRefine,
+  name: z.string().trim().min(1),
+})
   .partial()
   .omit({ id: true })
   .required({
