@@ -182,11 +182,6 @@ export const TaskForm = ({
     () =>
       insertTaskSchema
         .omit({ userId: true })
-        .required(
-          Object.fromEntries(
-            requiredRankFields.map((name) => [name, true]),
-          ) satisfies Record<RankField, boolean>,
-        )
         .superRefine((data, ctx) => {
           for (const field of requiredRankFields) {
             if (data[field] == null) {
