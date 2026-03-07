@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import { omit } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import type { z } from 'zod'
+import { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
@@ -170,19 +170,35 @@ export const TaskForm = ({
     [rankFieldConfig],
   )
 
+  const requiredRankFields = useMemo(
+    () =>
+      RANK_FIELDS_COLUMNS.filter(
+        ({ name }) => rankFieldConfig.get(name)?.required,
+      ).map(({ name }) => name),
+    [rankFieldConfig],
+  )
+
   const formSchema = useMemo(
     () =>
       insertTaskSchema
         .omit({ userId: true })
         .required(
           Object.fromEntries(
-            RANK_FIELDS_COLUMNS.map(({ name }) => [
-              name,
-              Boolean(rankFieldConfig.get(name)?.required),
-            ]).filter(([, isReq]) => isReq),
+            requiredRankFields.map((name) => [name, true]),
           ) satisfies Record<RankField, boolean>,
-        ),
-    [rankFieldConfig],
+        )
+        .superRefine((data, ctx) => {
+          for (const field of requiredRankFields) {
+            if (data[field] == null) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: [field],
+                message: 'This field is required',
+              })
+            }
+          }
+        }),
+    [requiredRankFields],
   )
 
   const getFormDefaults = useCallback(
