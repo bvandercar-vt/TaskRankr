@@ -53,7 +53,17 @@ const router = s.router(contract, {
       middleware: [isAuthenticated],
       handler: async ({ body, req }) => {
         const userId = getUserId(req)
-        const task = await storage.createTask({ ...body, userId })
+        let taskData = { ...body, userId }
+        if (
+          (!taskData.status || taskData.status === TaskStatus.OPEN) &&
+          !taskData.parentId
+        ) {
+          const settings = await storage.getSettings(userId)
+          if (settings.autoPinNewTasks) {
+            taskData = { ...taskData, status: TaskStatus.PINNED }
+          }
+        }
+        const task = await storage.createTask(taskData)
         return { status: 201, body: task }
       },
     },
