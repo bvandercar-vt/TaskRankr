@@ -413,6 +413,8 @@ export const LocalStateProvider = ({
         userId: 'local',
         status: newStatus,
         parentId: data.parentId ?? null,
+        completedAt: data.completedAt ?? null,
+        inProgressStartedAt: null,
       })
 
       setTasks((prev) => {
