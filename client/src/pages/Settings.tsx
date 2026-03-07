@@ -234,8 +234,16 @@ const ImportButton = () => {
 
       queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
       toast({ title: 'Tasks imported successfully' })
-    } catch (_error) {
-      toast({ title: 'Failed to import tasks', variant: 'destructive' })
+    } catch (err) {
+      if (
+        err instanceof SyntaxError ||
+        err instanceof TypeError ||
+        (err instanceof Error && err.message === 'Import failed')
+      ) {
+        toast({ title: 'Failed to import tasks', variant: 'destructive' })
+      } else {
+        throw err
+      }
     } finally {
       setIsImporting(false)
       if (fileInputRef.current) {

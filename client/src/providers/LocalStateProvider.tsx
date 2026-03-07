@@ -13,6 +13,7 @@ import {
   useState,
 } from 'react'
 import { toMerged } from 'es-toolkit'
+import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
@@ -26,6 +27,7 @@ import {
   updateTaskInList,
 } from '@/lib/task-utils'
 import {
+  allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
   type Task,
@@ -408,12 +410,12 @@ export const LocalStateProvider = ({
       })()
 
       const newTask: Task = taskSchema.parse({
+        ...allRankFieldsNull,
         ...data,
         id: tempId,
         userId: 'local',
         status: newStatus,
-        parentId: data.parentId ?? null,
-      })
+      } satisfies z.input<typeof taskSchema>)
 
       setTasks((prev) => {
         const parent = data.parentId

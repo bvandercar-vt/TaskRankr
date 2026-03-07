@@ -27,6 +27,9 @@ export interface MigrationResult {
   tasks: Task[]
 }
 
+const isStorageError = (err: unknown): boolean =>
+  err instanceof SyntaxError || err instanceof DOMException
+
 export const getGuestTasksToMigrate = (): MigrationResult => {
   try {
     const guestTasksRaw = localStorage.getItem(GUEST_STORAGE_KEYS.tasks)
@@ -48,8 +51,9 @@ export const getGuestTasksToMigrate = (): MigrationResult => {
       migratedCount: userCreatedTasks.length,
       tasks: userCreatedTasks,
     }
-  } catch {
-    return { migratedCount: 0, tasks: [] }
+  } catch (err) {
+    if (isStorageError(err)) return { migratedCount: 0, tasks: [] }
+    throw err
   }
 }
 
@@ -139,8 +143,11 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 
     return { migratedCount, tasks: migratedTasks }
   } catch (err) {
-    console.error('Failed to migrate guest tasks:', err)
-    return { migratedCount: 0, tasks: [] }
+    if (isStorageError(err)) {
+      console.error('Failed to migrate guest tasks:', err)
+      return { migratedCount: 0, tasks: [] }
+    }
+    throw err
   }
 }
 
