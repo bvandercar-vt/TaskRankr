@@ -8,8 +8,10 @@ import { Selectors } from '../constants'
 
 const { TaskForm } = Selectors
 
+export type TaskFormData = Pick<Task, 'name' | RankField>
+
 export const fillTaskForm = (
-  { name, ...rankfields }: Pick<Task, 'name' | RankField>,
+  { name, ...rankfields }: TaskFormData,
   settings: FieldConfig,
   submitBtnText: string,
 ) => {

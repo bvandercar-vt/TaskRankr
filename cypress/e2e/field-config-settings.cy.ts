@@ -1,17 +1,15 @@
 import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
 import { getSettings } from '@cypress/support/utils'
-import { fillTaskForm } from '@cypress/support/utils/task-form'
+import {
+  fillTaskForm,
+  type TaskFormData,
+} from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
 import { type FieldConfig, SortOption } from '~/shared/schema'
 
 const { Menu, Settings } = Selectors
-
-const navigateToSettings = () => {
-  cy.get(Selectors.MENU_BTN).click()
-  cy.get(Menu.SETTINGS).click()
-}
 
 const RankFieldSettings = {
   priority: { visible: true, required: true },
@@ -19,6 +17,18 @@ const RankFieldSettings = {
   enjoyment: { visible: false, required: false },
   time: { visible: true, required: false },
 } as const satisfies FieldConfig
+
+const newTask = {
+  ...DefaultTask,
+  name: 'Field Config Test Task',
+  ease: null,
+  enjoyment: null,
+} satisfies TaskFormData
+
+const navigateToSettings = () => {
+  cy.get(Selectors.MENU_BTN).click()
+  cy.get(Menu.SETTINGS).click()
+}
 
 const applyFieldConfigChanges = () => {
   cy.get(Settings.FieldConfig.visibleCheckbox(SortOption.ENJOYMENT)) //
@@ -35,9 +45,9 @@ const applyFieldConfigChanges = () => {
 const verifyTaskFormAndCreate = () => {
   cy.get(Selectors.CREATE_TASK_BTN).click()
 
-  fillTaskForm(DefaultTask, RankFieldSettings, 'Create')
+  fillTaskForm(newTask, RankFieldSettings, 'Create')
 
-  checkTaskInTree(DefaultTask.name)
+  checkTaskInTree(newTask.name)
 }
 
 describe('Field Config Settings', () => {

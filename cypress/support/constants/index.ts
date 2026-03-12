@@ -4,9 +4,9 @@ import {
   Enjoyment,
   type FieldConfig,
   Priority,
-  type Task,
   Time,
 } from '~/shared/schema'
+import type { TaskFormData } from '../utils/task-form'
 
 export * from './selectors'
 
@@ -23,7 +23,7 @@ export const DefaultTask = {
   ease: Ease.MEDIUM,
   enjoyment: Enjoyment.LOW,
   time: Time.HIGH,
-} as const satisfies Partial<Task>
+} as const satisfies TaskFormData
 
 export const SettingsAllVisbileAllRequired = {
   priority: { visible: true, required: true },
