@@ -23,7 +23,7 @@ import { InlineLink } from '@/components/primitives/InlineText'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 
 const CaptionedIcon = ({
   icon: Icon,
@@ -144,7 +144,7 @@ const Landing = () => {
 
         <div className="flex flex-col items-center sm:flex-row sm:items-start sm:gap-4 gap-2 justify-center">
           <LandingButtonWithCaption
-            href={authPaths.LOGIN}
+            href={AuthPaths.LOGIN}
             caption="To back up your data and sync across devices"
             data-testid="button-get-started"
           >

@@ -3,6 +3,7 @@
  * Captures timestamped action logs in a circular buffer.
  */
 
+import { contract } from '~/shared/contract'
 import type { Task, UserSettings } from '~/shared/schema'
 
 interface LogEntry {
@@ -57,8 +58,8 @@ class DebugLogger {
   } | null> {
     try {
       const [tasksRes, settingsRes] = await Promise.all([
-        fetch('/api/tasks', { credentials: 'include' }),
-        fetch('/api/settings', { credentials: 'include' }),
+        fetch(contract.tasks.list.path, { credentials: 'include' }),
+        fetch(contract.settings.get.path, { credentials: 'include' }),
       ])
       const tasks = tasksRes.ok
         ? await tasksRes.json()

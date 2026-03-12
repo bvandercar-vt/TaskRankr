@@ -4,14 +4,14 @@
 
 import type { Express } from 'express'
 
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import { isAuthenticated, type UserSession } from './replitAuth'
 import { authStorage } from './storage'
 
 // Register auth-specific routes
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
-  app.get(authPaths.USER, isAuthenticated, async (req, res) => {
+  app.get(AuthPaths.USER, isAuthenticated, async (req, res) => {
     try {
       // biome-ignore lint/style/noNonNullAssertion: is always present
       const userId = (req.user as UserSession)!.claims!.sub

@@ -5,7 +5,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import type { User } from '~/shared/models/auth'
 
 const CACHED_USER_KEY = 'taskrankr-cached-user'
@@ -33,7 +33,7 @@ function setCachedUser(user: User | null): void {
 
 async function fetchUser(): Promise<User | null> {
   try {
-    const response = await fetch(authPaths.USER, {
+    const response = await fetch(AuthPaths.USER, {
       credentials: 'include',
     })
 
@@ -63,13 +63,13 @@ async function fetchUser(): Promise<User | null> {
 // biome-ignore lint/suspicious/useAwait: involved window.href logging out, allow it.
 async function logout(): Promise<void> {
   setCachedUser(null)
-  window.location.href = authPaths.LOGOUT
+  window.location.href = AuthPaths.LOGOUT
 }
 
 export function useAuth() {
   const queryClient = useQueryClient()
   const { data: user, isLoading } = useQuery<User | null>({
-    queryKey: [authPaths.USER],
+    queryKey: [AuthPaths.USER],
     queryFn: fetchUser,
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -78,7 +78,7 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.setQueryData([authPaths.USER], null)
+      queryClient.setQueryData([AuthPaths.USER], null)
     },
   })
 

@@ -12,6 +12,16 @@ import * as schema from '~/shared/schema'
 
 const { Pool } = pg
 
+try {
+  process.loadEnvFile('.env.local')
+} catch {
+  try {
+    process.loadEnvFile()
+  } catch {
+    // noop
+  }
+}
+
 if (!process.env.DATABASE_URL) {
   throw new Error(
     'DATABASE_URL must be set. Did you forget to provision a database?',

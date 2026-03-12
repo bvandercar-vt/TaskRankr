@@ -45,6 +45,7 @@ const Title = ({
       'font-semibold text-base break-words',
       isCompleted ? 'text-muted-foreground line-through' : 'text-foreground',
     )}
+    data-testid="task-title"
   >
     {numberIndex !== undefined && (
       <span className="text-muted-foreground mr-1">{numberIndex + 1}.</span>
