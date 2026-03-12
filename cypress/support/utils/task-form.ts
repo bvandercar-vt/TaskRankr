@@ -23,7 +23,7 @@ export const fillTaskForm = (
   )
 
   cy.get(TaskForm.SUBMIT_BTN) //
-    .should(requiredFields.length ? 'be.disabled' : 'be.enabled')
+    .should(requiredFields.length ? 'be.disabled' : 'not.be.disabled')
 
   const filled = new Set<RankField>()
   for (const field of rankFields) {
@@ -38,7 +38,7 @@ export const fillTaskForm = (
       }
       const allRequiredFilled = requiredFields.every((f) => filled.has(f))
       cy.get(TaskForm.SUBMIT_BTN) //
-        .should(allRequiredFilled ? 'be.enabled' : 'be.disabled')
+        .should(allRequiredFilled ? 'not.be.disabled' : 'be.disabled')
     } else {
       cy.get(RankSelect).should('not.exist')
     }
@@ -46,6 +46,6 @@ export const fillTaskForm = (
 
   cy.get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
-    .should('be.enabled')
+    .should('not.be.disabled')
     .click()
 }
