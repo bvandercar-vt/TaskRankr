@@ -84,7 +84,20 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize())
   app.use(passport.session())
 
-  const config = await getOidcConfig()
+  passport.serializeUser((user: Express.User, cb) => cb(null, user))
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user))
+
+  let config: Awaited<ReturnType<typeof getOidcConfig>> | null = null
+  try {
+    config = await getOidcConfig()
+  } catch (err) {
+    console.warn(
+      '[Auth] OIDC discovery failed — OAuth login routes disabled.',
+      err instanceof Error ? err.message : String(err),
+    )
+  }
+
+  if (!config) return
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -106,7 +119,7 @@ export async function setupAuth(app: Express) {
       const strategy = new Strategy(
         {
           name: strategyName,
-          config,
+          config: config!,
           scope: 'openid email profile offline_access',
           callbackURL: `https://${domain}${authPaths.CALLBACK}`,
         },
@@ -116,9 +129,6 @@ export async function setupAuth(app: Express) {
       registeredStrategies.add(strategyName)
     }
   }
-
-  passport.serializeUser((user: Express.User, cb) => cb(null, user))
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user))
 
   app.get(authPaths.LOGIN, (req, res, next) => {
     ensureStrategy(req.hostname)
@@ -139,7 +149,7 @@ export async function setupAuth(app: Express) {
   app.get(authPaths.LOGOUT, (req, res) => {
     req.logout(() => {
       res.redirect(
-        client.buildEndSessionUrl(config, {
+        client.buildEndSessionUrl(config!, {
           client_id: process.env.REPL_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
         }).href,
