@@ -2,7 +2,7 @@ import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
 import { getTasks, selectOption } from '@cypress/support/utils'
 
-import type { Task } from '~/shared/schema'
+import type { RankField, Task } from '~/shared/schema'
 
 const { TaskForm, TaskCard } = Selectors
 const { RankSelect } = TaskForm
@@ -13,7 +13,7 @@ const fillTaskForm = ({
   ease,
   enjoyment,
   time,
-}: Pick<Task, 'name' | 'priority' | 'ease' | 'enjoyment' | 'time'>) => {
+}: Pick<Task, 'name' | RankField>) => {
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
   cy.get(TaskForm.NAME_INPUT).type(name)
@@ -59,7 +59,7 @@ describe('Create Task', () => {
     it('creates a task and displays it in the main tree', () => {
       createTaskAndCheckTree()
 
-      getTasks().then((tasks: Task[]) =>
+      getTasks().then((tasks) =>
         expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
       )
     })
@@ -73,7 +73,7 @@ describe('Create Task', () => {
     })
 
     it('creates a task and displays it in the main tree, and persists it to the database', () => {
-      getTasks().then((tasks: Task[]) =>
+      getTasks().then((tasks) =>
         expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
       )
 
@@ -82,7 +82,7 @@ describe('Create Task', () => {
       createTaskAndCheckTree()
 
       cy.wait('@createTask')
-      getTasks().then((tasks: Task[]) =>
+      getTasks().then((tasks) =>
         expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
       )
     })
