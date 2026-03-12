@@ -21,5 +21,18 @@ export const getTasks = () =>
         .its('body'),
     )
 
+export const checkTaskExistsBackend = (
+  task: Pick<Task, 'name'>,
+  exists: boolean,
+) =>
+  // TODO: check field values
+  getTasks().then((tasks) => {
+    if (exists) {
+      expect(tasks.map((t) => t.name)).to.include(task.name)
+    } else {
+      expect(tasks.map((t) => t.name)).to.not.include(task.name)
+    }
+  })
+
 export const getSettings = () =>
   cy.request<UserSettings>('GET', ApiPaths.GET_SETTINGS).its('body')

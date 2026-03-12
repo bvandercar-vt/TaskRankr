@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
-import { getSettings } from '@cypress/support/utils'
+import { checkTaskExistsBackend, getSettings } from '@cypress/support/utils'
 import {
   fillTaskForm,
   type TaskFormData,
@@ -47,7 +47,7 @@ const verifyTaskFormAndCreate = () => {
 
   fillTaskForm(newTask, RankFieldSettings, 'Create')
 
-  checkTaskInTree(newTask.name)
+  checkTaskInTree(newTask)
 }
 
 describe('Field Config Settings', () => {
@@ -96,6 +96,8 @@ describe('Field Config Settings', () => {
         })
       })
 
+      checkTaskExistsBackend(newTask, false)
+
       cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 
       cy.get(Selectors.BACK_BTN).click()
@@ -103,6 +105,7 @@ describe('Field Config Settings', () => {
       verifyTaskFormAndCreate()
 
       cy.wait('@createTask')
+      checkTaskExistsBackend(newTask, true)
     })
   })
 })

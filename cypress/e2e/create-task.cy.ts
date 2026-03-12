@@ -5,7 +5,7 @@ import {
   Selectors,
   SettingsAllVisbileAllRequired,
 } from '@cypress/support/constants'
-import { getTasks } from '@cypress/support/utils'
+import { checkTaskExistsBackend } from '@cypress/support/utils'
 import { fillTaskForm } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
@@ -14,7 +14,7 @@ const createTaskAndCheckTree = () => {
 
   fillTaskForm(DefaultTask, SettingsAllVisbileAllRequired, 'Create')
 
-  checkTaskInTree(DefaultTask.name)
+  checkTaskInTree(DefaultTask)
 }
 
 describe('Create Task', () => {
@@ -27,9 +27,7 @@ describe('Create Task', () => {
     it('creates a task and displays it in the main tree', () => {
       createTaskAndCheckTree()
 
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
-      )
+      checkTaskExistsBackend(DefaultTask, false)
     })
   })
 
@@ -42,18 +40,13 @@ describe('Create Task', () => {
     })
 
     it('creates a task and displays it in the main tree, and persists it to the database', () => {
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
-      )
-
+      checkTaskExistsBackend(DefaultTask, false)
       cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 
       createTaskAndCheckTree()
 
       cy.wait('@createTask')
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
-      )
+      checkTaskExistsBackend(DefaultTask, true)
     })
   })
 })
