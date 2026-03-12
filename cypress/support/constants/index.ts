@@ -1,5 +1,12 @@
 import { contract } from '~/shared/contract'
-import { Ease, Enjoyment, Priority, type Task, Time } from '~/shared/schema'
+import {
+  Ease,
+  Enjoyment,
+  type FieldConfig,
+  Priority,
+  type Task,
+  Time,
+} from '~/shared/schema'
 
 export * from './selectors'
 
@@ -17,3 +24,10 @@ export const DefaultTask = {
   enjoyment: Enjoyment.LOW,
   time: Time.HIGH,
 } as const satisfies Partial<Task>
+
+export const SettingsAllVisbileAllRequired = {
+  priority: { visible: true, required: true },
+  ease: { visible: true, required: false },
+  enjoyment: { visible: true, required: false },
+  time: { visible: true, required: false },
+} as const satisfies FieldConfig

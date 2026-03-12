@@ -6,14 +6,14 @@ declare global {
     interface Chainable {
       /** Log in as the hardcoded test user, bypassing Replit OAuth. */
       loginAsTestUser(): Chainable<void>
-
       /** Deletes all tasks for the test user. */
       clearTestUserTasks(): Chainable<void>
-
       /** Resets the test user's settings to their defaults on the server. */
       resetTestUserSettings(): Chainable<void>
 
       getElementArrayText(): Chainable<(string | null)[]>
+      selectOption(trigger: string, value: string): Chainable<void>
+      checkCheckedState(checked: boolean): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -36,4 +36,18 @@ Cypress.Commands.add('resetTestUserSettings', () => {
 Cypress.Commands.addQuery(
   'getElementArrayText',
   () => (subject: JQuery<HTMLElement>) => getElementArrayText(subject),
+)
+
+Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
+  cy.get(trigger).click()
+  cy.get('[role="listbox"]').contains(value).click()
+})
+
+Cypress.Commands.add(
+  'checkCheckedState',
+  { prevSubject: 'element' },
+  (subject, state) =>
+    cy
+      .wrap(subject)
+      .should('have.attr', 'data-state', state ? 'checked' : 'unchecked'),
 )

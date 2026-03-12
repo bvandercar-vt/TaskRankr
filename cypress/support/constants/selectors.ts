@@ -28,12 +28,7 @@ export const Selectors = {
   },
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
-    RankSelect: {
-      PRIORITY: testId('rank-select-priority'),
-      EASE: testId('rank-select-ease'),
-      ENJOYMENT: testId('rank-select-enjoyment'),
-      TIME: testId('rank-select-time'),
-    },
+    rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
   },

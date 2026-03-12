@@ -1,52 +1,20 @@
 import { Routes } from '@client/lib/constants'
-import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
-import { getTasks, selectOption } from '@cypress/support/utils'
-
-import type { RankField, Task } from '~/shared/schema'
-
-const { TaskForm, TaskCard } = Selectors
-const { RankSelect } = TaskForm
-
-const fillTaskForm = ({
-  name,
-  priority,
-  ease,
-  enjoyment,
-  time,
-}: Pick<Task, 'name' | RankField>) => {
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
-
-  cy.get(TaskForm.NAME_INPUT).type(name)
-
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
-  if (priority !== null) {
-    selectOption(RankSelect.PRIORITY, priority)
-  }
-
-  if (ease !== null) {
-    selectOption(RankSelect.EASE, ease)
-  }
-
-  if (enjoyment !== null) {
-    selectOption(RankSelect.ENJOYMENT, enjoyment)
-  }
-
-  if (time !== null) {
-    selectOption(RankSelect.TIME, time)
-  }
-}
+import {
+  ApiPaths,
+  DefaultTask,
+  Selectors,
+  SettingsAllVisbileAllRequired,
+} from '@cypress/support/constants'
+import { getTasks } from '@cypress/support/utils'
+import { fillTaskForm } from '@cypress/support/utils/task-form'
+import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
 const createTaskAndCheckTree = () => {
   cy.get(Selectors.CREATE_TASK_BTN).click()
-  fillTaskForm(DefaultTask)
-  cy.get(TaskForm.SUBMIT_BTN)
-    .should('be.enabled')
-    .should('have.text', 'Create')
-    .click()
-  cy.get(TaskCard.CARD)
-    .find(TaskCard.TITLE)
-    .getElementArrayText()
-    .should('include', DefaultTask.name)
+
+  fillTaskForm(DefaultTask, SettingsAllVisbileAllRequired, 'Create')
+
+  checkTaskInTree(DefaultTask.name)
 }
 
 describe('Create Task', () => {
