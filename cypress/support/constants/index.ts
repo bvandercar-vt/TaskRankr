@@ -1,3 +1,4 @@
+import { contract } from '@src/contract'
 import {
   Ease,
   Enjoyment,
@@ -8,7 +9,12 @@ import {
 
 export * from './selectors'
 
-export const DEFAULT_TASK = {
+export const ApiPaths = {
+  GET_TASKS: contract.tasks.get.path,
+  CREATE_TASK: contract.tasks.create.path,
+}
+
+export const DefaultTask = {
   name: 'E2E Test Task',
   priority: Priority.HIGH,
   ease: Ease.MEDIUM,

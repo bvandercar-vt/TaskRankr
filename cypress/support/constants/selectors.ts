@@ -11,20 +11,22 @@ const testIdEndsWith = <S extends string>(testid: S) =>
 
 export const Selectors = {
   CREATE_TASK_BTN: testId('button-create-task'),
-  TRY_GUEST_BTN: testId('button-try-guest'),
-  TaskForm: {
-    NAME_INPUT: testId('task-name-input'),
-    SUBMIT_BTN: testId('submit-button'),
-    CANCEL_BTN: testId('cancel-button'),
+  LandingPage: {
+    TRY_GUEST_BTN: testId('button-try-guest'),
   },
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
   },
-  RankSelect: {
-    PRIORITY: testId('rank-select-priority'),
-    EASE: testId('rank-select-ease'),
-    ENJOYMENT: testId('rank-select-enjoyment'),
-    TIME: testId('rank-select-time'),
+  TaskForm: {
+    NAME_INPUT: testId('task-name-input'),
+    SUBMIT_BTN: testId('submit-button'),
+    CANCEL_BTN: testId('cancel-button'),
+    RankSelect: {
+      PRIORITY: testId('rank-select-priority'),
+      EASE: testId('rank-select-ease'),
+      ENJOYMENT: testId('rank-select-enjoyment'),
+      TIME: testId('rank-select-time'),
+    },
   },
 } as const

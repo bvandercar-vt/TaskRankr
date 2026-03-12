@@ -1,8 +1,10 @@
-import { DEFAULT_TASK, Selectors } from '@cypress/support/constants'
-import { selectOption } from '@cypress/support/utils'
+import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
+import { getTasks, selectOption } from '@cypress/support/utils'
 import { Routes } from '@src/client/lib/constants'
-import { contract } from '@src/contract'
 import type { Task } from '@src/schema/tasks.zod'
+
+const { TaskForm, TaskCard } = Selectors
+const { RankSelect } = TaskForm
 
 const fillTaskForm = ({
   name,
@@ -11,40 +13,39 @@ const fillTaskForm = ({
   enjoyment,
   time,
 }: Pick<Task, 'name' | 'priority' | 'ease' | 'enjoyment' | 'time'>) => {
-  cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
+  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
-  cy.get(Selectors.TaskForm.NAME_INPUT).type(name)
+  cy.get(TaskForm.NAME_INPUT).type(name)
 
-  cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
-
+  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
   if (priority !== null) {
-    selectOption(Selectors.RankSelect.PRIORITY, priority)
+    selectOption(RankSelect.PRIORITY, priority)
   }
 
   if (ease !== null) {
-    selectOption(Selectors.RankSelect.EASE, ease)
+    selectOption(RankSelect.EASE, ease)
   }
 
   if (enjoyment !== null) {
-    selectOption(Selectors.RankSelect.ENJOYMENT, enjoyment)
+    selectOption(RankSelect.ENJOYMENT, enjoyment)
   }
 
   if (time !== null) {
-    selectOption(Selectors.RankSelect.TIME, time)
+    selectOption(RankSelect.TIME, time)
   }
 }
 
 const createTaskAndCheckTree = () => {
   cy.get(Selectors.CREATE_TASK_BTN).click()
-  fillTaskForm(DEFAULT_TASK)
-  cy.get(Selectors.TaskForm.SUBMIT_BTN)
+  fillTaskForm(DefaultTask)
+  cy.get(TaskForm.SUBMIT_BTN)
     .should('be.enabled')
     .should('have.text', 'Create')
     .click()
-  cy.get(Selectors.TaskCard.CARD)
-    .find(Selectors.TaskCard.TITLE)
+  cy.get(TaskCard.CARD)
+    .find(TaskCard.TITLE)
     .getElementArrayText()
-    .should('include', DEFAULT_TASK.name)
+    .should('include', DefaultTask.name)
 }
 
 describe('Create Task', () => {
@@ -55,6 +56,10 @@ describe('Create Task', () => {
 
     it('creates a task and displays it in the main tree', () => {
       createTaskAndCheckTree()
+
+      getTasks().then((tasks: Task[]) =>
+        expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
+      )
     })
   })
 
@@ -66,22 +71,18 @@ describe('Create Task', () => {
     })
 
     it('creates a task and displays it in the main tree, and persists it to the database', () => {
-      cy.request('GET', contract.tasks.list.path)
-        .its('body')
-        .then((tasks: Task[]) =>
-          expect(tasks.map((t) => t.name)).to.not.include(DEFAULT_TASK.name),
-        )
+      getTasks().then((tasks: Task[]) =>
+        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
+      )
 
-      cy.intercept('POST', contract.tasks.create.path).as('createTask')
+      cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 
       createTaskAndCheckTree()
 
       cy.wait('@createTask')
-      cy.request('GET', contract.tasks.list.path)
-        .its('body')
-        .then((tasks: Task[]) =>
-          expect(tasks.map((t) => t.name)).to.include(DEFAULT_TASK.name),
-        )
+      getTasks().then((tasks: Task[]) =>
+        expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
+      )
     })
   })
 })
