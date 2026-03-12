@@ -25,10 +25,11 @@ export const checkTaskExistsBackend = (
   task: Pick<Task, 'name'>,
   exists: boolean,
 ) =>
-  // TODO: check field values
   getTasks().then((tasks) => {
     if (exists) {
       expect(tasks.map((t) => t.name)).to.include(task.name)
+      const taskInBackend = tasks.find((t) => t.name === task.name)
+      expect(taskInBackend).to.include(task)
     } else {
       expect(tasks.map((t) => t.name)).to.not.include(task.name)
     }

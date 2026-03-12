@@ -1,14 +1,13 @@
-import {
-  type FieldConfig,
-  type RankField,
-  SortOption,
-  type Task,
-} from '~/shared/schema'
+import { RANK_FIELDS_COLUMNS } from '@client/lib/task-utils'
+
+import type { FieldConfig, RankField, Task } from '~/shared/schema'
 import { Selectors } from '../constants'
 
 const { TaskForm } = Selectors
 
 export type TaskFormData = Pick<Task, 'name' | RankField>
+
+const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
 
 export const fillTaskForm = (
   { name, ...rankfields }: TaskFormData,
@@ -19,21 +18,14 @@ export const fillTaskForm = (
 
   cy.get(TaskForm.NAME_INPUT).type(name)
 
-  const rankFields = [
-    SortOption.PRIORITY,
-    SortOption.EASE,
-    SortOption.ENJOYMENT,
-    SortOption.TIME,
-  ] as const
-
-  const lastRequired = [...rankFields]
-    .reverse()
-    .find((field) => settings[field].visible && settings[field].required)
+  const requiredFields = rankFields.filter(
+    (field) => settings[field].visible && settings[field].required,
+  )
 
   cy.get(TaskForm.SUBMIT_BTN) //
-    .should(lastRequired ? 'be.disabled' : 'not.be.disabled')
+    .should(requiredFields.length ? 'be.disabled' : 'not.be.disabled')
 
-  let allRequiredSelected = !lastRequired
+  const filled = new Set<RankField>()
   for (const field of rankFields) {
     const RankSelect = TaskForm.rankSelect(field)
     const value = rankfields[field]
@@ -42,12 +34,11 @@ export const fillTaskForm = (
       cy.get(RankSelect).should('be.visible')
       if (value !== null) {
         cy.selectOption(RankSelect, value)
-        if (field === lastRequired) {
-          allRequiredSelected = true
-        }
+        filled.add(field)
       }
+      const allRequiredFilled = requiredFields.every((f) => filled.has(f))
       cy.get(TaskForm.SUBMIT_BTN) //
-        .should(allRequiredSelected ? 'not.be.disabled' : 'be.disabled')
+        .should(allRequiredFilled ? 'not.be.disabled' : 'be.disabled')
     } else {
       cy.get(RankSelect).should('not.exist')
     }
