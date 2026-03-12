@@ -13,7 +13,7 @@ declare global {
 
       getElementArrayText(): Chainable<(string | null)[]>
       selectOption(trigger: string, value: string): Chainable<void>
-      checkCheckedState(checked: boolean): Chainable<JQuery<HTMLElement>>
+      getCheckedState(): Chainable<boolean>
     }
   }
 }
@@ -44,10 +44,12 @@ Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
 })
 
 Cypress.Commands.add(
-  'checkCheckedState',
+  'getCheckedState',
   { prevSubject: 'element' },
-  (subject, state) =>
-    cy
-      .wrap(subject)
-      .should('have.attr', 'data-state', state ? 'checked' : 'unchecked'),
+  (subject) => {
+    const state = Cypress.$(subject).attr('data-state')
+    if (state === 'checked') return cy.wrap(true)
+    if (state === 'unchecked') return cy.wrap(false)
+    throw new Error('Element does not have a data-state attribute')
+  },
 )
