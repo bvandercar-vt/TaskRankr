@@ -64,7 +64,7 @@ describe('Create Task', () => {
       cy.visit('/')
     })
 
-    it('creates a task, displays it in the main tree, and persists it to the database', () => {
+    it('creates a task and displays it in the main tree, and persists it to the database', () => {
       cy.request('GET', contract.tasks.list.path)
         .its('body')
         .then((tasks: Task[]) =>
