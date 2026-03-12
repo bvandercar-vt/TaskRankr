@@ -12,10 +12,14 @@ import * as schema from '~/shared/schema'
 
 const { Pool } = pg
 
-// Load .env file when running locally (no-op if the file doesn't exist)
+// Load .env.local or .env when running locally (no-op if neither exists)
 try {
-  process.loadEnvFile()
-} catch {}
+  process.loadEnvFile('.env.local')
+} catch {
+  try {
+    process.loadEnvFile()
+  } catch {}
+}
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
