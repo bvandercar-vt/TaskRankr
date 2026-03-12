@@ -7,14 +7,14 @@ describe('Create Task', () => {
     beforeEach(() => {
       cy.clearLocalStorage()
       cy.visit('/')
-      cy.get(Selectors.tryGuestButton).click()
+      cy.get(Selectors.TRY_GUEST_BUTTON).click()
     })
 
     it('creates a task and displays it in the main tree', () => {
-      cy.get(Selectors.createTaskButton).click()
-      cy.get(Selectors.taskNameInput).type(TASK_NAME)
-      cy.get(Selectors.submitButton).contains('Create').click()
-      cy.contains(Selectors.taskCard, TASK_NAME).should('be.visible')
+      cy.get(Selectors.CREATE_TASK_BUTTON).click()
+      cy.get(Selectors.TASK_NAME_INPUT).type(TASK_NAME)
+      cy.get(Selectors.SUBMIT_BUTTON).contains('Create').click()
+      cy.contains(Selectors.TASK_CARD, TASK_NAME).should('be.visible')
     })
   })
 
@@ -26,10 +26,10 @@ describe('Create Task', () => {
     })
 
     it('creates a task and displays it in the main tree', () => {
-      cy.get(Selectors.createTaskButton).click()
-      cy.get(Selectors.taskNameInput).type(TASK_NAME)
-      cy.get(Selectors.submitButton).contains('Create').click()
-      cy.contains(Selectors.taskCard, TASK_NAME).should('be.visible')
+      cy.get(Selectors.CREATE_TASK_BUTTON).click()
+      cy.get(Selectors.TASK_NAME_INPUT).type(TASK_NAME)
+      cy.get(Selectors.SUBMIT_BUTTON).contains('Create').click()
+      cy.contains(Selectors.TASK_CARD, TASK_NAME).should('be.visible')
     })
   })
 })
