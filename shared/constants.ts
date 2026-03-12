@@ -18,4 +18,4 @@ export const TestPaths = {
   TEST_LOGIN: '/api/test/login',
   /** GET/DELETE the test user's tasks without a session. */
   TEST_TASKS: '/api/test/tasks',
-}
+} as const

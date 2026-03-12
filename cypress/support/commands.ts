@@ -4,7 +4,7 @@ import { getElementArrayText } from './utils'
 declare global {
   namespace Cypress {
     interface Chainable {
-      /** Log in as an actual user */
+      /** Log in as the hardcoded test user, bypassing Replit OAuth. */
       loginAsTestUser(): Chainable<void>
 
       /** Deletes all tasks for the test user. */
