@@ -4,7 +4,7 @@ import { Ease, Enjoyment, Priority, type Task, Time } from '~/shared/schema'
 export * from './selectors'
 
 export const ApiPaths = {
-  GET_TASKS: contract.tasks.get.path,
+  GET_TASKS: contract.tasks.list.path,
   CREATE_TASK: contract.tasks.create.path,
 }
 
