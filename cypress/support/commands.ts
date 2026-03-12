@@ -1,5 +1,4 @@
-import { AuthPaths } from '@src/constants'
-
+import { AuthPaths } from '~/shared/constants'
 import { getElementArrayText } from './utils'
 
 declare global {

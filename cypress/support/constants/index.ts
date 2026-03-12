@@ -1,11 +1,5 @@
-import { contract } from '@src/contract'
-import {
-  Ease,
-  Enjoyment,
-  Priority,
-  type Task,
-  Time,
-} from '@src/schema/tasks.zod'
+import { contract } from '~/shared/contract'
+import { Ease, Enjoyment, Priority, type Task, Time } from '~/shared/schema'
 
 export * from './selectors'
 

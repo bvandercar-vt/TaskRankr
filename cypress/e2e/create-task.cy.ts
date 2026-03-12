@@ -1,7 +1,8 @@
+import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
 import { getTasks, selectOption } from '@cypress/support/utils'
-import { Routes } from '@src/client/lib/constants'
-import type { Task } from '@src/schema/tasks.zod'
+
+import type { Task } from '~/shared/schema'
 
 const { TaskForm, TaskCard } = Selectors
 const { RankSelect } = TaskForm

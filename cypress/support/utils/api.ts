@@ -1,5 +1,4 @@
-import type { Task } from '@src/schema'
-
+import type { Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 
 export const getTasks = () =>
