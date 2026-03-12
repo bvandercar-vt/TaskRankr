@@ -10,6 +10,9 @@ declare global {
       /** Deletes all tasks for the test user. */
       clearTestUserTasks(): Chainable<void>
 
+      /** Resets the test user's settings to their defaults on the server. */
+      resetTestUserSettings(): Chainable<void>
+
       getElementArrayText(): Chainable<(string | null)[]>
     }
   }
@@ -25,6 +28,14 @@ Cypress.Commands.add('loginAsTestUser', () => {
 
 Cypress.Commands.add('clearTestUserTasks', () => {
   cy.request('DELETE', TestPaths.TEST_TASKS).should(
+    'have.property',
+    'status',
+    200,
+  )
+})
+
+Cypress.Commands.add('resetTestUserSettings', () => {
+  cy.request('DELETE', TestPaths.TEST_RESET_SETTINGS).should(
     'have.property',
     'status',
     200,

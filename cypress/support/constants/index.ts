@@ -6,6 +6,8 @@ export * from './selectors'
 export const ApiPaths = {
   GET_TASKS: contract.tasks.list.path,
   CREATE_TASK: contract.tasks.create.path,
+  GET_SETTINGS: contract.settings.get.path,
+  UPDATE_SETTINGS: contract.settings.update.path,
 }
 
 export const DefaultTask = {

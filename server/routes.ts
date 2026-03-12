@@ -13,7 +13,7 @@ import type { Express } from 'express'
 
 import { TestPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { TaskStatus } from '~/shared/schema'
+import { DEFAULT_FIELD_CONFIG, TaskStatus } from '~/shared/schema'
 import {
   authStorage,
   isAuthenticated,
@@ -280,6 +280,15 @@ function registerTestRoutes(app: Express): void {
       res.json({ ok: true, deleted: tasks.length })
     } catch (err) {
       res.status(500).json({ message: 'Cleanup failed', error: String(err) })
+    }
+  })
+
+  app.delete(TestPaths.TEST_RESET_SETTINGS, async (_req, res) => {
+    try {
+      await storage.updateSettings(TEST_USER_ID, { fieldConfig: DEFAULT_FIELD_CONFIG })
+      res.json({ ok: true })
+    } catch (err) {
+      res.status(500).json({ message: 'Reset settings failed', error: String(err) })
     }
   })
 }

@@ -69,6 +69,7 @@ describe('Create Task', () => {
     beforeEach(() => {
       cy.loginAsTestUser()
       cy.clearTestUserTasks()
+      cy.resetTestUserSettings()
       cy.visit(Routes.HOME)
     })
 
