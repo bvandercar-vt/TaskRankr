@@ -1,38 +1,26 @@
 const TASK_NAME = 'E2E Test Task - Create'
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function openCreateDialog() {
-  cy.get('[data-testid="button-create-task"]').click()
+const Selectors = {
+  createTaskButton: '[data-testid="button-create-task"]',
+  tryGuestButton: '[data-testid="button-try-guest"]',
+  taskNameInput: 'textarea[placeholder="Task name"]',
+  submitButton: 'button[type="submit"]',
+  taskCard: '[data-testid^="task-card-"]',
 }
-
-function fillAndSubmitTaskForm(taskName: string) {
-  cy.get('textarea[placeholder="Task name"]').type(taskName)
-  cy.get('button[type="submit"]').contains('Create').click()
-}
-
-function createTask(taskName: string) {
-  openCreateDialog()
-  fillAndSubmitTaskForm(taskName)
-}
-
-function verifyTaskInTree(taskName: string) {
-  cy.contains('[data-testid^="task-card-"]', taskName).should('be.visible')
-}
-
-// ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('Create Task', () => {
   describe('Guest Mode', () => {
     beforeEach(() => {
       cy.clearLocalStorage()
       cy.visit('/')
-      cy.get('[data-testid="button-try-guest"]').click()
+      cy.get(Selectors.tryGuestButton).click()
     })
 
     it('creates a task and displays it in the main tree', () => {
-      createTask(TASK_NAME)
-      verifyTaskInTree(TASK_NAME)
+      cy.get(Selectors.createTaskButton).click()
+      cy.get(Selectors.taskNameInput).type(TASK_NAME)
+      cy.get(Selectors.submitButton).contains('Create').click()
+      cy.contains(Selectors.taskCard, TASK_NAME).should('be.visible')
     })
   })
 
@@ -44,8 +32,10 @@ describe('Create Task', () => {
     })
 
     it('creates a task and displays it in the main tree', () => {
-      createTask(TASK_NAME)
-      verifyTaskInTree(TASK_NAME)
+      cy.get(Selectors.createTaskButton).click()
+      cy.get(Selectors.taskNameInput).type(TASK_NAME)
+      cy.get(Selectors.submitButton).contains('Create').click()
+      cy.contains(Selectors.taskCard, TASK_NAME).should('be.visible')
     })
   })
 })
