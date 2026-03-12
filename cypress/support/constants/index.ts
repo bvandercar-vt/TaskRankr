@@ -1,10 +1,11 @@
 import { contract } from '~/shared/contract'
 import { Ease, Enjoyment, Priority, type Task, Time } from '~/shared/schema'
+import { AuthPaths } from '~/shared/constants'
 
 export * from './selectors'
 
 export const ApiPaths = {
-  GET_TASKS: contract.tasks.list.path,
+  GET_TASKS: AuthPaths.TEST_TASKS,
   CREATE_TASK: contract.tasks.create.path,
 }
 

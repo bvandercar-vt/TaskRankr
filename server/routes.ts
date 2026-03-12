@@ -249,6 +249,15 @@ function registerTestRoutes(app: Express): void {
     }
   })
 
+  app.get(AuthPaths.TEST_TASKS, async (_req, res) => {
+    try {
+      const tasks = await storage.getTasks(TEST_USER_ID)
+      res.json(tasks)
+    } catch (err) {
+      res.status(500).json({ message: 'Fetch failed', error: String(err) })
+    }
+  })
+
   app.delete(AuthPaths.TEST_TASKS, async (_req, res) => {
     try {
       const tasks = await storage.getTasks(TEST_USER_ID)
