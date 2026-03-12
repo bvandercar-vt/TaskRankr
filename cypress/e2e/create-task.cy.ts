@@ -1,21 +1,48 @@
-import { Selectors } from '@cypress/support/constants'
+import { DEFAULT_TASK, Selectors } from '@cypress/support/constants'
+import { selectOption } from '@cypress/support/utils'
+import { contract } from '@src/contract'
+import type { Task } from '@src/schema/tasks.zod'
 
-const TASK_NAME = 'E2E Test Task'
+const fillTaskForm = ({
+  name,
+  priority,
+  ease,
+  enjoyment,
+  time,
+}: Pick<Task, 'name' | 'priority' | 'ease' | 'enjoyment' | 'time'>) => {
+  cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
 
-const selectOption = (trigger: string, value: string) => {
-  cy.get(trigger).click()
-  cy.get('[role="listbox"]').contains(value).click()
+  cy.get(Selectors.TaskForm.NAME_INPUT).type(name)
+
+  cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
+
+  if (priority !== null) {
+    selectOption(Selectors.RankSelect.PRIORITY, priority)
+  }
+
+  if (ease !== null) {
+    selectOption(Selectors.RankSelect.EASE, ease)
+  }
+
+  if (enjoyment !== null) {
+    selectOption(Selectors.RankSelect.ENJOYMENT, enjoyment)
+  }
+
+  if (time !== null) {
+    selectOption(Selectors.RankSelect.TIME, time)
+  }
 }
 
 const createTaskAndCheckTree = () => {
-  it('creates a task and displays it in the main tree', () => {
-    cy.get(Selectors.CREATE_TASK_BTN).click()
-    cy.get(Selectors.TaskForm.NAME_INPUT).type(TASK_NAME)
-    cy.get(Selectors.TaskForm.SUBMIT_BTN).contains('Create').click()
-    cy.get(Selectors.TaskCard.CARD)
-      .find(Selectors.TaskCard.TITLE)
-      .should('have.text', TASK_NAME)
-  })
+  cy.get(Selectors.CREATE_TASK_BTN).click()
+  fillTaskForm(DEFAULT_TASK)
+  cy.get(Selectors.TaskForm.SUBMIT_BTN)
+    .should('be.enabled')
+    .should('have.text', 'Create')
+    .click()
+  cy.get(Selectors.TaskCard.CARD)
+    .find(Selectors.TaskCard.TITLE)
+    .should('have.text', DEFAULT_TASK.name)
 }
 
 describe('Create Task', () => {
@@ -25,7 +52,9 @@ describe('Create Task', () => {
       cy.get(Selectors.TRY_GUEST_BTN).click()
     })
 
-    createTaskAndCheckTree()
+    it('creates a task and displays it in the main tree', () => {
+      createTaskAndCheckTree()
+    })
   })
 
   describe('Logged In Mode', () => {
@@ -36,33 +65,22 @@ describe('Create Task', () => {
     })
 
     it('creates a task, displays it in the main tree, and persists it to the database', () => {
-      cy.intercept('POST', '/api/tasks').as('createTask')
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      cy.get(Selectors.TaskForm.NAME_INPUT).type(TASK_NAME)
-
-      cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
-
-      selectOption(Selectors.RankSelect.PRIORITY, 'medium')
-      cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
-
-      selectOption(Selectors.RankSelect.EASE, 'medium')
-      cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
-
-      selectOption(Selectors.RankSelect.ENJOYMENT, 'medium')
-      cy.get(Selectors.TaskForm.SUBMIT_BTN).should('be.disabled')
-
-      selectOption(Selectors.RankSelect.TIME, 'medium')
-      cy.get(Selectors.TaskForm.SUBMIT_BTN).should('not.be.disabled').click()
-
-      cy.get(Selectors.TaskCard.CARD)
-        .find(Selectors.TaskCard.TITLE)
-        .should('have.text', TASK_NAME)
-      cy.wait('@createTask')
-      cy.request('GET', '/api/tasks')
+      cy.request('GET', contract.tasks.list.path)
         .its('body')
-        .then((tasks: Array<{ name: string }>) => {
-          expect(tasks.some((t) => t.name === TASK_NAME)).to.be.true
-        })
+        .then((tasks: Task[]) =>
+          expect(tasks.map((t) => t.name)).to.not.include(DEFAULT_TASK.name),
+        )
+
+      cy.intercept('POST', contract.tasks.create.path).as('createTask')
+
+      createTaskAndCheckTree()
+
+      cy.wait('@createTask')
+      cy.request('GET', contract.tasks.list.path)
+        .its('body')
+        .then((tasks: Task[]) =>
+          expect(tasks.map((t) => t.name)).to.include(DEFAULT_TASK.name),
+        )
     })
   })
 })
