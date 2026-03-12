@@ -21,4 +21,10 @@ export const Selectors = {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
   },
+  RankSelect: {
+    PRIORITY: testId('rank-select-priority'),
+    EASE: testId('rank-select-ease'),
+    ENJOYMENT: testId('rank-select-enjoyment'),
+    TIME: testId('rank-select-time'),
+  },
 } as const

@@ -48,6 +48,7 @@ export const RankFieldSelect = ({
       >
         <FormControl>
           <SelectTrigger
+            data-testid={`rank-select-${name}`}
             className={cn(
               'bg-secondary/20 capitalize font-semibold h-10',
               hasError ? 'border-destructive/50' : 'border-white/5',
