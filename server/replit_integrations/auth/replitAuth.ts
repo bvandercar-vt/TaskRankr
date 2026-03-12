@@ -119,7 +119,7 @@ export async function setupAuth(app: Express) {
       const strategy = new Strategy(
         {
           name: strategyName,
-          config: config!,
+          config,
           scope: 'openid email profile offline_access',
           callbackURL: `https://${domain}${AuthPaths.CALLBACK}`,
         },
@@ -149,7 +149,7 @@ export async function setupAuth(app: Express) {
   app.get(AuthPaths.LOGOUT, (req, res) => {
     req.logout(() => {
       res.redirect(
-        client.buildEndSessionUrl(config!, {
+        client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
         }).href,
