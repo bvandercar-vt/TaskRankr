@@ -45,6 +45,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
+      // secure:true requires HTTPS, which Cypress (and local dev) doesn't use.
+      // Limiting this to production means cy.request() can receive and replay
+      // the session cookie in non-production environments without TLS.
       secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
     },
@@ -87,6 +90,11 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user))
   passport.deserializeUser((user: Express.User, cb) => cb(null, user))
 
+  // OIDC discovery hits the Replit identity provider at startup. In a local
+  // or CI environment there is no provider reachable, so discovery fails.
+  // Rather than crashing the server, we degrade gracefully: OAuth login routes
+  // are simply not registered. The rest of the app (including test endpoints
+  // that bypass OIDC entirely) continues to work normally.
   let config: Awaited<ReturnType<typeof getOidcConfig>> | null = null
   try {
     config = await getOidcConfig()
