@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
-import { getTasks, selectOption } from '@cypress/support/utils'
+import { getTestUserTasks, getTasks, selectOption } from '@cypress/support/utils'
 
 import type { Task } from '~/shared/schema'
 
@@ -52,14 +52,15 @@ const createTaskAndCheckTree = () => {
 describe('Create Task', () => {
   describe('Guest Mode', () => {
     beforeEach(() => {
+      cy.clearTestUserTasks()
       cy.visit(Routes.GUEST)
     })
 
     it('creates a task and displays it in the main tree', () => {
       createTaskAndCheckTree()
 
-      getTasks().then((tasks: Task[]) =>
-        expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
+      getTestUserTasks().then((tasks: Task[]) =>
+        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
       )
     })
   })
