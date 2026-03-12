@@ -1,6 +1,5 @@
-import { AuthPaths } from '~/shared/constants'
+import { TestPaths } from '~/shared/constants'
 import type { Task } from '~/shared/schema'
-
 import { ApiPaths } from '../constants'
 
 /**
@@ -17,7 +16,7 @@ export const getTasks = () =>
       cy
         .request<Task[]>(
           'GET',
-          cookie ? ApiPaths.GET_TASKS : AuthPaths.TEST_TASKS,
+          cookie ? ApiPaths.GET_TASKS : TestPaths.TEST_TASKS,
         )
         .its('body'),
     )

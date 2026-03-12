@@ -1,30 +1,26 @@
-import { AuthPaths } from '~/shared/constants'
+import { TestPaths } from '~/shared/constants'
 import { getElementArrayText } from './utils'
 
 declare global {
   namespace Cypress {
     interface Chainable {
-      /**
-       * Logs in as the hardcoded test user via POST /api/test/login, which
-       * writes a real session cookie without going through Replit OAuth.
-       */
+      /** Log in as an actual user */
       loginAsTestUser(): Chainable<void>
 
-      /** Deletes all tasks for the test user. Call in beforeEach for a clean slate. */
+      /** Deletes all tasks for the test user. */
       clearTestUserTasks(): Chainable<void>
 
-      /** Maps a jQuery element collection to an array of their text content. */
       getElementArrayText(): Chainable<(string | null)[]>
     }
   }
 }
 
 Cypress.Commands.add('loginAsTestUser', () => {
-  cy.request('POST', AuthPaths.TEST_LOGIN).its('status').should('eq', 200)
+  cy.request('POST', TestPaths.TEST_LOGIN).its('status').should('eq', 200)
 })
 
 Cypress.Commands.add('clearTestUserTasks', () => {
-  cy.request('DELETE', AuthPaths.TEST_TASKS).its('status').should('eq', 200)
+  cy.request('DELETE', TestPaths.TEST_TASKS).its('status').should('eq', 200)
 })
 
 Cypress.Commands.addQuery(

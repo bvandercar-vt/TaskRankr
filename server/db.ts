@@ -12,14 +12,14 @@ import * as schema from '~/shared/schema'
 
 const { Pool } = pg
 
-// Load .env.local (or .env) for local development. No-op in Replit/CI where
-// env vars are already set. try/catch required — throws if the file is absent.
 try {
   process.loadEnvFile('.env.local')
 } catch {
   try {
     process.loadEnvFile()
-  } catch {}
+  } catch {
+    // noop
+  }
 }
 
 if (!process.env.DATABASE_URL) {
