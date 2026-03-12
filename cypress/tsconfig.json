@@ -5,10 +5,10 @@
     "types": ["cypress"],
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "strict": true
-  },
-  "paths": {
-    "@cypress/support/*": ["./support/*"]
+    "strict": true,
+    "paths": {
+      "@cypress/support/*": ["./support/*"]
+    }
   },
   "include": ["**/*.ts"],
   "exclude": ["../node_modules"]

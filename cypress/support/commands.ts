@@ -14,3 +14,5 @@ Cypress.Commands.add('loginAsTestUser', () => {
 Cypress.Commands.add('clearTestUserTasks', () => {
   cy.request('DELETE', '/api/test/tasks').its('status').should('eq', 200)
 })
+
+export {}
