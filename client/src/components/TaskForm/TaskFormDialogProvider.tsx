@@ -68,7 +68,7 @@ const DesktopDialog = ({
   onClose,
   ...taskFormArgs
 }: TaskFormDialogProps) => (
-  <div className="hidden sm:block">
+  <div className="hidden sm:block" data-testid="task-form-dialog-desktop">
     <Dialog open={isOpen && window.innerWidth >= 640} onOpenChange={setIsOpen}>
       <DialogContent
         className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-hidden bg-card border-white/10 p-6 shadow-2xl rounded-xl flex flex-col [&>form]:min-h-0"
@@ -117,6 +117,7 @@ const MobileDialog = ({
         exit={{ opacity: 0, y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className="fixed inset-0 z-[100] bg-background sm:hidden flex flex-col overflow-hidden"
+        data-testid="task-form-dialog-mobile"
       >
         <TaskForm
           {...taskFormArgs}
