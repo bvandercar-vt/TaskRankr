@@ -29,7 +29,7 @@ export default defineConfig({
     tailwindcss(),
     react(),
     runtimeErrorOverlay(),
-    tsconfigPaths({ ignoreConfigErrors: true }),
+    tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
