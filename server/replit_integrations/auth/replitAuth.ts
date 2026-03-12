@@ -89,12 +89,16 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user))
   passport.deserializeUser((user: Express.User, cb) => cb(null, user))
 
-  // OIDC discovery fails in local/CI environments where no provider is
-  // reachable. This is not a security risk: the failure mode is fail-closed
-  // (login routes are never registered, so no new sessions can be created).
-  // Fail-open — e.g. falling back to unauthenticated access — would be
-  // dangerous, but that never happens here. Existing sessions remain valid
-  // because the session middleware above always runs regardless of this result.
+  /*
+   * OIDC discovery fails in local/CI environments where no provider is
+   * reachable, so this is necessary for those environments.
+   *
+   * Not a security risk: the failure mode is fail-closed
+   * (login routes are never registered, so no new sessions can be created).
+   * Fail-open — e.g. falling back to unauthenticated access — would be
+   * dangerous, but that never happens here. Existing sessions remain valid
+   * because the session middleware above always runs regardless of this result.
+   */
   let config: Awaited<ReturnType<typeof getOidcConfig>> | null = null
   try {
     config = await getOidcConfig()
