@@ -14,6 +14,7 @@ import type { Express } from 'express'
 import { contract } from '~/shared/contract'
 import { TaskStatus } from '~/shared/schema'
 import {
+  authStorage,
   isAuthenticated,
   registerAuthRoutes,
   setupAuth,
@@ -199,7 +200,61 @@ export async function registerRoutes(
   await setupAuth(app)
   registerAuthRoutes(app)
 
+  if (process.env.NODE_ENV !== 'production') {
+    registerTestRoutes(app)
+  }
+
   createExpressEndpoints(contract, router, app)
 
   return httpServer
+}
+
+const TEST_USER_ID = 'cypress-test-user'
+
+function registerTestRoutes(app: Express): void {
+  app.post('/api/test/login', async (req, res) => {
+    try {
+      await authStorage.upsertUser({
+        id: TEST_USER_ID,
+        email: 'cypress@test.local',
+        firstName: 'Cypress',
+        lastName: 'Test',
+        profileImageUrl: null,
+      })
+
+      const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
+      const user: UserSession = {
+        claims: {
+          sub: TEST_USER_ID,
+          iss: 'test',
+          aud: 'test',
+          exp: expiresAt,
+          iat: Math.floor(Date.now() / 1000),
+        } as UserSession['claims'],
+        expires_at: expiresAt,
+        access_token: 'test-token',
+      }
+
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: 'Login failed', error: String(err) })
+        }
+        res.json({ ok: true, userId: TEST_USER_ID })
+      })
+    } catch (err) {
+      res.status(500).json({ message: 'Setup failed', error: String(err) })
+    }
+  })
+
+  app.delete('/api/test/tasks', async (req, res) => {
+    try {
+      const tasks = await storage.getTasks(TEST_USER_ID)
+      for (const task of tasks) {
+        await storage.deleteTask(task.id, TEST_USER_ID)
+      }
+      res.json({ ok: true, deleted: tasks.length })
+    } catch (err) {
+      res.status(500).json({ message: 'Cleanup failed', error: String(err) })
+    }
+  })
 }
