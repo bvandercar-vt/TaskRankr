@@ -1,3 +1,5 @@
+import type { RankField } from '~/shared/schema'
+
 const testId = <S extends string>(testid: S) =>
   `[data-testid="${testid}"]` as const
 const testIdStartsWith = <S extends string>(testid: S) =>
@@ -16,6 +18,10 @@ export const Selectors = {
   LandingPage: {
     TRY_GUEST_BTN: testId('button-try-guest'),
   },
+  Menu: {
+    SETTINGS: testId('menu-item-settings'),
+    HOME: testId('menu-item-home'),
+  },
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
@@ -31,14 +37,12 @@ export const Selectors = {
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
   },
-  Menu: {
-    SETTINGS: testId('menu-item-settings'),
-    HOME: testId('menu-item-home'),
-  },
   Settings: {
     FieldConfig: {
-      visibleCheckbox: (field: string) => testId(`checkbox-${field}-visible`),
-      requiredCheckbox: (field: string) => testId(`checkbox-${field}-required`),
+      visibleCheckbox: (field: RankField) =>
+        testId(`checkbox-${field}-visible`),
+      requiredCheckbox: (field: RankField) =>
+        testId(`checkbox-${field}-required`),
     },
   },
 } as const

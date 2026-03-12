@@ -1,5 +1,5 @@
 import { TestPaths } from '~/shared/constants'
-import type { Task } from '~/shared/schema'
+import type { Task, UserSettings } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 
 /**
@@ -20,3 +20,6 @@ export const getTasks = () =>
         )
         .its('body'),
     )
+
+export const getSettings = () =>
+  cy.request<UserSettings>('GET', ApiPaths.GET_SETTINGS).its('body')

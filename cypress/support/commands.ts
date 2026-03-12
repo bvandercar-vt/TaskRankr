@@ -19,27 +19,18 @@ declare global {
 }
 
 Cypress.Commands.add('loginAsTestUser', () => {
-  cy.request('POST', TestPaths.TEST_LOGIN).should(
-    'have.property',
-    'status',
-    200,
-  )
+  cy.request('POST', TestPaths.TEST_LOGIN) //
+    .should('have.property', 'status', 200)
 })
 
 Cypress.Commands.add('clearTestUserTasks', () => {
-  cy.request('DELETE', TestPaths.TEST_TASKS).should(
-    'have.property',
-    'status',
-    200,
-  )
+  cy.request('DELETE', TestPaths.TEST_TASKS) //
+    .should('have.property', 'status', 200)
 })
 
 Cypress.Commands.add('resetTestUserSettings', () => {
-  cy.request('DELETE', TestPaths.TEST_RESET_SETTINGS).should(
-    'have.property',
-    'status',
-    200,
-  )
+  cy.request('DELETE', TestPaths.TEST_RESET_SETTINGS) //
+    .should('have.property', 'status', 200)
 })
 
 Cypress.Commands.addQuery(

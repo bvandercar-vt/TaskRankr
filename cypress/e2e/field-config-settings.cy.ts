@@ -1,9 +1,8 @@
 import { Routes } from '@client/lib/constants'
 import { ApiPaths, Selectors } from '@cypress/support/constants'
-import { selectOption } from '@cypress/support/utils'
+import { getSettings, selectOption } from '@cypress/support/utils'
 
-import type { UserSettings } from '~/shared/schema'
-import { Priority, Time } from '~/shared/schema'
+import { Priority, SortOption, Time } from '~/shared/schema'
 
 const { TaskForm, TaskCard, Menu, Settings: SettingsSelectors } = Selectors
 const { RankSelect } = TaskForm
@@ -27,8 +26,8 @@ const navigateToSettings = () => {
  *   - ease      → not required (stays visible)
  */
 const applyFieldConfigChanges = () => {
-  cy.get(FieldConfig.visibleCheckbox('enjoyment')).click()
-  cy.get(FieldConfig.requiredCheckbox('ease')).click()
+  cy.get(FieldConfig.visibleCheckbox(SortOption.ENJOYMENT)).click()
+  cy.get(FieldConfig.requiredCheckbox(SortOption.EASE)).click()
 }
 
 /**
@@ -72,13 +71,18 @@ describe('Field Config Settings', () => {
     it('changes field visibility/required in settings, then creates a task respecting those settings', () => {
       navigateToSettings()
 
-      cy.get(FieldConfig.visibleCheckbox('enjoyment')).should('have.attr', 'data-state', 'checked')
-      cy.get(FieldConfig.requiredCheckbox('ease')).should('have.attr', 'data-state', 'checked')
+      cy.get(
+        FieldConfig.visibleCheckbox(SortOption.ENJOYMENT), //
+      ).should('have.attr', 'data-state', 'checked')
+      cy.get(FieldConfig.requiredCheckbox(SortOption.EASE)) //
+        .should('have.attr', 'data-state', 'checked')
 
       applyFieldConfigChanges()
 
-      cy.get(FieldConfig.visibleCheckbox('enjoyment')).should('have.attr', 'data-state', 'unchecked')
-      cy.get(FieldConfig.requiredCheckbox('ease')).should('have.attr', 'data-state', 'unchecked')
+      cy.get(FieldConfig.visibleCheckbox(SortOption.ENJOYMENT)) //
+        .should('have.attr', 'data-state', 'unchecked')
+      cy.get(FieldConfig.requiredCheckbox(SortOption.EASE)) //
+        .should('have.attr', 'data-state', 'unchecked')
 
       cy.get(Selectors.BACK_BTN).click()
 
@@ -97,8 +101,10 @@ describe('Field Config Settings', () => {
     it('changes field visibility/required in settings, verifies the backend, then creates a task respecting those settings', () => {
       navigateToSettings()
 
-      cy.get(FieldConfig.visibleCheckbox('enjoyment')).should('have.attr', 'data-state', 'checked')
-      cy.get(FieldConfig.requiredCheckbox('ease')).should('have.attr', 'data-state', 'checked')
+      cy.get(FieldConfig.visibleCheckbox(SortOption.ENJOYMENT)) //
+        .should('have.attr', 'data-state', 'checked')
+      cy.get(FieldConfig.requiredCheckbox(SortOption.EASE)) //
+        .should('have.attr', 'data-state', 'checked')
 
       cy.intercept('PUT', ApiPaths.UPDATE_SETTINGS).as('settingsPut')
 
@@ -107,14 +113,16 @@ describe('Field Config Settings', () => {
       cy.wait('@settingsPut')
       cy.wait('@settingsPut')
 
-      cy.request<UserSettings>('GET', ApiPaths.GET_SETTINGS)
-        .its('body')
-        .then((settings) => {
-          expect(settings.fieldConfig.enjoyment.visible, 'enjoyment visible').to.be.false
-          expect(settings.fieldConfig.enjoyment.required, 'enjoyment required').to.be.false
-          expect(settings.fieldConfig.ease.visible, 'ease visible').to.be.true
-          expect(settings.fieldConfig.ease.required, 'ease required').to.be.false
+      getSettings().then((settings) => {
+        expect(settings.fieldConfig.enjoyment, SortOption.ENJOYMENT).to.eql({
+          visible: false,
+          required: false,
         })
+        expect(settings.fieldConfig.ease, SortOption.EASE).to.eql({
+          visible: true,
+          required: false,
+        })
+      })
 
       cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 

@@ -285,10 +285,14 @@ function registerTestRoutes(app: Express): void {
 
   app.delete(TestPaths.TEST_RESET_SETTINGS, async (_req, res) => {
     try {
-      await storage.updateSettings(TEST_USER_ID, { fieldConfig: DEFAULT_FIELD_CONFIG })
+      await storage.updateSettings(TEST_USER_ID, {
+        fieldConfig: DEFAULT_FIELD_CONFIG,
+      })
       res.json({ ok: true })
     } catch (err) {
-      res.status(500).json({ message: 'Reset settings failed', error: String(err) })
+      res
+        .status(500)
+        .json({ message: 'Reset settings failed', error: String(err) })
     }
   })
 }
