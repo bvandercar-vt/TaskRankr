@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
-import { getTestUserTasks, getTasks, selectOption } from '@cypress/support/utils'
+import { getTasks, selectOption } from '@cypress/support/utils'
 
 import type { Task } from '~/shared/schema'
 
@@ -59,7 +59,7 @@ describe('Create Task', () => {
     it('creates a task and displays it in the main tree', () => {
       createTaskAndCheckTree()
 
-      getTestUserTasks().then((tasks: Task[]) =>
+      getTasks().then((tasks: Task[]) =>
         expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
       )
     })
