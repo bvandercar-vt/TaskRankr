@@ -6,6 +6,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import { useIsMobile } from '@/hooks/useMobile'
 import { useTaskActions } from '@/hooks/useTasks'
 import type {
   DeleteTaskArgs,
@@ -57,23 +58,6 @@ interface TaskFormDialogProps
   parentId?: number
   activeTask?: Task
   onClose: () => void
-}
-
-const SM_BREAKPOINT = 640
-
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(
-    () => window.matchMedia(`(min-width: ${SM_BREAKPOINT}px)`).matches,
-  )
-
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${SM_BREAKPOINT}px)`)
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  return isDesktop
 }
 
 const DesktopDialog = ({
@@ -273,7 +257,7 @@ export const TaskFormDialogProvider = ({
     onMarkCompleted: handleMarkCompleted,
   }
 
-  const isDesktop = useIsDesktop()
+  const isMobile = useIsMobile()
 
   return (
     <TaskFormDialogContext.Provider
@@ -281,14 +265,14 @@ export const TaskFormDialogProvider = ({
     >
       {children}
 
-      {isDesktop ? (
+      {isMobile ? (
+        <MobileDialog {...taskFormDialogProps} />
+      ) : (
         <DesktopDialog
           {...taskFormDialogProps}
           setIsOpen={setIsOpen}
           mode={mode}
         />
-      ) : (
-        <MobileDialog {...taskFormDialogProps} />
       )}
 
       <SubtaskActionDialog
