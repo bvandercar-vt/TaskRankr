@@ -10,7 +10,8 @@
     "strict": true,
     "paths": {
       "@cypress/support/*": ["./support/*"],
-      "@src/*": ["../shared/*"]
+      "@src/*": ["../shared/*"],
+      "@src/client/*": ["../client/src/*"]
     }
   },
   "include": ["**/*.ts"],

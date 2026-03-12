@@ -1,5 +1,6 @@
 import { DEFAULT_TASK, Selectors } from '@cypress/support/constants'
 import { selectOption } from '@cypress/support/utils'
+import { Routes } from '@src/client/lib/constants'
 import { contract } from '@src/contract'
 import type { Task } from '@src/schema/tasks.zod'
 
@@ -48,8 +49,7 @@ const createTaskAndCheckTree = () => {
 describe('Create Task', () => {
   describe('Guest Mode', () => {
     beforeEach(() => {
-      cy.visit('/')
-      cy.get(Selectors.TRY_GUEST_BTN).click()
+      cy.visit(Routes.GUEST)
     })
 
     it('creates a task and displays it in the main tree', () => {
@@ -61,7 +61,7 @@ describe('Create Task', () => {
     beforeEach(() => {
       cy.loginAsTestUser()
       cy.clearTestUserTasks()
-      cy.visit('/')
+      cy.visit(Routes.HOME)
     })
 
     it('creates a task and displays it in the main tree, and persists it to the database', () => {
