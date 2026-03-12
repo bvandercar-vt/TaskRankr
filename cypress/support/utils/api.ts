@@ -4,18 +4,11 @@ import type { Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 
 /**
- * Fetches the current user's tasks, automatically routing to the correct
- * endpoint depending on whether a session cookie is present.
+ * Fetches tasks, routing to the correct endpoint based on session state.
  *
- * - **Logged in** (`connect.sid` cookie exists): calls the real authenticated
- *   endpoint (GET /api/tasks), exercising the full auth middleware stack.
- *   A bug in session validation or the route guard will surface here.
- *
- * - **Guest** (no session cookie): calls the test-only backdoor endpoint
- *   (GET /api/test/tasks), which requires no session. This lets guest-mode
- *   tests query the DB as the test-user identity to assert that locally-created
- *   tasks were NOT persisted to the server. Only reachable when
- *   NODE_ENV !== 'production'.
+ * Logged in (session cookie present) → GET /api/tasks (real auth middleware).
+ * Guest (no cookie) → GET /api/test/tasks (unauthenticated backdoor), used to
+ * assert that guest-created tasks are not persisted to the server.
  */
 export const getTasks = () =>
   cy

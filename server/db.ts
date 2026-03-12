@@ -12,13 +12,8 @@ import * as schema from '~/shared/schema'
 
 const { Pool } = pg
 
-// Load .env.local or .env when running locally.
-// In Replit and CI the environment is already populated (via Secrets /
-// workflow env vars), so process.loadEnvFile() is a no-op in those
-// environments. Locally, it lets developers keep DATABASE_URL and
-// SESSION_SECRET in .env.local without setting them system-wide.
-// Both calls are wrapped in try/catch because the function throws if the
-// file doesn't exist, not just if parsing fails.
+// Load .env.local (or .env) for local development. No-op in Replit/CI where
+// env vars are already set. try/catch required — throws if the file is absent.
 try {
   process.loadEnvFile('.env.local')
 } catch {

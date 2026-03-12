@@ -3,22 +3,19 @@
  */
 
 /**
- * API route paths for authentication and test utilities.
+ * Shared between the server (which registers the routes) and Cypress (which
+ * calls them), so both sides always agree on the path strings.
  *
- * TEST_LOGIN and TEST_TASKS are E2E-only backdoor endpoints registered
- * exclusively when NODE_ENV !== 'production' (see server/routes.ts →
- * registerTestRoutes). They are defined here rather than in a test-only file
- * so that both the server (which registers them) and the Cypress support layer
- * (which calls them via cy.request) share a single source of truth for the
- * path strings.
+ * TEST_* paths are E2E-only backdoors, only registered when
+ * NODE_ENV !== 'production'. See server/routes.ts → registerTestRoutes.
  */
 export const AuthPaths = {
   LOGIN: '/api/login',
   LOGOUT: '/api/logout',
   CALLBACK: '/api/callback',
   USER: '/api/auth/user',
-  /** E2E only – establishes a server session without the Replit OAuth flow. */
+  /** E2E only – creates a real server session without going through Replit OAuth. */
   TEST_LOGIN: '/api/test/login',
-  /** E2E only – GET returns / DELETE clears the hardcoded test user's tasks. */
+  /** E2E only – GET/DELETE the test user's tasks without a session. */
   TEST_TASKS: '/api/test/tasks',
 } as const
