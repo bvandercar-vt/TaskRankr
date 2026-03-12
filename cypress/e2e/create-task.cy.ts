@@ -43,7 +43,8 @@ const createTaskAndCheckTree = () => {
     .click()
   cy.get(Selectors.TaskCard.CARD)
     .find(Selectors.TaskCard.TITLE)
-    .should('have.text', DEFAULT_TASK.name)
+    .getElementArrayText()
+    .should('include', DEFAULT_TASK.name)
 }
 
 describe('Create Task', () => {
