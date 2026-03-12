@@ -4,7 +4,7 @@ import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
 import { useSyncSafe } from '@/providers/SyncProvider'
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import { Button } from '../primitives/Button'
 
 const TopBanner = ({
@@ -38,7 +38,7 @@ export const StatusBanner = () => {
       >
         <span>Log in to back up your data and use it across devices.</span>
         <Button
-          href={authPaths.LOGIN}
+          href={AuthPaths.LOGIN}
           size="sm"
           variant="secondary"
           className="h-7"

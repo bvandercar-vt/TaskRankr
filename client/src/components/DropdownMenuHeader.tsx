@@ -20,7 +20,7 @@ import { useLocation } from 'wouter'
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import { Button } from './primitives/Button'
 import {
   DropdownMenu,
@@ -142,7 +142,7 @@ export const DropdownMenuHeader = ({
                   icon={LogIn}
                   label="Sign Up"
                   data-testid="menu-item-signup"
-                  href={authPaths.LOGIN}
+                  href={AuthPaths.LOGIN}
                 />
                 <DropdownMenuItem
                   icon={LogOut}

@@ -45,7 +45,7 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
@@ -80,7 +80,7 @@ const UserInfoCard = () => {
         </p>
       </div>
       <Button
-        href={authPaths.LOGOUT}
+        href={AuthPaths.LOGOUT}
         variant="outline"
         className="gap-2 border-muted-foreground/30 text-muted-foreground"
         data-testid="button-logout"

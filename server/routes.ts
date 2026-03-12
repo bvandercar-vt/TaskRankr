@@ -11,6 +11,7 @@ import { createExpressEndpoints, initServer } from '@ts-rest/express'
 import { isNil, omit } from 'es-toolkit'
 import type { Express } from 'express'
 
+import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { TaskStatus } from '~/shared/schema'
 import {
@@ -212,7 +213,7 @@ export async function registerRoutes(
 const TEST_USER_ID = 'cypress-test-user'
 
 function registerTestRoutes(app: Express): void {
-  app.post('/api/test/login', async (req, res) => {
+  app.post(AuthPaths.TEST_LOGIN, async (req, res) => {
     try {
       await authStorage.upsertUser({
         id: TEST_USER_ID,
@@ -248,7 +249,7 @@ function registerTestRoutes(app: Express): void {
     }
   })
 
-  app.delete('/api/test/tasks', async (_req, res) => {
+  app.delete(AuthPaths.TEST_TASKS, async (_req, res) => {
     try {
       const tasks = await storage.getTasks(TEST_USER_ID)
       for (const task of tasks) {

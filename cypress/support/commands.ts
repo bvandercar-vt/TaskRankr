@@ -1,3 +1,5 @@
+import { AuthPaths } from '@src/constants'
+
 import { getElementArrayText } from './utils'
 
 declare global {
@@ -11,11 +13,11 @@ declare global {
 }
 
 Cypress.Commands.add('loginAsTestUser', () => {
-  cy.request('POST', '/api/test/login').its('status').should('eq', 200)
+  cy.request('POST', AuthPaths.TEST_LOGIN).its('status').should('eq', 200)
 })
 
 Cypress.Commands.add('clearTestUserTasks', () => {
-  cy.request('DELETE', '/api/test/tasks').its('status').should('eq', 200)
+  cy.request('DELETE', AuthPaths.TEST_TASKS).its('status').should('eq', 200)
 })
 
 Cypress.Commands.addQuery(

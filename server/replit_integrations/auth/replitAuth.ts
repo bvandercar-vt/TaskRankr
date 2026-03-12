@@ -16,7 +16,7 @@ import * as client from 'openid-client'
 import { Strategy, type VerifyFunction } from 'openid-client/passport'
 import passport from 'passport'
 
-import { authPaths } from '~/shared/constants'
+import { AuthPaths } from '~/shared/constants'
 import { authStorage } from './storage'
 
 const getOidcConfig = memoize(
@@ -121,7 +121,7 @@ export async function setupAuth(app: Express) {
           name: strategyName,
           config: config!,
           scope: 'openid email profile offline_access',
-          callbackURL: `https://${domain}${authPaths.CALLBACK}`,
+          callbackURL: `https://${domain}${AuthPaths.CALLBACK}`,
         },
         verify,
       )
@@ -130,7 +130,7 @@ export async function setupAuth(app: Express) {
     }
   }
 
-  app.get(authPaths.LOGIN, (req, res, next) => {
+  app.get(AuthPaths.LOGIN, (req, res, next) => {
     ensureStrategy(req.hostname)
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: 'login consent',
@@ -138,15 +138,15 @@ export async function setupAuth(app: Express) {
     })(req, res, next)
   })
 
-  app.get(authPaths.CALLBACK, (req, res, next) => {
+  app.get(AuthPaths.CALLBACK, (req, res, next) => {
     ensureStrategy(req.hostname)
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: '/',
-      failureRedirect: authPaths.LOGIN,
+      failureRedirect: AuthPaths.LOGIN,
     })(req, res, next)
   })
 
-  app.get(authPaths.LOGOUT, (req, res) => {
+  app.get(AuthPaths.LOGOUT, (req, res) => {
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config!, {
