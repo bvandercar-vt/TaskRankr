@@ -11,9 +11,11 @@ import { createExpressEndpoints, initServer } from '@ts-rest/express'
 import { isNil, omit } from 'es-toolkit'
 import type { Express } from 'express'
 
+import { TestPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { TaskStatus } from '~/shared/schema'
 import {
+  authStorage,
   isAuthenticated,
   registerAuthRoutes,
   setupAuth,
@@ -199,7 +201,85 @@ export async function registerRoutes(
   await setupAuth(app)
   registerAuthRoutes(app)
 
+  if (process.env.NODE_ENV !== 'production') {
+    registerTestRoutes(app)
+  }
+
   createExpressEndpoints(contract, router, app)
 
   return httpServer
+}
+
+/** Hardcoded user identity used by every Cypress test run. */
+const TEST_USER_ID = 'cypress-test-user'
+
+/**
+ * E2E-only routes, never registered in production.
+ *
+ * Replit OAuth requires a live OIDC provider and browser redirects — neither
+ * is available in CI. These endpoints give Cypress a controlled alternative:
+ *
+ *  POST /api/test/login   – Upserts the test user and calls req.login(),
+ *    writing a real session cookie via the same Passport middleware as prod.
+ *  GET  /api/test/tasks   – Returns the test user's tasks without a session,
+ *    so guest-mode tests can assert nothing was persisted to the server.
+ *  DELETE /api/test/tasks – Clears all test-user tasks between runs.
+ */
+function registerTestRoutes(app: Express): void {
+  app.post(TestPaths.TEST_LOGIN, async (req, res) => {
+    try {
+      await authStorage.upsertUser({
+        id: TEST_USER_ID,
+        email: 'cypress@test.local',
+        firstName: 'Cypress',
+        lastName: 'Test',
+        profileImageUrl: null,
+      })
+
+      const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
+      const user: UserSession = {
+        claims: {
+          sub: TEST_USER_ID,
+          iss: 'test',
+          aud: 'test',
+          exp: expiresAt,
+          iat: Math.floor(Date.now() / 1000),
+        } as UserSession['claims'],
+        expires_at: expiresAt,
+        access_token: 'test-token',
+      }
+
+      req.login(user, (err) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ message: 'Login failed', error: String(err) })
+        }
+        res.json({ ok: true, userId: TEST_USER_ID })
+      })
+    } catch (err) {
+      res.status(500).json({ message: 'Setup failed', error: String(err) })
+    }
+  })
+
+  app.get(TestPaths.TEST_TASKS, async (_req, res) => {
+    try {
+      const tasks = await storage.getTasks(TEST_USER_ID)
+      res.json(tasks)
+    } catch (err) {
+      res.status(500).json({ message: 'Fetch failed', error: String(err) })
+    }
+  })
+
+  app.delete(TestPaths.TEST_TASKS, async (_req, res) => {
+    try {
+      const tasks = await storage.getTasks(TEST_USER_ID)
+      for (const task of tasks) {
+        await storage.deleteTask(task.id, TEST_USER_ID)
+      }
+      res.json({ ok: true, deleted: tasks.length })
+    } catch (err) {
+      res.status(500).json({ message: 'Cleanup failed', error: String(err) })
+    }
+  })
 }

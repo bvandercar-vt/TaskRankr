@@ -45,7 +45,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      // Disabled outside production so Cypress and local dev can set/replay the
+      // session cookie without TLS.
+      secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
     },
   })
@@ -84,7 +86,30 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize())
   app.use(passport.session())
 
-  const config = await getOidcConfig()
+  passport.serializeUser((user: Express.User, cb) => cb(null, user))
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user))
+
+  /*
+   * OIDC discovery fails in local/CI environments where no provider is
+   * reachable, so this is necessary for those environments.
+   *
+   * Not a security risk: the failure mode is fail-closed
+   * (login routes are never registered, so no new sessions can be created).
+   * Fail-open — e.g. falling back to unauthenticated access — would be
+   * dangerous, but that never happens here. Existing sessions remain valid
+   * because the session middleware above always runs regardless of this result.
+   */
+  let config: Awaited<ReturnType<typeof getOidcConfig>> | null = null
+  try {
+    config = await getOidcConfig()
+  } catch (err) {
+    console.warn(
+      '[Auth] OIDC discovery failed — OAuth login routes disabled.',
+      err instanceof Error ? err.message : String(err),
+    )
+  }
+
+  if (!config) return
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -116,9 +141,6 @@ export async function setupAuth(app: Express) {
       registeredStrategies.add(strategyName)
     }
   }
-
-  passport.serializeUser((user: Express.User, cb) => cb(null, user))
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user))
 
   app.get(AuthPaths.LOGIN, (req, res, next) => {
     ensureStrategy(req.hostname)
