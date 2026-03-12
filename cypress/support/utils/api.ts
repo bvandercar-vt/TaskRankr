@@ -1,6 +1,7 @@
 import { TestPaths } from '~/shared/constants'
 import type { Task, UserSettings } from '~/shared/schema'
 import { ApiPaths } from '../constants'
+import { isLoggedIn } from './test-runner'
 
 /**
  * Fetches tasks, routing to the correct endpoint based on session state.
@@ -11,15 +12,11 @@ import { ApiPaths } from '../constants'
  */
 export const getTasks = () =>
   cy
-    .getCookie('connect.sid')
-    .then((cookie) =>
-      cy
-        .request<Task[]>(
-          'GET',
-          cookie ? ApiPaths.GET_TASKS : TestPaths.TEST_TASKS,
-        )
-        .its('body'),
+    .request<Task[]>(
+      'GET',
+      isLoggedIn() ? ApiPaths.GET_TASKS : TestPaths.TEST_TASKS,
     )
+    .its('body')
 
 export const checkTaskExistsBackend = (
   task: Pick<Task, 'name'>,
