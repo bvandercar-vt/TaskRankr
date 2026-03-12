@@ -7,10 +7,9 @@
     "moduleResolution": "node",
     "strict": true
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "../node_modules"
-  ]
+  "paths": {
+    "@cypress/support/*": ["./support/*"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["../node_modules"]
 }

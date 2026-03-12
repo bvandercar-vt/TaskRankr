@@ -43,7 +43,7 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUndeclaredDependencies": "error",
+        "noUndeclaredDependencies": "off", // wish we could use this but it doesn't work with tsconfig path aliases
         "noUnusedFunctionParameters": "error",
         "noUnusedImports": {
           "level": "error",

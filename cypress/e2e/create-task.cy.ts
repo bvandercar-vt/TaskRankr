@@ -1,4 +1,4 @@
-import { Selectors } from '../support/constants'
+import { Selectors } from '@cypress/support/constants/selectors'
 
 const TASK_NAME = 'E2E Test Task - Create'
 

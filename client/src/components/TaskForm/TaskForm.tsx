@@ -253,6 +253,7 @@ export const TaskForm = ({
                 <FormControl>
                   <Textarea
                     placeholder="Task name"
+                    data-testid="task-name-input"
                     className="bg-secondary/20 border-white/5 min-h-0 py-2 text-lg focus-visible:ring-primary/50 resize-none overflow-hidden leading-snug"
                     rows={1}
                     onInput={(e) => {
@@ -413,6 +414,7 @@ export const TaskForm = ({
             variant="outline"
             onClick={onCancel}
             className="flex-1 h-12 border-white/10 bg-background hover:bg-secondary/20 text-lg"
+            data-testid="cancel-button"
           >
             Cancel
           </Button>
@@ -420,6 +422,7 @@ export const TaskForm = ({
             type="submit"
             disabled={!isValid}
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg disabled:bg-primary/80 disabled:cursor-not-allowed"
+            data-testid="submit-button"
           >
             {initialData ? 'Save' : 'Create'}
           </Button>

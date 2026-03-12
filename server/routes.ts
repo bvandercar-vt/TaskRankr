@@ -237,7 +237,9 @@ function registerTestRoutes(app: Express): void {
 
       req.login(user, (err) => {
         if (err) {
-          return res.status(500).json({ message: 'Login failed', error: String(err) })
+          return res
+            .status(500)
+            .json({ message: 'Login failed', error: String(err) })
         }
         res.json({ ok: true, userId: TEST_USER_ID })
       })
@@ -246,7 +248,7 @@ function registerTestRoutes(app: Express): void {
     }
   })
 
-  app.delete('/api/test/tasks', async (req, res) => {
+  app.delete('/api/test/tasks', async (_req, res) => {
     try {
       const tasks = await storage.getTasks(TEST_USER_ID)
       for (const task of tasks) {
