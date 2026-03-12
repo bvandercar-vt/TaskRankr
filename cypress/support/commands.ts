@@ -16,11 +16,11 @@ declare global {
 }
 
 Cypress.Commands.add('loginAsTestUser', () => {
-  cy.request('POST', TestPaths.TEST_LOGIN).its('status').should('eq', 200)
+  cy.request('POST', TestPaths.TEST_LOGIN).should('have.property', 'status', 200)
 })
 
 Cypress.Commands.add('clearTestUserTasks', () => {
-  cy.request('DELETE', TestPaths.TEST_TASKS).its('status').should('eq', 200)
+  cy.request('DELETE', TestPaths.TEST_TASKS).should('have.property', 'status', 200)
 })
 
 Cypress.Commands.addQuery(
