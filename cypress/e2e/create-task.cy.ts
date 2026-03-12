@@ -5,7 +5,6 @@ const TASK_NAME = 'E2E Test Task - Create'
 describe('Create Task', () => {
   describe('Guest Mode', () => {
     beforeEach(() => {
-      cy.clearLocalStorage()
       cy.visit('/')
       cy.get(Selectors.TRY_GUEST_BUTTON).click()
     })
