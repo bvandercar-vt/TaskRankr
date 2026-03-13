@@ -27,7 +27,7 @@ export const DefaultTask = {
 
 export const SettingsAllVisbileAllRequired = {
   priority: { visible: true, required: true },
-  ease: { visible: true, required: false },
-  enjoyment: { visible: true, required: false },
-  time: { visible: true, required: false },
+  ease: { visible: true, required: true },
+  enjoyment: { visible: true, required: true },
+  time: { visible: true, required: true },
 } as const satisfies FieldConfig
