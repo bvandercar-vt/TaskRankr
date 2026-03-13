@@ -25,7 +25,7 @@ export const DefaultTask = {
   time: Time.HIGH,
 } as const satisfies TaskFormData
 
-export const SettingsAllVisbileAllRequired = {
+export const FieldConfigAllTrue = {
   priority: { visible: true, required: true },
   ease: { visible: true, required: true },
   enjoyment: { visible: true, required: true },

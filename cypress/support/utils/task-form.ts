@@ -12,6 +12,9 @@ export type TaskFormData = Pick<Task, 'name' | RankField>
 
 const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
 
+/**
+ * Fills form, submits, and checks results in the UI and (if logged in) backend. 
+ */
 export const fillTaskForm = (
   task: TaskFormData,
   settings: FieldConfig,
