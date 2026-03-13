@@ -1,3 +1,5 @@
+import type { RankField } from '~/shared/schema'
+
 const testId = <S extends string>(testid: S) =>
   `[data-testid="${testid}"]` as const
 const testIdStartsWith = <S extends string>(testid: S) =>
@@ -11,8 +13,14 @@ const testIdEndsWith = <S extends string>(testid: S) =>
 
 export const Selectors = {
   CREATE_TASK_BTN: testId('button-create-task'),
+  BACK_BTN: testId('button-back'),
+  MENU_BTN: testId('button-menu'),
   LandingPage: {
     TRY_GUEST_BTN: testId('button-try-guest'),
+  },
+  Menu: {
+    SETTINGS: testId('menu-item-settings'),
+    HOME: testId('menu-item-home'),
   },
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
@@ -20,13 +28,16 @@ export const Selectors = {
   },
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
-    RankSelect: {
-      PRIORITY: testId('rank-select-priority'),
-      EASE: testId('rank-select-ease'),
-      ENJOYMENT: testId('rank-select-enjoyment'),
-      TIME: testId('rank-select-time'),
-    },
+    rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
+  },
+  Settings: {
+    FieldConfig: {
+      visibleCheckbox: (field: RankField) =>
+        testId(`checkbox-${field}-visible`),
+      requiredCheckbox: (field: RankField) =>
+        testId(`checkbox-${field}-required`),
+    },
   },
 } as const

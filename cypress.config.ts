@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import installTerminalReporter from 'cypress-terminal-report/src/installLogsPrinter'
 import vitePreprocessor from 'cypress-vite'
 
 export default defineConfig({
@@ -10,6 +11,18 @@ export default defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on) {
       on('file:preprocessor', vitePreprocessor())
+
+      installTerminalReporter(on, {
+        outputVerbose: false,
+        compactLogs: 5,
+        outputCompactLogs: false, // print all logs to file
+        routeTrimLength: 1000, // don't print all GET data
+        printLogsToConsole: 'onFail',
+        printLogsToFile: 'always',
+        outputRoot: 'cypress/results',
+        specRoot: 'cypress/e2e',
+        outputTarget: { 'logs|html': 'html' },
+      })
     },
   },
 })

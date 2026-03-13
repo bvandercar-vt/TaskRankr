@@ -1,90 +1,56 @@
 import { Routes } from '@client/lib/constants'
-import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
-import { getTasks, selectOption } from '@cypress/support/utils'
+import {
+  DefaultTask,
+  FieldConfigAllTrue,
+  Selectors,
+} from '@cypress/support/constants'
+import { runBothModes } from '@cypress/support/utils'
+import { setFieldConfig } from '@cypress/support/utils/settings'
+import {
+  fillTaskForm,
+  type TaskFormData,
+} from '@cypress/support/utils/task-form'
 
-import type { RankField, Task } from '~/shared/schema'
+import type { FieldConfig } from '~/shared/schema'
 
-const { TaskForm, TaskCard } = Selectors
-const { RankSelect } = TaskForm
+const { Menu } = Selectors
 
-const fillTaskForm = ({
-  name,
-  priority,
-  ease,
-  enjoyment,
-  time,
-}: Pick<Task, 'name' | RankField>) => {
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
+describe('Task Creation', () => {
+  runBothModes('create a task, check displays in main tree', (isLoggedIn) => {
+    cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
 
-  cy.get(TaskForm.NAME_INPUT).type(name)
-
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
-  if (priority !== null) {
-    selectOption(RankSelect.PRIORITY, priority)
-  }
-
-  if (ease !== null) {
-    selectOption(RankSelect.EASE, ease)
-  }
-
-  if (enjoyment !== null) {
-    selectOption(RankSelect.ENJOYMENT, enjoyment)
-  }
-
-  if (time !== null) {
-    selectOption(RankSelect.TIME, time)
-  }
-}
-
-const createTaskAndCheckTree = () => {
-  cy.get(Selectors.CREATE_TASK_BTN).click()
-  fillTaskForm(DefaultTask)
-  cy.get(TaskForm.SUBMIT_BTN)
-    .should('be.enabled')
-    .should('have.text', 'Create')
-    .click()
-  cy.get(TaskCard.CARD)
-    .find(TaskCard.TITLE)
-    .getElementArrayText()
-    .should('include', DefaultTask.name)
-}
-
-describe('Create Task', () => {
-  describe('Guest Mode', () => {
-    beforeEach(() => {
-      cy.clearTestUserTasks()
-      cy.visit(Routes.GUEST)
-    })
-
-    it('creates a task and displays it in the main tree', () => {
-      createTaskAndCheckTree()
-
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
-      )
-    })
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(DefaultTask, FieldConfigAllTrue, 'Create')
   })
 
-  describe('Logged In Mode', () => {
-    beforeEach(() => {
-      cy.loginAsTestUser()
-      cy.clearTestUserTasks()
-      cy.visit(Routes.HOME)
-    })
+  runBothModes(
+    'change field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
+    (isLoggedIn) => {
+      const fieldConfig = {
+        priority: { visible: true, required: true },
+        ease: { visible: true, required: false },
+        enjoyment: { visible: false, required: false },
+        time: { visible: true, required: false },
+      } as const satisfies FieldConfig
 
-    it('creates a task and displays it in the main tree, and persists it to the database', () => {
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.not.include(DefaultTask.name),
-      )
+      const newTask = {
+        ...DefaultTask,
+        name: 'Field Config Test Task',
+        ease: null,
+        enjoyment: null,
+      } satisfies TaskFormData
 
-      cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
+      cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
 
-      createTaskAndCheckTree()
+      cy.get(Selectors.MENU_BTN).click()
+      cy.get(Menu.SETTINGS).click()
+      setFieldConfig(fieldConfig)
+      cy.get('@settingsPut').should('have.been.called', isLoggedIn ? 2 : 0)
 
-      cy.wait('@createTask')
-      getTasks().then((tasks) =>
-        expect(tasks.map((t) => t.name)).to.include(DefaultTask.name),
-      )
-    })
-  })
+      cy.get(Selectors.BACK_BTN).click()
+
+      cy.get(Selectors.CREATE_TASK_BTN).click()
+      fillTaskForm(newTask, fieldConfig, 'Create')
+    },
+  )
 })

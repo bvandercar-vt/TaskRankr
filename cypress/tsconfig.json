@@ -11,7 +11,8 @@
     "paths": {
       "@cypress/support/*": ["./support/*"],
       "@client/*": ["../client/src/*"],
-      "~/shared/*": ["../shared/*"]
+      "~/shared/*": ["../shared/*"],
+      "@/*": ["../client/src/*"] // from root tsconfig aliases, but don't use this one in cypress code
     }
   },
   "include": ["**/*.ts"],
