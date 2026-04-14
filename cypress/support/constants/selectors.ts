@@ -25,6 +25,7 @@ export const Selectors = {
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
+    EXPAND_BTN: testIdStartsWith('button-expand-'),
   },
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
