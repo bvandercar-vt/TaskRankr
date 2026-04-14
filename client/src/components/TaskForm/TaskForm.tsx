@@ -384,12 +384,15 @@ export const TaskForm = ({
                     checked={form.watch('status') === TaskStatus.COMPLETED}
                     disabled={hasIncompleteSubtasks}
                     onCheckedChange={(checked) => {
-                      const newStatus = checked === true
-                        ? TaskStatus.COMPLETED
-                        : (initialData?.status !== TaskStatus.COMPLETED
-                            ? initialData?.status
-                            : TaskStatus.OPEN) ?? TaskStatus.OPEN
-                      form.setValue('status', newStatus, { shouldValidate: true })
+                      const newStatus =
+                        checked === true
+                          ? TaskStatus.COMPLETED
+                          : ((initialData?.status !== TaskStatus.COMPLETED
+                              ? initialData?.status
+                              : TaskStatus.OPEN) ?? TaskStatus.OPEN)
+                      form.setValue('status', newStatus, {
+                        shouldValidate: true,
+                      })
                       void form.trigger('timeSpent')
                     }}
                     className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"

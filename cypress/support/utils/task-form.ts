@@ -5,6 +5,7 @@ import {
   type FieldConfig,
   type RankField,
   type Task,
+  TaskStatus,
 } from '~/shared/schema'
 import { ApiPaths, Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
@@ -73,12 +74,15 @@ export const fillTaskForm = (
   }
 }
 
-export function maybeWaitForCreate(task: TaskFormData) {
+export function maybeWaitForCreate({
+  status = TaskStatus.OPEN,
+  ...task
+}: TaskFormData & { status?: TaskStatus }) {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@createTask')
 
-  checkTaskExistsBackend(task, loggedIn)
+  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
 
   cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
 }
@@ -87,7 +91,7 @@ export function maybeWaitForCreate(task: TaskFormData) {
  * Submits form and checks results in the UI and (if logged in) backend.
  */
 export const submitTaskForm = (
-  task: TaskFormData,
+  { status = TaskStatus.OPEN, ...task }: TaskFormData & { status?: TaskStatus },
   submitBtnText = 'Create',
 ) => {
   cy.get(TaskForm.SUBMIT_BTN)
@@ -95,5 +99,5 @@ export const submitTaskForm = (
     .should('not.be.disabled')
     .click()
 
-  maybeWaitForCreate(task)
+  maybeWaitForCreate({ ...task, status })
 }
