@@ -100,7 +100,6 @@ describe('Task Creation', () => {
       maybeWaitForCreate(parentTask)
       fillTaskForm(subtask)
       submitTaskForm(subtask)
-      // TODO: if cancels at parent level, should subtasks be deleted? Or left orphaned?
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .first()

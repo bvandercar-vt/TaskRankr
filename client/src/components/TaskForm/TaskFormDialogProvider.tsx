@@ -181,7 +181,9 @@ export const TaskFormDialogProvider = ({
     setMode('create')
     setParentId(pid)
     setActiveTask(undefined)
-    setPendingCreateTaskId(undefined)
+    if (pid === undefined) {
+      setPendingCreateTaskId(undefined)
+    }
     setIsOpen(true)
   }
 
