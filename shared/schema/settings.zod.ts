@@ -5,6 +5,7 @@
 
 import { boolean, jsonb, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { mapValues } from 'es-toolkit'
 import { z } from 'zod'
 
 import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
@@ -48,13 +49,19 @@ export const DEFAULT_FIELD_CONFIG: FieldConfig = {
 }
 
 /** Ensures `required` is always false whenever `visible` is false. */
-export const sanitizeFieldConfig = (fieldConfig: FieldConfig): FieldConfig => {
-  const result = {} as FieldConfig
-  for (const key of Object.keys(fieldConfig) as (keyof FieldConfig)[]) {
-    const { visible, required } = fieldConfig[key]
-    result[key] = { visible, required: visible ? required : false }
+export const sanitizeSettings = <T extends Partial<UserSettings>>(
+  settings: T,
+): T => {
+  if (settings.fieldConfig) {
+    return {
+      ...settings,
+      fieldConfig: mapValues(settings.fieldConfig, ({ visible, required }) => ({
+        visible,
+        required: visible ? required : false,
+      })),
+    }
   }
-  return result
+  return settings
 }
 
 export const userSettings = pgTable('user_settings', {

@@ -11,7 +11,7 @@ import { useLocalStateSafe } from '@/providers/LocalStateProvider'
 import {
   type FieldConfig,
   type FieldFlags,
-  sanitizeFieldConfig,
+  sanitizeSettings,
   type UserSettings,
 } from '~/shared/schema'
 
@@ -21,19 +21,15 @@ export const useSettings = () => {
   const localState = useLocalStateSafe()
 
   const rawSettings = localState?.settings
-  const settings: UserSettings = useMemo(() => {
-    const merged = toMerged(DEFAULT_SETTINGS, rawSettings ?? {})
-    return { ...merged, fieldConfig: sanitizeFieldConfig(merged.fieldConfig) }
-  }, [rawSettings])
+  const settings: UserSettings = useMemo(
+    () => sanitizeSettings(toMerged(DEFAULT_SETTINGS, rawSettings ?? {})),
+    [rawSettings],
+  )
   const isLoading = !localState?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
     if (!localState) return
-    const sanitized =
-      value.fieldConfig != null
-        ? { ...value, fieldConfig: sanitizeFieldConfig(value.fieldConfig) }
-        : value
-    localState.updateSettings(sanitized)
+    localState.updateSettings(sanitizeSettings(value))
   }
 
   const updateFieldFlags = (

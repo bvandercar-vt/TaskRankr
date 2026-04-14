@@ -10,7 +10,7 @@ import { and, eq } from 'drizzle-orm'
 
 import {
   type InsertTask,
-  sanitizeFieldConfig,
+  sanitizeSettings,
   type Task,
   TaskStatus,
   tasks,
@@ -447,8 +447,7 @@ export class DatabaseStorage implements IStorage {
       .from(userSettings)
       .where(eq(userSettings.userId, userId))
     if (settings) {
-      const sanitized = sanitizeFieldConfig(settings.fieldConfig)
-      return { ...settings, fieldConfig: sanitized }
+      return sanitizeSettings(settings)
     }
     // Create default settings for new user
     const [newSettings] = await db
@@ -465,20 +464,13 @@ export class DatabaseStorage implements IStorage {
     // Ensure settings exist first
     await this.getSettings(userId)
 
-    const sanitizedUpdates =
-      updates.fieldConfig != null
-        ? { ...updates, fieldConfig: sanitizeFieldConfig(updates.fieldConfig) }
-        : updates
-    const { userId: _, ...updateData } = sanitizedUpdates
+    const { userId: _, ...updateData } = sanitizeSettings(updates)
     const [settings] = await db
       .update(userSettings)
       .set(updateData)
       .where(eq(userSettings.userId, userId))
       .returning()
-    return {
-      ...settings,
-      fieldConfig: sanitizeFieldConfig(settings.fieldConfig),
-    }
+    return sanitizeSettings(settings)
   }
 }
 
