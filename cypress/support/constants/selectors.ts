@@ -25,6 +25,7 @@ export const Selectors = {
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
+    EXPAND_BTN: testIdStartsWith('button-expand-'),
   },
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
@@ -35,6 +36,8 @@ export const Selectors = {
     rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
+    ADD_SUBTASK_BTN: testId('button-add-subtask'),
+    SUBTASK_ROW: testIdStartsWith('subtask-row-'),
   },
   Settings: {
     FieldConfig: {

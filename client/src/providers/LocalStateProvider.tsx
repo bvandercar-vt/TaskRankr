@@ -85,6 +85,9 @@ interface LocalStateContextValue {
   setTasksFromServer: (tasks: Task[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
   deleteDemoData: () => void
+  subscribeToIdReplacement: (
+    cb: (tempId: number, realId: number) => void,
+  ) => () => void
 }
 
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
@@ -227,6 +230,19 @@ export const LocalStateProvider = ({
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
   const tasksRef = useRef<Task[]>([])
+  const idReplacedCallbacks = useRef<
+    Set<(tempId: number, realId: number) => void>
+  >(new Set())
+
+  const subscribeToIdReplacement = useCallback(
+    (cb: (tempId: number, realId: number) => void) => {
+      idReplacedCallbacks.current.add(cb)
+      return () => {
+        idReplacedCallbacks.current.delete(cb)
+      }
+    },
+    [],
+  )
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
@@ -393,6 +409,9 @@ export const LocalStateProvider = ({
         return op
       }),
     )
+    idReplacedCallbacks.current.forEach((cb) => {
+      cb(tempId, realId)
+    })
   }, [])
 
   const createTask = useCallback(
@@ -806,7 +825,35 @@ export const LocalStateProvider = ({
       if (serverTasks.length > 0) {
         setDemoTaskIds([])
       }
-      reconcileAndSetTasks(serverTasks, 'fromServer')
+
+      const validIds = new Set(serverTasks.map((t) => t.id))
+      const orphaned: Task[] = []
+      const sanitized = serverTasks.map((t) => {
+        if (t.parentId !== null && !validIds.has(t.parentId)) {
+          orphaned.push(t)
+          return { ...t, parentId: null }
+        }
+        return t
+      })
+
+      if (orphaned.length > 0) {
+        debugLog.log('sync', 'setTasksFromServer:orphanedParentIds', {
+          ids: orphaned.map((t) => t.id),
+        })
+        setSyncQueue((prev) => [
+          ...prev,
+          ...orphaned.map(
+            (t) =>
+              ({
+                type: SyncOperationType.UPDATE_TASK,
+                id: t.id,
+                data: { parentId: null },
+              }) as const,
+          ),
+        ])
+      }
+
+      reconcileAndSetTasks(sanitized, 'fromServer')
       nextIdRef.current = -1
       localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
@@ -854,6 +901,7 @@ export const LocalStateProvider = ({
         setTasksFromServer,
         setSettingsFromServer,
         deleteDemoData,
+        subscribeToIdReplacement,
       }}
     >
       {children}
