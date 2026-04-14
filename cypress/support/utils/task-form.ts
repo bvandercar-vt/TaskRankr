@@ -1,27 +1,23 @@
-import { RANK_FIELDS_COLUMNS } from '@client/lib/task-utils'
-
 import {
   DEFAULT_FIELD_CONFIG,
   type FieldConfig,
-  type RankField,
+  RankField,
   type Task,
-  TaskStatus,
 } from '~/shared/schema'
-import { ApiPaths, Selectors } from '../constants'
+import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
+import { interceptCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
 
 export type TaskFormData = Pick<Task, 'name' | RankField>
 
-const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
-
 export const fillTaskFormRankFields = (
   task: TaskFormData,
   settings: FieldConfig,
 ) => {
-  const requiredFields = rankFields.filter(
+  const requiredFields = RankField.filter(
     (field) => settings[field].visible && settings[field].required,
   )
 
@@ -29,7 +25,7 @@ export const fillTaskFormRankFields = (
     .should(requiredFields.length ? 'be.disabled' : 'not.be.disabled')
 
   const filled = new Set<RankField>()
-  for (const field of rankFields) {
+  for (const field of RankField) {
     const RankSelect = TaskForm.rankSelect(field)
     const value = task[field]
     const config = settings[field]
@@ -58,7 +54,7 @@ export const fillTaskForm = (
   const loggedIn = isLoggedIn()
 
   loggedIn && checkTaskExistsBackend(task, false)
-  cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
+  interceptCreate()
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
@@ -74,30 +70,9 @@ export const fillTaskForm = (
   }
 }
 
-export function maybeWaitForCreate({
-  status = TaskStatus.OPEN,
-  ...task
-}: TaskFormData & { status?: TaskStatus }) {
-  const loggedIn = isLoggedIn()
-
-  loggedIn && cy.wait('@createTask')
-
-  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
-
-  cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
-}
-
-/**
- * Submits form and checks results in the UI and (if logged in) backend.
- */
-export const submitTaskForm = (
-  { status = TaskStatus.OPEN, ...task }: TaskFormData & { status?: TaskStatus },
-  submitBtnText = 'Create',
-) => {
-  cy.get(TaskForm.SUBMIT_BTN)
+export const clickSubmitBtn = (submitBtnText = 'Create') =>
+  cy
+    .get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
-
-  maybeWaitForCreate({ ...task, status })
-}
