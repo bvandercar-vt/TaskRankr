@@ -189,10 +189,8 @@ const AttributeSettingsCard = ({
         <tr>
           <td
             colSpan={3}
-            className="pt-5 pb-1 text-[10px] uppercase tracking-widest text-muted-foreground/50 border-t-2 border-dashed border-white/10"
-          >
-            Tracking
-          </td>
+            className="pt-2 pb-0 border-t-2 border-dashed border-white/10"
+          />
         </tr>
         {(() => {
           const { visible, required } = fieldConfig.timeSpent
