@@ -52,6 +52,7 @@ describe('Task Creation', () => {
   runBothModes('create a task, check displays in main tree', (loggedIn) => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(DefaultTask)
+
     clickSubmitBtn()
     waitForCreate([DefaultTask])
     checkTaskInTree(DefaultTask)
@@ -81,6 +82,7 @@ describe('Task Creation', () => {
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(newTask, fieldConfig)
+
       clickSubmitBtn()
       waitForCreate([newTask])
       checkTaskInTree(newTask)
@@ -104,6 +106,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
+
       clickSubmitBtn()
       waitForCreate([{ ...DefaultTask, status: TaskStatus.COMPLETED }])
       // TODO: check is in completed tree
@@ -127,7 +130,6 @@ describe('Task Creation', () => {
 
       clickSubmitBtn()
       waitForCreate([rootTask, subtask])
-
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
     },
@@ -158,7 +160,6 @@ describe('Task Creation', () => {
 
       clickSubmitBtn()
       waitForCreate([rootTask, subtask, subtask2])
-
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
     },
@@ -191,7 +192,6 @@ describe('Task Creation', () => {
         .should('equal', [subtask2.name, subtask3.name])
 
       clickSubmitBtn()
-
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
@@ -199,7 +199,6 @@ describe('Task Creation', () => {
 
       clickSubmitBtn()
       waitForCreate([rootTask, subtask, subtask2, subtask3])
-
       checkTaskInTree({
         ...rootTask,
         subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],

@@ -26,7 +26,7 @@ const subtask2 = {
   name: 'E2E Subtask 2',
 } as const satisfies TaskFormData
 
-const checkDoNotExist = (tasks: TaskFormData[]) => {
+const checkTasksDontExist = (tasks: TaskFormData[]) => {
   tasks.forEach((task) => {
     cy.contains(task.name).should('not.exist')
     checkTaskExistsBackend(task, false)
@@ -49,7 +49,7 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      checkDoNotExist([rootTask])
+      checkTasksDontExist([rootTask])
       cy.get('@createTask').should('have.been.called', 0)
     },
   )
@@ -61,7 +61,6 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-
       fillTaskForm(subtask)
       clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
@@ -72,7 +71,7 @@ describe('Task Creation Cancellation', () => {
       cy.contains('1 subtask').should('be.visible')
       cy.get('[data-testid="button-cancel-confirm-discard"]').click()
 
-      checkDoNotExist([rootTask, subtask])
+      checkTasksDontExist([rootTask, subtask])
       cy.get('@createTask').should('have.been.called', 0)
     },
   )
@@ -84,7 +83,6 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-
       cy.get(TaskForm.NAME_INPUT).type(subtask.name)
       cy.get(TaskForm.CANCEL_BTN).click()
 
@@ -92,7 +90,7 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      checkDoNotExist([rootTask, subtask])
+      checkTasksDontExist([rootTask, subtask])
       cy.get('@createTask').should('have.been.called', 0)
     },
   )
@@ -104,7 +102,6 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-
       fillTaskForm(subtask)
       clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
@@ -120,7 +117,7 @@ describe('Task Creation Cancellation', () => {
       cy.contains('2 subtasks').should('be.visible')
       cy.get('[data-testid="button-cancel-confirm-discard"]').click()
 
-      checkDoNotExist([rootTask, subtask, subtask2])
+      checkTasksDontExist([rootTask, subtask, subtask2])
       cy.get('@createTask').should('have.been.called', 0)
     },
   )
