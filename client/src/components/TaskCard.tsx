@@ -183,10 +183,10 @@ const formatDuration = (ms: number) => {
 const getTotalAccumulatedTime = (
   task: Pick<
     TaskWithSubtasks,
-    'inProgressTime' | 'inProgressStartedAt' | 'status' | 'subtasks'
+    'timeSpent' | 'inProgressStartedAt' | 'status' | 'subtasks'
   >,
 ): number => {
-  let total = task.inProgressTime
+  let total = task.timeSpent
   if (task.status === TaskStatus.IN_PROGRESS && task.inProgressStartedAt) {
     const elapsed = Date.now() - new Date(task.inProgressStartedAt).getTime()
     total += elapsed
@@ -208,13 +208,13 @@ const CompletedTimeDisplay = ({
     </span>
   )
 
-const InProgressTimeDisplay = (
+const TimeSpentDisplay = (
   task: Parameters<typeof getTotalAccumulatedTime>[0],
 ) => {
   const { settings } = useSettings()
   const totalTime = getTotalAccumulatedTime(task)
 
-  if (!settings.enableInProgressTime || totalTime <= 0) return null
+  if (!settings.fieldConfig.timeSpent.visible || totalTime <= 0) return null
 
   return (
     <span className="text-[10px] text-muted-foreground">
@@ -356,7 +356,7 @@ export const TaskCard = ({
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">
                 <CompletedTimeDisplay {...task} />
-                <InProgressTimeDisplay {...task} />
+                <TimeSpentDisplay {...task} />
               </div>
             )}
           </div>
@@ -415,13 +415,13 @@ export const TaskCard = ({
         onOpenChange={setShowConfirm}
         taskName={task.name}
         status={task.status}
-        inProgressTime={getTotalAccumulatedTime(task)}
+        timeSpent={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
         hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) =>
-          updateTask({ id: task.id, inProgressTime: timeMs })
+          updateTask({ id: task.id, timeSpent: timeMs })
         }
         onDelete={() => deleteTask(task.id)}
         onToggleHidden={() => updateTask({ id: task.id, hidden: !task.hidden })}

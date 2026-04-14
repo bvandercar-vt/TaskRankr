@@ -748,7 +748,7 @@ export const LocalStateProvider = ({
 
         let totalTime = 0
         for (const t of prev) {
-          if (idsToDelete.has(t.id)) totalTime += t.inProgressTime
+          if (idsToDelete.has(t.id)) totalTime += t.timeSpent
         }
 
         let updated = prev.filter((t) => !idsToDelete.has(t.id))
@@ -758,7 +758,7 @@ export const LocalStateProvider = ({
             ...t,
             ...(totalTime > 0
               ? {
-                  inProgressTime: (t.inProgressTime ?? 0) + totalTime,
+                  timeSpent: (t.timeSpent ?? 0) + totalTime,
                 }
               : {}),
             subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),

@@ -1,4 +1,6 @@
-import type { FieldConfig, RankField } from '~/shared/schema'
+import type { Entries } from 'type-fest'
+
+import type { FieldConfig } from '~/shared/schema'
 import { ApiPaths, Selectors } from '../constants'
 import { getSettings } from './api'
 import { isLoggedIn } from './test-runner'
@@ -9,9 +11,9 @@ export const setFieldConfig = (targetConfig: FieldConfig) => {
   const loggedIn = isLoggedIn()
   cy.intercept('PUT', ApiPaths.UPDATE_SETTINGS).as('settingsPut')
 
-  for (const field of Object.keys(targetConfig) as RankField[]) {
-    const { visible, required } = targetConfig[field]
-
+  for (const [field, { visible, required }] of Object.entries(
+    targetConfig,
+  ) as Entries<FieldConfig>) {
     cy.get(Settings.FieldConfig.visibleCheckbox(field))
       .getCheckedState()
       .then((isChecked) => {

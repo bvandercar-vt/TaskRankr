@@ -30,4 +30,5 @@ export const FieldConfigAllTrue = {
   ease: { visible: true, required: true },
   enjoyment: { visible: true, required: true },
   time: { visible: true, required: true },
+  timeSpent: { visible: true, required: true },
 } as const satisfies FieldConfig

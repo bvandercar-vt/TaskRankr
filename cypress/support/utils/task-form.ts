@@ -13,7 +13,7 @@ export type TaskFormData = Pick<Task, 'name' | RankField>
 const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
 
 /**
- * Fills form, submits, and checks results in the UI and (if logged in) backend. 
+ * Fills form, submits, and checks results in the UI and (if logged in) backend.
  */
 export const fillTaskForm = (
   task: TaskFormData,
@@ -53,6 +53,13 @@ export const fillTaskForm = (
     } else {
       cy.get(RankSelect).should('not.exist')
     }
+  }
+
+  if (settings.timeSpent.visible) {
+    cy.get(TaskForm.TIME_SPENT_INPUT).should(
+      settings.timeSpent.visible ? 'be.visible' : 'not.exist',
+    )
+    // TODO: test required
   }
 
   cy.get(TaskForm.SUBMIT_BTN)

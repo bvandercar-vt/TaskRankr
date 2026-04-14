@@ -47,7 +47,7 @@ import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { type FieldConfig, TaskStatus } from '~/shared/schema'
+import { type FieldConfig, type FieldFlags, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
@@ -126,6 +126,44 @@ const SwitchCard = (props: SwitchSettingProps) => (
   </Card>
 )
 
+const AttributeCheckboxRow = ({
+  name,
+  label,
+  visible,
+  required,
+  updateFieldFlags,
+  className,
+}: FieldFlags & {
+  name: keyof FieldConfig
+  label: string
+  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
+  className?: string
+}) => (
+  <tr className={className}>
+    <td className="py-3 text-foreground">{label}</td>
+    <td className="py-3 text-center">
+      <Checkbox
+        checked={visible}
+        onCheckedChange={(checked) =>
+          updateFieldFlags(name, { visible: !!checked })
+        }
+        data-testid={`checkbox-${name}-visible`}
+      />
+    </td>
+    <td className="py-3 text-center">
+      <Checkbox
+        checked={required}
+        onCheckedChange={(checked) =>
+          updateFieldFlags(name, { required: !!checked })
+        }
+        disabled={!visible}
+        className={!visible ? 'opacity-50' : ''}
+        data-testid={`checkbox-${name}-required`}
+      />
+    </td>
+  </tr>
+)
+
 const AttributeSettingsCard = ({
   fieldConfig,
   updateFieldFlags,
@@ -153,39 +191,29 @@ const AttributeSettingsCard = ({
         </tr>
       </thead>
       <tbody>
-        {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
-          const { visible, required } = fieldConfig[name]
-
-          return (
-            <tr key={name} className="border-b border-white/5">
-              <td className="py-3 text-foreground">{label}</td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={visible}
-                  onCheckedChange={(checked) => {
-                    const newVisible = !!checked
-                    updateFieldFlags(name, {
-                      visible: newVisible,
-                      ...(!newVisible && required ? { required: false } : {}),
-                    })
-                  }}
-                  data-testid={`checkbox-${name}-visible`}
-                />
-              </td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={required}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags(name, { required: !!checked })
-                  }
-                  disabled={!visible}
-                  className={!visible ? 'opacity-50' : ''}
-                  data-testid={`checkbox-${name}-required`}
-                />
-              </td>
-            </tr>
-          )
-        })}
+        {RANK_FIELDS_COLUMNS.map(({ name, label }) => (
+          <AttributeCheckboxRow
+            key={name}
+            name={name}
+            label={label}
+            {...fieldConfig[name]}
+            updateFieldFlags={updateFieldFlags}
+            className="border-b border-white/5"
+          />
+        ))}
+        <tr>
+          <td
+            colSpan={3}
+            className="pt-2 pb-0 border-t-2 border-dashed border-white/10"
+          />
+        </tr>
+        <AttributeCheckboxRow
+          key="timeSpent"
+          name="timeSpent"
+          label="Time Spent"
+          {...fieldConfig.timeSpent}
+          updateFieldFlags={updateFieldFlags}
+        />
       </tbody>
     </table>
   </Card>
@@ -430,44 +458,23 @@ const Settings = () => {
           }
           data-testid="switch-sort-pinned-priority"
         />
-        <Card>
-          <div className="flex items-center justify-between">
-            <SwitchSetting
-              title='Enable "In Progress" Status'
-              description={
-                'Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
+        <SwitchCard
+          title='Enable "In Progress" Status'
+          description='Allow tasks to be marked as "In Progress" to pin to the top and track active work.'
+          checked={settings.enableInProgressStatus}
+          onCheckedChange={(checked) => {
+            updateSettings({ enableInProgressStatus: checked })
+            if (!checked) {
+              const inProgressTask = allTasks.find(
+                (t) => t.status === TaskStatus.IN_PROGRESS,
+              )
+              if (inProgressTask) {
+                setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
               }
-              checked={settings.enableInProgressStatus}
-              onCheckedChange={(checked) => {
-                updateSettings({ enableInProgressStatus: checked })
-                if (!checked) {
-                  updateSettings({ enableInProgressTime: false })
-                  // Demote any in_progress task to pinned
-                  const inProgressTask = allTasks.find(
-                    (t) => t.status === TaskStatus.IN_PROGRESS,
-                  )
-                  if (inProgressTask) {
-                    setTaskStatus(inProgressTask.id, TaskStatus.PINNED)
-                  }
-                }
-              }}
-              data-testid="switch-enable-in-progress"
-            />
-          </div>
-          {settings.enableInProgressStatus && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-              <SwitchSetting
-                title='Enable "In Progress" Time'
-                description="Track and display time spent In Progress."
-                checked={settings.enableInProgressTime}
-                onCheckedChange={(checked) =>
-                  updateSettings({ enableInProgressTime: checked })
-                }
-                data-testid="switch-enable-time"
-              />
-            </div>
-          )}
-        </Card>
+            }
+          }}
+          data-testid="switch-enable-in-progress"
+        />
       </div>
 
       <AttributeSettingsCard

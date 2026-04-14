@@ -92,8 +92,8 @@ export const FormItem = forwardRefHelper<HTMLDivElement>(
 
 export const FormLabel = forwardRefHelper<
   typeof LabelPrimitive.Root,
-  { redOnError?: boolean }
->(({ className, redOnError, ...props }, ref) => {
+  { redOnError?: boolean; isRequired?: boolean }
+>(({ children, className, redOnError, isRequired, ...props }, ref) => {
   const { error, formItemId } = useFormField()
 
   return (
@@ -102,7 +102,10 @@ export const FormLabel = forwardRefHelper<
       ref={ref}
       className={cn(error && redOnError && 'text-destructive', className)}
       htmlFor={formItemId}
-    />
+    >
+      {children}
+      {isRequired && <span className="text-destructive ml-1">*</span>}
+    </Label>
   )
 }, 'FormLabel')
 

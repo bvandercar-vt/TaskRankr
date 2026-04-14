@@ -1,4 +1,4 @@
-import type { RankField } from '~/shared/schema'
+import type { FieldConfig, RankField } from '~/shared/schema'
 
 const testId = <S extends string>(testid: S) =>
   `[data-testid="${testid}"]` as const
@@ -28,15 +28,16 @@ export const Selectors = {
   },
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
+    TIME_SPENT_INPUT: testId('time-spent-input'),
     rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
   },
   Settings: {
     FieldConfig: {
-      visibleCheckbox: (field: RankField) =>
+      visibleCheckbox: (field: keyof FieldConfig) =>
         testId(`checkbox-${field}-visible`),
-      requiredCheckbox: (field: RankField) =>
+      requiredCheckbox: (field: keyof FieldConfig) =>
         testId(`checkbox-${field}-required`),
     },
   },

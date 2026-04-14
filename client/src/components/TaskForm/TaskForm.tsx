@@ -65,7 +65,7 @@ const taskFormDefaultsSchema = taskSchema.pick({
   enjoyment: true,
   time: true,
   parentId: true,
-  inProgressTime: true,
+  timeSpent: true,
   createdAt: true,
   completedAt: true,
 })
@@ -150,33 +150,27 @@ export const TaskForm = ({
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false
 
-  const rankFieldConfig = useMemo(
-    () =>
-      new Map(
-        RANK_FIELDS_COLUMNS.map(({ name }) => {
-          const { visible, required: rawRequired } = settings.fieldConfig[name]
-          const required = visible && rawRequired
-          return [name, { visible, required }]
-        }),
-      ),
-    [settings],
-  )
-
   const visibleRankFields = useMemo(
     () =>
       RANK_FIELDS_COLUMNS.filter(
-        (attr) => rankFieldConfig.get(attr.name)?.visible,
+        (attr) => settings.fieldConfig[attr.name].visible,
       ),
-    [rankFieldConfig],
+    [settings.fieldConfig],
   )
 
   const requiredRankFields: RankField[] = useMemo(
     () =>
       RANK_FIELDS_COLUMNS.filter(
-        ({ name }) => rankFieldConfig.get(name)?.required,
+        ({ name }) => settings.fieldConfig[name].required,
       ).map(({ name }) => name),
-    [rankFieldConfig],
+    [settings.fieldConfig],
   )
+
+  const {
+    fieldConfig: {
+      timeSpent: { visible: timeSpentVisible, required: timeSpentRequired },
+    },
+  } = settings
 
   const formSchema = useMemo(
     () =>
@@ -190,8 +184,15 @@ export const TaskForm = ({
             })
           }
         }
+        if (markCompleted && timeSpentRequired && (data.timeSpent ?? 0) <= 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['timeSpent'],
+            message: 'Time spent is required when completing a task',
+          })
+        }
       }),
-    [requiredRankFields],
+    [requiredRankFields, markCompleted, timeSpentRequired],
   )
 
   const getFormDefaults = useCallback(
@@ -222,7 +223,7 @@ export const TaskForm = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [rankFieldConfig, form])
+  }, [settings.fieldConfig, form, markCompleted, timeSpentRequired])
 
   return (
     <Form {...form}>
@@ -288,9 +289,7 @@ export const TaskForm = ({
                         label={label}
                         levels={levels}
                         field={field}
-                        isRequired={Boolean(
-                          rankFieldConfig.get(name)?.required,
-                        )}
+                        isRequired={settings.fieldConfig[name].required}
                       />
                     )}
                   />
@@ -365,19 +364,34 @@ export const TaskForm = ({
                   </div>
                 )}
 
-              {settings.enableInProgressTime && (
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Time Spent
-                  </div>
-                  <TimeInput
-                    durationMs={form.watch('inProgressTime') || 0}
-                    onDurationChange={(ms) =>
-                      form.setValue('inProgressTime', ms)
-                    }
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                  />
-                </div>
+              {timeSpentVisible && (
+                <FormField
+                  control={form.control}
+                  name="timeSpent"
+                  render={() => (
+                    <FormItem className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <FormLabel
+                          className="text-[10px] uppercase tracking-wider text-muted-foreground"
+                          isRequired={timeSpentRequired}
+                        >
+                          Time Spent
+                        </FormLabel>
+                        <TimeInput
+                          durationMs={form.watch('timeSpent') || 0}
+                          onDurationChange={(ms) =>
+                            form.setValue('timeSpent', ms, {
+                              shouldValidate: true,
+                            })
+                          }
+                          className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                          data-testid="time-spent-input"
+                        />
+                      </div>
+                      <FormMessage className="text-[11px] text-right" />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>

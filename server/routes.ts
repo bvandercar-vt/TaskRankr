@@ -25,6 +25,22 @@ import { storage } from './storage'
 
 const s = initServer()
 
+/** Returns a 400 response if timeSpent is required and effectiveTimeMs ≤ 0, otherwise null. */
+const checkTimeSpentRequired = async (
+  userId: string,
+  effectiveTimeMs: number,
+): Promise<{ status: 400; body: { message: string } } | null> => {
+  const userSettings = await storage.getSettings(userId)
+  if (!userSettings.fieldConfig.timeSpent.required) return null
+  if (effectiveTimeMs <= 0) {
+    return {
+      status: 400,
+      body: { message: 'Time spent must be recorded to complete this task' },
+    }
+  }
+  return null
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: is always present
 const getUserId = (req: Record<string, any>): string =>
   // biome-ignore lint/style/noNonNullAssertion: is always present
@@ -67,6 +83,13 @@ const router = s.router(contract, {
         if (!existing) {
           return { status: 404, body: { message: 'Task not found' } }
         }
+        if (body.status === TaskStatus.COMPLETED) {
+          const err = await checkTimeSpentRequired(
+            userId,
+            body.timeSpent ?? existing.timeSpent ?? 0,
+          )
+          if (err) return err
+        }
         const task = await storage.updateTask(params.id, userId, body)
         return { status: 200, body: task }
       },
@@ -90,6 +113,15 @@ const router = s.router(contract, {
         const existing = await storage.getTask(params.id, userId)
         if (!existing) {
           return { status: 404, body: { message: 'Task not found' } }
+        }
+        if (body.status === TaskStatus.COMPLETED) {
+          const accumulatedTime =
+            (existing.timeSpent ?? 0) +
+            (existing.inProgressStartedAt
+              ? Date.now() - existing.inProgressStartedAt.getTime()
+              : 0)
+          const err = await checkTimeSpentRequired(userId, accumulatedTime)
+          if (err) return err
         }
         const task = await storage.setTaskStatus(params.id, userId, body.status)
         return { status: 200, body: task }
@@ -131,7 +163,7 @@ const router = s.router(contract, {
             userId,
             parentId: null,
             status: rest.status ?? TaskStatus.OPEN,
-            inProgressTime: rest.inProgressTime ?? 0,
+            timeSpent: rest.timeSpent ?? 0,
             inProgressStartedAt: null,
             createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
             completedAt: rest.completedAt ? new Date(rest.completedAt) : null,

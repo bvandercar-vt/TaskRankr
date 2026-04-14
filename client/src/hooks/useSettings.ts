@@ -8,7 +8,12 @@ import { toMerged } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { useLocalStateSafe } from '@/providers/LocalStateProvider'
-import type { FieldFlags, RankField, UserSettings } from '~/shared/schema'
+import {
+  type FieldConfig,
+  type FieldFlags,
+  sanitizeSettings,
+  type UserSettings,
+} from '~/shared/schema'
 
 export type UserSettingsContent = Omit<UserSettings, 'userId'>
 
@@ -17,19 +22,21 @@ export const useSettings = () => {
 
   const rawSettings = localState?.settings
   const settings: UserSettings = useMemo(
-    () => toMerged(DEFAULT_SETTINGS, rawSettings ?? {}),
+    () => sanitizeSettings(toMerged(DEFAULT_SETTINGS, rawSettings ?? {})),
     [rawSettings],
   )
   const isLoading = !localState?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
     if (!localState) return
-    localState.updateSettings(value)
+    localState.updateSettings(sanitizeSettings(value))
   }
 
-  const updateFieldFlags = (field: RankField, flags: Partial<FieldFlags>) => {
-    if (!localState) return
-    localState.updateSettings({
+  const updateFieldFlags = (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) => {
+    updateSettings({
       fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
     })
   }

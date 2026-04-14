@@ -5,6 +5,7 @@
 
 import { boolean, jsonb, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { mapValues } from 'es-toolkit'
 import { z } from 'zod'
 
 import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
@@ -26,29 +27,47 @@ export const fieldFlagsSchema = z.object({
 
 export type FieldFlags = z.infer<typeof fieldFlagsSchema>
 
-export const fieldConfigSchema = z.object({
+const rankFieldConfigSchema = z.object({
   priority: fieldFlagsSchema,
   ease: fieldFlagsSchema,
   enjoyment: fieldFlagsSchema,
   time: fieldFlagsSchema,
 } satisfies Record<RankField, typeof fieldFlagsSchema>)
 
+export const fieldConfigSchema = rankFieldConfigSchema.extend({
+  timeSpent: fieldFlagsSchema,
+})
+
 export type FieldConfig = z.infer<typeof fieldConfigSchema>
 
-export const DEFAULT_FIELD_CONFIG: FieldConfig = {
+export const DEFAULT_FIELD_CONFIG = {
   priority: { visible: true, required: true },
   ease: { visible: true, required: true },
   enjoyment: { visible: true, required: true },
   time: { visible: true, required: true },
+  timeSpent: { visible: true, required: false },
+} as const satisfies FieldConfig
+
+/** Ensures `required` is always false whenever `visible` is false. */
+export const sanitizeSettings = <T extends Partial<UserSettings>>(
+  settings: T,
+): T => {
+  if (settings.fieldConfig) {
+    return {
+      ...settings,
+      fieldConfig: mapValues(settings.fieldConfig, ({ visible, required }) => ({
+        visible,
+        required: visible ? required : false,
+      })),
+    }
+  }
+  return settings
 }
 
 export const userSettings = pgTable('user_settings', {
   userId: varchar('user_id').primaryKey(),
   autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),
   enableInProgressStatus: boolean('enable_in_progress_status')
-    .default(true)
-    .notNull(),
-  enableInProgressTime: boolean('enable_in_progress_time')
     .default(true)
     .notNull(),
   alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
@@ -68,7 +87,6 @@ const userSettingsSchemaRefine = {
   // https://github.com/drizzle-team/drizzle-orm/issues/5384
   autoPinNewTasks: (s) => s.default(true),
   enableInProgressStatus: (s) => s.default(true),
-  enableInProgressTime: (s) => s.default(true),
   alwaysSortPinnedByPriority: (s) => s.default(true),
   sortBy: (s) => s.default(SortOption.DATE_CREATED),
   fieldConfig: fieldConfigSchema.default(DEFAULT_FIELD_CONFIG),

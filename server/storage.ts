@@ -10,6 +10,7 @@ import { and, eq } from 'drizzle-orm'
 
 import {
   type InsertTask,
+  sanitizeSettings,
   type Task,
   TaskStatus,
   tasks,
@@ -150,7 +151,7 @@ export class DatabaseStorage implements IStorage {
           .update(tasks)
           .set({
             status: TaskStatus.PINNED,
-            inProgressTime: currentInProgressTask.inProgressTime + elapsed,
+            timeSpent: currentInProgressTask.timeSpent + elapsed,
             inProgressStartedAt: null,
           })
           .where(eq(tasks.id, currentInProgressTask.id))
@@ -166,7 +167,7 @@ export class DatabaseStorage implements IStorage {
     ) {
       // Leaving in-progress: accumulate time
       const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
-      updates.inProgressTime = currentTask.inProgressTime + elapsed
+      updates.timeSpent = currentTask.timeSpent + elapsed
       updates.inProgressStartedAt = null
     }
 
@@ -362,7 +363,7 @@ export class DatabaseStorage implements IStorage {
     const task = await this.getTask(id, userId)
     if (!task) return 0
 
-    let total = task.inProgressTime
+    let total = task.timeSpent
 
     const childTasks = await db
       .select()
@@ -388,7 +389,7 @@ export class DatabaseStorage implements IStorage {
           subtaskOrder: parent.subtaskOrder.filter((sid: number) => sid !== id),
         }
         if (timeToAccumulate > 0) {
-          updates.inProgressTime = parent.inProgressTime + timeToAccumulate
+          updates.timeSpent = parent.timeSpent + timeToAccumulate
         }
         await db
           .update(tasks)
@@ -446,7 +447,7 @@ export class DatabaseStorage implements IStorage {
       .from(userSettings)
       .where(eq(userSettings.userId, userId))
     if (settings) {
-      return settings
+      return sanitizeSettings(settings)
     }
     // Create default settings for new user
     const [newSettings] = await db
@@ -463,13 +464,13 @@ export class DatabaseStorage implements IStorage {
     // Ensure settings exist first
     await this.getSettings(userId)
 
-    const { userId: _, ...updateData } = updates
+    const { userId: _, ...updateData } = sanitizeSettings(updates)
     const [settings] = await db
       .update(userSettings)
       .set(updateData)
       .where(eq(userSettings.userId, userId))
       .returning()
-    return settings
+    return sanitizeSettings(settings)
   }
 }
 
