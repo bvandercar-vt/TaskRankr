@@ -5,7 +5,10 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
-import { waitForCreate } from '@cypress/support/utils/intercepts'
+import {
+  interceptCreate,
+  waitForCreate,
+} from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
   clickSubmitBtn,
@@ -41,21 +44,24 @@ describe('Task Creation', () => {
   } as const satisfies TaskFormData
 
   beforeEach(() => {
+    interceptCreate()
+
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  runBothModes('create a task, check displays in main tree', () => {
+  runBothModes('create a task, check displays in main tree', (loggedIn) => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(DefaultTask)
     clickSubmitBtn()
     waitForCreate(DefaultTask)
     checkTaskInTree(DefaultTask)
+    cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
   })
 
   runBothModes(
     'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    () => {
+    (loggedIn) => {
       const fieldConfig = {
         priority: { visible: true, required: true },
         ease: { visible: true, required: false },
@@ -79,12 +85,13 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate(newTask)
       checkTaskInTree(newTask)
+      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
     },
   )
 
   runBothModes(
     'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    () => {
+    (loggedIn) => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
         timeSpent: { visible: true, required: false },
@@ -101,12 +108,13 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate({ ...DefaultTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
+      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
     },
   )
 
   runBothModes(
     'create a subtask while creating the parent task, check both appear in the tree',
-    () => {
+    (loggedIn) => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -121,12 +129,13 @@ describe('Task Creation', () => {
       submitTaskForm(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
+      cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
     },
   )
 
   runBothModes(
     'create multiple subtasks while creating the parent task, check both appear in the tree',
-    () => {
+    (loggedIn) => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -150,12 +159,13 @@ describe('Task Creation', () => {
       submitTaskForm(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+      cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
     },
   )
 
   runBothModes(
     'create nested subtasks while creating the parent task, check both appear in the tree',
-    () => {
+    (loggedIn) => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -192,6 +202,7 @@ describe('Task Creation', () => {
         ...rootTask,
         subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
       })
+      cy.get('@createTask').should('have.been.called', loggedIn ? 4 : 0)
     },
   )
 })
