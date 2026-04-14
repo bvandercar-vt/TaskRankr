@@ -162,13 +162,9 @@ const AttributeSettingsCard = ({
               <td className="py-3 text-center">
                 <Checkbox
                   checked={visible}
-                  onCheckedChange={(checked) => {
-                    const newVisible = !!checked
-                    updateFieldFlags(name, {
-                      visible: newVisible,
-                      ...(!newVisible && required ? { required: false } : {}),
-                    })
-                  }}
+                  onCheckedChange={(checked) =>
+                    updateFieldFlags(name, { visible: !!checked })
+                  }
                   data-testid={`checkbox-${name}-visible`}
                 />
               </td>
@@ -200,13 +196,9 @@ const AttributeSettingsCard = ({
               <td className="py-3 text-center">
                 <Checkbox
                   checked={visible}
-                  onCheckedChange={(checked) => {
-                    const newVisible = !!checked
-                    updateFieldFlags('timeSpent', {
-                      visible: newVisible,
-                      ...(!newVisible && required ? { required: false } : {}),
-                    })
-                  }}
+                  onCheckedChange={(checked) =>
+                    updateFieldFlags('timeSpent', { visible: !!checked })
+                  }
                   data-testid="checkbox-timeSpent-visible"
                 />
               </td>
