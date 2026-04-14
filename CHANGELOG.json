@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.2.2",
+    "date": "2026-04-14",
+    "title": "Task Creation Cancel Fix",
+    "changes": [
+      "When cancelling task creation, subtasks that were created now properly don't get created as well."
+    ]
+  },
+  {
     "version": "1.2.1",
     "date": "2026-04-14",
     "title": "Time Spent Settings & Subtask Fixes",
