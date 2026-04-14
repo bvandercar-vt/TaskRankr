@@ -71,7 +71,13 @@ const DesktopDialog = ({
   ...taskFormArgs
 }: TaskFormDialogProps) => (
   <div data-testid="task-form-dialog-desktop">
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+        else setIsOpen(true)
+      }}
+    >
       <DialogContent
         className="w-full max-w-[600px] max-h-[calc(100vh-2.5rem)] overflow-hidden bg-card border-white/10 p-6 shadow-2xl rounded-xl flex flex-col [&>form]:min-h-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -148,6 +154,9 @@ export const TaskFormDialogProvider = ({
   )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
+  const [pendingCreateTaskId, setPendingCreateTaskId] = useState<
+    number | undefined
+  >(undefined)
 
   const { createTask, updateTask, deleteTask, setTaskStatus } = useTaskActions()
   const { subscribeToIdReplacement } = useLocalState()
@@ -161,6 +170,7 @@ export const TaskFormDialogProvider = ({
       setReturnToTask((prev) =>
         prev?.id === tempId ? { ...prev, id: realId } : prev,
       )
+      setPendingCreateTaskId((prev) => (prev === tempId ? realId : prev))
     })
   }, [subscribeToIdReplacement])
 
@@ -171,6 +181,7 @@ export const TaskFormDialogProvider = ({
     setMode('create')
     setParentId(pid)
     setActiveTask(undefined)
+    setPendingCreateTaskId(undefined)
     setIsOpen(true)
   }
 
@@ -179,6 +190,7 @@ export const TaskFormDialogProvider = ({
     setActiveTask(task)
     setParentId(task.parentId ?? undefined)
     setReturnToTask(undefined)
+    setPendingCreateTaskId(undefined)
     setIsOpen(true)
   }
 
@@ -192,7 +204,7 @@ export const TaskFormDialogProvider = ({
     setIsOpen(true)
   }
 
-  const closeDialog = () => {
+  const closeDialog = (confirmed = false) => {
     if (returnToTask) {
       const taskToReturn = returnToTask
       setReturnToTask(undefined)
@@ -200,6 +212,10 @@ export const TaskFormDialogProvider = ({
       setActiveTask(taskToReturn)
       setParentId(taskToReturn.parentId ?? undefined)
     } else {
+      if (!confirmed && pendingCreateTaskId !== undefined) {
+        deleteTask(pendingCreateTaskId)
+      }
+      setPendingCreateTaskId(undefined)
       setIsOpen(false)
       setTimeout(() => {
         setActiveTask(undefined)
@@ -211,10 +227,10 @@ export const TaskFormDialogProvider = ({
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
       createTask({ ...data, parentId } as CreateTask)
-      closeDialog()
+      closeDialog(true)
     } else if (mode === 'edit' && activeTask) {
       updateTask({ id: activeTask.id, ...data })
-      closeDialog()
+      closeDialog(true)
     }
   }
 
@@ -225,6 +241,7 @@ export const TaskFormDialogProvider = ({
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
     if (formData) {
       const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setPendingCreateTaskId(newTask.id)
       setReturnToTask(newTask)
       setMode('create')
       setActiveTask(undefined)
@@ -237,6 +254,7 @@ export const TaskFormDialogProvider = ({
   const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
     if (formData) {
       const newTask = createTask({ ...formData, parentId } as CreateTask)
+      setPendingCreateTaskId(newTask.id)
       setMode('edit')
       setActiveTask(newTask)
       setParentId(newTask.parentId ?? undefined)
