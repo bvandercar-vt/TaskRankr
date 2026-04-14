@@ -8,18 +8,20 @@ import {
   waitForUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
+  assignSubtask,
+  checkTaskFormSubtasks,
   clickSubmitBtn,
   fillTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
-const { TaskForm, TaskCard, AssignSubtaskDialog } = Selectors
+const { TaskForm, TaskCard } = Selectors
 
 describe('Assign Subtask', () => {
-  const parentTask = {
+  const rootTask = {
     ...DefaultTask,
-    name: 'E2E Assign Parent Task',
+    name: 'E2E Root Task',
   } as const satisfies TaskFormData
 
   const orphanTask = {
@@ -38,106 +40,76 @@ describe('Assign Subtask', () => {
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+
+    // Create the orphan task
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(orphanTask)
+    clickSubmitBtn()
+    waitForCreate(orphanTask)
   })
 
-  runBothModes(
-    'assign an existing orphaned task as a subtask of a task',
-    (loggedIn) => {
-      // Create the orphan task
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(orphanTask)
-      clickSubmitBtn()
-      waitForCreate(orphanTask)
+  for (const [logStr, beforeTest] of [
+    [
+      'while creating new task',
+      () => {
+        // Fill form for the parent task, but don't submit yet
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+        fillTaskForm(rootTask)
+      },
+    ],
+    [
+      'while editing existing task',
+      () => {
+        // Create the parent task
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+        fillTaskForm(rootTask)
+        clickSubmitBtn()
+        waitForCreate(rootTask)
 
-      // Create the parent task
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
-      clickSubmitBtn()
-      waitForCreate(parentTask)
+        // Open the edit dialog for the parent task,
+        cy.contains(TaskCard.CARD, rootTask.name).click()
+      },
+    ],
+  ] as const) {
+    runBothModes(
+      `assign an existing orphaned task as a subtask of a task - ${logStr}`,
+      (loggedIn) => {
+        beforeTest()
 
-      // Open the edit dialog for the parent task
-      cy.contains(TaskCard.CARD, parentTask.name).click()
+        assignSubtask(orphanTask)
+        waitForUpdate()
+        checkTaskFormSubtasks([orphanTask])
 
-      // Click the assign button to open the assign subtask dialog
-      cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
+        cy.get(TaskForm.SUBMIT_BTN).click() // TODO: try cancel and ensure wasn't assigned.
+        checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
 
-      // The assign dialog should be visible with the orphan task listed
-      cy.get(AssignSubtaskDialog.TITLE).should('be.visible')
-      cy.contains(AssignSubtaskDialog.TASK_OPTION, orphanTask.name).click()
+        cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
+        cy.get('@updateTask').should('have.been.called', loggedIn ? 1 : 0)
+      },
+    )
 
-      // Confirm the assignment
-      cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
-      waitForUpdate()
+    runBothModes(
+      `mix of assigning an existing orphaned subtask and creating a new subtask - ${logStr}`,
+      (loggedIn) => {
+        beforeTest()
 
-      // Back in the parent edit form — orphan should now appear as a subtask row
-      cy.get(TaskForm.SUBTASK_ROW)
-        .should('have.length', 1)
-        .first()
-        .should('contain.text', orphanTask.name)
+        assignSubtask(orphanTask)
+        waitForUpdate()
+        checkTaskFormSubtasks([orphanTask])
 
-      // Close the edit dialog
-      cy.get(TaskForm.CANCEL_BTN).click()
+        // Now add a brand-new subtask via the add button
+        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        fillTaskForm(newSubtask)
+        clickSubmitBtn()
+        waitForCreate(newSubtask)
+        checkTaskFormSubtasks([orphanTask, newSubtask])
 
-      // Verify the orphan task appears as a subtask under the parent in the tree
-      checkTaskInTree({ ...parentTask, subtasks: [orphanTask] })
+        cy.get(TaskForm.SUBMIT_BTN).click() // TODO: try cancel and ensure wasn't assigned.
+        checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
 
-      cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
-      cy.get('@updateTask').should('have.been.called', loggedIn ? 1 : 0)
-    },
-  )
-
-  runBothModes(
-    'mix of assigning an existing orphaned subtask and creating a new subtask',
-    (loggedIn) => {
-      // Create the orphan task
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(orphanTask)
-      clickSubmitBtn()
-      waitForCreate(orphanTask)
-
-      // Create the parent task
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
-      clickSubmitBtn()
-      waitForCreate(parentTask)
-
-      // Open the edit dialog for the parent task
-      cy.contains(TaskCard.CARD, parentTask.name).click()
-
-      // Assign the existing orphan as a subtask
-      cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
-      cy.get(AssignSubtaskDialog.TITLE).should('be.visible')
-      cy.contains(AssignSubtaskDialog.TASK_OPTION, orphanTask.name).click()
-      cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
-      waitForUpdate()
-
-      // Orphan is now listed in the subtask rows
-      cy.get(TaskForm.SUBTASK_ROW)
-        .should('have.length', 1)
-        .first()
-        .should('contain.text', orphanTask.name)
-
-      // Now add a brand-new subtask via the add button
-      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      fillTaskForm(newSubtask)
-      clickSubmitBtn()
-      waitForCreate(newSubtask)
-
-      // Back in the parent edit form — both subtasks should be listed
-      cy.get(TaskForm.SUBTASK_ROW)
-        .should('have.length', 2)
-        .getElementArrayText()
-        .should('include', orphanTask.name)
-        .and('include', newSubtask.name)
-
-      // Close the edit dialog
-      cy.get(TaskForm.CANCEL_BTN).click()
-
-      // Verify both subtasks appear under the parent in the tree
-      checkTaskInTree({ ...parentTask, subtasks: [orphanTask, newSubtask] })
-
-      cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
-      cy.get('@updateTask').should('have.been.called', loggedIn ? 1 : 0)
-    },
-  )
+        cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
+        cy.get('@updateTask').should('have.been.called', loggedIn ? 1 : 0)
+      },
+    )
+  }
 })

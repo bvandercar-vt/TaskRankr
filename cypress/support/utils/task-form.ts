@@ -8,7 +8,7 @@ import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import { isLoggedIn } from './test-runner'
 
-const { TaskForm } = Selectors
+const { TaskForm, AssignSubtaskDialog } = Selectors
 
 export type TaskFormData = Pick<Task, 'name' | RankField>
 
@@ -74,3 +74,28 @@ export const clickSubmitBtn = (submitBtnText = 'Create') =>
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
+
+export const assignSubtask = (
+  /**
+   * the orphan task to assign as subtask.
+   */
+  task: Pick<Task, 'name'>,
+) => {
+  cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
+  cy.get(AssignSubtaskDialog.DIALOG)
+    .should('be.visible')
+    .within(() => {
+      cy.contains(AssignSubtaskDialog.TASK_OPTION, task.name).click()
+    })
+  cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
+}
+
+export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
+  // TODO: test how they are nested
+  cy
+    .get(TaskForm.SUBTASK_ROW)
+    .getElementArrayText()
+    .should(
+      'equal',
+      subtasks.map((subtask) => subtask.name),
+    )

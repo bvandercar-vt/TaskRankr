@@ -57,7 +57,7 @@ export const AssignSubtaskDialog = ({
     setSearch('')
     setShowCompleted(false)
   }
-  
+
   const handleConfirm = () => {
     if (selectedId === null) return
     updateTask({ id: selectedId, parentId: parentTask.id })
@@ -89,11 +89,10 @@ export const AssignSubtaskDialog = ({
       <DialogContent
         className={cn('max-w-sm rounded-lg', LAYER_CLASS)}
         overlayClassName={LAYER_CLASS}
+        data-testid="assign-subtask-dialog"
       >
         <DialogHeader>
-          <DialogTitle data-testid="title-assign-subtask">
-            Assign Subtask
-          </DialogTitle>
+          <DialogTitle>Assign Subtask</DialogTitle>
         </DialogHeader>
         <SearchInput
           value={search}

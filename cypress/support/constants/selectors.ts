@@ -41,7 +41,7 @@ export const Selectors = {
     SUBTASK_ROW: testIdStartsWith('subtask-row-'),
   },
   AssignSubtaskDialog: {
-    TITLE: testId('title-assign-subtask'),
+    DIALOG: testId('assign-subtask-dialog'),
     SEARCH_INPUT: testId('search-assign-tasks'),
     ORPHAN_TASK_LIST: testId('list-orphan-tasks'),
     taskOption: (id: number) => testId(`option-assign-task-${id}`),
