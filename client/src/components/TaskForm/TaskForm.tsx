@@ -365,31 +365,33 @@ export const TaskForm = ({
                 )}
 
               {timeSpentVisible && (
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Time Spent
-                      {timeSpentRequired && (
-                        <span className="text-destructive ml-1">*</span>
-                      )}
-                    </div>
-                    <TimeInput
-                      durationMs={form.watch('timeSpent') || 0}
-                      onDurationChange={(ms) =>
-                        form.setValue('timeSpent', ms, {
-                          shouldValidate: true,
-                        })
-                      }
-                      className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                      data-testid="time-spent-input"
-                    />
-                  </div>
-                  {form.formState.errors.timeSpent && (
-                    <p className="text-[11px] text-destructive text-right">
-                      {form.formState.errors.timeSpent.message}
-                    </p>
+                <FormField
+                  control={form.control}
+                  name="timeSpent"
+                  render={() => (
+                    <FormItem className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Time Spent
+                          {timeSpentRequired && (
+                            <span className="text-destructive ml-1">*</span>
+                          )}
+                        </FormLabel>
+                        <TimeInput
+                          durationMs={form.watch('timeSpent') || 0}
+                          onDurationChange={(ms) =>
+                            form.setValue('timeSpent', ms, {
+                              shouldValidate: true,
+                            })
+                          }
+                          className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                          data-testid="time-spent-input"
+                        />
+                      </div>
+                      <FormMessage className="text-[11px] text-right" />
+                    </FormItem>
                   )}
-                </div>
+                />
               )}
 
               <SubtaskBlockedTooltip blocked={hasIncompleteSubtasks}>
