@@ -30,3 +30,12 @@ export const waitForDelete = (task: Pick<TaskFormData, 'name'>) => {
 
   checkTaskExistsBackend(task, false)
 }
+
+export const interceptUpdate = () => {
+  cy.intercept('PUT', ApiPaths.UPDATE_TASK).as('updateTask')
+}
+
+export const waitForUpdate = () => {
+  const loggedIn = isLoggedIn()
+  loggedIn && cy.wait('@updateTask')
+}

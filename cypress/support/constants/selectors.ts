@@ -37,7 +37,17 @@ export const Selectors = {
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
     ADD_SUBTASK_BTN: testId('button-add-subtask'),
+    ASSIGN_SUBTASK_BTN: testId('button-assign-subtask'),
     SUBTASK_ROW: testIdStartsWith('subtask-row-'),
+  },
+  AssignSubtaskDialog: {
+    TITLE: testId('title-assign-subtask'),
+    SEARCH_INPUT: testId('search-assign-tasks'),
+    ORPHAN_TASK_LIST: testId('list-orphan-tasks'),
+    taskOption: (id: number) => testId(`option-assign-task-${id}`),
+    TASK_OPTION: testIdStartsWith('option-assign-task-'),
+    CANCEL_BTN: testId('button-cancel-assign'),
+    CONFIRM_BTN: testId('button-confirm-assign'),
   },
   Settings: {
     FieldConfig: {

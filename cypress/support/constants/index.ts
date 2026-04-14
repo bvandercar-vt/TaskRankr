@@ -14,6 +14,7 @@ export const ApiPaths = {
   GET_TASKS: contract.tasks.list.path,
   CREATE_TASK: contract.tasks.create.path,
   DELETE_TASK: new RegExp(contract.tasks.delete.path.replace(':id', '\\d+')),
+  UPDATE_TASK: new RegExp(contract.tasks.update.path.replace(':id', '\\d+')),
   GET_SETTINGS: contract.settings.get.path,
   UPDATE_SETTINGS: contract.settings.update.path,
 }
