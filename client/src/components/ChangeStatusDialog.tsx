@@ -36,18 +36,18 @@ import { SubtaskBlockedTooltip } from './SubtaskBlockedTooltip'
 
 const TimeSpentInput = ({
   onBlur,
-  localTimeMs,
-  setLocalTimeMs,
+  timeSpentMs,
+  setTimeSpentMs,
 }: {
   onBlur: () => void
-  localTimeMs: number
-  setLocalTimeMs: (ms: number) => void
+  timeSpentMs: number
+  setTimeSpentMs: (ms: number) => void
 }) => (
   <div className="flex items-center justify-center gap-3 pt-2 border-t border-white/10">
     <span className="text-xs text-muted-foreground">Time Spent</span>
     <TimeInput
-      durationMs={localTimeMs}
-      onDurationChange={setLocalTimeMs}
+      durationMs={timeSpentMs}
+      onDurationChange={setTimeSpentMs}
       onBlur={onBlur}
       className="w-16 h-8 text-center text-sm bg-secondary/30"
     />
@@ -152,24 +152,28 @@ export const ChangeStatusDialog = ({
     settings: {
       enableInProgressStatus: showInProgressOption,
       fieldConfig: {
-        timeSpent: { visible: showTimeInputs, required: timeSpentRequired },
+        timeSpent: { visible: showTimeSpentInput, required: timeSpentRequired },
       },
     },
   } = useSettings()
 
-  const [localTimeMs, setLocalTimeMs] = useState(inProgressTime)
+  const [timeSpent, setTimeSpent] = useState(inProgressTime)
 
   useEffect(() => {
     if (open) {
-      setLocalTimeMs(inProgressTime)
+      setTimeSpent(inProgressTime)
     }
   }, [open, inProgressTime])
 
   const handleTimeBlur = () => {
-    if (localTimeMs !== inProgressTime) {
-      onUpdateTime(localTimeMs)
+    if (timeSpent !== inProgressTime) {
+      onUpdateTime(timeSpent)
     }
   }
+
+  const needsTimeSpent = !isCompleted && timeSpentRequired && timeSpent <= 0
+  const isCompleteActionDisabled =
+    needsTimeSpent || (!isCompleted && hasIncompleteSubtasks)
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -237,17 +241,12 @@ export const ChangeStatusDialog = ({
                     isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
                   )
                 }
-                disabled={
-                  (!isCompleted && hasIncompleteSubtasks) ||
-                  (!isCompleted && timeSpentRequired && localTimeMs <= 0)
-                }
+                disabled={isCompleteActionDisabled}
                 className={cn(
                   'w-full h-11 text-base font-semibold',
                   isCompleted
                     ? 'bg-primary hover:bg-primary/90 text-white'
-                    : !isCompleted &&
-                        (hasIncompleteSubtasks ||
-                          (timeSpentRequired && localTimeMs <= 0))
+                    : isCompleteActionDisabled
                       ? 'bg-muted text-muted-foreground cursor-not-allowed'
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white',
                 )}
@@ -257,15 +256,15 @@ export const ChangeStatusDialog = ({
               </AlertDialogAction>
             </SubtaskBlockedTooltip>
 
-            {showTimeInputs && (
+            {showTimeSpentInput && (
               <TimeSpentInput
                 onBlur={handleTimeBlur}
-                localTimeMs={localTimeMs}
-                setLocalTimeMs={setLocalTimeMs}
+                timeSpentMs={timeSpent}
+                setTimeSpentMs={setTimeSpent}
               />
             )}
 
-            {!isCompleted && timeSpentRequired && localTimeMs <= 0 && (
+            {needsTimeSpent && (
               <p className="text-xs text-amber-400/70 text-center -mt-1">
                 Time spent is required to complete this task
               </p>
