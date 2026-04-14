@@ -55,14 +55,32 @@ export class DatabaseStorage implements IStorage {
       .orderBy(tasks.id)
 
     const byId = new Map(result.map((t) => [t.id, t]))
-    const fixes: { id: number; subtaskOrder?: number[]; parentId?: null }[] = []
+    type Fix =
+      | { id: number; subtaskOrder: number[] }
+      | { id: number; parentId: number | null }
+    const fixes: Fix[] = []
+
+    // Group orphaned tasks by their invalid (negative) parentId so we can
+    // attempt to recover the intended parent via the sequential-ID heuristic:
+    // When a new task is created locally it receives temp id -N (N = 1 for the
+    // first task in a session).  After the parent syncs it gets a real server
+    // id.  Subtasks created directly after will get server ids base+1, base+2
+    // etc.  Therefore: for a group with parentId = -N the most-likely real
+    // parent id is  min(group IDs) - N.
+    const orphanGroups = new Map<number, Task[]>()
 
     for (const task of result) {
       if (task.parentId == null) continue
       const parent = byId.get(task.parentId)
       if (!parent) {
-        task.parentId = null
-        fixes.push({ id: task.id, parentId: null })
+        if (task.parentId < 0) {
+          const group = orphanGroups.get(task.parentId) ?? []
+          group.push(task)
+          orphanGroups.set(task.parentId, group)
+        } else {
+          task.parentId = null
+          fixes.push({ id: task.id, parentId: null })
+        }
         continue
       }
       if (!parent.subtaskOrder.includes(task.id)) {
@@ -71,13 +89,40 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    for (const [tempParentId, orphans] of orphanGroups) {
+      const n = Math.abs(tempParentId)
+      const minOrphanId = Math.min(...orphans.map((t) => t.id))
+      const recoveredParentId = minOrphanId - n
+      const recoveredParent = byId.get(recoveredParentId)
+
+      for (const orphan of orphans) {
+        if (recoveredParent) {
+          orphan.parentId = recoveredParentId
+          fixes.push({ id: orphan.id, parentId: recoveredParentId })
+          if (!recoveredParent.subtaskOrder.includes(orphan.id)) {
+            recoveredParent.subtaskOrder = [
+              ...recoveredParent.subtaskOrder,
+              orphan.id,
+            ]
+            fixes.push({
+              id: recoveredParent.id,
+              subtaskOrder: recoveredParent.subtaskOrder,
+            })
+          }
+        } else {
+          orphan.parentId = null
+          fixes.push({ id: orphan.id, parentId: null })
+        }
+      }
+    }
+
     if (fixes.length > 0) {
       await Promise.all(
-        fixes.map(({ id, subtaskOrder, parentId }) =>
+        fixes.map((fix) =>
           db
             .update(tasks)
-            .set({ ...(subtaskOrder !== undefined ? { subtaskOrder } : {}), ...(parentId === null ? { parentId } : {}) })
-            .where(and(eq(tasks.id, id), eq(tasks.userId, userId))),
+            .set('subtaskOrder' in fix ? { subtaskOrder: fix.subtaskOrder } : { parentId: fix.parentId })
+            .where(and(eq(tasks.id, fix.id), eq(tasks.userId, userId))),
         ),
       )
     }
