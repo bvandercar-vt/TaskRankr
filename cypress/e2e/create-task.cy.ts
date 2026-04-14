@@ -109,7 +109,7 @@ describe('Task Creation', () => {
 
       submitTaskForm(parentTask)
 
-      checkTaskInTree(parentTask)
+      checkTaskInTree({ ...parentTask, subtasks: [subtask] })
     },
   )
 })
