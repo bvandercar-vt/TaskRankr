@@ -1,1 +1,1 @@
-export { SubtasksCard } from './SubtasksCard'
+export { type PendingSubtask, SubtasksCard } from './SubtasksCard'

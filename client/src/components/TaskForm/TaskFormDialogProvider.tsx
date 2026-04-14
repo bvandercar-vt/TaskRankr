@@ -15,7 +15,6 @@ import type {
 import { useLocalState } from '@/providers/LocalStateProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
-import { TaskFormCancelConfirmDialog } from '../TaskForm/TaskFormCancelConfirmDialog'
 import {
   Dialog,
   DialogContent,
@@ -23,10 +22,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../primitives/overlays/Dialog'
+import type { PendingSubtask } from '../TaskForm/SubtasksCard'
 import { AssignSubtaskDialog } from '../TaskForm/SubtasksCard/AssignSubtaskDialog'
-import type { PendingSubtask } from '../TaskForm/SubtasksCard/SubtasksCard'
 import { SubtaskActionDialog } from '../TaskForm/SubtasksCard/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '../TaskForm/TaskForm'
+import { TaskFormCancelConfirmDialog } from '../TaskForm/TaskFormCancelConfirmDialog'
 
 interface TaskFormDialogContextType {
   openCreateDialog: (parentId?: number) => void
@@ -168,7 +168,7 @@ export const TaskFormDialogProvider = ({
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([])
   const [pendingNavStack, setPendingNavStack] = useState<number[]>([])
   const [showingChildForm, setShowingChildForm] = useState(false)
-  const pendingIdRef = useRef(-10000)
+  const pendingIdRef = useRef(-10_000)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
   const { subscribeToIdReplacement } = useLocalState()
@@ -191,7 +191,7 @@ export const TaskFormDialogProvider = ({
     setPendingTasks([])
     setPendingNavStack([])
     setShowingChildForm(false)
-    pendingIdRef.current = -10000
+    pendingIdRef.current = -10_000
   }
 
   const resetAndClose = () => {
@@ -238,27 +238,35 @@ export const TaskFormDialogProvider = ({
       if (!rootCreatedTask) rootCreatedTask = created
     }
 
-    return rootCreatedTask!
+    if (!rootCreatedTask) {
+      throw new Error('No tasks were created from pending tasks')
+    }
+    return rootCreatedTask
   }
 
-  const getTopOfStack = () =>
-    pendingNavStack.length > 0
-      ? pendingNavStack[pendingNavStack.length - 1]
-      : null
+  const getTopOfStack = <T extends boolean>(ensureNotNull?: T) => {
+    const top = pendingNavStack.at(-1) ?? null
+    if (ensureNotNull && top === null) {
+      throw new Error('No top of stack found')
+    }
+    return top as T extends true ? number : number | null
+  }
 
   const getCurrentPending = () => {
     const topId = getTopOfStack()
-    return topId !== null
-      ? pendingTasks.find((t) => t.localId === topId) ?? null
-      : null
+    if (topId === null) return null
+    return pendingTasks.find((t) => t.localId === topId) ?? null
   }
 
   const getPendingSubtasksForTop = (): PendingSubtask[] => {
     const topId = getTopOfStack()
     if (topId === null) return []
-    return pendingTasks
-      .filter((t) => t.parentLocalId === topId)
-      .map((t) => ({ name: (t.data as { name: string }).name }))
+    return (
+      pendingTasks
+        .filter((t) => t.parentLocalId === topId)
+        // biome-ignore lint/style/noNonNullAssertion: TODO: find alternative
+        .map((t) => ({ name: t.data.name! }))
+    )
   }
 
   const getSessionParentId = (): number | undefined => {
@@ -336,12 +344,9 @@ export const TaskFormDialogProvider = ({
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
       if (isInSession && showingChildForm) {
-        const parentLocalId = getTopOfStack()!
+        const parentLocalId = getTopOfStack(true)
         const localId = pendingIdRef.current--
-        setPendingTasks((prev) => [
-          ...prev,
-          { localId, data, parentLocalId },
-        ])
+        setPendingTasks((prev) => [...prev, { localId, data, parentLocalId }])
         setShowingChildForm(false)
         setActiveTask(undefined)
       } else if (isInSession && pendingNavStack.length === 1) {
@@ -362,11 +367,9 @@ export const TaskFormDialogProvider = ({
           resetAndClose()
         }
       } else if (isInSession && pendingNavStack.length > 1) {
-        const currentLocalId = getTopOfStack()!
+        const currentLocalId = getTopOfStack(true)
         setPendingTasks((prev) =>
-          prev.map((t) =>
-            t.localId === currentLocalId ? { ...t, data } : t,
-          ),
+          prev.map((t) => (t.localId === currentLocalId ? { ...t, data } : t)),
         )
         setPendingNavStack((prev) => prev.slice(0, -1))
         setActiveTask(undefined)
@@ -404,7 +407,7 @@ export const TaskFormDialogProvider = ({
         setPendingNavStack([localId])
         setShowingChildForm(true)
       } else if (showingChildForm) {
-        const parentLocalId = getTopOfStack()!
+        const parentLocalId = getTopOfStack(true)
         const localId = pendingIdRef.current--
         setPendingTasks((prev) => [
           ...prev,
@@ -412,7 +415,7 @@ export const TaskFormDialogProvider = ({
         ])
         setPendingNavStack((prev) => [...prev, localId])
       } else {
-        const currentLocalId = getTopOfStack()!
+        const currentLocalId = getTopOfStack(true)
         setPendingTasks((prev) =>
           prev.map((t) =>
             t.localId === currentLocalId ? { ...t, data: formData } : t,

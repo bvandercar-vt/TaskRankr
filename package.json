@@ -17,6 +17,7 @@
     "check": "npm run lint && npm run ts:check && npm run cy:ts:check",
     "format": "npx biome check . --fix",
     "lint": "npx biome check .",
+    "lint:fix": "npm run format",
     "ts:check": "tsc",
     "cy:ts:check": "tsc  --project cypress/tsconfig.json"
   },

@@ -47,7 +47,7 @@ import {
 import { TagChain } from '../primitives/TagChain'
 import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
-import { SubtasksCard, type PendingSubtask } from './SubtasksCard'
+import { type PendingSubtask, SubtasksCard } from './SubtasksCard'
 
 const STUB_TASK: Task = taskSchema.parse({
   id: 0,
@@ -172,11 +172,13 @@ export const TaskForm = ({
   const getFormDefaults = useCallback(
     (data: TaskFormDefaults | undefined): TaskFormDefaults =>
       taskFormDefaultsSchema.parse(
-        (data ?? defaultFormData ?? {
-          ...allRankFieldsNull,
-          name: '',
-          parentId,
-        }) satisfies z.input<typeof taskFormDefaultsSchema>,
+        data ??
+          defaultFormData ??
+          ({
+            ...allRankFieldsNull,
+            name: '',
+            parentId,
+          } satisfies z.input<typeof taskFormDefaultsSchema>),
       ),
     [parentId, defaultFormData],
   )
