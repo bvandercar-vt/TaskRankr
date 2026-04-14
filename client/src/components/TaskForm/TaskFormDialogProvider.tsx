@@ -12,6 +12,7 @@ import type {
   DeleteTaskArgs,
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { type CreateTask, type Task, TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
 import {
@@ -149,6 +150,19 @@ export const TaskFormDialogProvider = ({
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
 
   const { createTask, updateTask, deleteTask, setTaskStatus } = useTaskActions()
+  const { subscribeToIdReplacement } = useLocalState()
+
+  useEffect(() => {
+    return subscribeToIdReplacement((tempId, realId) => {
+      setParentId((prev) => (prev === tempId ? realId : prev))
+      setActiveTask((prev) =>
+        prev?.id === tempId ? { ...prev, id: realId } : prev,
+      )
+      setReturnToTask((prev) =>
+        prev?.id === tempId ? { ...prev, id: realId } : prev,
+      )
+    })
+  }, [subscribeToIdReplacement])
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {

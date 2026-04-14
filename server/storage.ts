@@ -55,12 +55,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(tasks.id)
 
     const byId = new Map(result.map((t) => [t.id, t]))
-    const fixes: { id: number; subtaskOrder: number[] }[] = []
+    const fixes: { id: number; subtaskOrder?: number[]; parentId?: null }[] = []
 
     for (const task of result) {
       if (task.parentId == null) continue
       const parent = byId.get(task.parentId)
-      if (!parent) continue
+      if (!parent) {
+        task.parentId = null
+        fixes.push({ id: task.id, parentId: null })
+        continue
+      }
       if (!parent.subtaskOrder.includes(task.id)) {
         parent.subtaskOrder = [...parent.subtaskOrder, task.id]
         fixes.push({ id: parent.id, subtaskOrder: parent.subtaskOrder })
@@ -69,10 +73,10 @@ export class DatabaseStorage implements IStorage {
 
     if (fixes.length > 0) {
       await Promise.all(
-        fixes.map(({ id, subtaskOrder }) =>
+        fixes.map(({ id, subtaskOrder, parentId }) =>
           db
             .update(tasks)
-            .set({ subtaskOrder })
+            .set({ ...(subtaskOrder !== undefined ? { subtaskOrder } : {}), ...(parentId === null ? { parentId } : {}) })
             .where(and(eq(tasks.id, id), eq(tasks.userId, userId))),
         ),
       )
