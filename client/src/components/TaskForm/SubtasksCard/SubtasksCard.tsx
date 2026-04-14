@@ -231,7 +231,6 @@ export const SubtasksCard = ({
                     // biome-ignore lint/suspicious/noArrayIndexKey: Not sure what else to do
                     key={`pending-subtask-${i}`}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/5 select-none"
-                    style={{ paddingLeft: '12px' }}
                     data-testid={`subtask-row-pending-${i}`}
                   >
                     <span className="shrink-0 h-4 w-4 rounded-sm border border-muted-foreground/40" />
