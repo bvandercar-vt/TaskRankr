@@ -47,6 +47,16 @@ export const DEFAULT_FIELD_CONFIG: FieldConfig = {
   timeSpent: { visible: true, required: false },
 }
 
+/** Ensures `required` is always false whenever `visible` is false. */
+export const sanitizeFieldConfig = (fieldConfig: FieldConfig): FieldConfig => {
+  const result = {} as FieldConfig
+  for (const key of Object.keys(fieldConfig) as (keyof FieldConfig)[]) {
+    const { visible, required } = fieldConfig[key]
+    result[key] = { visible, required: visible ? required : false }
+  }
+  return result
+}
+
 export const userSettings = pgTable('user_settings', {
   userId: varchar('user_id').primaryKey(),
   autoPinNewTasks: boolean('auto_pin_new_tasks').default(true).notNull(),
