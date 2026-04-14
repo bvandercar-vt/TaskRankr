@@ -5,6 +5,7 @@ import {
   type FieldConfig,
   type RankField,
   type Task,
+  TaskStatus,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
@@ -78,7 +79,7 @@ export const fillTaskForm = (
  * Submits form and checks results in the UI and (if logged in) backend.
  */
 export const submitTaskForm = (
-  task: TaskFormData,
+  { status = TaskStatus.OPEN, ...task }: TaskFormData & { status?: TaskStatus },
   submitBtnText = 'Create',
 ) => {
   cy.get(TaskForm.SUBMIT_BTN)
@@ -86,5 +87,5 @@ export const submitTaskForm = (
     .should('not.be.disabled')
     .click()
 
-  waitForCreate(task)
+  waitForCreate({ ...task, status })
 }

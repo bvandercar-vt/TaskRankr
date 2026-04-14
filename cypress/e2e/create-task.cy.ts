@@ -14,7 +14,7 @@ import {
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
-import type { FieldConfig } from '~/shared/schema'
+import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
 const { TaskForm } = Selectors
 
@@ -95,7 +95,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-      submitTaskForm(DefaultTask)
+      submitTaskForm({ ...DefaultTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
     },
   )

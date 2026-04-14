@@ -1,3 +1,4 @@
+import { TaskStatus } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import type { TaskFormData } from './task-form'
@@ -7,12 +8,15 @@ export const interceptCreate = () => {
   cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 }
 
-export function waitForCreate(task: TaskFormData) {
+export function waitForCreate({
+  status = TaskStatus.OPEN,
+  ...task
+}: TaskFormData & { status?: TaskStatus }) {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@createTask')
 
-  checkTaskExistsBackend(task, loggedIn)
+  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
 
   cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
 }
