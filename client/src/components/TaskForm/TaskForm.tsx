@@ -397,6 +397,7 @@ export const TaskForm = ({
                         })
                       }
                       className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                      data-testid='time-spent-input'
                     />
                   </div>
                   {form.formState.errors.inProgressTime && (

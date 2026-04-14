@@ -31,6 +31,7 @@ describe('Task Creation', () => {
         ease: { visible: true, required: false },
         enjoyment: { visible: false, required: false },
         time: { visible: true, required: false },
+        timeSpent: { visible: false, required: false },
       } as const satisfies FieldConfig
 
       const newTask = {

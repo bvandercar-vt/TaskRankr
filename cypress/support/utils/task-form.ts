@@ -55,6 +55,13 @@ export const fillTaskForm = (
     }
   }
 
+  if (settings.timeSpent.visible) {
+    cy.get(TaskForm.TIME_SPENT_INPUT).should(
+      settings.timeSpent.visible ? 'be.visible' : 'not.exist',
+    )
+    // TODO: test required
+  }
+
   cy.get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
