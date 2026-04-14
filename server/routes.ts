@@ -69,11 +69,7 @@ const router = s.router(contract, {
         }
         if (body.status === TaskStatus.COMPLETED) {
           const userSettings = await storage.getSettings(userId)
-          const timeSpentRequired =
-            (userSettings.fieldConfig?.timeSpent?.visible &&
-              userSettings.fieldConfig?.timeSpent?.required) ??
-            false
-          if (timeSpentRequired) {
+          if (userSettings.fieldConfig.timeSpent.required) {
             const finalTime =
               body.inProgressTime ?? existing.inProgressTime ?? 0
             if (finalTime <= 0) {
@@ -112,11 +108,7 @@ const router = s.router(contract, {
         }
         if (body.status === TaskStatus.COMPLETED) {
           const userSettings = await storage.getSettings(userId)
-          const timeSpentRequired =
-            (userSettings.fieldConfig?.timeSpent?.visible &&
-              userSettings.fieldConfig?.timeSpent?.required) ??
-            false
-          if (timeSpentRequired) {
+          if (userSettings.fieldConfig.timeSpent.required) {
             let expectedTime = existing.inProgressTime ?? 0
             if (existing.inProgressStartedAt) {
               expectedTime +=
