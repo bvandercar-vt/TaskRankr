@@ -13,7 +13,7 @@ import type {
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useLocalState } from '@/providers/LocalStateProvider'
-import { type CreateTask, type Task, TaskStatus } from '~/shared/schema'
+import { type CreateTask, type Task } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
 import {
   Dialog,
@@ -51,7 +51,6 @@ interface TaskFormDialogProps
     | 'onEditSubtask'
     | 'onDeleteSubtask'
     | 'onAssignSubtask'
-    | 'onMarkCompleted'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -149,7 +148,7 @@ export const TaskFormDialogProvider = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
 
-  const { createTask, updateTask, deleteTask, setTaskStatus } = useTaskActions()
+  const { createTask, updateTask, deleteTask } = useTaskActions()
   const { subscribeToIdReplacement } = useLocalState()
 
   useEffect(() => {
@@ -218,10 +217,6 @@ export const TaskFormDialogProvider = ({
     }
   }
 
-  const handleMarkCompleted = (taskId: number) => {
-    setTaskStatus(taskId, TaskStatus.COMPLETED)
-  }
-
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
     if (formData) {
       const newTask = createTask({ ...formData, parentId } as CreateTask)
@@ -268,7 +263,6 @@ export const TaskFormDialogProvider = ({
     onEditSubtask: handleEditSubtask,
     onDeleteSubtask: setSubtaskToDelete,
     onAssignSubtask: handleAssignSubtask,
-    onMarkCompleted: handleMarkCompleted,
   }
 
   const isMobile = useIsMobile()

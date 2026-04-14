@@ -127,7 +127,6 @@ export interface TaskFormProps {
   onEditSubtask: (task: Task) => void
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
-  onMarkCompleted?: (taskId: number) => void
 }
 
 export const TaskForm = ({
@@ -139,7 +138,6 @@ export const TaskForm = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
-  onMarkCompleted,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { data: allTasks } = useTasks()
@@ -202,16 +200,10 @@ export const TaskForm = ({
       <form
         onSubmit={form.handleSubmit((data) => {
           const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
-          const isCompleting = data.status === TaskStatus.COMPLETED
-          if (isCompleting && initialData && onMarkCompleted) {
-            onSubmit(submitted)
-            onMarkCompleted(initialData.id)
-          } else if (isCompleting && !submitted.completedAt) {
+          if (data.status === TaskStatus.COMPLETED && !submitted.completedAt) {
             submitted.completedAt = new Date()
-            onSubmit(submitted)
-          } else {
-            onSubmit(submitted)
           }
+          onSubmit(submitted)
         })}
         className="flex flex-col h-full"
       >
