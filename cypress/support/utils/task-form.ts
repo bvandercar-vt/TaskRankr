@@ -3,11 +3,10 @@ import {
   type FieldConfig,
   RankField,
   type Task,
-  TaskStatus,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { interceptCreate, waitForCreate } from './intercepts'
+import { interceptCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -76,19 +75,4 @@ export const clickSubmitBtn = (submitBtnText = 'Create') => {
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
-}
-
-/**
- * Submits form and checks results in the UI and (if logged in) backend.
- */
-export const submitTaskForm = (
-  { status = TaskStatus.OPEN, ...task }: TaskFormData & { status?: TaskStatus },
-  submitBtnText = 'Create',
-) => {
-  cy.get(TaskForm.SUBMIT_BTN)
-    .should('have.text', submitBtnText)
-    .should('not.be.disabled')
-    .click()
-
-  waitForCreate({ ...task, status })
 }
