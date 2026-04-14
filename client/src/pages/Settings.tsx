@@ -47,7 +47,7 @@ import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
-import { type FieldConfig, TaskStatus } from '~/shared/schema'
+import { type FieldConfig, type FieldFlags, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
@@ -133,11 +133,9 @@ const AttributeCheckboxRow = ({
   required,
   updateFieldFlags,
   className,
-}: {
+}: FieldFlags & {
   name: keyof FieldConfig
   label: string
-  visible: boolean
-  required: boolean
   updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
   className?: string
 }) => (
