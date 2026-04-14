@@ -80,8 +80,7 @@ const router = s.router(contract, {
               return {
                 status: 400,
                 body: {
-                  message:
-                    'Time spent must be recorded to complete this task',
+                  message: 'Time spent must be recorded to complete this task',
                 },
               }
             }
@@ -127,8 +126,7 @@ const router = s.router(contract, {
               return {
                 status: 400,
                 body: {
-                  message:
-                    'Time spent must be recorded to complete this task',
+                  message: 'Time spent must be recorded to complete this task',
                 },
               }
             }

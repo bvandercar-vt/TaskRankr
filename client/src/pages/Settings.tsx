@@ -2,8 +2,8 @@
  * @fileoverview User preferences and settings configuration page.
  */
 
-import { useRef, useState } from "react";
-import { isStandalonePWA } from "is-standalone-pwa";
+import { useRef, useState } from 'react'
+import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ChevronRight,
   Download,
@@ -11,17 +11,17 @@ import {
   type LucideIcon,
   Trash2,
   Upload,
-} from "lucide-react";
-import { Link } from "wouter";
+} from 'lucide-react'
+import { Link } from 'wouter'
 
-import { ContactCard } from "@/components/appInfo/ContactCard";
-import { SortInfo } from "@/components/appInfo/SortInfo";
-import { FullChangelogDialog } from "@/components/appInfo/WhatsNewDialog";
-import { BackButtonHeader } from "@/components/BackButton";
-import { Button } from "@/components/primitives/Button";
-import { CollapsibleCard } from "@/components/primitives/CollapsibleCard";
-import { Checkbox } from "@/components/primitives/forms/Checkbox";
-import { Switch } from "@/components/primitives/forms/Switch";
+import { ContactCard } from '@/components/appInfo/ContactCard'
+import { SortInfo } from '@/components/appInfo/SortInfo'
+import { FullChangelogDialog } from '@/components/appInfo/WhatsNewDialog'
+import { BackButtonHeader } from '@/components/BackButton'
+import { Button } from '@/components/primitives/Button'
+import { CollapsibleCard } from '@/components/primitives/CollapsibleCard'
+import { Checkbox } from '@/components/primitives/forms/Checkbox'
+import { Switch } from '@/components/primitives/forms/Switch'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,36 +32,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/primitives/overlays/AlertDialog";
-import { ScrollablePage } from "@/components/primitives/ScrollablePage";
-import { useAuth } from "@/hooks/useAuth";
-import { useSettings } from "@/hooks/useSettings";
-import { useTaskActions, useTasks } from "@/hooks/useTasks";
-import { useToast } from "@/hooks/useToast";
-import { APP_VERSION } from "@/lib/changelog";
-import { Routes } from "@/lib/constants";
-import { queryClient } from "@/lib/query-client";
-import { RANK_FIELDS_COLUMNS } from "@/lib/task-utils";
-import { QueryKeys, tsr } from "@/lib/ts-rest";
-import { cn } from "@/lib/utils";
-import { useGuestMode } from "@/providers/GuestModeProvider";
-import { AuthPaths } from "~/shared/constants";
-import { contract } from "~/shared/contract";
-import { type FieldConfig, TaskStatus } from "~/shared/schema";
+} from '@/components/primitives/overlays/AlertDialog'
+import { ScrollablePage } from '@/components/primitives/ScrollablePage'
+import { useAuth } from '@/hooks/useAuth'
+import { useSettings } from '@/hooks/useSettings'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { useToast } from '@/hooks/useToast'
+import { APP_VERSION } from '@/lib/changelog'
+import { Routes } from '@/lib/constants'
+import { queryClient } from '@/lib/query-client'
+import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
+import { QueryKeys, tsr } from '@/lib/ts-rest'
+import { cn } from '@/lib/utils'
+import { useGuestMode } from '@/providers/GuestModeProvider'
+import { AuthPaths } from '~/shared/constants'
+import { contract } from '~/shared/contract'
+import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
 const Card = ({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) => (
   <div
-    className={cn("p-4 bg-card rounded-lg border border-white/10", className)}
+    className={cn('p-4 bg-card rounded-lg border border-white/10', className)}
   >
     {children}
   </div>
-);
+)
 
 const UserInfoCard = () => {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   return (
     <Card className="flex items-center justify-between">
@@ -89,15 +89,15 @@ const UserInfoCard = () => {
         Log Out
       </Button>
     </Card>
-  );
-};
+  )
+}
 
 interface SwitchSettingProps {
-  title: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  "data-testid": string;
+  title: string
+  description: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  'data-testid': string
 }
 
 const SwitchSetting = ({
@@ -105,7 +105,7 @@ const SwitchSetting = ({
   description,
   checked,
   onCheckedChange,
-  "data-testid": testId,
+  'data-testid': testId,
 }: SwitchSettingProps) => (
   <>
     <div className="flex-1 mr-2">
@@ -118,20 +118,20 @@ const SwitchSetting = ({
       data-testid={testId}
     />
   </>
-);
+)
 
 const SwitchCard = (props: SwitchSettingProps) => (
   <Card className="flex items-center justify-between">
     <SwitchSetting {...props} />
   </Card>
-);
+)
 
 const AttributeSettingsCard = ({
   fieldConfig,
   updateFieldFlags,
 }: {
-  fieldConfig: FieldConfig;
-  updateFieldFlags: ReturnType<typeof useSettings>["updateFieldFlags"];
+  fieldConfig: FieldConfig
+  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
 }) => (
   <Card className="mt-4">
     <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
@@ -227,18 +227,18 @@ const AttributeSettingsCard = ({
       </tbody>
     </table>
   </Card>
-);
+)
 
 const ExportButton = () => {
-  const { data: tasks } = useTasks();
-  const hasNoTasks = tasks.length === 0;
+  const { data: tasks } = useTasks()
+  const hasNoTasks = tasks.length === 0
 
   return (
     <Button
       variant="outline"
       className="gap-2"
       onClick={() => {
-        window.location.href = contract.tasks.export.path;
+        window.location.href = contract.tasks.export.path
       }}
       disabled={hasNoTasks}
       data-testid="button-export"
@@ -246,49 +246,49 @@ const ExportButton = () => {
       <Download className="size-4" />
       Export Tasks
     </Button>
-  );
-};
+  )
+}
 
 const ImportButton = () => {
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImporting, setIsImporting] = useState(false);
+  const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isImporting, setIsImporting] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    setIsImporting(true);
+    setIsImporting(true)
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const text = await file.text()
+      const data = JSON.parse(text)
 
       const result = await tsr.tasks.import.mutate({
         body: { tasks: data.tasks || data },
-      });
+      })
       if (result.status !== 200) {
-        throw new Error("Import failed");
+        throw new Error('Import failed')
       }
 
-      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks });
-      toast({ title: "Tasks imported successfully" });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.getTasks })
+      toast({ title: 'Tasks imported successfully' })
     } catch (err) {
       if (
         err instanceof SyntaxError ||
         err instanceof TypeError ||
-        (err instanceof Error && err.message === "Import failed")
+        (err instanceof Error && err.message === 'Import failed')
       ) {
-        toast({ title: "Failed to import tasks", variant: "destructive" });
+        toast({ title: 'Failed to import tasks', variant: 'destructive' })
       } else {
-        throw err;
+        throw err
       }
     } finally {
-      setIsImporting(false);
+      setIsImporting(false)
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = ''
       }
     }
-  };
+  }
 
   return (
     <>
@@ -300,7 +300,7 @@ const ImportButton = () => {
         data-testid="button-import"
       >
         <Upload className="size-4" />
-        {isImporting ? "Importing..." : "Import Tasks"}
+        {isImporting ? 'Importing...' : 'Import Tasks'}
       </Button>
       <input
         ref={fileInputRef}
@@ -311,11 +311,11 @@ const ImportButton = () => {
         data-testid="input-import-file"
       />
     </>
-  );
-};
+  )
+}
 
 const ClearLocalStorageConfirmDialog = () => {
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   return (
     <AlertDialog>
@@ -343,9 +343,9 @@ const ClearLocalStorageConfirmDialog = () => {
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              localStorage.clear();
-              toast({ title: "Local storage cleared" });
-              window.location.reload();
+              localStorage.clear()
+              toast({ title: 'Local storage cleared' })
+              window.location.reload()
             }}
             data-testid="button-confirm-clear"
           >
@@ -354,8 +354,8 @@ const ClearLocalStorageConfirmDialog = () => {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
+  )
+}
 
 const InfoCard = ({
   title,
@@ -363,14 +363,14 @@ const InfoCard = ({
   icon: IconComponent,
   href,
   onClick,
-  "data-testid": testId,
+  'data-testid': testId,
 }: {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  href?: string;
-  onClick?: () => void;
-  "data-testid"?: string;
+  title: string
+  description: string
+  icon: LucideIcon
+  href?: string
+  onClick?: () => void
+  'data-testid'?: string
 }) => {
   const content = (
     <Card className="flex items-center justify-between hover-elevate cursor-pointer">
@@ -380,7 +380,7 @@ const InfoCard = ({
       </div>
       <IconComponent className="size-5 text-muted-foreground shrink-0" />
     </Card>
-  );
+  )
 
   return href ? (
     <Link href={href} data-testid={testId}>
@@ -395,8 +395,8 @@ const InfoCard = ({
     >
       {content}
     </button>
-  );
-};
+  )
+}
 
 const HowToUseCard = () => (
   <InfoCard
@@ -405,7 +405,7 @@ const HowToUseCard = () => (
     icon={ChevronRight}
     href={Routes.HOW_TO_USE}
   />
-);
+)
 
 const InstallAsAppCard = () => (
   <InfoCard
@@ -415,10 +415,10 @@ const InstallAsAppCard = () => (
     href={Routes.HOW_TO_INSTALL}
     data-testid="link-how-to-install"
   />
-);
+)
 
 const ChangelogCard = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   return (
     <>
@@ -431,15 +431,15 @@ const ChangelogCard = () => {
       />
       <FullChangelogDialog open={open} onOpenChange={setOpen} />
     </>
-  );
-};
+  )
+}
 
 const Settings = () => {
-  const { settings, updateSettings, updateFieldFlags } = useSettings();
-  const { isGuestMode } = useGuestMode();
-  const isStandalone = isStandalonePWA();
-  const { data: allTasks } = useTasks();
-  const { setTaskStatus } = useTaskActions();
+  const { settings, updateSettings, updateFieldFlags } = useSettings()
+  const { isGuestMode } = useGuestMode()
+  const isStandalone = isStandalonePWA()
+  const { data: allTasks } = useTasks()
+  const { setTaskStatus } = useTaskActions()
 
   return (
     <ScrollablePage>
@@ -459,8 +459,8 @@ const Settings = () => {
           title="Always sort pinned by Priority"
           description={
             settings.alwaysSortPinnedByPriority
-              ? "Pinned tasks are always sorted by priority first, then by your selected sort."
-              : "Pinned tasks are sorted using your selected sort only."
+              ? 'Pinned tasks are always sorted by priority first, then by your selected sort.'
+              : 'Pinned tasks are sorted using your selected sort only.'
           }
           checked={settings.alwaysSortPinnedByPriority}
           onCheckedChange={(checked) =>
@@ -544,7 +544,7 @@ const Settings = () => {
         </p>
       </div>
     </ScrollablePage>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings
