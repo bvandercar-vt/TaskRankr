@@ -67,8 +67,10 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('be.visible')
-      cy.contains('1 subtask').should('be.visible')
+      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
+        .should('be.visible')
+        .should('contain.text', '1 subtask')
+        .should('be.visible ')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
 
       checkTasksDontExist([rootTask, subtask])
@@ -113,8 +115,10 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('be.visible')
-      cy.contains('2 subtasks').should('be.visible')
+      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
+        .should('be.visible')
+        .should('contain.text', '2 subtasks')
+        .should('be.visible ')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
 
       checkTasksDontExist([rootTask, subtask, subtask2])
