@@ -10,13 +10,24 @@ import { isLoggedIn } from './test-runner'
  * Guest (no cookie) → GET /api/test/tasks (unauthenticated backdoor), used to
  * assert that guest-created tasks are not persisted to the server.
  */
-export const getTasks = () =>
+const getApiTasks = () =>
   cy
     .request<Task[]>(
       'GET',
       isLoggedIn() ? ApiPaths.GET_TASKS : TestPaths.TEST_TASKS,
     )
     .its('body')
+
+const getLocalStateTasks = () =>
+  cy.window().then<Task[]>((win) => {
+    const storageMode = isLoggedIn() ? 'auth' : 'guest'
+    const localStateTasksKey = `taskrankr-${storageMode}-tasks`
+    const storedTasks = win.localStorage.getItem(localStateTasksKey)
+
+    if (!storedTasks) return []
+
+    return JSON.parse(storedTasks)
+  })
 
 export function checkTaskExistsBackend(
   task: Pick<Task, 'name' | 'status'>,
@@ -30,7 +41,7 @@ export function checkTaskExistsBackend(
   task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
   exists: boolean,
 ): void {
-  getTasks().then((tasks) => {
+  const checkTasks = (tasks: Task[]) => {
     if (exists) {
       expect(tasks.map((t) => t.name)).to.include(task.name)
       const taskInBackend = tasks.find((t) => t.name === task.name)
@@ -38,7 +49,10 @@ export function checkTaskExistsBackend(
     } else {
       expect(tasks.map((t) => t.name)).to.not.include(task.name)
     }
-  })
+  }
+  
+  getLocalStateTasks().then(checkTasks)
+  getApiTasks().then(checkTasks)
 }
 
 export const getSettings = () =>
