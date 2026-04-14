@@ -68,9 +68,9 @@ export const fillTaskForm = (
   }
 }
 
-export const clickSubmitBtn = (submitBtnText = 'Create') => {
-  cy.get(TaskForm.SUBMIT_BTN)
+export const clickSubmitBtn = (submitBtnText = 'Create') =>
+  cy
+    .get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
-}
