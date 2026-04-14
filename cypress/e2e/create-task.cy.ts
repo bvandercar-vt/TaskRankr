@@ -5,7 +5,7 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
-import { setFieldConfig } from '@cypress/support/utils/settings'
+import { setSettings } from '@cypress/support/utils/settings'
 import {
   checkTaskMaybeCreatedBackend,
   fillTaskForm,
@@ -14,9 +14,9 @@ import {
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
-import { DEFAULT_FIELD_CONFIG, type FieldConfig } from '~/shared/schema'
+import type { FieldConfig } from '~/shared/schema'
 
-const { Menu, TaskForm } = Selectors
+const { TaskForm } = Selectors
 
 describe('Task Creation', () => {
   beforeEach(() => {
@@ -26,14 +26,14 @@ describe('Task Creation', () => {
 
   runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(DefaultTask, DEFAULT_FIELD_CONFIG)
-    submitTaskForm(DefaultTask, 'Create')
+    fillTaskForm(DefaultTask)
+    submitTaskForm(DefaultTask)
     checkTaskInTree(DefaultTask)
   })
 
   runBothModes(
     'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         priority: { visible: true, required: true },
         ease: { visible: true, required: false },
@@ -49,33 +49,25 @@ describe('Task Creation', () => {
         enjoyment: null,
       } satisfies TaskFormData
 
-      cy.get(Selectors.MENU_BTN).click()
-      cy.get(Menu.SETTINGS).click()
-      setFieldConfig(fieldConfig)
-      cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
-
+      setSettings({ fieldConfig })
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(newTask, fieldConfig)
-      submitTaskForm(newTask, 'Create')
+      submitTaskForm(newTask)
       checkTaskInTree(newTask)
     },
   )
 
   runBothModes(
     'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
         timeSpent: { visible: true, required: false },
       } as const satisfies FieldConfig
 
-      cy.get(Selectors.MENU_BTN).click()
-      cy.get(Menu.SETTINGS).click()
-      setFieldConfig(fieldConfig)
-      cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
-
+      setSettings({ fieldConfig })
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -83,7 +75,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-      submitTaskForm(DefaultTask, 'Create')
+      submitTaskForm(DefaultTask)
       // TODO: check is in completed tree
     },
   )
@@ -102,20 +94,20 @@ describe('Task Creation', () => {
       } as const satisfies TaskFormData
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask, DEFAULT_FIELD_CONFIG)
+      fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       checkTaskMaybeCreatedBackend(parentTask)
 
-      fillTaskForm(subtask, DEFAULT_FIELD_CONFIG)
-      submitTaskForm(subtask, 'Create')
+      fillTaskForm(subtask)
+      submitTaskForm(subtask)
 
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .first()
         .should('contain.text', subtask.name)
 
-      submitTaskForm(parentTask, 'Create')
+      submitTaskForm(parentTask)
 
       checkTaskInTree(parentTask)
     },

@@ -1,6 +1,11 @@
 import { RANK_FIELDS_COLUMNS } from '@client/lib/task-utils'
 
-import type { FieldConfig, RankField, Task } from '~/shared/schema'
+import {
+  DEFAULT_FIELD_CONFIG,
+  type FieldConfig,
+  type RankField,
+  type Task,
+} from '~/shared/schema'
 import { ApiPaths, Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import { isLoggedIn } from './test-runner'
@@ -45,7 +50,10 @@ export const fillTaskFormRankFields = (
 /**
  * Fills form.
  */
-export const fillTaskForm = (task: TaskFormData, settings: FieldConfig) => {
+export const fillTaskForm = (
+  task: TaskFormData,
+  settings: FieldConfig = DEFAULT_FIELD_CONFIG,
+) => {
   const loggedIn = isLoggedIn()
 
   loggedIn && checkTaskExistsBackend(task, false)
@@ -78,7 +86,10 @@ export function checkTaskMaybeCreatedBackend(task: TaskFormData) {
 /**
  * Submits form and checks results in the UI and (if logged in) backend.
  */
-export const submitTaskForm = (task: TaskFormData, submitBtnText: string) => {
+export const submitTaskForm = (
+  task: TaskFormData,
+  submitBtnText = 'Create',
+) => {
   cy.get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')

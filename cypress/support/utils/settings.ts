@@ -1,16 +1,30 @@
 import type { Entries } from 'type-fest'
 
-import type { FieldConfig } from '~/shared/schema'
+import type { FieldConfig, UserSettings } from '~/shared/schema'
 import { ApiPaths, Selectors } from '../constants'
 import { getSettings } from './api'
 import { isLoggedIn } from './test-runner'
 
-const { Settings } = Selectors
+const { Menu, Settings } = Selectors
 
-export const setFieldConfig = (targetConfig: FieldConfig) => {
+export const setSettings = (settings: Pick<UserSettings, 'fieldConfig'>) => {
   const loggedIn = isLoggedIn()
+
+  cy.get(Selectors.MENU_BTN).click()
+  cy.get(Menu.SETTINGS).click()
+
   cy.intercept('PUT', ApiPaths.UPDATE_SETTINGS).as('settingsPut')
 
+  setFieldConfig(settings.fieldConfig)
+  cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
+
+  loggedIn &&
+    getSettings().then((currentSettings) => {
+      expect(currentSettings).to.deep.include(settings)
+    })
+}
+
+const setFieldConfig = (targetConfig: FieldConfig) => {
   for (const [field, { visible, required }] of Object.entries(
     targetConfig,
   ) as Entries<FieldConfig>) {
@@ -32,9 +46,4 @@ export const setFieldConfig = (targetConfig: FieldConfig) => {
         }
       })
   }
-
-  loggedIn &&
-    getSettings().then((settings) => {
-      expect(settings.fieldConfig).to.eql(targetConfig)
-    })
 }
