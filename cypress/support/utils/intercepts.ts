@@ -8,15 +8,16 @@ export const interceptCreate = () => {
   cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 }
 
-export function waitForCreate({
-  status = TaskStatus.OPEN,
-  ...task
-}: TaskFormData & { status?: TaskStatus }) {
+export function waitForCreate(
+  tasks: (TaskFormData & { status?: TaskStatus })[],
+) {
   const loggedIn = isLoggedIn()
 
-  loggedIn && cy.wait('@createTask')
+  loggedIn && cy.wait(Array(tasks.length).fill('@createTask'))
 
-  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
+  tasks.forEach(({ status = TaskStatus.OPEN, ...task }) => {
+    checkTaskExistsBackend({ ...task, status }, loggedIn as true)
+  })
 }
 
 export const interceptDelete = () => {

@@ -53,7 +53,7 @@ describe('Task Creation', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(DefaultTask)
     clickSubmitBtn()
-    waitForCreate(DefaultTask)
+    waitForCreate([DefaultTask])
     checkTaskInTree(DefaultTask)
     cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
   })
@@ -82,7 +82,7 @@ describe('Task Creation', () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(newTask, fieldConfig)
       clickSubmitBtn()
-      waitForCreate(newTask)
+      waitForCreate([newTask])
       checkTaskInTree(newTask)
       cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
     },
@@ -105,7 +105,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
       clickSubmitBtn()
-      waitForCreate({ ...DefaultTask, status: TaskStatus.COMPLETED })
+      waitForCreate([{ ...DefaultTask, status: TaskStatus.COMPLETED }])
       // TODO: check is in completed tree
       cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
     },
@@ -126,8 +126,7 @@ describe('Task Creation', () => {
         .should('contain.text', subtask.name)
 
       clickSubmitBtn()
-      waitForCreate(rootTask)
-      waitForCreate(subtask)
+      waitForCreate([rootTask, subtask])
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
@@ -158,9 +157,7 @@ describe('Task Creation', () => {
         .should('equal', [subtask.name, subtask2.name])
 
       clickSubmitBtn()
-      waitForCreate(rootTask)
-      waitForCreate(subtask)
-      waitForCreate(subtask2)
+      waitForCreate([rootTask, subtask, subtask2])
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
@@ -201,10 +198,7 @@ describe('Task Creation', () => {
         .should('equal', [subtask.name, subtask2.name, subtask3.name])
 
       clickSubmitBtn()
-      waitForCreate(rootTask)
-      waitForCreate(subtask)
-      waitForCreate(subtask2)
-      waitForCreate(subtask3)
+      waitForCreate([rootTask, subtask, subtask2, subtask3])
 
       checkTaskInTree({
         ...rootTask,
