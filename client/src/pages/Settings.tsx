@@ -195,7 +195,7 @@ const AttributeSettingsCard = ({
         {(() => {
           const { visible, required } = fieldConfig.timeSpent
           return (
-            <tr key="timeSpent" className="border-b border-white/5">
+            <tr key="timeSpent">
               <td className="py-3 text-foreground">Time Spent</td>
               <td className="py-3 text-center">
                 <Checkbox
