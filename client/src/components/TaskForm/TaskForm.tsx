@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import { omit } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
@@ -20,9 +20,8 @@ import type {
 } from '@/providers/LocalStateProvider'
 import {
   allRankFieldsNull,
-  insertTaskSchema,
+  insertTaskSchemaRefined,
   type MutateTask,
-  type RankField,
   type Task,
   TaskStatus,
   taskSchema,
@@ -158,14 +157,6 @@ export const TaskForm = ({
     [settings.fieldConfig],
   )
 
-  const requiredRankFields: RankField[] = useMemo(
-    () =>
-      RANK_FIELDS_COLUMNS.filter(
-        ({ name }) => settings.fieldConfig[name].required,
-      ).map(({ name }) => name),
-    [settings.fieldConfig],
-  )
-
   const {
     fieldConfig: {
       timeSpent: { visible: timeSpentVisible, required: timeSpentRequired },
@@ -173,26 +164,8 @@ export const TaskForm = ({
   } = settings
 
   const formSchema = useMemo(
-    () =>
-      insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
-        for (const field of requiredRankFields) {
-          if (data[field] == null) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: [field],
-              message: 'This field is required',
-            })
-          }
-        }
-        if (markCompleted && timeSpentRequired && (data.timeSpent ?? 0) <= 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['timeSpent'],
-            message: 'Time spent is required when completing a task',
-          })
-        }
-      }),
-    [requiredRankFields, markCompleted, timeSpentRequired],
+    () => insertTaskSchemaRefined(settings),
+    [settings],
   )
 
   const getFormDefaults = useCallback(

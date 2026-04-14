@@ -8,17 +8,8 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { mapValues } from 'es-toolkit'
 import { z } from 'zod'
 
+import { type RankField, SortOption } from './common'
 import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
-
-export enum SortOption {
-  DATE_CREATED = 'date_created',
-  PRIORITY = 'priority',
-  EASE = 'ease',
-  ENJOYMENT = 'enjoyment',
-  TIME = 'time',
-}
-
-export type RankField = Exclude<SortOption, `date_${string}`>
 
 export const fieldFlagsSchema = z.object({
   visible: z.boolean(),
