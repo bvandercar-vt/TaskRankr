@@ -81,7 +81,9 @@ export const AssignSubtaskDialog = ({
     <Dialog
       open={open}
       onOpenChange={(v) => {
-        if (!v) reset()
+        if (!v) {
+          reset()
+        }
         onOpenChange(v)
       }}
     >
