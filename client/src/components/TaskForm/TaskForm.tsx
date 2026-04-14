@@ -371,11 +371,11 @@ export const TaskForm = ({
                   render={() => (
                     <FormItem className="flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-4">
-                        <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <FormLabel
+                          className="text-[10px] uppercase tracking-wider text-muted-foreground"
+                          isRequired={timeSpentRequired}
+                        >
                           Time Spent
-                          {timeSpentRequired && (
-                            <span className="text-destructive ml-1">*</span>
-                          )}
                         </FormLabel>
                         <TimeInput
                           durationMs={form.watch('timeSpent') || 0}
