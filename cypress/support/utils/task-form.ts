@@ -73,7 +73,7 @@ export const fillTaskForm = (
   }
 }
 
-export function checkTaskMaybeCreatedBackend(task: TaskFormData) {
+export function maybeWaitForCreate(task: TaskFormData) {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@createTask')
@@ -95,5 +95,5 @@ export const submitTaskForm = (
     .should('not.be.disabled')
     .click()
 
-  checkTaskMaybeCreatedBackend(task)
+  maybeWaitForCreate(task)
 }

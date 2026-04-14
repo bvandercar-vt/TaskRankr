@@ -7,8 +7,8 @@ import {
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
-  checkTaskMaybeCreatedBackend,
   fillTaskForm,
+  maybeWaitForCreate,
   submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
@@ -97,7 +97,7 @@ describe('Task Creation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      checkTaskMaybeCreatedBackend(parentTask)
+      maybeWaitForCreate(parentTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)

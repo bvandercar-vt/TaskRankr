@@ -842,11 +842,14 @@ export const LocalStateProvider = ({
         })
         setSyncQueue((prev) => [
           ...prev,
-          ...orphaned.map((t) => ({
-            type: SyncOperationType.UPDATE_TASK as const,
-            id: t.id,
-            data: { parentId: null as null },
-          })),
+          ...orphaned.map(
+            (t) =>
+              ({
+                type: SyncOperationType.UPDATE_TASK,
+                id: t.id,
+                data: { parentId: null },
+              }) as const,
+          ),
         ])
       }
 
