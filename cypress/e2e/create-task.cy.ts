@@ -125,7 +125,9 @@ describe('Task Creation', () => {
         .first()
         .should('contain.text', subtask.name)
 
-      submitTaskForm(rootTask)
+      clickSubmitBtn()
+      waitForCreate(rootTask)
+      waitForCreate(subtask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
@@ -155,7 +157,10 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('equal', [subtask.name, subtask2.name])
 
-      submitTaskForm(rootTask)
+      clickSubmitBtn()
+      waitForCreate(rootTask)
+      waitForCreate(subtask)
+      waitForCreate(subtask2)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
       cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
@@ -191,11 +196,15 @@ describe('Task Creation', () => {
       clickSubmitBtn()
 
       cy.get(TaskForm.SUBTASK_ROW)
-        .should('have.length', 1)
+        .should('have.length', 2)
         .getElementArrayText()
-        .should('equal', [subtask.name])
+        .should('equal', [subtask.name, subtask2.name, subtask3.name])
 
-      submitTaskForm(rootTask)
+      clickSubmitBtn()
+      waitForCreate(rootTask)
+      waitForCreate(subtask)
+      waitForCreate(subtask2)
+      waitForCreate(subtask3)
 
       checkTaskInTree({
         ...rootTask,
