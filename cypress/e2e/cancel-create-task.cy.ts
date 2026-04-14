@@ -50,7 +50,7 @@ describe('Task Creation Cancellation', () => {
   )
 
   runBothModes(
-    'cancel on parent form after a subtask was added — nothing is persisted',
+    'cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
@@ -62,6 +62,10 @@ describe('Task Creation Cancellation', () => {
       cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
 
       cy.get(TaskForm.CANCEL_BTN).click()
+
+      cy.contains('Are you sure you want to cancel?').should('be.visible')
+      cy.contains('1 subtask').should('be.visible')
+      cy.get('[data-testid="button-cancel-confirm-discard"]').click()
 
       checkDoNotExist([rootTask, subtask])
     },
@@ -87,7 +91,7 @@ describe('Task Creation Cancellation', () => {
   )
 
   runBothModes(
-    'cancel on parent form after multiple subtasks were added — nothing is persisted',
+    'cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
@@ -105,7 +109,32 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
+      cy.contains('Are you sure you want to cancel?').should('be.visible')
+      cy.contains('2 subtasks').should('be.visible')
+      cy.get('[data-testid="button-cancel-confirm-discard"]').click()
+
       checkDoNotExist([rootTask, subtask, subtask2])
+    },
+  )
+
+  runBothModes(
+    'cancel confirmation "Go Back" returns to parent form without discarding',
+    () => {
+      cy.get(Selectors.CREATE_TASK_BTN).click()
+      fillTaskForm(rootTask)
+
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      fillTaskForm(subtask)
+      clickSubmitBtn()
+      cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+
+      cy.get(TaskForm.CANCEL_BTN).click()
+
+      cy.contains('Are you sure you want to cancel?').should('be.visible')
+      cy.get('[data-testid="button-cancel-confirm-back"]').click()
+
+      cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
+      cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
     },
   )
 })
