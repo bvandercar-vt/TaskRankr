@@ -184,11 +184,7 @@ export const TaskForm = ({
             })
           }
         }
-        if (
-          markCompleted &&
-          timeSpentRequired &&
-          (data.timeSpent ?? 0) <= 0
-        ) {
+        if (markCompleted && timeSpentRequired && (data.timeSpent ?? 0) <= 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['timeSpent'],

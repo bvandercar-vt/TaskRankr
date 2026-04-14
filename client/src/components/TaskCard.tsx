@@ -208,7 +208,7 @@ const CompletedTimeDisplay = ({
     </span>
   )
 
-const InProgressTimeDisplay = (
+const TimeSpentDisplay = (
   task: Parameters<typeof getTotalAccumulatedTime>[0],
 ) => {
   const { settings } = useSettings()
@@ -356,7 +356,7 @@ export const TaskCard = ({
             {showCompletedDate && (
               <div className="flex flex-col items-end mt-0.5">
                 <CompletedTimeDisplay {...task} />
-                <InProgressTimeDisplay {...task} />
+                <TimeSpentDisplay {...task} />
               </div>
             )}
           </div>
