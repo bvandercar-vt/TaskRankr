@@ -7,8 +7,9 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
-import { ApiPaths, Selectors } from '../constants'
+import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
+import { interceptCreate, waitForCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -58,7 +59,7 @@ export const fillTaskForm = (
   const loggedIn = isLoggedIn()
 
   loggedIn && checkTaskExistsBackend(task, false)
-  cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
+  interceptCreate()
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
@@ -74,19 +75,6 @@ export const fillTaskForm = (
   }
 }
 
-export function maybeWaitForCreate({
-  status = TaskStatus.OPEN,
-  ...task
-}: TaskFormData & { status?: TaskStatus }) {
-  const loggedIn = isLoggedIn()
-
-  loggedIn && cy.wait('@createTask')
-
-  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
-
-  cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
-}
-
 /**
  * Submits form and checks results in the UI and (if logged in) backend.
  */
@@ -99,5 +87,5 @@ export const submitTaskForm = (
     .should('not.be.disabled')
     .click()
 
-  maybeWaitForCreate({ ...task, status })
+  waitForCreate({ ...task, status })
 }

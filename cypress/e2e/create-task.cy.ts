@@ -5,10 +5,10 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { waitForCreate } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
   fillTaskForm,
-  maybeWaitForCreate,
   submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
@@ -19,6 +19,26 @@ import { type FieldConfig, TaskStatus } from '~/shared/schema'
 const { TaskForm } = Selectors
 
 describe('Task Creation', () => {
+  const rootTask = {
+    ...DefaultTask,
+    name: 'E2E Root Level Task',
+  } as const satisfies TaskFormData
+
+  const subtask = {
+    ...DefaultTask,
+    name: 'E2E Subtask 1',
+  } as const satisfies TaskFormData
+
+  const subtask2 = {
+    ...DefaultTask,
+    name: 'E2E Subtask 2',
+  } as const satisfies TaskFormData
+
+  const subtask3 = {
+    ...DefaultTask,
+    name: 'E2E Subtask 3',
+  } as const satisfies TaskFormData
+
   beforeEach(() => {
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
@@ -83,65 +103,39 @@ describe('Task Creation', () => {
   runBothModes(
     'create a subtask while creating the parent task, check both appear in the tree',
     () => {
-      const parentTask = {
-        ...DefaultTask,
-        name: 'E2E Parent Task',
-      } as const satisfies TaskFormData
-
-      const subtask = {
-        ...DefaultTask,
-        name: 'E2E Subtask',
-      } as const satisfies TaskFormData
-
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(rootTask)
       fillTaskForm(subtask)
       submitTaskForm(subtask)
-      // TODO: if cancels at parent level, should subtasks be deleted? Or left orphaned?
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .first()
         .should('contain.text', subtask.name)
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
-      checkTaskInTree({ ...parentTask, subtasks: [subtask] })
+      checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     },
   )
 
   runBothModes(
     'create multiple subtasks while creating the parent task, check both appear in the tree',
     () => {
-      const parentTask = {
-        ...DefaultTask,
-        name: 'E2E Parent Task',
-      } as const satisfies TaskFormData
-
-      const subtask1 = {
-        ...DefaultTask,
-        name: 'E2E Subtask 1',
-      } as const satisfies TaskFormData
-
-      const subtask2 = {
-        ...DefaultTask,
-        name: 'E2E Subtask 2',
-      } as const satisfies TaskFormData
-
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(rootTask)
 
-      fillTaskForm(subtask1)
-      submitTaskForm(subtask1)
+      fillTaskForm(subtask)
+      submitTaskForm(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .getElementArrayText()
-        .should('equal', [subtask1.name])
+        .should('equal', [subtask.name])
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask2)
@@ -149,47 +143,27 @@ describe('Task Creation', () => {
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
-        .should('equal', [subtask1.name, subtask2.name])
+        .should('equal', [subtask.name, subtask2.name])
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
-      checkTaskInTree({ ...parentTask, subtasks: [subtask1, subtask2] })
+      checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     },
   )
 
   runBothModes(
     'create nested subtasks while creating the parent task, check both appear in the tree',
     () => {
-      const parentTask = {
-        ...DefaultTask,
-        name: 'E2E Parent Task',
-      } as const satisfies TaskFormData
-
-      const subtask1 = {
-        ...DefaultTask,
-        name: 'E2E Subtask 1',
-      } as const satisfies TaskFormData
-
-      const subtask2 = {
-        ...DefaultTask,
-        name: 'E2E Subtask 2',
-      } as const satisfies TaskFormData
-
-      const subtask3 = {
-        ...DefaultTask,
-        name: 'E2E Subtask 3',
-      } as const satisfies TaskFormData
-
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(rootTask)
 
-      fillTaskForm(subtask1)
+      fillTaskForm(subtask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(subtask1)
+      waitForCreate(subtask)
       fillTaskForm(subtask2)
       submitTaskForm(subtask2)
       cy.get(TaskForm.SUBTASK_ROW)
@@ -205,18 +179,18 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('equal', [subtask2.name, subtask3.name])
 
-      submitTaskForm(subtask1)
+      submitTaskForm(subtask)
 
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
-        .should('equal', [subtask1.name, subtask2.name, subtask3.name])
+        .should('equal', [subtask.name, subtask2.name, subtask3.name])
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
       checkTaskInTree({
-        ...parentTask,
-        subtasks: [{ ...subtask1, subtasks: [subtask2, subtask3] }],
+        ...rootTask,
+        subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
       })
     },
   )
