@@ -1,4 +1,4 @@
-import type { RankField } from '~/shared/schema'
+import type { FieldConfig, RankField } from '~/shared/schema'
 
 const testId = <S extends string>(testid: S) =>
   `[data-testid="${testid}"]` as const
@@ -35,9 +35,9 @@ export const Selectors = {
   },
   Settings: {
     FieldConfig: {
-      visibleCheckbox: (field: RankField) =>
+      visibleCheckbox: (field: keyof FieldConfig) =>
         testId(`checkbox-${field}-visible`),
-      requiredCheckbox: (field: RankField) =>
+      requiredCheckbox: (field: keyof FieldConfig) =>
         testId(`checkbox-${field}-required`),
     },
   },
