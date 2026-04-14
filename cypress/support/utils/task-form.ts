@@ -65,6 +65,16 @@ export const fillTaskForm = (task: TaskFormData, settings: FieldConfig) => {
   }
 }
 
+export function checkTaskMaybeCreatedBackend(task: TaskFormData) {
+  const loggedIn = isLoggedIn()
+
+  loggedIn && cy.wait('@createTask')
+
+  checkTaskExistsBackend(task, loggedIn)
+
+  cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+}
+
 /**
  * Submits form and checks results in the UI and (if logged in) backend.
  */
@@ -74,11 +84,5 @@ export const submitTaskForm = (task: TaskFormData, submitBtnText: string) => {
     .should('not.be.disabled')
     .click()
 
-  const loggedIn = isLoggedIn()
-
-  loggedIn && cy.wait('@createTask')
-
-  checkTaskExistsBackend(task, loggedIn)
-
-  cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+  checkTaskMaybeCreatedBackend(task)
 }

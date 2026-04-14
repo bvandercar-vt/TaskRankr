@@ -1,37 +1,39 @@
 import { Routes } from '@client/lib/constants'
 import {
-  ApiPaths,
   DefaultTask,
   FieldConfigAllFalse,
-  FieldConfigAllTrue,
   Selectors,
 } from '@cypress/support/constants'
-import { runBothModes } from '@cypress/support/utils'
+import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import { setFieldConfig } from '@cypress/support/utils/settings'
 import {
+  checkTaskMaybeCreatedBackend,
   fillTaskForm,
   submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
-import type { FieldConfig } from '~/shared/schema'
+import { DEFAULT_FIELD_CONFIG, type FieldConfig } from '~/shared/schema'
 
-const { Menu, TaskCard, TaskForm } = Selectors
+const { Menu, TaskForm } = Selectors
 
 describe('Task Creation', () => {
-  runBothModes('create a task, check displays in main tree', (isLoggedIn) => {
-    cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
+  beforeEach(() => {
+    const loggedIn = isLoggedIn()
+    cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+  })
 
+  runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(DefaultTask, FieldConfigAllTrue)
+    fillTaskForm(DefaultTask, DEFAULT_FIELD_CONFIG)
     submitTaskForm(DefaultTask, 'Create')
     checkTaskInTree(DefaultTask)
   })
 
   runBothModes(
     'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (isLoggedIn) => {
+    (loggedIn) => {
       const fieldConfig = {
         priority: { visible: true, required: true },
         ease: { visible: true, required: false },
@@ -47,12 +49,10 @@ describe('Task Creation', () => {
         enjoyment: null,
       } satisfies TaskFormData
 
-      cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
-
       cy.get(Selectors.MENU_BTN).click()
       cy.get(Menu.SETTINGS).click()
       setFieldConfig(fieldConfig)
-      cy.get('@settingsPut').should('have.been.called', isLoggedIn ? 2 : 0)
+      cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
 
       cy.get(Selectors.BACK_BTN).click()
 
@@ -65,18 +65,16 @@ describe('Task Creation', () => {
 
   runBothModes(
     'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (isLoggedIn) => {
+    (loggedIn) => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
         timeSpent: { visible: true, required: false },
       } as const satisfies FieldConfig
 
-      cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
-
       cy.get(Selectors.MENU_BTN).click()
       cy.get(Menu.SETTINGS).click()
       setFieldConfig(fieldConfig)
-      cy.get('@settingsPut').should('have.been.called', isLoggedIn ? 2 : 0)
+      cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
 
       cy.get(Selectors.BACK_BTN).click()
 
@@ -92,48 +90,34 @@ describe('Task Creation', () => {
 
   runBothModes(
     'create a subtask while creating the parent task, check both appear in the tree',
-    (isLoggedIn) => {
+    () => {
       const parentTask = {
         ...DefaultTask,
         name: 'E2E Parent Task',
       } as const satisfies TaskFormData
 
-      const subtaskData = {
+      const subtask = {
         ...DefaultTask,
         name: 'E2E Subtask',
       } as const satisfies TaskFormData
 
-      cy.visit(isLoggedIn ? Routes.HOME : Routes.GUEST)
-
-      // Open the new task form and fill in the parent task details
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask, FieldConfigAllTrue)
+      fillTaskForm(parentTask, DEFAULT_FIELD_CONFIG)
 
-      // Clicking "Add Subtask" submits the parent form (creating the parent
-      // task locally and queueing it for sync) then opens a fresh subtask form
-      cy.intercept('POST', ApiPaths.CREATE_TASK).as('createParent')
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      checkTaskMaybeCreatedBackend(parentTask)
 
-      // In logged-in mode wait for the parent to land on the server before
-      // filling the subtask so backend assertions stay deterministic
-      if (isLoggedIn) cy.wait('@createParent')
+      fillTaskForm(subtask, DEFAULT_FIELD_CONFIG)
+      submitTaskForm(subtask, 'Create')
 
-      // Fill and submit the subtask in the newly opened form
-      fillTaskForm(subtaskData, FieldConfigAllTrue)
-      submitTaskForm(subtaskData, 'Create')
+      cy.get(TaskForm.SUBTASK_ROW)
+        .should('have.length', 1)
+        .first()
+        .should('contain.text', subtask.name)
 
-      // After the subtask is saved the dialog returns to editing the parent —
-      // close it to get back to the main task list
-      cy.get(TaskForm.CANCEL_BTN).click()
+      submitTaskForm(parentTask, 'Create')
 
-      // Parent task must be visible in the main task list
       checkTaskInTree(parentTask)
-
-      // Open the parent task edit dialog and confirm the subtask is listed
-      cy.contains(TaskCard.CARD, parentTask.name)
-        .find(TaskCard.TITLE)
-        .click()
-      cy.get(TaskForm.SUBTASK_ROW).should('contain.text', subtaskData.name)
     },
   )
 })

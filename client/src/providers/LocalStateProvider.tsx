@@ -230,7 +230,9 @@ export const LocalStateProvider = ({
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
   const tasksRef = useRef<Task[]>([])
-  const idReplacedCallbacks = useRef<Set<(tempId: number, realId: number) => void>>(new Set())
+  const idReplacedCallbacks = useRef<
+    Set<(tempId: number, realId: number) => void>
+  >(new Set())
 
   const subscribeToIdReplacement = useCallback(
     (cb: (tempId: number, realId: number) => void) => {
@@ -407,7 +409,9 @@ export const LocalStateProvider = ({
         return op
       }),
     )
-    idReplacedCallbacks.current.forEach((cb) => cb(tempId, realId))
+    idReplacedCallbacks.current.forEach((cb) => {
+      cb(tempId, realId)
+    })
   }, [])
 
   const createTask = useCallback(
