@@ -13,8 +13,8 @@ import type {
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useLocalState } from '@/providers/LocalStateProvider'
-import { SubtaskSortMode } from '~/shared/schema'
 import type { CreateTask, Task } from '~/shared/schema'
+import { SubtaskSortMode } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
 import {
   Dialog,
@@ -577,7 +577,10 @@ export const TaskFormDialogProvider = ({
         parentTaskId={assignParentTask?.id ?? null}
         onConfirm={({ id: selectedId, name }) => {
           if (pendingAssignOpen) {
-            setPendingAssignedTasks((prev) => [...prev, { id: selectedId, name }])
+            setPendingAssignedTasks((prev) => [
+              ...prev,
+              { id: selectedId, name },
+            ])
           } else if (assignParentTask) {
             updateTask({ id: selectedId, parentId: assignParentTask.id })
             if (assignParentTask.subtaskSortMode === SubtaskSortMode.MANUAL) {

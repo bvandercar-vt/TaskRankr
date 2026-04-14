@@ -46,10 +46,10 @@ export const AssignSubtaskDialog = ({
         : new Set<number>()
     return allTasks.filter(
       (t) =>
-        t.parentId === null &&
-        (parentTaskId === null || t.id !== parentTaskId) &&
-        !descendantIds.has(t.id) &&
-        (showCompleted || t.status !== TaskStatus.COMPLETED),
+        t.parentId === null && // must be an orphan
+        (parentTaskId === null || t.id !== parentTaskId) && // must not be the parent task itself
+        !descendantIds.has(t.id) && // must not already be a descendant of the parent task
+        (showCompleted || t.status !== TaskStatus.COMPLETED), // filter out completed tasks if not showing them
     )
   }, [allTasks, parentTaskId, showCompleted])
 
