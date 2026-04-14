@@ -13,7 +13,6 @@ import { setSettings } from '@cypress/support/utils/settings'
 import {
   clickSubmitBtn,
   fillTaskForm,
-  submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'

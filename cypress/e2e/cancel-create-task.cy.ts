@@ -1,6 +1,7 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
 import { checkTaskExistsBackend } from '@cypress/support/utils/api'
+import { interceptCreate } from '@cypress/support/utils/intercepts'
 import {
   clickSubmitBtn,
   fillTaskForm,
@@ -31,8 +32,11 @@ const checkDoNotExist = (tasks: TaskFormData[]) => {
     checkTaskExistsBackend(task, false)
   })
 }
+
 describe('Task Creation Cancellation', () => {
   beforeEach(() => {
+    interceptCreate()
+
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
@@ -46,6 +50,7 @@ describe('Task Creation Cancellation', () => {
       cy.get(TaskForm.CANCEL_BTN).click()
 
       checkDoNotExist([rootTask])
+      cy.get('@createTask').should('have.been.called', 0)
     },
   )
 
@@ -68,6 +73,7 @@ describe('Task Creation Cancellation', () => {
       cy.get('[data-testid="button-cancel-confirm-discard"]').click()
 
       checkDoNotExist([rootTask, subtask])
+      cy.get('@createTask').should('have.been.called', 0)
     },
   )
 
@@ -87,6 +93,7 @@ describe('Task Creation Cancellation', () => {
       cy.get(TaskForm.CANCEL_BTN).click()
 
       checkDoNotExist([rootTask, subtask])
+      cy.get('@createTask').should('have.been.called', 0)
     },
   )
 
@@ -114,6 +121,7 @@ describe('Task Creation Cancellation', () => {
       cy.get('[data-testid="button-cancel-confirm-discard"]').click()
 
       checkDoNotExist([rootTask, subtask, subtask2])
+      cy.get('@createTask').should('have.been.called', 0)
     },
   )
 
@@ -135,6 +143,8 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
       cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+
+      cy.get('@createTask').should('have.been.called', 0)
     },
   )
 })
