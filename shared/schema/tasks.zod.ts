@@ -15,7 +15,9 @@ import {
 } from 'drizzle-zod'
 import { z } from 'zod'
 
+import { RankField } from './common'
 import { type DrizzleZodDefaultRefine, pgNativeEnum } from './drizzle-utils'
+import type { UserSettings } from './settings.zod'
 
 // Status constants and types
 export enum TaskStatus {
@@ -142,6 +144,39 @@ export const insertTaskSchema = createInsertSchema(tasks, {
     name: true,
     userId: true,
   })
+
+export const insertTaskSchemaRefined = (
+  settings: Pick<UserSettings, 'fieldConfig'>,
+) => {
+  const requiredRankFields: RankField[] = RankField.filter(
+    (name) => settings.fieldConfig[name].required,
+  )
+
+  const timeSpentRequired = settings.fieldConfig.timeSpent.required
+
+  return insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
+    for (const field of requiredRankFields) {
+      if (data[field] == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [field],
+          message: 'This field is required',
+        })
+      }
+    }
+    if (
+      data.status === TaskStatus.COMPLETED &&
+      timeSpentRequired &&
+      (data.timeSpent ?? 0) <= 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['timeSpent'],
+        message: 'Time spent is required when completing a task',
+      })
+    }
+  })
+}
 
 export type InsertTask = z.infer<typeof insertTaskSchema>
 export type CreateTask = InsertTask

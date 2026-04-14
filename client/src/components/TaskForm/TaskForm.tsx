@@ -2,13 +2,13 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
@@ -20,9 +20,8 @@ import type {
 } from '@/providers/LocalStateProvider'
 import {
   allRankFieldsNull,
-  insertTaskSchema,
+  insertTaskSchemaRefined,
   type MutateTask,
-  type RankField,
   type Task,
   TaskStatus,
   taskSchema,
@@ -68,6 +67,7 @@ const taskFormDefaultsSchema = taskSchema.pick({
   timeSpent: true,
   createdAt: true,
   completedAt: true,
+  status: true,
 })
 
 type TaskFormDefaults = z.infer<typeof taskFormDefaultsSchema>
@@ -127,7 +127,6 @@ export interface TaskFormProps {
   onEditSubtask: (task: Task) => void
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
-  onMarkCompleted?: (taskId: number) => void
 }
 
 export const TaskForm = ({
@@ -139,13 +138,10 @@ export const TaskForm = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
-  onMarkCompleted,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { data: allTasks } = useTasks()
   const { settings } = useSettings()
-  const [markCompleted, setMarkCompleted] = useState(false)
-
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false
@@ -158,14 +154,6 @@ export const TaskForm = ({
     [settings.fieldConfig],
   )
 
-  const requiredRankFields: RankField[] = useMemo(
-    () =>
-      RANK_FIELDS_COLUMNS.filter(
-        ({ name }) => settings.fieldConfig[name].required,
-      ).map(({ name }) => name),
-    [settings.fieldConfig],
-  )
-
   const {
     fieldConfig: {
       timeSpent: { visible: timeSpentVisible, required: timeSpentRequired },
@@ -173,26 +161,8 @@ export const TaskForm = ({
   } = settings
 
   const formSchema = useMemo(
-    () =>
-      insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
-        for (const field of requiredRankFields) {
-          if (data[field] == null) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: [field],
-              message: 'This field is required',
-            })
-          }
-        }
-        if (markCompleted && timeSpentRequired && (data.timeSpent ?? 0) <= 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['timeSpent'],
-            message: 'Time spent is required when completing a task',
-          })
-        }
-      }),
-    [requiredRankFields, markCompleted, timeSpentRequired],
+    () => insertTaskSchemaRefined(settings),
+    [settings],
   )
 
   const getFormDefaults = useCallback(
@@ -223,23 +193,17 @@ export const TaskForm = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [settings.fieldConfig, form, markCompleted, timeSpentRequired])
+  }, [settings.fieldConfig, form, timeSpentRequired])
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
           const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
-          if (markCompleted && initialData && onMarkCompleted) {
-            onSubmit(submitted)
-            onMarkCompleted(initialData.id)
-          } else if (markCompleted) {
-            submitted.status = TaskStatus.COMPLETED
+          if (data.status === TaskStatus.COMPLETED && !submitted.completedAt) {
             submitted.completedAt = new Date()
-            onSubmit(submitted)
-          } else {
-            onSubmit(submitted)
           }
+          onSubmit(submitted)
         })}
         className="flex flex-col h-full"
       >
@@ -409,11 +373,20 @@ export const TaskForm = ({
                     Completed
                   </div>
                   <Checkbox
-                    checked={markCompleted}
+                    checked={form.watch('status') === TaskStatus.COMPLETED}
                     disabled={hasIncompleteSubtasks}
-                    onCheckedChange={(checked) =>
-                      setMarkCompleted(checked === true)
-                    }
+                    onCheckedChange={(checked) => {
+                      const newStatus =
+                        checked === true
+                          ? TaskStatus.COMPLETED
+                          : ((initialData?.status !== TaskStatus.COMPLETED
+                              ? initialData?.status
+                              : TaskStatus.OPEN) ?? TaskStatus.OPEN)
+                      form.setValue('status', newStatus, {
+                        shouldValidate: true,
+                      })
+                      void form.trigger('timeSpent')
+                    }}
                     className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                     data-testid="mark-completed-checkbox"
                   />

@@ -18,10 +18,18 @@ export const getTasks = () =>
     )
     .its('body')
 
-export const checkTaskExistsBackend = (
+export function checkTaskExistsBackend(
+  task: Pick<Task, 'name' | 'status'>,
+  exists: true,
+): void
+export function checkTaskExistsBackend(
   task: Pick<Task, 'name'>,
+  exists: false,
+): void
+export function checkTaskExistsBackend(
+  task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
   exists: boolean,
-) =>
+): void {
   getTasks().then((tasks) => {
     if (exists) {
       expect(tasks.map((t) => t.name)).to.include(task.name)
@@ -31,6 +39,7 @@ export const checkTaskExistsBackend = (
       expect(tasks.map((t) => t.name)).to.not.include(task.name)
     }
   })
+}
 
 export const getSettings = () =>
   cy.request<UserSettings>('GET', ApiPaths.GET_SETTINGS).its('body')
