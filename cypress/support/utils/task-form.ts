@@ -6,7 +6,6 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { interceptCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -54,7 +53,6 @@ export const fillTaskForm = (
   const loggedIn = isLoggedIn()
 
   loggedIn && checkTaskExistsBackend(task, false)
-  interceptCreate()
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
