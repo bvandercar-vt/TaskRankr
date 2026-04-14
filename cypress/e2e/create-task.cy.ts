@@ -98,11 +98,9 @@ describe('Task Creation', () => {
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       maybeWaitForCreate(parentTask)
-
       fillTaskForm(subtask)
       submitTaskForm(subtask)
       // TODO: if cancels at parent level, should subtasks be deleted? Or left orphaned?
-
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .first()
@@ -140,8 +138,6 @@ describe('Task Creation', () => {
 
       fillTaskForm(subtask1)
       submitTaskForm(subtask1)
-      // TODO: if cancels at parent level, should subtasks be deleted? Or left orphaned?
-
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .getElementArrayText()
@@ -150,7 +146,6 @@ describe('Task Creation', () => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask2)
       submitTaskForm(subtask2)
-
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
@@ -180,6 +175,11 @@ describe('Task Creation', () => {
         name: 'E2E Subtask 2',
       } as const satisfies TaskFormData
 
+      const subtask3 = {
+        ...DefaultTask,
+        name: 'E2E Subtask 3',
+      } as const satisfies TaskFormData
+
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(parentTask)
 
@@ -187,29 +187,36 @@ describe('Task Creation', () => {
       maybeWaitForCreate(parentTask)
 
       fillTaskForm(subtask1)
+
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       maybeWaitForCreate(subtask1)
-
       fillTaskForm(subtask2)
       submitTaskForm(subtask2)
-
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .getElementArrayText()
         .should('equal', [subtask2.name])
+
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      fillTaskForm(subtask3)
+      submitTaskForm(subtask3)
+      cy.get(TaskForm.SUBTASK_ROW)
+        .should('have.length', 2)
+        .getElementArrayText()
+        .should('equal', [subtask2.name, subtask3.name])
 
       submitTaskForm(subtask1)
 
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
-        .should('equal', [subtask1.name, subtask2.name])
+        .should('equal', [subtask1.name, subtask2.name, subtask3.name])
 
       submitTaskForm(parentTask)
 
       checkTaskInTree({
         ...parentTask,
-        subtasks: [{ ...subtask1, subtasks: [subtask2] }],
+        subtasks: [{ ...subtask1, subtasks: [subtask2, subtask3] }],
       })
     },
   )
