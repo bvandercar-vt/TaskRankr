@@ -2,17 +2,6 @@ export const runBothModes = (
   testTitle: string,
   runTest: (loggedIn: boolean) => void,
 ) => {
-  beforeEach(() => {
-    const loggedIn = isLoggedIn()
-    if (loggedIn) {
-      cy.loginAsTestUser()
-      cy.clearTestUserTasks()
-      cy.resetTestUserSettings()
-    } else {
-      cy.clearTestUserTasks()
-    }
-  })
-
   describe(testTitle, () => {
     for (const [loggedIn, testTitleSuffix] of [
       [false, 'Guest Mode'],
