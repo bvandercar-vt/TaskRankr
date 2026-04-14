@@ -13,7 +13,7 @@ import type {
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useLocalState } from '@/providers/LocalStateProvider'
-import { type CreateTask, type Task } from '~/shared/schema'
+import type { CreateTask, Task } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
 import {
   Dialog,
