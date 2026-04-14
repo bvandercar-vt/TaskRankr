@@ -67,6 +67,26 @@ const router = s.router(contract, {
         if (!existing) {
           return { status: 404, body: { message: 'Task not found' } }
         }
+        if (body.status === TaskStatus.COMPLETED) {
+          const userSettings = await storage.getSettings(userId)
+          const timeSpentRequired =
+            (userSettings.fieldConfig?.timeSpent?.visible &&
+              userSettings.fieldConfig?.timeSpent?.required) ??
+            false
+          if (timeSpentRequired) {
+            const finalTime =
+              body.inProgressTime ?? existing.inProgressTime ?? 0
+            if (finalTime <= 0) {
+              return {
+                status: 400,
+                body: {
+                  message:
+                    'Time spent must be recorded to complete this task',
+                },
+              }
+            }
+          }
+        }
         const task = await storage.updateTask(params.id, userId, body)
         return { status: 200, body: task }
       },
@@ -90,6 +110,29 @@ const router = s.router(contract, {
         const existing = await storage.getTask(params.id, userId)
         if (!existing) {
           return { status: 404, body: { message: 'Task not found' } }
+        }
+        if (body.status === TaskStatus.COMPLETED) {
+          const userSettings = await storage.getSettings(userId)
+          const timeSpentRequired =
+            (userSettings.fieldConfig?.timeSpent?.visible &&
+              userSettings.fieldConfig?.timeSpent?.required) ??
+            false
+          if (timeSpentRequired) {
+            let expectedTime = existing.inProgressTime ?? 0
+            if (existing.inProgressStartedAt) {
+              expectedTime +=
+                Date.now() - existing.inProgressStartedAt.getTime()
+            }
+            if (expectedTime <= 0) {
+              return {
+                status: 400,
+                body: {
+                  message:
+                    'Time spent must be recorded to complete this task',
+                },
+              }
+            }
+          }
         }
         const task = await storage.setTaskStatus(params.id, userId, body.status)
         return { status: 200, body: task }

@@ -151,7 +151,9 @@ export const ChangeStatusDialog = ({
   const {
     settings: {
       enableInProgressStatus: showInProgressOption,
-      enableInProgressTime: showTimeInputs,
+      fieldConfig: {
+        timeSpent: { visible: showTimeInputs, required: timeSpentRequired },
+      },
     },
   } = useSettings()
 
@@ -235,12 +237,17 @@ export const ChangeStatusDialog = ({
                     isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED,
                   )
                 }
-                disabled={!isCompleted && hasIncompleteSubtasks}
+                disabled={
+                  (!isCompleted && hasIncompleteSubtasks) ||
+                  (!isCompleted && timeSpentRequired && localTimeMs <= 0)
+                }
                 className={cn(
                   'w-full h-11 text-base font-semibold',
                   isCompleted
                     ? 'bg-primary hover:bg-primary/90 text-white'
-                    : !isCompleted && hasIncompleteSubtasks
+                    : !isCompleted &&
+                        (hasIncompleteSubtasks ||
+                          (timeSpentRequired && localTimeMs <= 0))
                       ? 'bg-muted text-muted-foreground cursor-not-allowed'
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white',
                 )}
@@ -256,6 +263,12 @@ export const ChangeStatusDialog = ({
                 localTimeMs={localTimeMs}
                 setLocalTimeMs={setLocalTimeMs}
               />
+            )}
+
+            {!isCompleted && timeSpentRequired && localTimeMs <= 0 && (
+              <p className="text-xs text-amber-400/70 text-center -mt-1">
+                Time spent is required to complete this task
+              </p>
             )}
 
             <div className="flex justify-center gap-2">

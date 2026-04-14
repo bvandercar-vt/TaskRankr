@@ -26,12 +26,16 @@ export const fieldFlagsSchema = z.object({
 
 export type FieldFlags = z.infer<typeof fieldFlagsSchema>
 
-export const fieldConfigSchema = z.object({
+const rankFieldConfigSchema = z.object({
   priority: fieldFlagsSchema,
   ease: fieldFlagsSchema,
   enjoyment: fieldFlagsSchema,
   time: fieldFlagsSchema,
 } satisfies Record<RankField, typeof fieldFlagsSchema>)
+
+export const fieldConfigSchema = rankFieldConfigSchema.extend({
+  timeSpent: fieldFlagsSchema,
+})
 
 export type FieldConfig = z.infer<typeof fieldConfigSchema>
 
@@ -40,6 +44,7 @@ export const DEFAULT_FIELD_CONFIG: FieldConfig = {
   ease: { visible: true, required: true },
   enjoyment: { visible: true, required: true },
   time: { visible: true, required: true },
+  timeSpent: { visible: true, required: false },
 }
 
 export const userSettings = pgTable('user_settings', {

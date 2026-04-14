@@ -214,7 +214,7 @@ const InProgressTimeDisplay = (
   const { settings } = useSettings()
   const totalTime = getTotalAccumulatedTime(task)
 
-  if (!settings.enableInProgressTime || totalTime <= 0) return null
+  if (!settings.fieldConfig.timeSpent.visible || totalTime <= 0) return null
 
   return (
     <span className="text-[10px] text-muted-foreground">

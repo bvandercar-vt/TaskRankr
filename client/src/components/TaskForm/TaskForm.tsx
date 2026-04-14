@@ -178,6 +178,10 @@ export const TaskForm = ({
     [rankFieldConfig],
   )
 
+  const timeSpentVisible = settings.fieldConfig.timeSpent.visible
+  const timeSpentRequired =
+    timeSpentVisible && settings.fieldConfig.timeSpent.required
+
   const formSchema = useMemo(
     () =>
       insertTaskSchema.omit({ userId: true }).superRefine((data, ctx) => {
@@ -190,8 +194,19 @@ export const TaskForm = ({
             })
           }
         }
+        if (
+          markCompleted &&
+          timeSpentRequired &&
+          (data.inProgressTime ?? 0) <= 0
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['inProgressTime'],
+            message: 'Time spent is required when completing a task',
+          })
+        }
       }),
-    [requiredRankFields],
+    [requiredRankFields, markCompleted, timeSpentRequired],
   )
 
   const getFormDefaults = useCallback(
@@ -222,7 +237,7 @@ export const TaskForm = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [rankFieldConfig, form])
+  }, [rankFieldConfig, form, markCompleted, timeSpentRequired])
 
   return (
     <Form {...form}>
@@ -365,18 +380,30 @@ export const TaskForm = ({
                   </div>
                 )}
 
-              {settings.enableInProgressTime && (
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Time Spent
+              {timeSpentVisible && (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Time Spent
+                      {timeSpentRequired && (
+                        <span className="text-destructive ml-1">*</span>
+                      )}
+                    </div>
+                    <TimeInput
+                      durationMs={form.watch('inProgressTime') || 0}
+                      onDurationChange={(ms) =>
+                        form.setValue('inProgressTime', ms, {
+                          shouldValidate: true,
+                        })
+                      }
+                      className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
+                    />
                   </div>
-                  <TimeInput
-                    durationMs={form.watch('inProgressTime') || 0}
-                    onDurationChange={(ms) =>
-                      form.setValue('inProgressTime', ms)
-                    }
-                    className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                  />
+                  {form.formState.errors.inProgressTime && (
+                    <p className="text-[11px] text-destructive text-right">
+                      {form.formState.errors.inProgressTime.message}
+                    </p>
+                  )}
                 </div>
               )}
 
