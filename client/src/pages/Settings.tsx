@@ -441,7 +441,6 @@ const Settings = () => {
               onCheckedChange={(checked) => {
                 updateSettings({ enableInProgressStatus: checked })
                 if (!checked) {
-                  updateSettings({ enableInProgressTime: false })
                   // Demote any in_progress task to pinned
                   const inProgressTask = allTasks.find(
                     (t) => t.status === TaskStatus.IN_PROGRESS,
@@ -454,19 +453,17 @@ const Settings = () => {
               data-testid="switch-enable-in-progress"
             />
           </div>
-          {settings.enableInProgressStatus && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-              <SwitchSetting
-                title='Enable "In Progress" Time'
-                description="Track and display time spent In Progress."
-                checked={settings.enableInProgressTime}
-                onCheckedChange={(checked) =>
-                  updateSettings({ enableInProgressTime: checked })
-                }
-                data-testid="switch-enable-time"
-              />
-            </div>
-          )}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+            <SwitchSetting
+              title='Enable "In Progress" Time'
+              description="Track and display time spent In Progress."
+              checked={settings.enableInProgressTime}
+              onCheckedChange={(checked) =>
+                updateSettings({ enableInProgressTime: checked })
+              }
+              data-testid="switch-enable-time"
+            />
+          </div>
         </Card>
       </div>
 
