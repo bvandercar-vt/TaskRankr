@@ -6,6 +6,7 @@ import {
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import {
+  checkNumCalls,
   interceptCreate,
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
@@ -29,18 +30,19 @@ describe('Task Creation', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  runBothModes('create a task, check displays in main tree', (loggedIn) => {
+  runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(DefaultTask)
+
     clickSubmitBtn()
     waitForCreate(DefaultTask)
     checkTaskInTree(DefaultTask)
-    cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+    checkNumCalls({ create: 1 })
   })
 
   runBothModes(
     'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         priority: { visible: true, required: true },
         ease: { visible: true, required: false },
@@ -64,13 +66,13 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate(newTask)
       checkTaskInTree(newTask)
-      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+      checkNumCalls({ create: 1 })
     },
   )
 
   runBothModes(
     'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
         timeSpent: { visible: true, required: false },
@@ -87,7 +89,7 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate({ ...DefaultTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
-      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+      checkNumCalls({ create: 1 })
     },
   )
 })

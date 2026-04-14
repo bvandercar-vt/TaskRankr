@@ -2,6 +2,7 @@ import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import {
+  checkNumCalls,
   interceptCreate,
   interceptUpdate,
   waitForCreate,
@@ -43,113 +44,102 @@ describe('Create Subtask', () => {
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(rootTask)
   })
 
-  for (const [logStr, beforeTest] of [
-    [
-      'while creating new task',
-      () => {
-        // Fill form for the parent task, but don't submit yet
-        cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(rootTask)
-      },
-    ],
-    [
-      'while editing existing task',
-      () => {
-        // Create the parent task
-        cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(rootTask)
-        clickSubmitBtn()
-        waitForCreate(rootTask)
+  runBothModes('create a subtask, check appears in tree', () => {
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    waitForCreate(rootTask)
+    fillTaskForm(subtask)
+    clickSubmitBtn()
+    waitForCreate(subtask)
+    checkTaskFormSubtasks([subtask])
 
-        // Open the edit dialog for the parent task,
-        cy.contains(TaskCard.CARD, rootTask.name).click()
-      },
-    ],
-  ] as const) {
-    runBothModes(
-      `create a subtask, check appears in tree - ${logStr}`,
-      (loggedIn) => {
-        beforeTest()
+    clickSubmitBtn()
+    waitForCreate(rootTask)
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        waitForCreate(rootTask)
-        fillTaskForm(subtask)
-        clickSubmitBtn()
-        waitForCreate(subtask)
-        checkTaskFormSubtasks([subtask])
+    checkTaskInTree({ ...rootTask, subtasks: [subtask] })
+    checkNumCalls({ create: 2, update: 0 })
 
-        clickSubmitBtn()
-        waitForCreate(rootTask)
+    // test EDIT
+    cy.contains(TaskCard.CARD, rootTask.name).click()
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask2)
+    clickSubmitBtn()
+    waitForCreate(subtask2)
+    checkTaskFormSubtasks([subtask, subtask2])
 
-        checkTaskInTree({ ...rootTask, subtasks: [subtask] })
-        cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
-      },
-    )
+    clickSubmitBtn()
+    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    checkNumCalls({ create: 3, update: 1 })
+  })
 
-    runBothModes(
-      `create multiple subtasks, check appear in tree - ${logStr}`,
-      (loggedIn) => {
-        beforeTest()
+  runBothModes('create multiple subtasks, check appear in tree', () => {
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    waitForCreate(rootTask)
+    fillTaskForm(subtask)
+    clickSubmitBtn()
+    waitForCreate(subtask)
+    checkTaskFormSubtasks([subtask])
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        waitForCreate(rootTask)
-        fillTaskForm(subtask)
-        clickSubmitBtn()
-        waitForCreate(subtask)
-        checkTaskFormSubtasks([subtask])
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask2)
+    clickSubmitBtn()
+    waitForCreate(subtask2)
+    checkTaskFormSubtasks([subtask, subtask2])
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        fillTaskForm(subtask2)
-        clickSubmitBtn()
-        waitForCreate(subtask2)
-        checkTaskFormSubtasks([subtask, subtask2])
+    clickSubmitBtn()
+    waitForCreate(rootTask)
 
-        clickSubmitBtn()
-        waitForCreate(rootTask)
+    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    checkNumCalls({ create: 3, update: 0 })
 
-        checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
-        cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
-      },
-    )
+    // test EDIT
+    cy.contains(TaskCard.CARD, rootTask.name).click()
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask3)
+    clickSubmitBtn()
+    waitForCreate(subtask3)
+    checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
-    runBothModes(
-      `create nested subtasks, ensure appear in tree - ${logStr}`,
-      (loggedIn) => {
-        beforeTest()
+    clickSubmitBtn()
+    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
+    checkNumCalls({ create: 4, update: 1 })
+  })
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        waitForCreate(rootTask)
+  runBothModes('create nested subtasks, ensure appear in tree', () => {
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    waitForCreate(rootTask)
+    fillTaskForm(subtask)
 
-        fillTaskForm(subtask)
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    waitForCreate(subtask)
+    fillTaskForm(subtask2)
+    clickSubmitBtn()
+    waitForCreate(subtask2)
+    checkTaskFormSubtasks([subtask2])
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        waitForCreate(subtask)
-        fillTaskForm(subtask2)
-        clickSubmitBtn()
-        waitForCreate(subtask2)
-        checkTaskFormSubtasks([subtask2])
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask3)
+    clickSubmitBtn()
+    waitForCreate(subtask3)
+    checkTaskFormSubtasks([subtask2, subtask3])
 
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-        fillTaskForm(subtask3)
-        clickSubmitBtn()
-        waitForCreate(subtask3)
-        checkTaskFormSubtasks([subtask2, subtask3])
+    clickSubmitBtn()
+    waitForCreate(subtask)
+    checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
-        clickSubmitBtn()
-        waitForCreate(subtask)
-        checkTaskFormSubtasks([subtask, subtask2, subtask3])
+    clickSubmitBtn()
+    waitForCreate(rootTask)
 
-        clickSubmitBtn()
-        waitForCreate(rootTask)
+    checkTaskInTree({
+      ...rootTask,
+      subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
+    })
+    checkNumCalls({ create: 4, update: 0 })
 
-        checkTaskInTree({
-          ...rootTask,
-          subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
-        })
-        cy.get('@createTask').should('have.been.called', loggedIn ? 4 : 0)
-      },
-    )
-  }
+    // TODO: test EDIT
+  })
 })

@@ -39,3 +39,19 @@ export const waitForUpdate = () => {
   const loggedIn = isLoggedIn()
   loggedIn && cy.wait('@updateTask')
 }
+
+export const checkNumCalls = ({
+  create,
+  update,
+}: {
+  create?: number
+  update?: number
+}) => {
+  const loggedIn = isLoggedIn()
+  if (create !== undefined) {
+    cy.get('@createTask').should('have.been.called', loggedIn ? create : 0)
+  }
+  if (update !== undefined) {
+    cy.get('@updateTask').should('have.been.called', loggedIn ? update : 0)
+  }
+}
