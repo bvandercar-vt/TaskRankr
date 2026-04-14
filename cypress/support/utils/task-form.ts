@@ -1,9 +1,7 @@
-import { RANK_FIELDS_COLUMNS } from '@client/lib/task-utils'
-
 import {
   DEFAULT_FIELD_CONFIG,
   type FieldConfig,
-  type RankField,
+  RankField,
   type Task,
   TaskStatus,
 } from '~/shared/schema'
@@ -16,13 +14,11 @@ const { TaskForm } = Selectors
 
 export type TaskFormData = Pick<Task, 'name' | RankField>
 
-const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
-
 export const fillTaskFormRankFields = (
   task: TaskFormData,
   settings: FieldConfig,
 ) => {
-  const requiredFields = rankFields.filter(
+  const requiredFields = RankField.filter(
     (field) => settings[field].visible && settings[field].required,
   )
 
@@ -30,7 +26,7 @@ export const fillTaskFormRankFields = (
     .should(requiredFields.length ? 'be.disabled' : 'not.be.disabled')
 
   const filled = new Set<RankField>()
-  for (const field of rankFields) {
+  for (const field of RankField) {
     const RankSelect = TaskForm.rankSelect(field)
     const value = task[field]
     const config = settings[field]

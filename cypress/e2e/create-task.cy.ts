@@ -5,6 +5,7 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { waitForCreate } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
   clickSubmitBtn,
@@ -47,7 +48,8 @@ describe('Task Creation', () => {
   runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(DefaultTask)
-    submitTaskForm(DefaultTask)
+    clickSubmitBtn()
+    waitForCreate(DefaultTask)
     checkTaskInTree(DefaultTask)
   })
 
@@ -74,7 +76,8 @@ describe('Task Creation', () => {
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(newTask, fieldConfig)
-      submitTaskForm(newTask)
+      clickSubmitBtn()
+      waitForCreate(newTask)
       checkTaskInTree(newTask)
     },
   )
@@ -95,7 +98,8 @@ describe('Task Creation', () => {
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-      submitTaskForm({ ...DefaultTask, status: TaskStatus.COMPLETED })
+      clickSubmitBtn()
+      waitForCreate({ ...DefaultTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
     },
   )
