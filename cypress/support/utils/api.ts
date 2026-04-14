@@ -50,7 +50,7 @@ export function checkTaskExistsBackend(
       expect(tasks.map((t) => t.name)).to.not.include(task.name)
     }
   }
-  
+
   getLocalStateTasks().then(checkTasks)
   getApiTasks().then(checkTasks)
 }
