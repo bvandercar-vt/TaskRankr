@@ -3,7 +3,6 @@ import { RANK_FIELDS_COLUMNS } from '@client/lib/task-utils'
 import type { FieldConfig, RankField, Task } from '~/shared/schema'
 import { ApiPaths, Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { checkTaskInTree } from './task-tree'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -12,23 +11,10 @@ export type TaskFormData = Pick<Task, 'name' | RankField>
 
 const rankFields = RANK_FIELDS_COLUMNS.map((col) => col.name)
 
-/**
- * Fills form, submits, and checks results in the UI and (if logged in) backend.
- */
-export const fillTaskForm = (
+export const fillTaskFormRankFields = (
   task: TaskFormData,
   settings: FieldConfig,
-  submitBtnText: string,
 ) => {
-  const loggedIn = isLoggedIn()
-
-  loggedIn && checkTaskExistsBackend(task, false)
-  cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
-
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
-
-  cy.get(TaskForm.NAME_INPUT).type(task.name)
-
   const requiredFields = rankFields.filter(
     (field) => settings[field].visible && settings[field].required,
   )
@@ -54,6 +40,22 @@ export const fillTaskForm = (
       cy.get(RankSelect).should('not.exist')
     }
   }
+}
+
+/**
+ * Fills form.
+ */
+export const fillTaskForm = (task: TaskFormData, settings: FieldConfig) => {
+  const loggedIn = isLoggedIn()
+
+  loggedIn && checkTaskExistsBackend(task, false)
+  cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
+
+  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
+
+  cy.get(TaskForm.NAME_INPUT).type(task.name)
+
+  fillTaskFormRankFields(task, settings)
 
   if (settings.timeSpent.visible) {
     cy.get(TaskForm.TIME_SPENT_INPUT).should(
@@ -61,15 +63,20 @@ export const fillTaskForm = (
     )
     // TODO: test required
   }
+}
 
+/**
+ * Submits form and checks results in the UI and (if logged in) backend.
+ */
+export const submitTaskForm = (task: TaskFormData, submitBtnText: string) => {
   cy.get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
 
-  loggedIn && cy.wait('@createTask')
+  const loggedIn = isLoggedIn()
 
-  checkTaskInTree(task)
+  loggedIn && cy.wait('@createTask')
 
   checkTaskExistsBackend(task, loggedIn)
 

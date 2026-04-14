@@ -415,6 +415,7 @@ export const TaskForm = ({
                       setMarkCompleted(checked === true)
                     }
                     className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    data-testid="mark-completed-checkbox"
                   />
                 </label>
               </SubtaskBlockedTooltip>
