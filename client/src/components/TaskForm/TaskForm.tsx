@@ -65,7 +65,7 @@ const taskFormDefaultsSchema = taskSchema.pick({
   enjoyment: true,
   time: true,
   parentId: true,
-  inProgressTime: true,
+  timeSpent: true,
   createdAt: true,
   completedAt: true,
 })
@@ -187,11 +187,11 @@ export const TaskForm = ({
         if (
           markCompleted &&
           timeSpentRequired &&
-          (data.inProgressTime ?? 0) <= 0
+          (data.timeSpent ?? 0) <= 0
         ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: ['inProgressTime'],
+            path: ['timeSpent'],
             message: 'Time spent is required when completing a task',
           })
         }
@@ -378,9 +378,9 @@ export const TaskForm = ({
                       )}
                     </div>
                     <TimeInput
-                      durationMs={form.watch('inProgressTime') || 0}
+                      durationMs={form.watch('timeSpent') || 0}
                       onDurationChange={(ms) =>
-                        form.setValue('inProgressTime', ms, {
+                        form.setValue('timeSpent', ms, {
                           shouldValidate: true,
                         })
                       }
@@ -388,9 +388,9 @@ export const TaskForm = ({
                       data-testid="time-spent-input"
                     />
                   </div>
-                  {form.formState.errors.inProgressTime && (
+                  {form.formState.errors.timeSpent && (
                     <p className="text-[11px] text-destructive text-right">
-                      {form.formState.errors.inProgressTime.message}
+                      {form.formState.errors.timeSpent.message}
                     </p>
                   )}
                 </div>
