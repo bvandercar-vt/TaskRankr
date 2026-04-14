@@ -35,6 +35,8 @@ export const Selectors = {
     rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
+    ADD_SUBTASK_BTN: testId('button-add-subtask'),
+    SUBTASK_ROW: testIdStartsWith('subtask-row-'),
   },
   Settings: {
     FieldConfig: {
