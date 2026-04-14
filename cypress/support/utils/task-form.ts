@@ -75,6 +75,13 @@ export const fillTaskForm = (
   }
 }
 
+export const clickSubmitBtn = (submitBtnText = 'Create') => {
+  cy.get(TaskForm.SUBMIT_BTN)
+    .should('have.text', submitBtnText)
+    .should('not.be.disabled')
+    .click()
+}
+
 /**
  * Submits form and checks results in the UI and (if logged in) backend.
  */

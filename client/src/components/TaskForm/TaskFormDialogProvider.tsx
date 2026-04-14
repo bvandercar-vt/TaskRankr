@@ -3,7 +3,7 @@
  * desktop/mobile variants.
  */
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
@@ -15,6 +15,7 @@ import type {
 import { useLocalState } from '@/providers/LocalStateProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
+import { TaskFormCancelConfirmDialog } from '../TaskForm/TaskFormCancelConfirmDialog'
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   DialogTitle,
 } from '../primitives/overlays/Dialog'
 import { AssignSubtaskDialog } from '../TaskForm/SubtasksCard/AssignSubtaskDialog'
+import type { PendingSubtask } from '../TaskForm/SubtasksCard/SubtasksCard'
 import { SubtaskActionDialog } from '../TaskForm/SubtasksCard/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '../TaskForm/TaskForm'
 
@@ -43,6 +45,12 @@ export const useTaskDialog = () => {
   return context
 }
 
+interface PendingTask {
+  localId: number
+  data: MutateTaskContent
+  parentLocalId: number | null
+}
+
 interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
@@ -51,6 +59,8 @@ interface TaskFormDialogProps
     | 'onEditSubtask'
     | 'onDeleteSubtask'
     | 'onAssignSubtask'
+    | 'defaultFormData'
+    | 'pendingSubtasks'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -152,10 +162,13 @@ export const TaskFormDialogProvider = ({
     null,
   )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
-  const [pendingCreateTaskId, setPendingCreateTaskId] = useState<
-    number | undefined
-  >(undefined)
+
+  const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([])
+  const [pendingNavStack, setPendingNavStack] = useState<number[]>([])
+  const [showingChildForm, setShowingChildForm] = useState(false)
+  const pendingIdRef = useRef(-10000)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
   const { subscribeToIdReplacement } = useLocalState()
@@ -169,9 +182,101 @@ export const TaskFormDialogProvider = ({
       setReturnToTask((prev) =>
         prev?.id === tempId ? { ...prev, id: realId } : prev,
       )
-      setPendingCreateTaskId((prev) => (prev === tempId ? realId : prev))
     })
   }, [subscribeToIdReplacement])
+
+  const isInSession = pendingNavStack.length > 0
+
+  const resetSession = () => {
+    setPendingTasks([])
+    setPendingNavStack([])
+    setShowingChildForm(false)
+    pendingIdRef.current = -10000
+  }
+
+  const resetAndClose = () => {
+    resetSession()
+    setShowCancelConfirm(false)
+    setIsOpen(false)
+    setTimeout(() => {
+      setActiveTask(undefined)
+      setParentId(undefined)
+      setReturnToTask(undefined)
+    }, 300)
+  }
+
+  const commitPendingTasks = (pending: PendingTask[]): Task => {
+    const localIdToRealId = new Map<number, number>()
+    let rootCreatedTask: Task | null = null
+
+    const sorted: PendingTask[] = []
+    const added = new Set<number>()
+
+    const addNode = (localId: number) => {
+      if (added.has(localId)) return
+      const node = pending.find((t) => t.localId === localId)
+      if (!node) return
+      if (node.parentLocalId !== null && !added.has(node.parentLocalId)) {
+        addNode(node.parentLocalId)
+      }
+      sorted.push(node)
+      added.add(localId)
+    }
+
+    for (const t of pending) addNode(t.localId)
+
+    for (const task of sorted) {
+      const realParentId =
+        task.parentLocalId !== null
+          ? localIdToRealId.get(task.parentLocalId)
+          : undefined
+      const created = createTask({
+        ...task.data,
+        parentId: realParentId,
+      } as CreateTask)
+      localIdToRealId.set(task.localId, created.id)
+      if (!rootCreatedTask) rootCreatedTask = created
+    }
+
+    return rootCreatedTask!
+  }
+
+  const getTopOfStack = () =>
+    pendingNavStack.length > 0
+      ? pendingNavStack[pendingNavStack.length - 1]
+      : null
+
+  const getCurrentPending = () => {
+    const topId = getTopOfStack()
+    return topId !== null
+      ? pendingTasks.find((t) => t.localId === topId) ?? null
+      : null
+  }
+
+  const getPendingSubtasksForTop = (): PendingSubtask[] => {
+    const topId = getTopOfStack()
+    if (topId === null) return []
+    return pendingTasks
+      .filter((t) => t.parentLocalId === topId)
+      .map((t) => ({ name: (t.data as { name: string }).name }))
+  }
+
+  const getSessionParentId = (): number | undefined => {
+    if (!isInSession) return parentId
+    if (showingChildForm) return -1
+    const current = getCurrentPending()
+    return current?.parentLocalId != null ? current.parentLocalId : undefined
+  }
+
+  const getSessionDefaultFormData = (): MutateTaskContent | undefined => {
+    if (!isInSession || showingChildForm) return undefined
+    return getCurrentPending()?.data
+  }
+
+  const getSessionPendingSubtasks = (): PendingSubtask[] => {
+    if (!isInSession || showingChildForm) return []
+    return getPendingSubtasksForTop()
+  }
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
@@ -180,9 +285,6 @@ export const TaskFormDialogProvider = ({
     setMode('create')
     setParentId(pid)
     setActiveTask(undefined)
-    if (pid === undefined) {
-      setPendingCreateTaskId(undefined)
-    }
     setIsOpen(true)
   }
 
@@ -191,7 +293,7 @@ export const TaskFormDialogProvider = ({
     setActiveTask(task)
     setParentId(task.parentId ?? undefined)
     setReturnToTask(undefined)
-    setPendingCreateTaskId(undefined)
+    resetSession()
     setIsOpen(true)
   }
 
@@ -205,44 +307,121 @@ export const TaskFormDialogProvider = ({
     setIsOpen(true)
   }
 
-  const closeDialog = (confirmed = false) => {
+  const pendingSubtaskCount = isInSession
+    ? pendingTasks.filter((t) => t.parentLocalId !== null).length
+    : 0
+
+  const closeDialog = () => {
     if (returnToTask) {
       const taskToReturn = returnToTask
+      resetSession()
+      setShowCancelConfirm(false)
       setReturnToTask(undefined)
       setMode('edit')
       setActiveTask(taskToReturn)
       setParentId(taskToReturn.parentId ?? undefined)
+    } else if (isInSession && showingChildForm) {
+      setShowingChildForm(false)
+      setActiveTask(undefined)
+    } else if (isInSession && pendingNavStack.length > 1) {
+      setPendingNavStack((prev) => prev.slice(0, -1))
+      setActiveTask(undefined)
+    } else if (isInSession && pendingSubtaskCount > 0) {
+      setShowCancelConfirm(true)
     } else {
-      if (!confirmed && pendingCreateTaskId !== undefined) {
-        deleteTask(pendingCreateTaskId)
-      }
-      setPendingCreateTaskId(undefined)
-      setIsOpen(false)
-      setTimeout(() => {
-        setActiveTask(undefined)
-        setParentId(undefined)
-      }, 300)
+      resetAndClose()
     }
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
-      createTask({ ...data, parentId } as CreateTask)
-      closeDialog(true)
+      if (isInSession && showingChildForm) {
+        const parentLocalId = getTopOfStack()!
+        const localId = pendingIdRef.current--
+        setPendingTasks((prev) => [
+          ...prev,
+          { localId, data, parentLocalId },
+        ])
+        setShowingChildForm(false)
+        setActiveTask(undefined)
+      } else if (isInSession && pendingNavStack.length === 1) {
+        const rootLocalId = pendingNavStack[0]
+        const finalTasks = pendingTasks.map((t) =>
+          t.localId === rootLocalId ? { ...t, data } : t,
+        )
+        commitPendingTasks(finalTasks)
+        if (returnToTask) {
+          const taskToReturn = returnToTask
+          resetSession()
+          setShowCancelConfirm(false)
+          setReturnToTask(undefined)
+          setMode('edit')
+          setActiveTask(taskToReturn)
+          setParentId(taskToReturn.parentId ?? undefined)
+        } else {
+          resetAndClose()
+        }
+      } else if (isInSession && pendingNavStack.length > 1) {
+        const currentLocalId = getTopOfStack()!
+        setPendingTasks((prev) =>
+          prev.map((t) =>
+            t.localId === currentLocalId ? { ...t, data } : t,
+          ),
+        )
+        setPendingNavStack((prev) => prev.slice(0, -1))
+        setActiveTask(undefined)
+      } else {
+        createTask({ ...data, parentId } as CreateTask)
+        if (returnToTask) {
+          const taskToReturn = returnToTask
+          setReturnToTask(undefined)
+          setMode('edit')
+          setActiveTask(taskToReturn)
+          setParentId(taskToReturn.parentId ?? undefined)
+        } else {
+          resetAndClose()
+        }
+      }
     } else if (mode === 'edit' && activeTask) {
       updateTask({ id: activeTask.id, ...data })
-      closeDialog(true)
+      if (returnToTask) {
+        const taskToReturn = returnToTask
+        setReturnToTask(undefined)
+        setMode('edit')
+        setActiveTask(taskToReturn)
+        setParentId(taskToReturn.parentId ?? undefined)
+      } else {
+        resetAndClose()
+      }
     }
   }
 
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
     if (formData) {
-      const newTask = createTask({ ...formData, parentId } as CreateTask)
-      setPendingCreateTaskId(newTask.id)
-      setReturnToTask(newTask)
+      if (!isInSession) {
+        const localId = pendingIdRef.current--
+        setPendingTasks([{ localId, data: formData, parentLocalId: null }])
+        setPendingNavStack([localId])
+        setShowingChildForm(true)
+      } else if (showingChildForm) {
+        const parentLocalId = getTopOfStack()!
+        const localId = pendingIdRef.current--
+        setPendingTasks((prev) => [
+          ...prev,
+          { localId, data: formData, parentLocalId },
+        ])
+        setPendingNavStack((prev) => [...prev, localId])
+      } else {
+        const currentLocalId = getTopOfStack()!
+        setPendingTasks((prev) =>
+          prev.map((t) =>
+            t.localId === currentLocalId ? { ...t, data: formData } : t,
+          ),
+        )
+        setShowingChildForm(true)
+      }
       setMode('create')
       setActiveTask(undefined)
-      setParentId(newTask.id)
     } else {
       openCreateDialog(pid)
     }
@@ -250,8 +429,17 @@ export const TaskFormDialogProvider = ({
 
   const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
     if (formData) {
-      const newTask = createTask({ ...formData, parentId } as CreateTask)
-      setPendingCreateTaskId(newTask.id)
+      let newTask: Task
+      if (isInSession) {
+        const rootLocalId = pendingNavStack[0]
+        const finalTasks = pendingTasks.map((t) =>
+          t.localId === rootLocalId ? { ...t, data: formData } : t,
+        )
+        newTask = commitPendingTasks(finalTasks)
+        resetSession()
+      } else {
+        newTask = createTask({ ...formData, parentId } as CreateTask)
+      }
       setMode('edit')
       setActiveTask(newTask)
       setParentId(newTask.parentId ?? undefined)
@@ -273,16 +461,22 @@ export const TaskFormDialogProvider = ({
     }
   }, [isOpen])
 
+  const sessionParentId = getSessionParentId()
+  const sessionDefaultFormData = getSessionDefaultFormData()
+  const sessionPendingSubtasks = getSessionPendingSubtasks()
+
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
     activeTask,
-    parentId,
+    parentId: sessionParentId,
     onClose: closeDialog,
     onSubmit: handleSubmit,
     onAddSubtask: handleAddSubtask,
     onEditSubtask: handleEditSubtask,
     onDeleteSubtask: setSubtaskToDelete,
     onAssignSubtask: handleAssignSubtask,
+    defaultFormData: sessionDefaultFormData,
+    pendingSubtasks: sessionPendingSubtasks,
   }
 
   const isMobile = useIsMobile()
@@ -344,6 +538,15 @@ export const TaskFormDialogProvider = ({
             setSubtaskToDelete(null)
           }
         }}
+      />
+
+      <TaskFormCancelConfirmDialog
+        open={showCancelConfirm}
+        onOpenChange={(open) => {
+          if (!open) setShowCancelConfirm(false)
+        }}
+        subtaskCount={pendingSubtaskCount}
+        onDiscard={resetAndClose}
       />
 
       {assignParentTask && (

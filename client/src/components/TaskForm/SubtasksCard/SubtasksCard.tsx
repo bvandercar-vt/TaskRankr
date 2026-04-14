@@ -37,12 +37,17 @@ import { SubtasksSettings } from './SubtasksSettings'
 const ADD_SUBTASK_BTN_CLASS =
   'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
 
+export interface PendingSubtask {
+  name: string
+}
+
 interface SubtasksCardProps {
   task: Task
   onAddSubtask: (parentId: number) => void
   onEditSubtask?: (task: Task) => void
   onDeleteSubtask?: (task: DeleteTaskArgs) => void
   onAssignSubtask?: (task: Task) => void
+  pendingSubtasks?: PendingSubtask[]
 }
 
 export const SubtasksCard = ({
@@ -51,6 +56,7 @@ export const SubtasksCard = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
+  pendingSubtasks = [],
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
   const { reorderSubtasks } = useTaskActions()
@@ -145,7 +151,7 @@ export const SubtasksCard = ({
     return allSubtasks.filter((s) => !s.hidden)
   }, [allSubtasks, showHidden])
 
-  const totalCount = allSubtasks.length
+  const totalCount = allSubtasks.length + pendingSubtasks.length
 
   const directChildIds = useMemo(
     () => visibleSubtasks.filter((t) => t.depth === 0).map((t) => t.id),
@@ -219,6 +225,17 @@ export const SubtasksCard = ({
                     isDragDisabled={false}
                     isHiddenItem={hiddenSubtaskIds.has(subtask.id)}
                   />
+                ))}
+                {pendingSubtasks.map((ps, i) => (
+                  <div
+                    key={`pending-${i}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/5 select-none"
+                    style={{ paddingLeft: '12px' }}
+                    data-testid={`subtask-row-pending-${i}`}
+                  >
+                    <span className="shrink-0 h-4 w-4 rounded-sm border border-muted-foreground/40" />
+                    <span className="text-sm break-words">{ps.name}</span>
+                  </div>
                 ))}
               </div>
             </SortableContext>

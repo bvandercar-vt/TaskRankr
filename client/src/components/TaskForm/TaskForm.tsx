@@ -47,7 +47,7 @@ import {
 import { TagChain } from '../primitives/TagChain'
 import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
-import { SubtasksCard } from './SubtasksCard'
+import { SubtasksCard, type PendingSubtask } from './SubtasksCard'
 
 const STUB_TASK: Task = taskSchema.parse({
   id: 0,
@@ -127,6 +127,8 @@ export interface TaskFormProps {
   onEditSubtask: (task: Task) => void
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
+  defaultFormData?: MutateTaskContent
+  pendingSubtasks?: PendingSubtask[]
 }
 
 export const TaskForm = ({
@@ -138,6 +140,8 @@ export const TaskForm = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
+  defaultFormData,
+  pendingSubtasks = [],
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { data: allTasks } = useTasks()
@@ -168,13 +172,13 @@ export const TaskForm = ({
   const getFormDefaults = useCallback(
     (data: TaskFormDefaults | undefined): TaskFormDefaults =>
       taskFormDefaultsSchema.parse(
-        (data ?? {
+        (data ?? defaultFormData ?? {
           ...allRankFieldsNull,
           name: '',
           parentId,
         }) satisfies z.input<typeof taskFormDefaultsSchema>,
       ),
-    [parentId],
+    [parentId, defaultFormData],
   )
 
   const form = useForm<MutateTask>({
@@ -301,6 +305,7 @@ export const TaskForm = ({
                       form.handleSubmit((data) => {
                         onAssignSubtask(STUB_TASK, data)
                       })(),
+                    pendingSubtasks,
                   })}
             />
 

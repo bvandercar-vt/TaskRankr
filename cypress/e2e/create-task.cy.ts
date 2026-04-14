@@ -5,9 +5,9 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
-import { waitForCreate } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
+  clickSubmitBtn,
   fillTaskForm,
   submitTaskForm,
   type TaskFormData,
@@ -107,9 +107,8 @@ describe('Task Creation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
       fillTaskForm(subtask)
-      submitTaskForm(subtask)
+      clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .first()
@@ -128,10 +127,9 @@ describe('Task Creation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
-      submitTaskForm(subtask)
+      clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .getElementArrayText()
@@ -139,7 +137,7 @@ describe('Task Creation', () => {
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask2)
-      submitTaskForm(subtask2)
+      clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
@@ -158,14 +156,12 @@ describe('Task Creation', () => {
       fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(subtask)
       fillTaskForm(subtask2)
-      submitTaskForm(subtask2)
+      clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
         .getElementArrayText()
@@ -173,18 +169,18 @@ describe('Task Creation', () => {
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask3)
-      submitTaskForm(subtask3)
+      clickSubmitBtn()
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 2)
         .getElementArrayText()
         .should('equal', [subtask2.name, subtask3.name])
 
-      submitTaskForm(subtask)
+      clickSubmitBtn()
 
       cy.get(TaskForm.SUBTASK_ROW)
-        .should('have.length', 2)
+        .should('have.length', 1)
         .getElementArrayText()
-        .should('equal', [subtask.name, subtask2.name, subtask3.name])
+        .should('equal', [subtask.name])
 
       submitTaskForm(rootTask)
 
