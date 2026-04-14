@@ -9,9 +9,9 @@ import { toMerged } from 'es-toolkit'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { useLocalStateSafe } from '@/providers/LocalStateProvider'
 import {
-  sanitizeFieldConfig,
   type FieldConfig,
   type FieldFlags,
+  sanitizeFieldConfig,
   type UserSettings,
 } from '~/shared/schema'
 

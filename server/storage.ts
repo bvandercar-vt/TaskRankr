@@ -475,7 +475,10 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(userSettings.userId, userId))
       .returning()
-    return { ...settings, fieldConfig: sanitizeFieldConfig(settings.fieldConfig) }
+    return {
+      ...settings,
+      fieldConfig: sanitizeFieldConfig(settings.fieldConfig),
+    }
   }
 }
 

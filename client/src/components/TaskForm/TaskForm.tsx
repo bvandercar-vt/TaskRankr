@@ -150,37 +150,27 @@ export const TaskForm = ({
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false
 
-  const rankFieldConfig = useMemo(
-    () =>
-      new Map(
-        RANK_FIELDS_COLUMNS.map(({ name }) => {
-          const { visible, required: rawRequired } = settings.fieldConfig[name]
-          const required = visible && rawRequired
-          return [name, { visible, required }]
-        }),
-      ),
-    [settings],
-  )
-
   const visibleRankFields = useMemo(
     () =>
       RANK_FIELDS_COLUMNS.filter(
-        (attr) => rankFieldConfig.get(attr.name)?.visible,
+        (attr) => settings.fieldConfig[attr.name].visible,
       ),
-    [rankFieldConfig],
+    [settings.fieldConfig],
   )
 
   const requiredRankFields: RankField[] = useMemo(
     () =>
       RANK_FIELDS_COLUMNS.filter(
-        ({ name }) => rankFieldConfig.get(name)?.required,
+        ({ name }) => settings.fieldConfig[name].required,
       ).map(({ name }) => name),
-    [rankFieldConfig],
+    [settings.fieldConfig],
   )
 
-  const timeSpentVisible = settings.fieldConfig.timeSpent.visible
-  const timeSpentRequired =
-    timeSpentVisible && settings.fieldConfig.timeSpent.required
+  const {
+    fieldConfig: {
+      timeSpent: { visible: timeSpentVisible, required: timeSpentRequired },
+    },
+  } = settings
 
   const formSchema = useMemo(
     () =>
@@ -237,7 +227,7 @@ export const TaskForm = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [rankFieldConfig, form, markCompleted, timeSpentRequired])
+  }, [settings.fieldConfig, form, markCompleted, timeSpentRequired])
 
   return (
     <Form {...form}>
@@ -303,9 +293,7 @@ export const TaskForm = ({
                         label={label}
                         levels={levels}
                         field={field}
-                        isRequired={Boolean(
-                          rankFieldConfig.get(name)?.required,
-                        )}
+                        isRequired={settings.fieldConfig[name].required}
                       />
                     )}
                   />
@@ -397,7 +385,7 @@ export const TaskForm = ({
                         })
                       }
                       className="w-16 h-8 text-xs bg-secondary/20 border-white/5 text-center"
-                      data-testid='time-spent-input'
+                      data-testid="time-spent-input"
                     />
                   </div>
                   {form.formState.errors.inProgressTime && (
