@@ -50,17 +50,19 @@ describe('Create Subtask', () => {
   })
 
   runBothModes('create a subtask, check appears in tree', () => {
+    const subtasks: TaskFormData[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
     fillTaskForm(subtask)
     clickSubmitBtn()
     waitForCreate(subtask)
-    checkTaskFormSubtasks([subtask])
+    subtasks.push(subtask)
+    checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtn()
     waitForCreate(rootTask)
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask] })
+    checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
@@ -69,31 +71,36 @@ describe('Create Subtask', () => {
     fillTaskForm(subtask2)
     clickSubmitBtn()
     waitForCreate(subtask2)
-    checkTaskFormSubtasks([subtask, subtask2])
+    subtasks.push(subtask2)
+    checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtn()
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 1 })
   })
 
   runBothModes('create multiple subtasks, check appear in tree', () => {
+    const subtasks: TaskFormData[] = []
+
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
     fillTaskForm(subtask)
     clickSubmitBtn()
     waitForCreate(subtask)
-    checkTaskFormSubtasks([subtask])
+    subtasks.push(subtask)
+    checkTaskFormSubtasks(subtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtn()
     waitForCreate(subtask2)
-    checkTaskFormSubtasks([subtask, subtask2])
+    subtasks.push(subtask2)
+    checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtn()
     waitForCreate(rootTask)
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
@@ -102,10 +109,11 @@ describe('Create Subtask', () => {
     fillTaskForm(subtask3)
     clickSubmitBtn()
     waitForCreate(subtask3)
-    checkTaskFormSubtasks([subtask, subtask2, subtask3])
+    subtasks.push(subtask3)
+    checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtn()
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
+    checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 4, update: 1 })
   })
 

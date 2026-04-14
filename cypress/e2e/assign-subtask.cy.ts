@@ -64,17 +64,20 @@ describe('Assign Subtask', () => {
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
+      const subtasks: TaskFormData[] = []
 
       assignSubtask(orphanTask)
+      subtasks.push(orphanTask)
       waitForUpdate()
-      checkTaskFormSubtasks([orphanTask])
+      checkTaskFormSubtasks(subtasks)
 
       // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(newSubtask)
       clickSubmitBtn()
       waitForCreate(newSubtask)
-      checkTaskFormSubtasks([orphanTask, newSubtask])
+      subtasks.push(newSubtask)
+      checkTaskFormSubtasks(subtasks)
 
       clickSubmitBtn() // TODO: try cancel and ensure wasn't assigned.
       checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
@@ -82,16 +85,14 @@ describe('Assign Subtask', () => {
 
       // test in edit mode
       cy.contains(TaskCard.CARD, rootTask.name).click()
-      checkTaskFormSubtasks([orphanTask, newSubtask])
+      checkTaskFormSubtasks(subtasks)
       assignSubtask(orphanTask2)
       waitForUpdate()
-      checkTaskFormSubtasks([orphanTask, newSubtask, orphanTask2])
+      subtasks.push(orphanTask2)
+      checkTaskFormSubtasks(subtasks)
 
       clickSubmitBtn()
-      checkTaskInTree({
-        ...rootTask,
-        subtasks: [orphanTask, newSubtask, orphanTask2],
-      })
+      checkTaskInTree({ ...rootTask, subtasks })
       checkNumCalls({ create: 3, update: 2 })
     },
   )
