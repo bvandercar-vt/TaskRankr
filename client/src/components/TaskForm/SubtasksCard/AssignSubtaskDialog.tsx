@@ -4,10 +4,10 @@
 
 import { useMemo, useState } from 'react'
 
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { useTasks } from '@/hooks/useTasks'
 import { filterRootTasks, getAllDescendantIds } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Checkbox } from '../../primitives/forms/Checkbox'
 import {
@@ -23,55 +23,57 @@ const LAYER_CLASS = 'z-[200]'
 interface AssignSubtaskDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  parentTask: Task
+  /** The real parent task ID, or null when the parent is still a pending draft */
+  parentTaskId: number | null
+  onConfirm: (task: Pick<Task, 'id' | 'name'>) => void
 }
 
 export const AssignSubtaskDialog = ({
   open,
   onOpenChange,
-  parentTask,
+  parentTaskId,
+  onConfirm,
 }: AssignSubtaskDialogProps) => {
   const { data: allTasks } = useTasks()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)
-  const { updateTask } = useTaskActions()
 
   const orphanTasks = useMemo(() => {
-    const descendantIds = getAllDescendantIds(allTasks, parentTask.id)
+    const descendantIds =
+      parentTaskId !== null
+        ? getAllDescendantIds(allTasks, parentTaskId)
+        : new Set<number>()
     return allTasks.filter(
       (t) =>
-        t.parentId === null && // must be an orphan
-        t.id !== parentTask.id && // must not be the parent task itself
-        !descendantIds.has(t.id) && // must not already be a descendant of the parent task
-        (showCompleted || t.status !== TaskStatus.COMPLETED), // filter out if set
+        t.parentId === null &&
+        (parentTaskId === null || t.id !== parentTaskId) &&
+        !descendantIds.has(t.id) &&
+        (showCompleted || t.status !== TaskStatus.COMPLETED),
     )
-  }, [allTasks, parentTask.id, showCompleted])
+  }, [allTasks, parentTaskId, showCompleted])
 
   const filteredTasks = useMemo(
     () => filterRootTasks(orphanTasks, search),
     [orphanTasks, search],
   )
 
-  const handleConfirm = () => {
-    if (selectedId === null) return
-    updateTask({ id: selectedId, parentId: parentTask.id })
-    if (parentTask.subtaskSortMode === SubtaskSortMode.MANUAL) {
-      updateTask({
-        id: parentTask.id,
-        subtaskOrder: [...parentTask.subtaskOrder, selectedId],
-      })
-    }
+  const reset = () => {
     setSelectedId(null)
     setSearch('')
     setShowCompleted(false)
+  }
+
+  const handleConfirm = () => {
+    const selected = filteredTasks.find((t) => t.id === selectedId)
+    if (!selected) return
+    onConfirm({ id: selected.id, name: selected.name })
+    reset()
     onOpenChange(false)
   }
 
   const handleClose = () => {
-    setSelectedId(null)
-    setSearch('')
-    setShowCompleted(false)
+    reset()
     onOpenChange(false)
   }
 
@@ -79,11 +81,7 @@ export const AssignSubtaskDialog = ({
     <Dialog
       open={open}
       onOpenChange={(v) => {
-        if (!v) {
-          setSelectedId(null)
-          setSearch('')
-          setShowCompleted(false)
-        }
+        if (!v) reset()
         onOpenChange(v)
       }}
     >

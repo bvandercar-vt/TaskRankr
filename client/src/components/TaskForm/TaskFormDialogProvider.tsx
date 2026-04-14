@@ -13,6 +13,7 @@ import type {
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useLocalState } from '@/providers/LocalStateProvider'
+import { SubtaskSortMode } from '~/shared/schema'
 import type { CreateTask, Task } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
 import {
@@ -164,6 +165,10 @@ export const TaskFormDialogProvider = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
+  const [pendingAssignedTasks, setPendingAssignedTasks] = useState<
+    Pick<Task, 'id' | 'name'>[]
+  >([])
+  const [pendingAssignOpen, setPendingAssignOpen] = useState(false)
 
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([])
   const [pendingNavStack, setPendingNavStack] = useState<number[]>([])
@@ -191,6 +196,8 @@ export const TaskFormDialogProvider = ({
     setPendingTasks([])
     setPendingNavStack([])
     setShowingChildForm(false)
+    setPendingAssignedTasks([])
+    setPendingAssignOpen(false)
     pendingIdRef.current = -10_000
   }
 
@@ -283,7 +290,9 @@ export const TaskFormDialogProvider = ({
 
   const getSessionPendingSubtasks = (): PendingSubtask[] => {
     if (!isInSession || showingChildForm) return []
-    return getPendingSubtasksForTop()
+    const created = getPendingSubtasksForTop()
+    const assigned = pendingAssignedTasks.map((t) => ({ name: t.name }))
+    return [...created, ...assigned]
   }
 
   const openCreateDialog = (pid?: number) => {
@@ -316,7 +325,8 @@ export const TaskFormDialogProvider = ({
   }
 
   const pendingSubtaskCount = isInSession
-    ? pendingTasks.filter((t) => t.parentLocalId !== null).length
+    ? pendingTasks.filter((t) => t.parentLocalId !== null).length +
+      pendingAssignedTasks.length
     : 0
 
   const closeDialog = () => {
@@ -354,7 +364,10 @@ export const TaskFormDialogProvider = ({
         const finalTasks = pendingTasks.map((t) =>
           t.localId === rootLocalId ? { ...t, data } : t,
         )
-        commitPendingTasks(finalTasks)
+        const rootTask = commitPendingTasks(finalTasks)
+        for (const { id: assignedId } of pendingAssignedTasks) {
+          updateTask({ id: assignedId, parentId: rootTask.id })
+        }
         if (returnToTask) {
           const taskToReturn = returnToTask
           resetSession()
@@ -432,22 +445,23 @@ export const TaskFormDialogProvider = ({
 
   const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
     if (formData) {
-      let newTask: Task
       if (isInSession) {
+        // Save current root form data without committing — defer until Submit
         const rootLocalId = pendingNavStack[0]
-        const finalTasks = pendingTasks.map((t) =>
-          t.localId === rootLocalId ? { ...t, data: formData } : t,
+        setPendingTasks((prev) =>
+          prev.map((t) =>
+            t.localId === rootLocalId ? { ...t, data: formData } : t,
+          ),
         )
-        newTask = commitPendingTasks(finalTasks)
-        resetSession()
+        setPendingAssignOpen(true)
       } else {
-        newTask = createTask({ ...formData, parentId } as CreateTask)
+        const newTask = createTask({ ...formData, parentId } as CreateTask)
+        setMode('edit')
+        setActiveTask(newTask)
+        setParentId(newTask.parentId ?? undefined)
+        setReturnToTask(undefined)
+        setAssignParentTask(newTask)
       }
-      setMode('edit')
-      setActiveTask(newTask)
-      setParentId(newTask.parentId ?? undefined)
-      setReturnToTask(undefined)
-      setAssignParentTask(newTask)
     } else {
       setAssignParentTask(task)
     }
@@ -552,15 +566,29 @@ export const TaskFormDialogProvider = ({
         onDiscard={resetAndClose}
       />
 
-      {assignParentTask && (
-        <AssignSubtaskDialog
-          open={!!assignParentTask}
-          onOpenChange={(open) => {
-            if (!open) setAssignParentTask(null)
-          }}
-          parentTask={assignParentTask}
-        />
-      )}
+      <AssignSubtaskDialog
+        open={pendingAssignOpen || !!assignParentTask}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAssignParentTask(null)
+            setPendingAssignOpen(false)
+          }
+        }}
+        parentTaskId={assignParentTask?.id ?? null}
+        onConfirm={({ id: selectedId, name }) => {
+          if (pendingAssignOpen) {
+            setPendingAssignedTasks((prev) => [...prev, { id: selectedId, name }])
+          } else if (assignParentTask) {
+            updateTask({ id: selectedId, parentId: assignParentTask.id })
+            if (assignParentTask.subtaskSortMode === SubtaskSortMode.MANUAL) {
+              updateTask({
+                id: assignParentTask.id,
+                subtaskOrder: [...assignParentTask.subtaskOrder, selectedId],
+              })
+            }
+          }
+        }}
+      />
     </TaskFormDialogContext.Provider>
   )
 }
