@@ -126,6 +126,46 @@ const SwitchCard = (props: SwitchSettingProps) => (
   </Card>
 )
 
+const AttributeCheckboxRow = ({
+  name,
+  label,
+  visible,
+  required,
+  updateFieldFlags,
+  className,
+}: {
+  name: keyof FieldConfig
+  label: string
+  visible: boolean
+  required: boolean
+  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
+  className?: string
+}) => (
+  <tr className={className}>
+    <td className="py-3 text-foreground">{label}</td>
+    <td className="py-3 text-center">
+      <Checkbox
+        checked={visible}
+        onCheckedChange={(checked) =>
+          updateFieldFlags(name, { visible: !!checked })
+        }
+        data-testid={`checkbox-${name}-visible`}
+      />
+    </td>
+    <td className="py-3 text-center">
+      <Checkbox
+        checked={required}
+        onCheckedChange={(checked) =>
+          updateFieldFlags(name, { required: !!checked })
+        }
+        disabled={!visible}
+        className={!visible ? 'opacity-50' : ''}
+        data-testid={`checkbox-${name}-required`}
+      />
+    </td>
+  </tr>
+)
+
 const AttributeSettingsCard = ({
   fieldConfig,
   updateFieldFlags,
@@ -153,69 +193,29 @@ const AttributeSettingsCard = ({
         </tr>
       </thead>
       <tbody>
-        {RANK_FIELDS_COLUMNS.map(({ name, label }) => {
-          const { visible, required } = fieldConfig[name]
-
-          return (
-            <tr key={name} className="border-b border-white/5">
-              <td className="py-3 text-foreground">{label}</td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={visible}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags(name, { visible: !!checked })
-                  }
-                  data-testid={`checkbox-${name}-visible`}
-                />
-              </td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={required}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags(name, { required: !!checked })
-                  }
-                  disabled={!visible}
-                  className={!visible ? 'opacity-50' : ''}
-                  data-testid={`checkbox-${name}-required`}
-                />
-              </td>
-            </tr>
-          )
-        })}
+        {RANK_FIELDS_COLUMNS.map(({ name, label }) => (
+          <AttributeCheckboxRow
+            key={name}
+            name={name}
+            label={label}
+            {...fieldConfig[name]}
+            updateFieldFlags={updateFieldFlags}
+            className="border-b border-white/5"
+          />
+        ))}
         <tr>
           <td
             colSpan={3}
             className="pt-2 pb-0 border-t-2 border-dashed border-white/10"
           />
         </tr>
-        {(() => {
-          const { visible, required } = fieldConfig.timeSpent
-          return (
-            <tr key="timeSpent">
-              <td className="py-3 text-foreground">Time Spent</td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={visible}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags('timeSpent', { visible: !!checked })
-                  }
-                  data-testid="checkbox-timeSpent-visible"
-                />
-              </td>
-              <td className="py-3 text-center">
-                <Checkbox
-                  checked={required}
-                  onCheckedChange={(checked) =>
-                    updateFieldFlags('timeSpent', { required: !!checked })
-                  }
-                  disabled={!visible}
-                  className={!visible ? 'opacity-50' : ''}
-                  data-testid="checkbox-timeSpent-required"
-                />
-              </td>
-            </tr>
-          )
-        })()}
+        <AttributeCheckboxRow
+          key="timeSpent"
+          name="timeSpent"
+          label="Time Spent"
+          {...fieldConfig.timeSpent}
+          updateFieldFlags={updateFieldFlags}
+        />
       </tbody>
     </table>
   </Card>
