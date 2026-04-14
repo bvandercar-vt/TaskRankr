@@ -29,6 +29,9 @@ export const Selectors = {
   TaskForm: {
     NAME_INPUT: testId('task-name-input'),
     TIME_SPENT_INPUT: testId('time-spent-input'),
+    TIME_SPENT_INPUT_HOURS: testId('time-spent-input-hours'),
+    TIME_SPENT_INPUT_MINUTES: testId('time-spent-input-minutes'),
+    MARK_COMPLETED_CHECKBOX: testId('mark-completed-checkbox'),
     rankSelect: (field: RankField) => testId(`rank-select-${field}`),
     SUBMIT_BTN: testId('submit-button'),
     CANCEL_BTN: testId('cancel-button'),
