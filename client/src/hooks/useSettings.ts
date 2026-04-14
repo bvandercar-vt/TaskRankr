@@ -32,10 +32,14 @@ export const useSettings = () => {
     flags: Partial<FieldFlags>,
   ) => {
     if (!localState) return
-    const resolved: Partial<FieldFlags> =
-      flags.visible === false ? { ...flags, required: false } : flags
+
     localState.updateSettings({
-      fieldConfig: toMerged(settings.fieldConfig, { [field]: resolved }),
+      fieldConfig: toMerged(settings.fieldConfig, {
+        [field]: {
+          visible: flags.visible,
+          required: flags.visible ? flags.required : false,
+        },
+      }),
     })
   }
 
