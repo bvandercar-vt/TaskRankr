@@ -25,8 +25,12 @@ export const interceptDelete = () => {
   cy.intercept('DELETE', ApiPaths.DELETE_TASK).as('deleteTask')
 }
 
-export const waitForDelete = () => {
-  if (isLoggedIn()) {
-    cy.wait('@deleteTask')
-  }
+export const waitForDelete = (task: Pick<TaskFormData, 'name'>) => {
+  const loggedIn = isLoggedIn()
+
+  loggedIn && cy.wait('@deleteTask')
+
+  checkTaskExistsBackend(task, false)
+
+  cy.get('@deleteTask').should('have.been.called', loggedIn ? 1 : 0)
 }

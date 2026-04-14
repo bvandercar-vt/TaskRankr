@@ -15,7 +15,7 @@ import { isLoggedIn, runBothModes } from '@cypress/support/utils/test-runner'
 
 const { TaskForm } = Selectors
 
-const parentTask = {
+const rootTask = {
   ...DefaultTask,
   name: 'E2E Root Task',
 } as const satisfies TaskFormData
@@ -46,11 +46,11 @@ describe('Task Creation Cancellation', () => {
     'cancel on create form before adding any subtask — dialog closes, no task created',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      checkDoNotExist([parentTask])
+      checkDoNotExist([rootTask])
     },
   )
 
@@ -58,10 +58,10 @@ describe('Task Creation Cancellation', () => {
     'cancel on parent form after a subtask was created — parent and subtask are deleted',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)
@@ -69,9 +69,9 @@ describe('Task Creation Cancellation', () => {
 
       interceptDelete()
       cy.get(TaskForm.CANCEL_BTN).click()
-      waitForDelete()
+      waitForDelete(rootTask)
 
-      checkDoNotExist([parentTask, subtask])
+      checkDoNotExist([rootTask, subtask])
     },
   )
 
@@ -79,21 +79,21 @@ describe('Task Creation Cancellation', () => {
     'cancel on subtask form navigates back to parent, then cancel on parent deletes it',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
 
       cy.get(TaskForm.NAME_INPUT).type(subtask.name)
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      cy.get(TaskForm.NAME_INPUT).should('have.value', parentTask.name)
+      cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
 
       interceptDelete()
       cy.get(TaskForm.CANCEL_BTN).click()
-      waitForDelete()
+      waitForDelete(rootTask)
 
-      checkDoNotExist([parentTask, subtask])
+      checkDoNotExist([rootTask, subtask])
     },
   )
 
@@ -101,10 +101,10 @@ describe('Task Creation Cancellation', () => {
     'cancel on parent form after multiple subtasks were created — all are deleted',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)
@@ -117,9 +117,9 @@ describe('Task Creation Cancellation', () => {
 
       interceptDelete()
       cy.get(TaskForm.CANCEL_BTN).click()
-      waitForDelete()
+      waitForDelete(rootTask)
 
-      checkDoNotExist([parentTask, subtask, subtask2])
+      checkDoNotExist([rootTask, subtask, subtask2])
     },
   )
 })

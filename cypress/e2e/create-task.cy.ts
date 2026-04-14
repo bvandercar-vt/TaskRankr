@@ -19,7 +19,7 @@ import { type FieldConfig, TaskStatus } from '~/shared/schema'
 const { TaskForm } = Selectors
 
 describe('Task Creation', () => {
-  const parentTask = {
+  const rootTask = {
     ...DefaultTask,
     name: 'E2E Root Level Task',
   } as const satisfies TaskFormData
@@ -104,10 +104,10 @@ describe('Task Creation', () => {
     'create a subtask while creating the parent task, check both appear in the tree',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
       fillTaskForm(subtask)
       submitTaskForm(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
@@ -115,9 +115,9 @@ describe('Task Creation', () => {
         .first()
         .should('contain.text', subtask.name)
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
-      checkTaskInTree({ ...parentTask, subtasks: [subtask] })
+      checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     },
   )
 
@@ -125,10 +125,10 @@ describe('Task Creation', () => {
     'create multiple subtasks while creating the parent task, check both appear in the tree',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)
@@ -145,9 +145,9 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('equal', [subtask.name, subtask2.name])
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
-      checkTaskInTree({ ...parentTask, subtasks: [subtask, subtask2] })
+      checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     },
   )
 
@@ -155,10 +155,10 @@ describe('Task Creation', () => {
     'create nested subtasks while creating the parent task, check both appear in the tree',
     () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(parentTask)
+      fillTaskForm(rootTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(parentTask)
+      waitForCreate(rootTask)
 
       fillTaskForm(subtask)
 
@@ -186,10 +186,10 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('equal', [subtask.name, subtask2.name, subtask3.name])
 
-      submitTaskForm(parentTask)
+      submitTaskForm(rootTask)
 
       checkTaskInTree({
-        ...parentTask,
+        ...rootTask,
         subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
       })
     },
