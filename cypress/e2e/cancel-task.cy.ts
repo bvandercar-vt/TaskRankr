@@ -17,12 +17,17 @@ const { TaskForm } = Selectors
 
 const parentTask = {
   ...DefaultTask,
-  name: 'E2E Cancel Parent Task',
+  name: 'E2E Root Task',
 } as const satisfies TaskFormData
 
 const subtask = {
   ...DefaultTask,
-  name: 'E2E Cancel Subtask',
+  name: 'E2E Subtask 1',
+} as const satisfies TaskFormData
+
+const subtask2 = {
+  ...DefaultTask,
+  name: 'E2E Subtask 2',
 } as const satisfies TaskFormData
 
 const checkDoNotExist = (tasks: TaskFormData[]) => {
@@ -95,11 +100,6 @@ describe('Task Creation Cancellation', () => {
   runBothModes(
     'cancel on parent form after multiple subtasks were created — all are deleted',
     () => {
-      const subtask2 = {
-        ...DefaultTask,
-        name: 'E2E Cancel Subtask 2',
-      } as const satisfies TaskFormData
-
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(parentTask)
 
