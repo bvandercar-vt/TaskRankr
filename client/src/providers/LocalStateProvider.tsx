@@ -822,53 +822,26 @@ export const LocalStateProvider = ({
         setDemoTaskIds([])
       }
 
-      const byId = new Map(serverTasks.map((t) => [t.id, t]))
-
-      // Group orphaned tasks (invalid parentId) by the negative temp id so we
-      // can recover the intended parent using the sequential-ID heuristic.
-      const orphanGroups = new Map<number, Task[]>()
-      for (const t of serverTasks) {
-        if (t.parentId !== null && !byId.has(t.parentId)) {
-          const group = orphanGroups.get(t.parentId) ?? []
-          group.push(t)
-          orphanGroups.set(t.parentId, group)
+      const validIds = new Set(serverTasks.map((t) => t.id))
+      const orphaned: Task[] = []
+      const sanitized = serverTasks.map((t) => {
+        if (t.parentId !== null && !validIds.has(t.parentId)) {
+          orphaned.push(t)
+          return { ...t, parentId: null }
         }
-      }
+        return t
+      })
 
-      const recoveryUpdates: { id: number; parentId: number | null }[] = []
-      const sanitized = serverTasks.map((t) => ({ ...t }))
-      const sanitizedById = new Map(sanitized.map((t) => [t.id, t]))
-
-      for (const [tempParentId, orphans] of orphanGroups) {
-        const n = Math.abs(tempParentId)
-        const minOrphanId = Math.min(...orphans.map((t) => t.id))
-        const recoveredParentId = tempParentId < 0 ? minOrphanId - n : null
-        const recoveredParent =
-          recoveredParentId !== null
-            ? sanitizedById.get(recoveredParentId)
-            : undefined
-
-        for (const orphan of orphans) {
-          const newParentId = recoveredParent ? recoveredParentId! : null
-          const sanitizedOrphan = sanitizedById.get(orphan.id)
-          if (sanitizedOrphan) sanitizedOrphan.parentId = newParentId
-          recoveryUpdates.push({ id: orphan.id, parentId: newParentId })
-          if (recoveredParent && !recoveredParent.subtaskOrder.includes(orphan.id)) {
-            recoveredParent.subtaskOrder = [...recoveredParent.subtaskOrder, orphan.id]
-          }
-        }
-      }
-
-      if (recoveryUpdates.length > 0) {
-        debugLog.log('sync', 'setTasksFromServer:recoveredOrphans', {
-          updates: recoveryUpdates,
+      if (orphaned.length > 0) {
+        debugLog.log('sync', 'setTasksFromServer:orphanedParentIds', {
+          ids: orphaned.map((t) => t.id),
         })
         setSyncQueue((prev) => [
           ...prev,
-          ...recoveryUpdates.map((u) => ({
+          ...orphaned.map((t) => ({
             type: SyncOperationType.UPDATE_TASK as const,
-            id: u.id,
-            data: { parentId: u.parentId },
+            id: t.id,
+            data: { parentId: null as null },
           })),
         ])
       }
