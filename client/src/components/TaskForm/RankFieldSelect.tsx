@@ -38,9 +38,11 @@ export const RankFieldSelect = ({
 
   return (
     <FormItem>
-      <FormLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+      <FormLabel
+        className="text-[10px] uppercase tracking-wider text-muted-foreground"
+        isRequired={isRequired}
+      >
         {label}
-        {isRequired && <span className="text-destructive ml-1">*</span>}
       </FormLabel>
       <Select
         onValueChange={(v) => field.onChange(v === NONE_VALUE ? null : v)}
