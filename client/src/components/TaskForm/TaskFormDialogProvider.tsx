@@ -327,6 +327,8 @@ export const TaskFormDialogProvider = ({
   const closeDialog = () => {
     if (returnToTask) {
       const taskToReturn = returnToTask
+      resetSession()
+      setShowCancelConfirm(false)
       setReturnToTask(undefined)
       setMode('edit')
       setActiveTask(taskToReturn)
@@ -361,7 +363,17 @@ export const TaskFormDialogProvider = ({
           t.localId === rootLocalId ? { ...t, data } : t,
         )
         commitPendingTasks(finalTasks)
-        resetAndClose()
+        if (returnToTask) {
+          const taskToReturn = returnToTask
+          resetSession()
+          setShowCancelConfirm(false)
+          setReturnToTask(undefined)
+          setMode('edit')
+          setActiveTask(taskToReturn)
+          setParentId(taskToReturn.parentId ?? undefined)
+        } else {
+          resetAndClose()
+        }
       } else if (isInSession && pendingNavStack.length > 1) {
         const currentLocalId = getTopOfStack()!
         setPendingTasks((prev) =>
@@ -373,7 +385,15 @@ export const TaskFormDialogProvider = ({
         setActiveTask(undefined)
       } else {
         createTask({ ...data, parentId } as CreateTask)
-        resetAndClose()
+        if (returnToTask) {
+          const taskToReturn = returnToTask
+          setReturnToTask(undefined)
+          setMode('edit')
+          setActiveTask(taskToReturn)
+          setParentId(taskToReturn.parentId ?? undefined)
+        } else {
+          resetAndClose()
+        }
       }
     } else if (mode === 'edit' && activeTask) {
       updateTask({ id: activeTask.id, ...data })
