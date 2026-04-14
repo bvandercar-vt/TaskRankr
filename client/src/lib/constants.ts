@@ -8,7 +8,7 @@ import {
   type UserSettings,
 } from '~/shared/schema'
 
-export const DEFAULT_SETTINGS: UserSettings = {
+export const DEFAULT_SETTINGS = {
   userId: '',
   autoPinNewTasks: true,
   enableInProgressStatus: true,
@@ -16,7 +16,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   alwaysSortPinnedByPriority: true,
   sortBy: SortOption.PRIORITY,
   fieldConfig: DEFAULT_FIELD_CONFIG,
-}
+} as const satisfies UserSettings
 
 export const STANDARD_DATE_FORMAT = {
   month: 'short',

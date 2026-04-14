@@ -40,13 +40,13 @@ export const fieldConfigSchema = rankFieldConfigSchema.extend({
 
 export type FieldConfig = z.infer<typeof fieldConfigSchema>
 
-export const DEFAULT_FIELD_CONFIG: FieldConfig = {
+export const DEFAULT_FIELD_CONFIG = {
   priority: { visible: true, required: true },
   ease: { visible: true, required: true },
   enjoyment: { visible: true, required: true },
   time: { visible: true, required: true },
   timeSpent: { visible: true, required: false },
-}
+} as const satisfies FieldConfig
 
 /** Ensures `required` is always false whenever `visible` is false. */
 export const sanitizeSettings = <T extends Partial<UserSettings>>(
