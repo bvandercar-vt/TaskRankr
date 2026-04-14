@@ -2,7 +2,7 @@
  * @fileoverview Form component for creating and editing tasks
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { omit } from 'es-toolkit'
@@ -67,6 +67,7 @@ const taskFormDefaultsSchema = taskSchema.pick({
   timeSpent: true,
   createdAt: true,
   completedAt: true,
+  status: true,
 })
 
 type TaskFormDefaults = z.infer<typeof taskFormDefaultsSchema>
@@ -143,8 +144,6 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined)
   const { data: allTasks } = useTasks()
   const { settings } = useSettings()
-  const [markCompleted, setMarkCompleted] = useState(false)
-
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false
@@ -196,18 +195,18 @@ export const TaskForm = ({
   // biome-ignore lint/correctness/useExhaustiveDependencies: is necessary
   useEffect(() => {
     void form.trigger()
-  }, [settings.fieldConfig, form, markCompleted, timeSpentRequired])
+  }, [settings.fieldConfig, form, timeSpentRequired])
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
           const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
-          if (markCompleted && initialData && onMarkCompleted) {
+          const isCompleting = data.status === TaskStatus.COMPLETED
+          if (isCompleting && initialData && onMarkCompleted) {
             onSubmit(submitted)
             onMarkCompleted(initialData.id)
-          } else if (markCompleted) {
-            submitted.status = TaskStatus.COMPLETED
+          } else if (isCompleting && !submitted.completedAt) {
             submitted.completedAt = new Date()
             onSubmit(submitted)
           } else {
@@ -382,11 +381,16 @@ export const TaskForm = ({
                     Completed
                   </div>
                   <Checkbox
-                    checked={markCompleted}
+                    checked={form.watch('status') === TaskStatus.COMPLETED}
                     disabled={hasIncompleteSubtasks}
-                    onCheckedChange={(checked) =>
-                      setMarkCompleted(checked === true)
-                    }
+                    onCheckedChange={(checked) => {
+                      const newStatus = checked === true
+                        ? TaskStatus.COMPLETED
+                        : (initialData?.status !== TaskStatus.COMPLETED
+                            ? initialData?.status
+                            : TaskStatus.OPEN) ?? TaskStatus.OPEN
+                      form.setValue('status', newStatus, { shouldValidate: true })
+                    }}
                     className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                     data-testid="mark-completed-checkbox"
                   />
