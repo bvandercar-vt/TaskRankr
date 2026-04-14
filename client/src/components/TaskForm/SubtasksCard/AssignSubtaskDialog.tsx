@@ -52,7 +52,12 @@ export const AssignSubtaskDialog = ({
     () => filterRootTasks(orphanTasks, search),
     [orphanTasks, search],
   )
-
+  const reset = () => {
+    setSelectedId(null)
+    setSearch('')
+    setShowCompleted(false)
+  }
+  
   const handleConfirm = () => {
     if (selectedId === null) return
     updateTask({ id: selectedId, parentId: parentTask.id })
@@ -62,16 +67,12 @@ export const AssignSubtaskDialog = ({
         subtaskOrder: [...parentTask.subtaskOrder, selectedId],
       })
     }
-    setSelectedId(null)
-    setSearch('')
-    setShowCompleted(false)
+    reset()
     onOpenChange(false)
   }
 
   const handleClose = () => {
-    setSelectedId(null)
-    setSearch('')
-    setShowCompleted(false)
+    reset()
     onOpenChange(false)
   }
 
@@ -80,9 +81,7 @@ export const AssignSubtaskDialog = ({
       open={open}
       onOpenChange={(v) => {
         if (!v) {
-          setSelectedId(null)
-          setSearch('')
-          setShowCompleted(false)
+          reset()
         }
         onOpenChange(v)
       }}

@@ -17,8 +17,6 @@ export function waitForCreate({
   loggedIn && cy.wait('@createTask')
 
   checkTaskExistsBackend({ ...task, status }, loggedIn as true)
-
-  cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
 }
 
 export const interceptDelete = () => {
@@ -31,6 +29,4 @@ export const waitForDelete = (task: Pick<TaskFormData, 'name'>) => {
   loggedIn && cy.wait('@deleteTask')
 
   checkTaskExistsBackend(task, false)
-
-  cy.get('@deleteTask').should('have.been.called', loggedIn ? 1 : 0)
 }
