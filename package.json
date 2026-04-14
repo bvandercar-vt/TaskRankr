@@ -1,6 +1,9 @@
 {
   "name": "taskrankr",
-  "author": {"name": "Blake Vandercar", "email": "bvandercar@outlook.com" },
+  "author": {
+    "name": "Blake Vandercar",
+    "email": "bvandercar@outlook.com"
+  },
   "version": "1.2.1",
   "type": "module",
   "license": "MIT",

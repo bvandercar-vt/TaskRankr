@@ -5,10 +5,10 @@ import {
   Selectors,
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { waitForCreate } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
   fillTaskForm,
-  maybeWaitForCreate,
   submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
@@ -97,7 +97,7 @@ describe('Task Creation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
       fillTaskForm(subtask)
       submitTaskForm(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
@@ -133,7 +133,7 @@ describe('Task Creation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
 
       fillTaskForm(subtask1)
       submitTaskForm(subtask1)
@@ -183,12 +183,12 @@ describe('Task Creation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
 
       fillTaskForm(subtask1)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(subtask1)
+      waitForCreate(subtask1)
       fillTaskForm(subtask2)
       submitTaskForm(subtask2)
       cy.get(TaskForm.SUBTASK_ROW)

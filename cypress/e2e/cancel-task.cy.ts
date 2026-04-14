@@ -1,13 +1,17 @@
 import { Routes } from '@client/lib/constants'
-import { ApiPaths, DefaultTask, Selectors } from '@cypress/support/constants'
+import { DefaultTask, Selectors } from '@cypress/support/constants'
 import { checkTaskExistsBackend } from '@cypress/support/utils/api'
-import { isLoggedIn, runBothModes } from '@cypress/support/utils/test-runner'
+import {
+  interceptDelete,
+  waitForCreate,
+  waitForDelete,
+} from '@cypress/support/utils/intercepts'
 import {
   fillTaskForm,
-  maybeWaitForCreate,
   submitTaskForm,
   type TaskFormData,
 } from '@cypress/support/utils/task-form'
+import { isLoggedIn, runBothModes } from '@cypress/support/utils/test-runner'
 
 const { TaskForm } = Selectors
 
@@ -21,22 +25,12 @@ const subtask = {
   name: 'E2E Cancel Subtask',
 } as const satisfies TaskFormData
 
-/**
- * Sets up a DELETE intercept and returns a function that waits for it.
- * Only active in logged-in mode — in guest mode the delete is local-only.
- */
-const interceptDelete = () => {
-  if (isLoggedIn()) {
-    cy.intercept('DELETE', ApiPaths.DELETE_TASK).as('deleteTask')
-  }
+const checkDoNotExist = (tasks: TaskFormData[]) => {
+  tasks.forEach((task) => {
+    cy.contains(task.name).should('not.exist')
+    checkTaskExistsBackend(task, false)
+  })
 }
-
-const waitForDelete = () => {
-  if (isLoggedIn()) {
-    cy.wait('@deleteTask')
-  }
-}
-
 describe('Task Creation Cancellation', () => {
   beforeEach(() => {
     const loggedIn = isLoggedIn()
@@ -51,9 +45,7 @@ describe('Task Creation Cancellation', () => {
 
       cy.get(TaskForm.CANCEL_BTN).click()
 
-      cy.get(TaskForm.NAME_INPUT).should('not.exist')
-      cy.contains(parentTask.name).should('not.exist')
-      checkTaskExistsBackend(parentTask, false)
+      checkDoNotExist([parentTask])
     },
   )
 
@@ -64,22 +56,17 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)
-
       cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
 
       interceptDelete()
       cy.get(TaskForm.CANCEL_BTN).click()
       waitForDelete()
 
-      cy.get(TaskForm.NAME_INPUT).should('not.exist')
-      cy.contains(parentTask.name).should('not.exist')
-      cy.contains(subtask.name).should('not.exist')
-      checkTaskExistsBackend(parentTask, false)
-      checkTaskExistsBackend(subtask, false)
+      checkDoNotExist([parentTask, subtask])
     },
   )
 
@@ -90,7 +77,7 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
 
       cy.get(TaskForm.NAME_INPUT).type(subtask.name)
       cy.get(TaskForm.CANCEL_BTN).click()
@@ -101,9 +88,7 @@ describe('Task Creation Cancellation', () => {
       cy.get(TaskForm.CANCEL_BTN).click()
       waitForDelete()
 
-      cy.get(TaskForm.NAME_INPUT).should('not.exist')
-      cy.contains(parentTask.name).should('not.exist')
-      checkTaskExistsBackend(parentTask, false)
+      checkDoNotExist([parentTask, subtask])
     },
   )
 
@@ -119,7 +104,7 @@ describe('Task Creation Cancellation', () => {
       fillTaskForm(parentTask)
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      maybeWaitForCreate(parentTask)
+      waitForCreate(parentTask)
 
       fillTaskForm(subtask)
       submitTaskForm(subtask)
@@ -134,13 +119,7 @@ describe('Task Creation Cancellation', () => {
       cy.get(TaskForm.CANCEL_BTN).click()
       waitForDelete()
 
-      cy.get(TaskForm.NAME_INPUT).should('not.exist')
-      cy.contains(parentTask.name).should('not.exist')
-      cy.contains(subtask.name).should('not.exist')
-      cy.contains(subtask2.name).should('not.exist')
-      checkTaskExistsBackend(parentTask, false)
-      checkTaskExistsBackend(subtask, false)
-      checkTaskExistsBackend(subtask2, false)
+      checkDoNotExist([parentTask, subtask, subtask2])
     },
   )
 })
