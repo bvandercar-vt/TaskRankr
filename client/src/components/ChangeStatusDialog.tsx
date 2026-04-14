@@ -120,7 +120,7 @@ interface ChangeStatusDialogProps {
   onOpenChange: (open: boolean) => void
   taskName: string
   status: TaskStatus
-  inProgressTime: number
+  timeSpent: number
   isSubtask?: boolean
   isHidden?: boolean
   hasIncompleteSubtasks?: boolean
@@ -135,7 +135,7 @@ export const ChangeStatusDialog = ({
   onOpenChange,
   taskName,
   status,
-  inProgressTime,
+  timeSpent: initialTimeSpent,
   isSubtask,
   isHidden,
   hasIncompleteSubtasks,
@@ -157,16 +157,16 @@ export const ChangeStatusDialog = ({
     },
   } = useSettings()
 
-  const [timeSpent, setTimeSpent] = useState(inProgressTime)
+  const [timeSpent, setTimeSpent] = useState(initialTimeSpent)
 
   useEffect(() => {
     if (open) {
-      setTimeSpent(inProgressTime)
+      setTimeSpent(initialTimeSpent)
     }
-  }, [open, inProgressTime])
+  }, [open, initialTimeSpent])
 
   const handleTimeBlur = () => {
-    if (timeSpent !== inProgressTime) {
+    if (timeSpent !== initialTimeSpent) {
       onUpdateTime(timeSpent)
     }
   }

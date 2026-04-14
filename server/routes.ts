@@ -86,7 +86,7 @@ const router = s.router(contract, {
         if (body.status === TaskStatus.COMPLETED) {
           const err = await checkTimeSpentRequired(
             userId,
-            body.inProgressTime ?? existing.inProgressTime ?? 0,
+            body.timeSpent ?? existing.timeSpent ?? 0,
           )
           if (err) return err
         }
@@ -116,7 +116,7 @@ const router = s.router(contract, {
         }
         if (body.status === TaskStatus.COMPLETED) {
           const accumulatedTime =
-            (existing.inProgressTime ?? 0) +
+            (existing.timeSpent ?? 0) +
             (existing.inProgressStartedAt
               ? Date.now() - existing.inProgressStartedAt.getTime()
               : 0)
@@ -163,7 +163,7 @@ const router = s.router(contract, {
             userId,
             parentId: null,
             status: rest.status ?? TaskStatus.OPEN,
-            inProgressTime: rest.inProgressTime ?? 0,
+            timeSpent: rest.timeSpent ?? 0,
             inProgressStartedAt: null,
             createdAt: rest.createdAt ? new Date(rest.createdAt) : new Date(),
             completedAt: rest.completedAt ? new Date(rest.completedAt) : null,

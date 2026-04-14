@@ -12,7 +12,6 @@ export const DEFAULT_SETTINGS = {
   userId: '',
   autoPinNewTasks: true,
   enableInProgressStatus: true,
-  enableInProgressTime: true,
   alwaysSortPinnedByPriority: true,
   sortBy: SortOption.PRIORITY,
   fieldConfig: DEFAULT_FIELD_CONFIG,

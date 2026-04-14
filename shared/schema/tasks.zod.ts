@@ -74,7 +74,7 @@ export const tasks = pgTable('tasks', {
   ease: pgNativeEnum('ease', Ease),
   enjoyment: pgNativeEnum('enjoyment', Enjoyment),
   time: pgNativeEnum('time', Time),
-  inProgressTime: integer('in_progress_time').default(0).notNull(), // Cumulative time in milliseconds
+  timeSpent: integer('time_spent').default(0).notNull(), // Cumulative time in milliseconds
   inProgressStartedAt: timestamp('in_progress_started_at'), // When current in-progress session started
   createdAt: timestamp('created_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
@@ -117,7 +117,7 @@ const taskSchemaRefine = {
   hidden: (s) => s.default(false),
   autoHideCompleted: (s) => s.default(false),
   inheritCompletionState: (s) => s.default(false),
-  inProgressTime: (s) => s.default(0),
+  timeSpent: (s) => s.default(0),
   // not sure the created schema from drizzle-zod performs the coercion,
   // so add here just in case / for safety.
   createdAt: z.coerce.date().default(() => new Date()),

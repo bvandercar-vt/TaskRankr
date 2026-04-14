@@ -70,9 +70,6 @@ export const userSettings = pgTable('user_settings', {
   enableInProgressStatus: boolean('enable_in_progress_status')
     .default(true)
     .notNull(),
-  enableInProgressTime: boolean('enable_in_progress_time')
-    .default(true)
-    .notNull(),
   alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
     .default(true)
     .notNull(),
@@ -90,7 +87,6 @@ const userSettingsSchemaRefine = {
   // https://github.com/drizzle-team/drizzle-orm/issues/5384
   autoPinNewTasks: (s) => s.default(true),
   enableInProgressStatus: (s) => s.default(true),
-  enableInProgressTime: (s) => s.default(true),
   alwaysSortPinnedByPriority: (s) => s.default(true),
   sortBy: (s) => s.default(SortOption.DATE_CREATED),
   fieldConfig: fieldConfigSchema.default(DEFAULT_FIELD_CONFIG),
