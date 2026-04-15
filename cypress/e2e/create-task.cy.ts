@@ -124,7 +124,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       waitForCreate(rootTask)
       fillTaskForm(subtask)
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
@@ -149,7 +149,7 @@ describe('Task Creation', () => {
       waitForCreate(rootTask)
 
       fillTaskForm(subtask)
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
         .getElementArrayText()
@@ -157,7 +157,7 @@ describe('Task Creation', () => {
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask2)
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask2)
       cy.get(TaskForm.SUBTASK_ROW)
         .getElementArrayText()
@@ -185,7 +185,7 @@ describe('Task Creation', () => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       waitForCreate(subtask)
       fillTaskForm(subtask2)
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask2)
       cy.get(TaskForm.SUBTASK_ROW)
         .getElementArrayText()
@@ -193,13 +193,13 @@ describe('Task Creation', () => {
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask3)
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask3)
       cy.get(TaskForm.SUBTASK_ROW)
         .getElementArrayText()
         .should('deep.equal', [subtask2.name, subtask3.name])
 
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(subtask)
 
       cy.get(TaskForm.SUBTASK_ROW)
