@@ -1,6 +1,4 @@
-import type { SetOptional } from 'type-fest'
-
-import { type Task, TaskStatus } from '~/shared/schema'
+import type { Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import type { TaskFormData } from './task-form'
@@ -12,15 +10,12 @@ export const interceptCreate = () => {
 
 export type CreatedTask = Pick<Task, keyof TaskFormData | 'status'>
 
-export function waitForCreate({
-  status = TaskStatus.OPEN,
-  ...task
-}: SetOptional<CreatedTask, 'status'>) {
+export function waitForCreate(task: CreatedTask) {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@createTask')
 
-  checkTaskExistsBackend({ ...task, status }, loggedIn as true)
+  checkTaskExistsBackend(task, loggedIn as true)
 }
 
 export const interceptDelete = () => {
