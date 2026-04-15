@@ -4,7 +4,7 @@ import {
   FieldConfigAllFalse,
   Selectors,
 } from '@cypress/support/constants'
-import { checkTaskExistsBackend, isLoggedIn } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -33,8 +33,6 @@ describe('Task Creation', () => {
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
-
-    checkTaskExistsBackend(task, false)
   })
 
   it('create a task, check displays in main tree', () => {

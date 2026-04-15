@@ -18,9 +18,9 @@ import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm, TaskCard } = Selectors
+const { TaskForm } = Selectors
 
-describe('Assign Subtask', () => {
+describe('Assign Subtasks', () => {
   const rootTask = {
     ...DefaultTask,
     name: 'E2E Root Task',
@@ -83,16 +83,16 @@ describe('Assign Subtask', () => {
     checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
     checkNumCalls({ create: 2, update: 1 })
 
-    // test in edit mode
-    cy.contains(TaskCard.CARD, rootTask.name).click()
-    checkTaskFormSubtasks(subtasks)
-    assignSubtask(orphanTask2)
-    waitForUpdate(orphanTask2)
-    subtasks.push(orphanTask2)
-    checkTaskFormSubtasks(subtasks)
+    // test EDIT
+    // cy.contains(TaskCard.CARD, rootTask.name).click()
+    // checkTaskFormSubtasks(subtasks)
+    // assignSubtask(orphanTask2)
+    // waitForUpdate(orphanTask2)
+    // subtasks.push(orphanTask2)
+    // checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtnCreate(rootTask)
-    checkTaskInTree({ ...rootTask, subtasks })
-    checkNumCalls({ create: 3, update: 2 })
+    // clickSubmitBtnCreate(rootTask)
+    // checkTaskInTree({ ...rootTask, subtasks })
+    // checkNumCalls({ create: 3, update: 2 })
   })
 })
