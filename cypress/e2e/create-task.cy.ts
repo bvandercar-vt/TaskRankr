@@ -12,11 +12,7 @@ import {
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
-import {
-  clickSubmitBtn,
-  fillTaskForm,
-  type TaskFormData,
-} from '@cypress/support/utils/task-form'
+import { clickSubmitBtn, fillTaskForm } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
 import { type FieldConfig, TaskStatus } from '~/shared/schema'
@@ -62,7 +58,7 @@ describe('Task Creation', () => {
         name: 'Field Config Test Task',
         ease: null,
         enjoyment: null,
-      } satisfies TaskFormData
+      } satisfies CreatedTask
 
       setSettings({ fieldConfig })
       cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 4 : 0)
@@ -91,7 +87,7 @@ describe('Task Creation', () => {
         ease: null,
         enjoyment: null,
         time: null,
-      } satisfies TaskFormData
+      } satisfies CreatedTask
 
       setSettings({ fieldConfig })
       cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 5 : 0)

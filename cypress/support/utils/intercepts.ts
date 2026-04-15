@@ -1,14 +1,13 @@
-import type { Task } from '~/shared/schema'
+import type { RankField, Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import type { TaskFormData } from './task-form'
 import { isLoggedIn } from './test-runner'
 
 export const interceptCreate = () => {
   cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 }
 
-export type CreatedTask = Pick<Task, keyof TaskFormData | 'status'>
+export type CreatedTask = Pick<Task, 'name' | 'status' | RankField>
 
 export function waitForCreate(task: CreatedTask) {
   const loggedIn = isLoggedIn()
@@ -22,7 +21,7 @@ export const interceptDelete = () => {
   cy.intercept('DELETE', ApiPaths.DELETE_TASK).as('deleteTask')
 }
 
-export const waitForDelete = (task: Pick<TaskFormData, 'name'>) => {
+export const waitForDelete = (task: Pick<Task, 'name'>) => {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@deleteTask')

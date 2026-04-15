@@ -10,7 +10,7 @@ import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
 
-export type TaskFormData = Pick<Task, 'name' | RankField>
+type TaskFormData = Pick<Task, 'name' | RankField>
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
@@ -74,3 +74,13 @@ export const clickSubmitBtn = (submitBtnText = 'Create') =>
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
+
+export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
+  // TODO: test how they are nested
+  cy
+    .get(TaskForm.SUBTASK_ROW)
+    .getElementArrayText()
+    .should(
+      'equal',
+      subtasks.map((subtask) => subtask.name),
+    )

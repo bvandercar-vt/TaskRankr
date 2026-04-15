@@ -7,7 +7,11 @@ import {
   interceptCreate,
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
-import { clickSubmitBtn, fillTaskForm } from '@cypress/support/utils/task-form'
+import {
+  checkTaskFormSubtasks,
+  clickSubmitBtn,
+  fillTaskForm,
+} from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
@@ -80,17 +84,13 @@ describe('Create Subtasks', () => {
       fillTaskForm(subtask)
       clickSubmitBtn()
       waitForCreate(subtask)
-      cy.get(TaskForm.SUBTASK_ROW)
-        .getElementArrayText()
-        .should('deep.equal', [subtask.name])
+      checkTaskFormSubtasks([subtask])
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask2)
       clickSubmitBtn()
       waitForCreate(subtask2)
-      cy.get(TaskForm.SUBTASK_ROW)
-        .getElementArrayText()
-        .should('deep.equal', [subtask.name, subtask2.name])
+      checkTaskFormSubtasks([subtask, subtask2])
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       // waitForUpdate() // TODO: debug test
@@ -116,24 +116,17 @@ describe('Create Subtasks', () => {
       fillTaskForm(subtask2)
       clickSubmitBtn()
       waitForCreate(subtask2)
-      cy.get(TaskForm.SUBTASK_ROW)
-        .getElementArrayText()
-        .should('deep.equal', [subtask2.name])
+      checkTaskFormSubtasks([subtask2])
 
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       fillTaskForm(subtask3)
       clickSubmitBtn()
       waitForCreate(subtask3)
-      cy.get(TaskForm.SUBTASK_ROW)
-        .getElementArrayText()
-        .should('deep.equal', [subtask2.name, subtask3.name])
+      checkTaskFormSubtasks([subtask2, subtask3])
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       // waitForCreate(subtask) // TODO: debug test
-
-      cy.get(TaskForm.SUBTASK_ROW)
-        .getElementArrayText()
-        .should('deep.equal', [subtask.name, subtask2.name, subtask3.name])
+      checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       // waitForUpdate() // TODO: debug test
