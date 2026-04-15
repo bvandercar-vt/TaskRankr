@@ -48,22 +48,27 @@ export const fillTaskFormRankFields = (
  */
 export const fillTaskForm = (
   task: TaskFormData,
+  tier = 0,
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
   checkTaskExistsBackend(task, false)
 
-  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
+  cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`)
+    .should('be.visible')
+    .within(() => {
+      cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
-  cy.get(TaskForm.NAME_INPUT).type(task.name)
+      cy.get(TaskForm.NAME_INPUT).type(task.name)
 
-  fillTaskFormRankFields(task, settings)
+      fillTaskFormRankFields(task, settings)
 
-  if (settings.timeSpent.visible) {
-    cy.get(TaskForm.TIME_SPENT_INPUT).should(
-      settings.timeSpent.visible ? 'be.visible' : 'not.exist',
-    )
-    // TODO: test required
-  }
+      if (settings.timeSpent.visible) {
+        cy.get(TaskForm.TIME_SPENT_INPUT).should(
+          settings.timeSpent.visible ? 'be.visible' : 'not.exist',
+        )
+        // TODO: test required
+      }
+    })
 }
 
 const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>

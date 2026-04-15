@@ -76,7 +76,7 @@ describe('Assign Subtasks', () => {
 
     // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(newSubtask)
+    fillTaskForm(newSubtask, 1)
     clickSubmitBtnCreate(newSubtask)
     checkTaskFormSubtasks([orphanTask, newSubtask])
 

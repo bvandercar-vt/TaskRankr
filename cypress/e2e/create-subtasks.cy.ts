@@ -59,7 +59,7 @@ describe('Create Subtasks', () => {
 
   it('create a subtask, check appears in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask)
+    fillTaskForm(subtask, 1)
     clickSubmitBtnCreate(subtask)
     checkTaskFormSubtasks([subtask])
 
@@ -73,7 +73,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask])
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask2)
+    fillTaskForm(subtask2, 1)
     clickSubmitBtnCreate(subtask2)
     checkTaskFormSubtasks([subtask, subtask2])
 
@@ -84,12 +84,12 @@ describe('Create Subtasks', () => {
 
   it('create multiple subtasks, check appear in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask)
+    fillTaskForm(subtask, 1)
     clickSubmitBtnCreate(subtask)
     checkTaskFormSubtasks([subtask])
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask2)
+    fillTaskForm(subtask2, 1)
     clickSubmitBtnCreate(subtask2)
     checkTaskFormSubtasks([subtask, subtask2])
 
@@ -103,7 +103,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, subtask2])
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask3)
+    fillTaskForm(subtask3, 1)
     clickSubmitBtnCreate(subtask3)
     checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
@@ -114,17 +114,17 @@ describe('Create Subtasks', () => {
 
   it('create nested subtasks, ensure appear in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask)
+    fillTaskForm(subtask, 1)
 
     const nestedSubtasks: CreatedTask[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask2)
+    fillTaskForm(subtask2, 2)
     clickSubmitBtnCreate(subtask2)
     nestedSubtasks.push(subtask2)
     checkTaskFormSubtasks(nestedSubtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask3)
+    fillTaskForm(subtask3, 2)
     clickSubmitBtnCreate(subtask3)
     nestedSubtasks.push(subtask3)
     checkTaskFormSubtasks(nestedSubtasks)

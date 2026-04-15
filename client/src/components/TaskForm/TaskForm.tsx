@@ -213,6 +213,7 @@ export const TaskForm = ({
         })}
         className="flex flex-col h-full"
         data-testid="task-form"
+        data-tier={parentChain.length}
       >
         <div className="pb-2  px-4 pt-2">
           <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />

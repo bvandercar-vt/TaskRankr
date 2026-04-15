@@ -23,7 +23,10 @@ export const TaskFormCancelConfirmDialog = ({
   onDiscard,
 }: TaskFormCancelConfirmDialogProps) => (
   <AlertDialog open={open} onOpenChange={onOpenChange}>
-    <AlertDialogContent className="bg-card border-white/10" data-testid="cancel-confirm-dialog">
+    <AlertDialogContent
+      className="bg-card border-white/10"
+      data-testid="cancel-confirm-dialog"
+    >
       <AlertDialogHeader>
         <AlertDialogTitle>Are you sure you want to cancel?</AlertDialogTitle>
         <AlertDialogDescription>
