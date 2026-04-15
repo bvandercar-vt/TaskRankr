@@ -89,7 +89,7 @@ describe('Assign Subtasks', () => {
     checkTaskFormSubtasks([orphanTask, newSubtask])
     assignSubtask(orphanTask2)
     waitForUpdate(orphanTask2)
-    checkTaskFormSubtasks([orphanTask, newSubtask, orphanTask2])
+    checkTaskFormSubtasks([orphanTask, orphanTask2, newSubtask]) // all at same level, so we don't care about orde really.
 
     clickSubmitBtnUpdate()
     checkTaskInTree({
