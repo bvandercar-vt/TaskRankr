@@ -72,7 +72,9 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
+    cy.get(TaskForm.FORM).should('not.exist')
     getTaskCardTitle(rootTask).click()
+    cy.get(TaskForm.FORM).should('be.visible')
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
@@ -106,7 +108,9 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
+    cy.get(TaskForm.FORM).should('not.exist')
     getTaskCardTitle(rootTask).click()
+    cy.get(TaskForm.FORM).should('be.visible')
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask3)
     clickSubmitBtnCreate(subtask3)
