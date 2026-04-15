@@ -79,7 +79,7 @@ describe('Assign Subtasks', () => {
     subtasks.push(newSubtask)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtnCreate(newSubtask) // TODO: try cancel and ensure wasn't assigned.
+    clickSubmitBtnCreate(rootTask) // TODO: try cancel and ensure wasn't assigned.
     checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
     checkNumCalls({ create: 2, update: 1 })
 
