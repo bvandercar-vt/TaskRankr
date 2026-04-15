@@ -16,6 +16,10 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [user, guest]
 
     services:
       postgres:
@@ -76,13 +80,13 @@ jobs:
           echo "Server failed to start within 30s"
           exit 1
 
-      - name: Run Cypress tests
-        run: npm run cy:run
+      - name: Run Cypress tests (${{ matrix.suite }})
+        run: npm run cy:run:${{ matrix.suite }}
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.suite }}
           path: cypress/screenshots
           if-no-files-found: ignore

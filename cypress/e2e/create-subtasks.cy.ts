@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -54,7 +54,7 @@ describe('Create Subtasks', () => {
     fillTaskForm(rootTask)
   })
 
-  runBothModes('create a subtask, check appears in tree', () => {
+  it('create a subtask, check appears in tree', () => {
     const subtasks: CreatedTask[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
@@ -69,7 +69,7 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 2, update: 0 })
   })
 
-  runBothModes('create multiple subtasks, check appear in tree', () => {
+  it('create multiple subtasks, check appear in tree', () => {
     const subtasks: CreatedTask[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
@@ -90,7 +90,7 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 3, update: 0 })
   })
 
-  runBothModes('create nested subtasks, ensure appear in tree', () => {
+  it('create nested subtasks, ensure appear in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
     fillTaskForm(subtask)

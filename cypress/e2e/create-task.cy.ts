@@ -4,7 +4,7 @@ import {
   FieldConfigAllFalse,
   Selectors,
 } from '@cypress/support/constants'
-import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -35,7 +35,7 @@ describe('Task Creation', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  runBothModes('create a task, check displays in main tree', () => {
+  it('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(rootTask)
     clickSubmitBtnCreate(rootTask)
@@ -43,64 +43,58 @@ describe('Task Creation', () => {
     checkNumCalls({ create: 1 })
   })
 
-  runBothModes(
-    'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    () => {
-      const fieldConfig = {
-        priority: { visible: true, required: true },
-        ease: { visible: true, required: false },
-        enjoyment: { visible: false, required: false },
-        time: { visible: true, required: false },
-        timeSpent: { visible: false, required: false },
-      } as const satisfies FieldConfig
+  it('change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings', () => {
+    const fieldConfig = {
+      priority: { visible: true, required: true },
+      ease: { visible: true, required: false },
+      enjoyment: { visible: false, required: false },
+      time: { visible: true, required: false },
+      timeSpent: { visible: false, required: false },
+    } as const satisfies FieldConfig
 
-      const newTask = {
-        ...rootTask,
-        name: 'Field Config Test Task',
-        ease: null,
-        enjoyment: null,
-      } satisfies CreatedTask
+    const newTask = {
+      ...rootTask,
+      name: 'Field Config Test Task',
+      ease: null,
+      enjoyment: null,
+    } satisfies CreatedTask
 
-      setSettings({ fieldConfig })
-      cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 4 : 0)
-      cy.get(Selectors.BACK_BTN).click()
+    setSettings({ fieldConfig })
+    cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 4 : 0)
+    cy.get(Selectors.BACK_BTN).click()
 
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(newTask, fieldConfig)
-      clickSubmitBtnCreate(newTask)
-      checkTaskInTree(newTask)
-      checkNumCalls({ create: 1 })
-    },
-  )
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(newTask, fieldConfig)
+    clickSubmitBtnCreate(newTask)
+    checkTaskInTree(newTask)
+    checkNumCalls({ create: 1 })
+  })
 
-  runBothModes(
-    'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    () => {
-      const fieldConfig = {
-        ...FieldConfigAllFalse,
-        timeSpent: { visible: true, required: true },
-      } as const satisfies FieldConfig
+  it('change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings', () => {
+    const fieldConfig = {
+      ...FieldConfigAllFalse,
+      timeSpent: { visible: true, required: true },
+    } as const satisfies FieldConfig
 
-      const taskAllNull = {
-        ...rootTask,
-        priority: null,
-        ease: null,
-        enjoyment: null,
-        time: null,
-      } satisfies CreatedTask
+    const taskAllNull = {
+      ...rootTask,
+      priority: null,
+      ease: null,
+      enjoyment: null,
+      time: null,
+    } satisfies CreatedTask
 
-      setSettings({ fieldConfig })
-      cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 5 : 0)
-      cy.get(Selectors.BACK_BTN).click()
+    setSettings({ fieldConfig })
+    cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 5 : 0)
+    cy.get(Selectors.BACK_BTN).click()
 
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(taskAllNull, fieldConfig)
-      cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-      cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
-      cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-      clickSubmitBtnCreate({ ...taskAllNull, status: TaskStatus.COMPLETED })
-      // TODO: check is in completed tree
-      checkNumCalls({ create: 1 })
-    },
-  )
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(taskAllNull, fieldConfig)
+    cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+    cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
+    cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
+    clickSubmitBtnCreate({ ...taskAllNull, status: TaskStatus.COMPLETED })
+    // TODO: check is in completed tree
+    checkNumCalls({ create: 1 })
+  })
 })
