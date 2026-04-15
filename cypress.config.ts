@@ -3,7 +3,7 @@ import installTerminalReporter from 'cypress-terminal-report/src/installLogsPrin
 import vitePreprocessor from 'cypress-vite'
 
 export default defineConfig({
-  video: false,
+  video: true,
   screenshotOnRunFailure: true,
   fixturesFolder: false,
   e2e: {
