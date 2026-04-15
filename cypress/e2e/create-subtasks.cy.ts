@@ -66,20 +66,6 @@ describe('Create Subtasks', () => {
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 2, update: 0 })
-
-    // test EDIT
-    // TODO: need do debug above test first
-    // cy.contains(TaskCard.CARD, rootTask.name).click()
-    // cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    // fillTaskForm(subtask2)
-    // clickSubmitBtn()
-    // waitForCreate(subtask2)
-    // subtasks.push(subtask2)
-    // checkTaskFormSubtasks(subtasks)
-
-    // clickSubmitBtn()
-    // checkTaskInTree({ ...rootTask, subtasks })
-    // checkNumCalls({ create: 3, update: 1 })
   })
 
   runBothModes('create multiple subtasks, check appear in tree', () => {
@@ -104,20 +90,6 @@ describe('Create Subtasks', () => {
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 0 })
-
-    // test EDIT
-    // TODO: need do debug above test first
-    // cy.contains(TaskCard.CARD, rootTask.name).click()
-    // cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    // fillTaskForm(subtask3)
-    // clickSubmitBtn()
-    // waitForCreate(subtask3)
-    // subtasks.push(subtask3)
-    // checkTaskFormSubtasks(subtasks)
-
-    // clickSubmitBtn()
-    // checkTaskInTree({ ...rootTask, subtasks })
-    // checkNumCalls({ create: 4, update: 1 })
   })
 
   runBothModes('create nested subtasks, ensure appear in tree', () => {
@@ -146,7 +118,5 @@ describe('Create Subtasks', () => {
 
     checkTaskInTree({ ...rootTask, subtasks: [{ ...subtask, subtasks }] })
     checkNumCalls({ create: 4, update: 0 })
-
-    // TODO: test EDIT
   })
 })
