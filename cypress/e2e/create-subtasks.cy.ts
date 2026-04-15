@@ -82,6 +82,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtnUpdate(rootTask)
+      cy.wait(500) //attempt wait
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 1 })
   })
@@ -117,6 +118,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtnUpdate(rootTask)
+    cy.wait(500) //attempt wait
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 4, update: 1 })
   })
@@ -144,7 +146,6 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, ...nestedSubtasks])
 
     clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
-
     checkTaskInTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: nestedSubtasks }],
