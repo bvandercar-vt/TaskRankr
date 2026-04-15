@@ -16,7 +16,7 @@ export const setSettings = (settings: Pick<UserSettings, 'fieldConfig'>) => {
   cy.intercept('PUT', ApiPaths.UPDATE_SETTINGS).as('settingsPut')
 
   setFieldConfig(settings.fieldConfig)
-  cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
+  cy.get('@settingsPut.all').should('have.length', loggedIn ? 2 : 0)
 
   loggedIn &&
     getSettings().then((currentSettings) => {

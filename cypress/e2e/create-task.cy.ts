@@ -7,6 +7,7 @@ import {
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import {
   type CreatedTask,
+  checkNumCalls,
   interceptCreate,
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
@@ -52,18 +53,18 @@ describe('Task Creation', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  runBothModes('create a task, check displays in main tree', (loggedIn) => {
+  runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(rootTask)
     clickSubmitBtn()
     waitForCreate(rootTask)
     checkTaskInTree(rootTask)
-    cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+    checkNumCalls({ create: 1 })
   })
 
   runBothModes(
     'change rank field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         priority: { visible: true, required: true },
         ease: { visible: true, required: false },
@@ -87,13 +88,13 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate(newTask)
       checkTaskInTree(newTask)
-      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+      checkNumCalls({ create: 1 })
     },
   )
 
   runBothModes(
     'change time spent field visibility/required in settings, check form matches the new settings, create task adhering to new settings',
-    (loggedIn) => {
+    () => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
         timeSpent: { visible: true, required: false },
@@ -110,13 +111,13 @@ describe('Task Creation', () => {
       clickSubmitBtn()
       waitForCreate({ ...rootTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
-      cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
+      checkNumCalls({ create: 1 })
     },
   )
 
   runBothModes(
     'create a subtask while creating the parent task, check both appear in the tree',
-    (loggedIn) => {
+    () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -134,13 +135,13 @@ describe('Task Creation', () => {
       waitForCreate(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
-      cy.get('@createTask').should('have.been.called', loggedIn ? 2 : 0)
+      checkNumCalls({ create: 2 })
     },
   )
 
   runBothModes(
     'create multiple subtasks while creating the parent task, check both appear in the tree',
-    (loggedIn) => {
+    () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -168,13 +169,13 @@ describe('Task Creation', () => {
       waitForCreate(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
-      cy.get('@createTask').should('have.been.called', loggedIn ? 3 : 0)
+      checkNumCalls({ create: 3 })
     },
   )
 
   runBothModes(
     'create nested subtasks while creating the parent task, check both appear in the tree',
-    (loggedIn) => {
+    () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(rootTask)
 
@@ -217,7 +218,7 @@ describe('Task Creation', () => {
         ...rootTask,
         subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
       })
-      cy.get('@createTask').should('have.been.called', loggedIn ? 4 : 0)
+      checkNumCalls({ create: 4 })
     },
   )
 })

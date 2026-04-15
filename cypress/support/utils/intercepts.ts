@@ -48,9 +48,9 @@ export const checkNumCalls = ({
 }) => {
   const loggedIn = isLoggedIn()
   if (create !== undefined) {
-    cy.get('@createTask').should('have.been.called', loggedIn ? create : 0)
+    cy.get('@createTask.all').should('have.length', loggedIn ? create : 0)
   }
   if (update !== undefined) {
-    cy.get('@updateTask').should('have.been.called', loggedIn ? update : 0)
+    cy.get('@updateTask.all').should('have.length', loggedIn ? update : 0)
   }
 }
