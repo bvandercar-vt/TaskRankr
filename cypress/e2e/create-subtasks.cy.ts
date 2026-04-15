@@ -63,7 +63,7 @@ describe('Create Subtasks', () => {
     subtasks.push(subtask)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 2, update: 0 })
@@ -84,7 +84,7 @@ describe('Create Subtasks', () => {
     subtasks.push(subtask2)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 0 })
@@ -96,7 +96,6 @@ describe('Create Subtasks', () => {
     fillTaskForm(subtask)
 
     const nestedSubtasks: CreatedTask[] = []
-
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(subtask)
     fillTaskForm(subtask2)
@@ -110,10 +109,10 @@ describe('Create Subtasks', () => {
     nestedSubtasks.push(subtask3)
     checkTaskFormSubtasks(nestedSubtasks)
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    clickSubmitBtnUpdate(subtask) // TODO: bugfix: should be create
     checkTaskFormSubtasks([subtask, ...nestedSubtasks])
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
 
     checkTaskInTree({
       ...rootTask,

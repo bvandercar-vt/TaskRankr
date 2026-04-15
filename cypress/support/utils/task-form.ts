@@ -6,7 +6,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { type CreatedTask, waitForCreate } from './intercepts'
+import { type CreatedTask, waitForCreate, waitForUpdate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -83,11 +83,8 @@ const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
 export const clickSubmitBtnCreate = (task: CreatedTask) =>
   clickSubmitBtn('Create', () => waitForCreate(task))
 
-export const clickSubmitBtnUpdate = () =>
-  clickSubmitBtn(
-    'Save',
-    // () => waitForUpdate() // TODO: debug test
-  )
+export const clickSubmitBtnUpdate = (task: CreatedTask) =>
+  clickSubmitBtn('Save', () => waitForUpdate(task))
 
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested

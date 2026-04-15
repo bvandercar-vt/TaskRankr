@@ -33,9 +33,10 @@ export const interceptUpdate = () => {
   cy.intercept('PUT', ApiPaths.UPDATE_TASK).as('updateTask')
 }
 
-export const waitForUpdate = () => {
+export const waitForUpdate = (task: CreatedTask) => {
   const loggedIn = isLoggedIn()
   loggedIn && cy.wait('@updateTask')
+  checkTaskExistsBackend(task, loggedIn as true)
 }
 
 export const checkNumCalls = ({
