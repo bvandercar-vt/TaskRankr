@@ -73,7 +73,7 @@ describe('Create Subtasks', () => {
 
     // test EDIT
     openTaskEditForm(rootTask)
-    
+
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
