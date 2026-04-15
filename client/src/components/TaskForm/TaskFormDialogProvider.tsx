@@ -268,16 +268,16 @@ export const TaskFormDialogProvider = ({
   const getPendingSubtasksForTop = (): PendingSubtask[] => {
     const topId = getTopOfStack()
     if (topId === null) return []
-    return (
-      pendingTasks
-        .filter((t) => t.parentLocalId === topId)
-        // biome-ignore lint/style/noNonNullAssertion: TODO: find alternative
-        .map((t) => ({ name: t.data.name! }))
-    )
+    return pendingTasks
+      .filter((t) => t.parentLocalId === topId)
+      .map((t) => ({ name: t.data.name ?? '' }))
   }
 
   const getSessionParentId = (): number | undefined => {
     if (!isInSession) return parentId
+    // -1 is a sentinel meaning "parent is a pending task with no real ID yet".
+    // TaskForm's useTaskParentChain won't find it and will render no breadcrumbs,
+    // which is the correct behaviour for a not-yet-created parent.
     if (showingChildForm) return -1
     const current = getCurrentPending()
     return current?.parentLocalId != null ? current.parentLocalId : undefined

@@ -22,19 +22,15 @@ export const TaskFormCancelConfirmDialog = ({
   subtaskCount,
   onDiscard,
 }: TaskFormCancelConfirmDialogProps) => (
-  <AlertDialog
-    open={open}
-    onOpenChange={onOpenChange}
-    data-testid="cancel-confirm-dialog"
-  >
-    <AlertDialogContent className="bg-card border-white/10">
+  <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialogContent className="bg-card border-white/10" data-testid="cancel-confirm-dialog">
       <AlertDialogHeader>
         <AlertDialogTitle>Are you sure you want to cancel?</AlertDialogTitle>
         <AlertDialogDescription>
-          You have created {subtaskCount}{' '}
+          You have {subtaskCount} unsaved{' '}
           {subtaskCount === 1 ? 'subtask' : 'subtasks'}.{' '}
-          {subtaskCount === 1 ? 'It' : 'They'} will not be created if you cancel
-          this parent task.
+          {subtaskCount === 1 ? 'It' : 'They'} will be discarded if you cancel
+          this task.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter className="flex-col sm:flex-row gap-2">
