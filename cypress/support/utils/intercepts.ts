@@ -9,7 +9,7 @@ export const interceptCreate = () => {
 }
 
 export function waitForCreate({
-  status = TaskStatus.OPEN,
+  status = TaskStatus.PINNED,
   ...task
 }: TaskFormData & { status?: TaskStatus }) {
   const loggedIn = isLoggedIn()
