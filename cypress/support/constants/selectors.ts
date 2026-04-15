@@ -26,8 +26,10 @@ export const Selectors = {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
     EXPAND_BTN: testIdStartsWith('button-expand-'),
+    COLLAPSE_BTN: testIdStartsWith('button-collapse-'),
   },
   TaskForm: {
+    FORM: testId('task-form'),
     NAME_INPUT: testId('task-name-input'),
     TIME_SPENT_INPUT: testId('time-spent-input'),
     TIME_SPENT_INPUT_HOURS: testId('time-spent-input-hours'),

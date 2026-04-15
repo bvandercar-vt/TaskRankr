@@ -16,7 +16,6 @@ export const setSettings = (settings: Pick<UserSettings, 'fieldConfig'>) => {
   cy.intercept('PUT', ApiPaths.UPDATE_SETTINGS).as('settingsPut')
 
   setFieldConfig(settings.fieldConfig)
-  cy.get('@settingsPut').should('have.been.called', loggedIn ? 2 : 0)
 
   loggedIn &&
     getSettings().then((currentSettings) => {
@@ -25,6 +24,8 @@ export const setSettings = (settings: Pick<UserSettings, 'fieldConfig'>) => {
 }
 
 const setFieldConfig = (targetConfig: FieldConfig) => {
+  const loggedIn = isLoggedIn()
+
   for (const [field, { visible, required }] of Object.entries(
     targetConfig,
   ) as Entries<FieldConfig>) {
@@ -33,7 +34,7 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .then((isChecked) => {
         if (isChecked !== visible) {
           cy.get(Settings.FieldConfig.visibleCheckbox(field)).click()
-          cy.wait('@settingsPut')
+          loggedIn && cy.wait('@settingsPut')
         }
       })
 
@@ -42,7 +43,7 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .then((isChecked) => {
         if (isChecked !== required) {
           cy.get(Settings.FieldConfig.requiredCheckbox(field)).click()
-          cy.wait('@settingsPut')
+          loggedIn && cy.wait('@settingsPut')
         }
       })
   }

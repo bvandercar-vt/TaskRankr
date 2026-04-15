@@ -1,33 +1,52 @@
-import { TaskStatus } from '~/shared/schema'
+import type { RankField, Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import type { TaskFormData } from './task-form'
 import { isLoggedIn } from './test-runner'
 
 export const interceptCreate = () => {
   cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 }
 
-export function waitForCreate(
-  tasks: (TaskFormData & { status?: TaskStatus })[],
-) {
+export type CreatedTask = Pick<Task, 'name' | 'status' | RankField>
+
+export function waitForCreate(task: CreatedTask) {
   const loggedIn = isLoggedIn()
-
-  loggedIn && cy.wait(Array(tasks.length).fill('@createTask'))
-
-  tasks.forEach(({ status = TaskStatus.OPEN, ...task }) => {
-    checkTaskExistsBackend({ ...task, status }, loggedIn as true)
-  })
+  loggedIn && cy.wait('@createTask')
+  checkTaskExistsBackend(task, true)
 }
 
 export const interceptDelete = () => {
   cy.intercept('DELETE', ApiPaths.DELETE_TASK).as('deleteTask')
 }
 
-export const waitForDelete = (task: Pick<TaskFormData, 'name'>) => {
+export const waitForDelete = (task: Pick<Task, 'name'>) => {
   const loggedIn = isLoggedIn()
-
   loggedIn && cy.wait('@deleteTask')
-
   checkTaskExistsBackend(task, false)
+}
+
+export const interceptUpdate = () => {
+  cy.intercept('PUT', ApiPaths.UPDATE_TASK).as('updateTask')
+}
+
+export const waitForUpdate = (task: CreatedTask) => {
+  const loggedIn = isLoggedIn()
+  loggedIn && cy.wait('@updateTask')
+  checkTaskExistsBackend(task, true)
+}
+
+export const checkNumCalls = ({
+  create,
+  update,
+}: {
+  create?: number
+  update?: number
+}) => {
+  const loggedIn = isLoggedIn()
+  if (create !== undefined) {
+    cy.get('@createTask.all').should('have.length', loggedIn ? create : 0)
+  }
+  if (update !== undefined) {
+    cy.get('@updateTask.all').should('have.length', loggedIn ? update : 0)
+  }
 }

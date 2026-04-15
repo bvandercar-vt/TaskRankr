@@ -157,7 +157,7 @@ export const TaskFormDialogProvider = ({
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [activeTask, setActiveTask] = useState<Task | undefined>(undefined)
   const [parentId, setParentId] = useState<number | undefined>(undefined)
-  const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
+  const [returnToTaskStack, setReturnToTaskStack] = useState<Task[]>([])
 
   const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
     null,
@@ -184,8 +184,8 @@ export const TaskFormDialogProvider = ({
       setActiveTask((prev) =>
         prev?.id === tempId ? { ...prev, id: realId } : prev,
       )
-      setReturnToTask((prev) =>
-        prev?.id === tempId ? { ...prev, id: realId } : prev,
+      setReturnToTaskStack((prev) =>
+        prev.map((t) => (t.id === tempId ? { ...t, id: realId } : t)),
       )
     })
   }, [subscribeToIdReplacement])
@@ -297,7 +297,7 @@ export const TaskFormDialogProvider = ({
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
-      setReturnToTask(activeTask)
+      setReturnToTaskStack((prev) => [...prev, activeTask])
     }
     setMode('create')
     setParentId(pid)
@@ -316,7 +316,7 @@ export const TaskFormDialogProvider = ({
 
   const handleEditSubtask = (task: Task) => {
     if (activeTask) {
-      setReturnToTask(activeTask)
+      setReturnToTaskStack((prev) => [...prev, activeTask])
     }
     setMode('edit')
     setActiveTask(task)
@@ -350,6 +350,19 @@ export const TaskFormDialogProvider = ({
       resetAndClose()
     }
   }
+
+  const hasChanges = (
+    data: Record<string, unknown>,
+    task: Record<string, unknown>,
+  ) =>
+    Object.keys(data).some((key) => {
+      const a = data[key]
+      const b = task[key]
+      if (a === b) return false
+      const sa = a instanceof Date ? a.toISOString() : JSON.stringify(a)
+      const sb = b instanceof Date ? b.toISOString() : JSON.stringify(b)
+      return sa !== sb
+    })
 
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {

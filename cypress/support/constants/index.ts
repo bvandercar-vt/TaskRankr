@@ -4,9 +4,9 @@ import {
   Enjoyment,
   type FieldConfig,
   Priority,
+  type Task,
   Time,
 } from '~/shared/schema'
-import type { TaskFormData } from '../utils/task-form'
 
 export * from './selectors'
 
@@ -14,6 +14,7 @@ export const ApiPaths = {
   GET_TASKS: contract.tasks.list.path,
   CREATE_TASK: contract.tasks.create.path,
   DELETE_TASK: new RegExp(contract.tasks.delete.path.replace(':id', '\\d+')),
+  UPDATE_TASK: new RegExp(contract.tasks.update.path.replace(':id', '\\d+')),
   GET_SETTINGS: contract.settings.get.path,
   UPDATE_SETTINGS: contract.settings.update.path,
 }
@@ -24,7 +25,7 @@ export const DefaultTask = {
   ease: Ease.MEDIUM,
   enjoyment: Enjoyment.LOW,
   time: Time.HIGH,
-} as const satisfies TaskFormData
+} as const satisfies Partial<Task>
 
 export const FieldConfigAllTrue = {
   priority: { visible: true, required: true },
