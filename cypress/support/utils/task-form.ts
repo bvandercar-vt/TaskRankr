@@ -92,7 +92,9 @@ export const clickSubmitBtnUpdate = () =>
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested
   cy
-    .get(TaskForm.SUBTASK_ROW)
+    .get(TaskForm.FORM)
+    .should('be.visible')
+    .find(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
     .getElementArrayText()
     .should(
