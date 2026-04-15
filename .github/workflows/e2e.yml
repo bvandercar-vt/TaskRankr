@@ -77,7 +77,7 @@ jobs:
           exit 1
 
       - name: Run Cypress tests
-        run: npx cypress run
+        run: npm run cy:run
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
