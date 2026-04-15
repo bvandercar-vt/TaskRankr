@@ -6,6 +6,7 @@ import {
   checkNumCalls,
   interceptCreate,
   waitForCreate,
+  waitForUpdate,
 } from '@cypress/support/utils/intercepts'
 import { clickSubmitBtn, fillTaskForm } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
@@ -53,7 +54,7 @@ describe('Create Subtasks', () => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       waitForCreate(rootTask)
       fillTaskForm(subtask)
-      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
+      clickSubmitBtn()
       waitForCreate(subtask)
       cy.get(TaskForm.SUBTASK_ROW)
         .should('have.length', 1)
@@ -61,7 +62,7 @@ describe('Create Subtasks', () => {
         .should('contain.text', subtask.name)
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
-      waitForCreate(rootTask)
+      waitForUpdate()
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
       checkNumCalls({ create: 2 })
@@ -93,7 +94,7 @@ describe('Create Subtasks', () => {
         .should('deep.equal', [subtask.name, subtask2.name])
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
-      waitForCreate(rootTask)
+      waitForUpdate()
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
       checkNumCalls({ create: 3 })
@@ -136,7 +137,7 @@ describe('Create Subtasks', () => {
         .should('deep.equal', [subtask.name, subtask2.name, subtask3.name])
 
       clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
-      waitForCreate(rootTask)
+      waitForUpdate()
 
       checkTaskInTree({
         ...rootTask,
