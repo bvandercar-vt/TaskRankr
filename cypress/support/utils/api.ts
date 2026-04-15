@@ -42,7 +42,7 @@ export function checkTaskExistsBackend(
   exists: boolean,
 ): void {
   const loggedIn = isLoggedIn()
-  
+
   const checkTasks = (tasks: Task[], message: string) => {
     if (exists) {
       expect(
