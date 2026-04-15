@@ -15,7 +15,10 @@ import {
   clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
-import { checkTaskInTree } from '@cypress/support/utils/task-tree'
+import {
+  checkTaskInTree,
+  openTaskEditForm,
+} from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
@@ -66,34 +69,33 @@ describe('Assign Subtasks', () => {
   it('assign an existing orphaned task as a subtask of a task', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(rootTask)
-    const subtasks: CreatedTask[] = []
 
     assignSubtask(orphanTask)
-    subtasks.push(orphanTask)
     waitForUpdate(orphanTask)
-    checkTaskFormSubtasks(subtasks)
+    checkTaskFormSubtasks([orphanTask])
 
     // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(newSubtask)
     clickSubmitBtnCreate(newSubtask)
-    subtasks.push(newSubtask)
-    checkTaskFormSubtasks(subtasks)
+    checkTaskFormSubtasks([orphanTask, newSubtask])
 
     clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
-    checkTaskInTree({ ...rootTask, subtasks })
+    checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
     checkNumCalls({ create: 2, update: 1 })
 
     // test EDIT
-    // cy.contains(TaskCard.CARD, rootTask.name).click()
-    // checkTaskFormSubtasks(subtasks)
-    // assignSubtask(orphanTask2)
-    // waitForUpdate(orphanTask2)
-    // subtasks.push(orphanTask2)
-    // checkTaskFormSubtasks(subtasks)
+    openTaskEditForm(rootTask)
+    checkTaskFormSubtasks([orphanTask, newSubtask])
+    assignSubtask(orphanTask2)
+    waitForUpdate(orphanTask2)
+    checkTaskFormSubtasks([orphanTask, newSubtask, orphanTask2])
 
-    // clickSubmitBtnCreate(rootTask)
-    // checkTaskInTree({ ...rootTask, subtasks })
-    // checkNumCalls({ create: 3, update: 2 })
+    clickSubmitBtnCreate(rootTask)
+    checkTaskInTree({
+      ...rootTask,
+      subtasks: [orphanTask, newSubtask, orphanTask2],
+    })
+    checkNumCalls({ create: 3, update: 2 })
   })
 })
