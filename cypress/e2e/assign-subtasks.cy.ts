@@ -12,6 +12,7 @@ import {
   assignSubtask,
   checkTaskFormSubtasks,
   clickSubmitBtnCreate,
+  clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
@@ -79,7 +80,7 @@ describe('Assign Subtasks', () => {
     subtasks.push(newSubtask)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtnCreate(rootTask) // TODO: try cancel and ensure wasn't assigned.
+    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
     checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
     checkNumCalls({ create: 2, update: 1 })
 
