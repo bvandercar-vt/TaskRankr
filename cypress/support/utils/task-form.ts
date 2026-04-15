@@ -107,7 +107,7 @@ export const assignSubtask = (
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested
   cy
-    .find(TaskForm.SUBTASK_ROW)
+    .get(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
     .getElementArrayText()
     .should(
