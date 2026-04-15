@@ -80,7 +80,7 @@ describe('Assign Subtasks', () => {
     clickSubmitBtnCreate(newSubtask)
     checkTaskFormSubtasks([orphanTask, newSubtask])
 
-    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
     checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
     checkNumCalls({ create: 2, update: 1 })
 
@@ -91,7 +91,7 @@ describe('Assign Subtasks', () => {
     waitForUpdate(orphanTask2)
     checkTaskFormSubtasks([orphanTask, newSubtask, orphanTask2])
 
-    clickSubmitBtnCreate(rootTask)
+    clickSubmitBtnUpdate()
     checkTaskInTree({
       ...rootTask,
       subtasks: [orphanTask, newSubtask, orphanTask2],
