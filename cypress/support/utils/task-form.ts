@@ -6,7 +6,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { type CreatedTask, waitForUpdate } from './intercepts'
+import type { CreatedTask } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
@@ -82,8 +82,7 @@ export const clickSubmitBtnCreate = (task: CreatedTask) => {
   clickSubmitBtn('Create')
 }
 
-export const clickSubmitBtnUpdate = (task?: CreatedTask) =>
-  clickSubmitBtn('Save', task && (() => waitForUpdate(task)))
+export const clickSubmitBtnUpdate = () => clickSubmitBtn('Save')
 
 export const assignSubtask = (
   /**
