@@ -47,7 +47,7 @@ Cypress.Commands.addQuery(
 Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
   cy.get(trigger).click()
   cy.escapeWithin()
-    .get('[role="listbox"]')
+    .find('[role="listbox"]')
     .contains(new RegExp(`^${value}$`))
     .click()
 })
