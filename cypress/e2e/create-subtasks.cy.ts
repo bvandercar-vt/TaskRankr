@@ -5,6 +5,7 @@ import {
   type CreatedTask,
   checkNumCalls,
   interceptCreate,
+  interceptUpdate,
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import {
@@ -43,6 +44,7 @@ describe('Create Subtasks', () => {
 
   beforeEach(() => {
     interceptCreate()
+    interceptUpdate()
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)

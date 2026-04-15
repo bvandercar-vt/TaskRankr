@@ -15,9 +15,12 @@ const checkSubtasksInCard = (
 ) => {
   subtasks.forEach((subtask) => {
     // The subtask card is nested inside the parent card in the DOM
-    const subtaskCard = parentCard.contains(TaskCard.CARD, subtask.name)
+    const subtaskCard = parentCard.contains(
+      `${TaskCard.CARD} ${TaskCard.TITLE}`,
+      new RegExp(`^${subtask.name}$`),
+    )
 
-    subtaskCard.find(TaskCard.TITLE).should('contain.text', subtask.name)
+    subtaskCard.should('exist')
 
     if (subtask.subtasks?.length) {
       subtaskCard.find(TaskCard.EXPAND_BTN).click()
