@@ -81,6 +81,7 @@ describe('Task Creation', () => {
       } satisfies TaskFormData
 
       setSettings({ fieldConfig })
+      cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 4 : 0)
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -101,6 +102,7 @@ describe('Task Creation', () => {
       } as const satisfies FieldConfig
 
       setSettings({ fieldConfig })
+      cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 5 : 0)
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
