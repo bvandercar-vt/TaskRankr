@@ -30,13 +30,13 @@ describe('Assign Subtasks', () => {
   const orphanTask = {
     ...DefaultTask,
     name: 'E2E Orphan Task 1',
-    status: TaskStatus.OPEN,
+    status: TaskStatus.PINNED,
   } as const satisfies CreatedTask
 
   const orphanTask2 = {
     ...DefaultTask,
     name: 'E2E Orphan Task 2',
-    status: TaskStatus.OPEN,
+    status: TaskStatus.PINNED,
   } as const satisfies CreatedTask
 
   const newSubtask = {
