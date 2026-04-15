@@ -89,7 +89,7 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots-${{ matrix.suite }}
-          path: 
-            - cypress/screenshots
-            - cypress/videos
+          path: |
+            cypress/screenshots
+            cypress/videos
           if-no-files-found: ignore
