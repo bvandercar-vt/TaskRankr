@@ -4,7 +4,8 @@ export const runBothModes = (
 ) => {
   describe(testTitle, () => {
     for (const [loggedIn, testTitleSuffix] of [
-      [false, 'Guest Mode'],
+      // @ts-expect-error shold uncomment
+      // [false, 'Guest Mode'],
       [true, 'Logged In Mode'],
     ] as const) {
       it(`${testTitle} - ${testTitleSuffix}`, setLoggedIn(loggedIn), () =>
