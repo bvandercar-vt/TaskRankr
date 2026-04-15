@@ -36,3 +36,9 @@ const checkSubtasksInCard = (task: TaskTreeNode) => {
 }
 
 export const checkTaskInTree = checkTitleAndSubtasks
+
+export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
+  cy.get(Selectors.TaskForm.FORM).should('not.exist')
+  getTaskCardTitle(task).click()
+  cy.get(Selectors.TaskForm.FORM).should('be.visible')
+}
