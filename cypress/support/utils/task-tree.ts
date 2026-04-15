@@ -5,7 +5,7 @@ const { TaskCard } = Selectors
 
 type TaskTreeNode = Pick<Task, 'name'> & { subtasks?: TaskTreeNode[] }
 
-export const getTaskCard = (task: Pick<Task, 'name'>) =>
+export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
   cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
@@ -13,10 +13,11 @@ export const getTaskCard = (task: Pick<Task, 'name'>) =>
     )
     .should('exist')
     .should('have.length', 1)
-    .closest(TaskCard.CARD)
 
 const checkTitleAndSubtasks = (task: TaskTreeNode) => {
-  const thisTaskCard = getTaskCard(task).should('exist')
+  const getTaskCard = () => getTaskCardTitle(task).closest(TaskCard.CARD)
+
+  const thisTaskCard = getTaskCard().should('exist')
 
   if (!task.subtasks?.length) return
 
@@ -25,7 +26,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
     .first()
     .then(($btn) => cy.wrap($btn).click())
   // expanding changes the render, so we need to get the card again
-  getTaskCard(task).within(() => checkSubtasksInCard(task))
+  getTaskCard().within(() => checkSubtasksInCard(task))
 }
 
 const checkSubtasksInCard = (task: TaskTreeNode) => {
