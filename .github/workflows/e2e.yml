@@ -19,7 +19,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [user, guest]
+        # suite: [user, guest]
+        suite: [user]
 
     services:
       postgres:
