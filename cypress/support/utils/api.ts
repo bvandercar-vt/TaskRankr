@@ -41,18 +41,21 @@ export function checkTaskExistsBackend(
   task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
   exists: boolean,
 ): void {
-  const checkTasks = (tasks: Task[]) => {
+  const checkTasks = (tasks: Task[], message: string) => {
     if (exists) {
       expect(tasks.map((t) => t.name)).to.include(task.name)
       const taskInBackend = tasks.find((t) => t.name === task.name)
-      expect(taskInBackend).to.include(task)
+      expect(
+        taskInBackend,
+        `Task "${task.name}" should exist in ${message} with correct props`,
+      ).to.include(task)
     } else {
       expect(tasks.map((t) => t.name)).to.not.include(task.name)
     }
   }
 
-  getLocalStateTasks().then(checkTasks)
-  getApiTasks().then(checkTasks)
+  getLocalStateTasks().then((tasks) => checkTasks(tasks, 'local state'))
+  getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
 }
 
 export const getSettings = () =>
