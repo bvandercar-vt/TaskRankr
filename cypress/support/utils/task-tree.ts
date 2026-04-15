@@ -11,11 +11,10 @@ type TaskTreeNode = Pick<Task, 'name'> & { subtasks?: TaskTreeNode[] }
  * iteration to avoid Cypress chainable subject drift in forEach loops.
  */
 const checkSubtasksInCard = (
-  parentTaskName: string,
-  subtasks: TaskTreeNode[],
+  task:TaskTreeNode
 ) => {
-  subtasks.forEach((subtask) => {
-    cy.contains(TaskCard.CARD, parentTaskName).within(() => {
+  task.subtasks?.forEach((subtask) => {
+    cy.contains(TaskCard.CARD, task.name).within(() => {
       cy.contains(
         `${TaskCard.CARD} ${TaskCard.TITLE}`,
         new RegExp(`^${subtask.name}$`),
@@ -23,11 +22,11 @@ const checkSubtasksInCard = (
     })
 
     if (subtask.subtasks?.length) {
-      cy.contains(TaskCard.CARD, parentTaskName)
+      cy.contains(TaskCard.CARD, task.name)
         .contains(TaskCard.CARD, subtask.name)
         .find(TaskCard.EXPAND_BTN)
         .click()
-      checkSubtasksInCard(subtask.name, subtask.subtasks)
+      checkSubtasksInCard(subtask)
     }
   })
 }
@@ -36,13 +35,13 @@ export const checkTaskInTree = (task: TaskTreeNode) => {
   // TODO: check field values
   cy.get(TaskCard.CARD)
     .find(TaskCard.TITLE)
-    .getElementArrayText()
-    .should('include', task.name)
+    .first()
+    .should('have.text', task.name)
 
   if (task.subtasks?.length) {
     // Expand the parent card to reveal its direct subtasks
     cy.contains(TaskCard.CARD, task.name).find(TaskCard.EXPAND_BTN).click()
 
-    checkSubtasksInCard(task.name, task.subtasks)
+    checkSubtasksInCard(task)
   }
 }
