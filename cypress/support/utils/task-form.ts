@@ -68,12 +68,19 @@ export const fillTaskForm = (
   }
 }
 
-export const clickSubmitBtn = (submitBtnText = 'Create') =>
+export const clickSubmitBtn = (
+  submitBtnText: string,
+  afterSubmit?: () => void,
+) =>
   cy
     .get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
+    .then(($btn) => {
+      afterSubmit?.()
+      cy.wrap($btn).should('not.exist')
+    })
 
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested

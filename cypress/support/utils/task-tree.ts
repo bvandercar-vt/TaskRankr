@@ -17,19 +17,13 @@ const getCardTitle = (taskName: string) =>
  */
 const checkSubtasksInCard = (task: TaskTreeNode) => {
   task.subtasks?.forEach((subtask) => {
-    getCardTitle(task.name)
-      .parent(TaskCard.CARD)
-      .within(() => {
-        const subtaskCardTitle = getCardTitle(subtask.name)
+    const subtaskCardTitle = getCardTitle(subtask.name)
 
-        if (subtask.subtasks?.length) {
-          subtaskCardTitle
-            .parent(TaskCard.CARD)
-            .find(TaskCard.EXPAND_BTN)
-            .click()
-          checkSubtasksInCard(subtask)
-        }
-      })
+    if (subtask.subtasks?.length) {
+      const subtaskCard = subtaskCardTitle.parent(TaskCard.CARD)
+      subtaskCard.find(TaskCard.EXPAND_BTN).click()
+      subtaskCard.within(() => checkSubtasksInCard(subtask))
+    }
   })
 }
 
@@ -39,7 +33,8 @@ export const checkTaskInTree = (task: TaskTreeNode) => {
 
   if (task.subtasks?.length) {
     // Expand the parent card to reveal its direct subtasks
-    cardTitle.parent(TaskCard.CARD).find(TaskCard.EXPAND_BTN).click()
-    checkSubtasksInCard(task)
+    const card = cardTitle.parent(TaskCard.CARD)
+    card.find(TaskCard.EXPAND_BTN).click()
+    card.within(() => checkSubtasksInCard(task))
   }
 }

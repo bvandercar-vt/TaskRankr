@@ -36,8 +36,7 @@ describe('Task Creation', () => {
   runBothModes('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(rootTask)
-    clickSubmitBtn()
-    waitForCreate(rootTask)
+    clickSubmitBtn('Create', () => waitForCreate(rootTask))
     checkTaskInTree(rootTask)
     checkNumCalls({ create: 1 })
   })
@@ -66,8 +65,7 @@ describe('Task Creation', () => {
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
       fillTaskForm(newTask, fieldConfig)
-      clickSubmitBtn()
-      waitForCreate(newTask)
+      clickSubmitBtn('Create', () => waitForCreate(newTask))
       checkTaskInTree(newTask)
       checkNumCalls({ create: 1 })
     },
@@ -98,8 +96,9 @@ describe('Task Creation', () => {
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-      clickSubmitBtn()
-      waitForCreate({ ...taskAllNull, status: TaskStatus.COMPLETED })
+      clickSubmitBtn('Create', () =>
+        waitForCreate({ ...taskAllNull, status: TaskStatus.COMPLETED }),
+      )
       // TODO: check is in completed tree
       checkNumCalls({ create: 1 })
     },
