@@ -3,19 +3,18 @@ export const runBothModes = (
   runTest: (loggedIn: boolean) => void,
 ) => {
   describe(testTitle, () => {
-    it(`${testTitle} - Guest Mode`, setLoggedIn(false), async () => {
-      cy.clearTestUserTasks()
-
-      await runTest(false)
-    })
-
-    it(`${testTitle} - Logged In Mode`, setLoggedIn(true), async () => {
-      cy.loginAsTestUser()
-      cy.clearTestUserTasks()
-      cy.resetTestUserSettings()
-
-      await runTest(true)
-    })
+    for (const [loggedIn, testTitleSuffix] of [
+      [false, 'Guest Mode'],
+      [true, 'Logged In Mode'],
+    ] as const) {
+      it(
+        `${testTitle} - ${testTitleSuffix}`,
+        setLoggedIn(loggedIn),
+        async () => {
+          await runTest(loggedIn)
+        },
+      )
+    }
   })
 }
 
