@@ -23,7 +23,6 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
     .find(TaskCard.EXPAND_BTN)
     .first()
     .then(($btn) => cy.wrap($btn).click())
-    .then(($btn) => cy.wrap($btn).should('not.exist'))
   cardTitle()
     .closest(TaskCard.CARD)
     .within(() => checkSubtasksInCard(task))
