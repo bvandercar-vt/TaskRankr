@@ -82,7 +82,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtnUpdate(rootTask)
-      cy.wait(500) //attempt wait
+    cy.wait(500) //attempt wait
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 1 })
   })
