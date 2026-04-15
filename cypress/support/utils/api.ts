@@ -41,18 +41,33 @@ export function checkTaskExistsBackend(
   task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
   exists: boolean,
 ): void {
-  const checkTasks = (tasks: Task[]) => {
+  const loggedIn = isLoggedIn()
+
+  const checkTasks = (tasks: Task[], message: string) => {
     if (exists) {
-      expect(tasks.map((t) => t.name)).to.include(task.name)
-      const taskInBackend = tasks.find((t) => t.name === task.name)
-      expect(taskInBackend).to.include(task)
+      expect(
+        tasks.map((t) => t.name),
+        `task names in ${message}`,
+      ).to.include(task.name)
+      const tasksInBackend = tasks.filter((t) => t.name === task.name)
+      expect(
+        tasksInBackend,
+        `tasks with name "${task.name}" in ${message}`,
+      ).to.have.length(1)
+      expect(
+        tasksInBackend[0],
+        `Task "${task.name}" should exist in ${message} with correct props`,
+      ).to.include(task)
     } else {
-      expect(tasks.map((t) => t.name)).to.not.include(task.name)
+      expect(
+        tasks.map((t) => t.name),
+        `task names in ${message}`,
+      ).to.not.include(task.name)
     }
   }
 
-  getLocalStateTasks().then(checkTasks)
-  getApiTasks().then(checkTasks)
+  getLocalStateTasks().should((tasks) => checkTasks(tasks, 'local state'))
+  loggedIn && getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
 }
 
 export const getSettings = () =>
