@@ -7,7 +7,6 @@ import {
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import { type CreatedTask, waitForCreate } from './intercepts'
-import { isLoggedIn } from './test-runner'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
@@ -51,10 +50,6 @@ export const fillTaskForm = (
   task: TaskFormData,
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
-  const loggedIn = isLoggedIn()
-
-  loggedIn && checkTaskExistsBackend(task, false)
-
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
   cy.get(TaskForm.NAME_INPUT).type(task.name)
@@ -80,8 +75,10 @@ const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
       cy.wrap($btn).should('not.exist')
     })
 
-export const clickSubmitBtnCreate = (task: CreatedTask) =>
+export const clickSubmitBtnCreate = (task: CreatedTask) => {
+  checkTaskExistsBackend(task, false)
   clickSubmitBtn('Create', () => waitForCreate(task))
+}
 
 export const clickSubmitBtnUpdate = (_task: CreatedTask) =>
   clickSubmitBtn(
