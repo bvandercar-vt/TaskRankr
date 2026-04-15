@@ -154,7 +154,7 @@ const CollapseCaret = ({
     }}
     className="group/expand flex items-center justify-center w-full rounded-md hover:bg-white/10 transition-colors cursor-pointer"
     type="button"
-    data-testid={`button-expand-${taskId}`}
+    data-testid={`button-${isExpanded ? 'collapse' : 'expand'}-${taskId}`}
   >
     <Icon
       icon={isExpanded ? ChevronDown : ChevronRight}
