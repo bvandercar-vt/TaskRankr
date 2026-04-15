@@ -14,10 +14,7 @@ import {
   clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
-import {
-  checkTaskInTree,
-  openTaskEditForm,
-} from '@cypress/support/utils/task-tree'
+import { checkTaskInTree, openTaskEditForm } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 

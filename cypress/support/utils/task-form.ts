@@ -8,7 +8,7 @@ import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import { type CreatedTask, waitForCreate } from './intercepts'
 
-const { TaskForm } = Selectors
+const { TaskForm, AssignSubtaskDialog } = Selectors
 
 type TaskFormData = Pick<Task, 'name' | RankField>
 
@@ -87,6 +87,21 @@ export const clickSubmitBtnUpdate = (_task: CreatedTask) =>
     'Save',
     // () => waitForUpdate(task) // TODO: this fails, debug it.
   )
+
+export const assignSubtask = (
+  /**
+   * the orphan task to assign as subtask.
+   */
+  task: Pick<Task, 'name'>,
+) => {
+  cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
+  cy.get(AssignSubtaskDialog.DIALOG)
+    .should('be.visible')
+    .within(() => {
+      cy.contains(AssignSubtaskDialog.TASK_OPTION, task.name).click()
+    })
+  cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
+}
 
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested

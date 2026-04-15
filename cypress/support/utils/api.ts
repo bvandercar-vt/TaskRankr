@@ -48,7 +48,7 @@ export function checkTaskExistsBackend(
       expect(
         tasks.map((t) => t.name),
         `task names in ${message}`,
-      ).to.include(task.name)
+      ).to.contain(task.name)
       const tasksInBackend = tasks.filter((t) => t.name === task.name)
       expect(
         tasksInBackend,
@@ -62,7 +62,7 @@ export function checkTaskExistsBackend(
       expect(
         tasks.map((t) => t.name),
         `task names in ${message}`,
-      ).to.not.include(task.name)
+      ).to.not.contain(task.name)
     }
   }
 

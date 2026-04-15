@@ -11,6 +11,7 @@ export default defineConfig({
     specPattern: [
       'cypress/e2e/create-task.cy.ts',
       'cypress/e2e/create-subtasks.cy.ts',
+      'cypress/e2e/assign-subtasks.cy.ts',
     ],
     setupNodeEvents(on) {
       on('file:preprocessor', vitePreprocessor())
