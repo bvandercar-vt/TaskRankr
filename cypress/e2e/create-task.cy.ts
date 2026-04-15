@@ -4,7 +4,7 @@ import {
   FieldConfigAllFalse,
   Selectors,
 } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
+import { checkTaskExistsBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -22,7 +22,7 @@ import { type FieldConfig, TaskStatus } from '~/shared/schema'
 const { TaskForm } = Selectors
 
 describe('Task Creation', () => {
-  const rootTask = {
+  const task = {
     ...DefaultTask,
     name: 'E2E Root Level Task',
     status: TaskStatus.PINNED,
@@ -33,13 +33,15 @@ describe('Task Creation', () => {
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+
+    checkTaskExistsBackend(task, false)
   })
 
   it('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(rootTask)
-    clickSubmitBtnCreate(rootTask)
-    checkTaskInTree(rootTask)
+    fillTaskForm(task)
+    clickSubmitBtnCreate(task)
+    checkTaskInTree(task)
     checkNumCalls({ create: 1 })
   })
 
@@ -53,7 +55,7 @@ describe('Task Creation', () => {
     } as const satisfies FieldConfig
 
     const newTask = {
-      ...rootTask,
+      ...task,
       name: 'Field Config Test Task',
       ease: null,
       enjoyment: null,
@@ -77,7 +79,7 @@ describe('Task Creation', () => {
     } as const satisfies FieldConfig
 
     const taskAllNull = {
-      ...rootTask,
+      ...task,
       priority: null,
       ease: null,
       enjoyment: null,
