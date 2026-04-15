@@ -3,9 +3,12 @@ import { DefaultTask, Selectors } from '@cypress/support/constants'
 import { checkTaskExistsBackend } from '@cypress/support/utils/api'
 import {
   type CreatedTask,
+  checkNumCalls,
   interceptCreate,
+  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
+  checkTaskFormSubtasks,
   clickSubmitBtnCreate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
@@ -42,6 +45,7 @@ const checkTasksDontExist = (tasks: CreatedTask[]) => {
 describe('Task Creation Cancellation', () => {
   beforeEach(() => {
     interceptCreate()
+    interceptUpdate()
 
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
@@ -54,7 +58,7 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.CANCEL_BTN).click()
 
     checkTasksDontExist([rootTask])
-    cy.get('@createTask').should('have.been.called', 0)
+    checkNumCalls({ create: 0, update: 0 })
   })
 
   it('cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all', () => {
@@ -64,34 +68,17 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask)
     clickSubmitBtnCreate(subtask)
-    cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+    checkTaskFormSubtasks([subtask])
 
     cy.get(TaskForm.CANCEL_BTN).click()
 
     cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
       .should('be.visible')
       .should('contain.text', '1 subtask')
-      .should('be.visible ')
     cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
 
     checkTasksDontExist([rootTask, subtask])
-    cy.get('@createTask').should('have.been.called', 0)
-  })
-
-  it('cancel on subtask form navigates back to parent, then cancel on parent discards all', () => {
-    cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(rootTask)
-
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    cy.get(TaskForm.NAME_INPUT).type(subtask.name)
-    cy.get(TaskForm.CANCEL_BTN).click()
-
-    cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-
-    cy.get(TaskForm.CANCEL_BTN).click()
-
-    checkTasksDontExist([rootTask, subtask])
-    cy.get('@createTask').should('have.been.called', 0)
+    checkNumCalls({ create: 0, update: 0 })
   })
 
   it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
@@ -101,12 +88,12 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask)
     clickSubmitBtnCreate(subtask)
-    cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+    checkTaskFormSubtasks([subtask])
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
-    cy.get(TaskForm.SUBTASK_ROW).should('have.length', 2)
+    checkTaskFormSubtasks([subtask, subtask2])
 
     cy.get(TaskForm.CANCEL_BTN).click()
 
@@ -117,7 +104,22 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
 
     checkTasksDontExist([rootTask, subtask, subtask2])
-    cy.get('@createTask').should('have.been.called', 0)
+    checkNumCalls({ create: 0, update: 0 })
+  })
+
+  it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(rootTask)
+
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    cy.get(TaskForm.NAME_INPUT).type(subtask.name)
+    cy.get(TaskForm.CANCEL_BTN).click()
+
+    cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
+    cy.get(TaskForm.CANCEL_BTN).click()
+
+    checkTasksDontExist([rootTask, subtask])
+    checkNumCalls({ create: 0, update: 0 })
   })
 
   it('cancel confirmation "Go Back" returns to parent form without discarding', () => {
@@ -127,7 +129,7 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask)
     clickSubmitBtnCreate(subtask)
-    cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+    checkTaskFormSubtasks([subtask])
 
     cy.get(TaskForm.CANCEL_BTN).click()
 
@@ -135,8 +137,9 @@ describe('Task Creation Cancellation', () => {
     cy.get(TaskForm.CANCEL_DENY_BTN).click()
 
     cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-    cy.get(TaskForm.SUBTASK_ROW).should('have.length', 1)
+    checkTaskFormSubtasks([subtask])
 
-    cy.get('@createTask').should('have.been.called', 0)
+    checkTasksDontExist([rootTask, subtask])
+    checkNumCalls({ create: 0, update: 0 })
   })
 })
