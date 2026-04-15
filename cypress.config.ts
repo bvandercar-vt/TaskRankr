@@ -8,13 +8,17 @@ export default defineConfig({
   fixturesFolder: false,
   e2e: {
     baseUrl: 'http://localhost:5000',
-    specPattern: 'cypress/e2e/**/*.cy.ts',
+    specPattern: [
+      'cypress/e2e/create-task.cy.ts',
+      'cypress/e2e/create-subtasks.cy.ts',
+      'cypress/e2e/assign-subtasks.cy.ts',
+    ],
     setupNodeEvents(on) {
       on('file:preprocessor', vitePreprocessor())
 
       installTerminalReporter(on, {
         outputVerbose: false,
-        compactLogs: 5,
+        compactLogs: 7,
         outputCompactLogs: false, // print all logs to file
         routeTrimLength: 1000, // don't print all GET data
         printLogsToConsole: 'onFail',

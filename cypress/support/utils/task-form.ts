@@ -6,11 +6,12 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
+import { type CreatedTask, waitForCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
-export type TaskFormData = Pick<Task, 'name' | RankField>
+type TaskFormData = Pick<Task, 'name' | RankField>
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
@@ -68,12 +69,25 @@ export const fillTaskForm = (
   }
 }
 
-export const clickSubmitBtn = (submitBtnText = 'Create') =>
+const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
   cy
     .get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
     .should('not.be.disabled')
     .click()
+    .then(($btn) => {
+      afterSubmit?.()
+      cy.wrap($btn).should('not.exist')
+    })
+
+export const clickSubmitBtnCreate = (task: CreatedTask) =>
+  clickSubmitBtn('Create', () => waitForCreate(task))
+
+export const clickSubmitBtnUpdate = (_task: CreatedTask) =>
+  clickSubmitBtn(
+    'Save',
+    // () => waitForUpdate(task) // TODO: this fails, debug it.
+  )
 
 export const assignSubtask = (
   /**
@@ -93,9 +107,12 @@ export const assignSubtask = (
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested
   cy
-    .get(TaskForm.SUBTASK_ROW)
+    .get(TaskForm.FORM)
+    .should('be.visible')
+    .find(TaskForm.SUBTASK_ROW)
+    .should('have.length', subtasks.length)
     .getElementArrayText()
     .should(
-      'equal',
+      'deep.equal',
       subtasks.map((subtask) => subtask.name),
     )

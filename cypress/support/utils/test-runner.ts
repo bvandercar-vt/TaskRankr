@@ -1,28 +1,7 @@
-export const runBothModes = (
-  testTitle: string,
-  runTest: (loggedIn: boolean) => void,
-) => {
-  describe(testTitle, () => {
-    for (const [loggedIn, testTitleSuffix] of [
-      [false, 'Guest Mode'],
-      [true, 'Logged In Mode'],
-    ] as const) {
-      it(`${testTitle} - ${testTitleSuffix}`, setLoggedIn(loggedIn), () =>
-        runTest(loggedIn),
-      )
-    }
-  })
-}
+const userMode = (Cypress.env('userMode') as string | undefined)?.toUpperCase()
+if (userMode === undefined)
+  throw new Error('userMode environment variable is not set')
+if (userMode !== 'USER' && userMode !== 'GUEST')
+  throw new Error(`Invalid userMode environment variable value: ${userMode}`)
 
-const LOGGED_IN_ENV_VAR = 'LOGGED_IN'
-export const setLoggedIn = (loggedIn: boolean) =>
-  ({
-    env: { [LOGGED_IN_ENV_VAR]: loggedIn ? 'true' : 'false' },
-  }) satisfies Pick<Cypress.ResolvedConfigOptions, 'env'>
-
-export const isLoggedIn = () => {
-  const val: boolean | undefined = Cypress.env(LOGGED_IN_ENV_VAR)
-  if (val === undefined)
-    throw new Error(`$${LOGGED_IN_ENV_VAR} environment variable is not set`)
-  return val
-}
+export const isLoggedIn = () => userMode === 'USER'

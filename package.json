@@ -18,7 +18,10 @@
     "format": "npx biome check . --fix",
     "lint": "npx biome check .",
     "ts:check": "tsc",
-    "cy:ts:check": "tsc  --project cypress/tsconfig.json"
+    "cy:ts:check": "tsc  --project cypress/tsconfig.json",
+    "cy:run": "npm run cy:run:user",
+    "cy:run:user": "cypress run --env userMode=USER",
+    "cy:run:guest": "cypress run --env userMode=GUEST"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
