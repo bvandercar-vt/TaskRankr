@@ -77,9 +77,15 @@ const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
       cy.wrap($btn).should('not.exist')
     })
 
-export const clickSubmitBtnCreate = (task: CreatedTask) => {
+export const clickSubmitBtnCreate = (
+  task: CreatedTask,
+  noCreateCheck?: boolean,
+) => {
   checkTaskExistsBackend(task, false)
-  clickSubmitBtn('Create', () => waitForCreate(task))
+  clickSubmitBtn(
+    'Create',
+    noCreateCheck ? undefined : () => waitForCreate(task),
+  )
 }
 
 export const clickSubmitBtnUpdate = (task?: CreatedTask) =>
