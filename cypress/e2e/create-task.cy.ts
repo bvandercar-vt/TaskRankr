@@ -85,17 +85,25 @@ describe('Task Creation', () => {
         timeSpent: { visible: true, required: true },
       } as const satisfies FieldConfig
 
+      const taskAllNull = {
+        ...rootTask,
+        priority: null,
+        ease: null,
+        enjoyment: null,
+        time: null,
+      } satisfies TaskFormData
+
       setSettings({ fieldConfig })
       cy.get('@settingsPut.all').should('have.length', isLoggedIn() ? 5 : 0)
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(rootTask, fieldConfig)
+      fillTaskForm(taskAllNull, fieldConfig)
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
       clickSubmitBtn()
-      waitForCreate({ ...rootTask, status: TaskStatus.COMPLETED })
+      waitForCreate({ ...taskAllNull, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
       checkNumCalls({ create: 1 })
     },
