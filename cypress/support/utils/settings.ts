@@ -24,6 +24,8 @@ export const setSettings = (settings: Pick<UserSettings, 'fieldConfig'>) => {
 }
 
 const setFieldConfig = (targetConfig: FieldConfig) => {
+  const loggedIn = isLoggedIn()
+
   for (const [field, { visible, required }] of Object.entries(
     targetConfig,
   ) as Entries<FieldConfig>) {
@@ -32,7 +34,7 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .then((isChecked) => {
         if (isChecked !== visible) {
           cy.get(Settings.FieldConfig.visibleCheckbox(field)).click()
-          cy.wait('@settingsPut')
+          loggedIn && cy.wait('@settingsPut')
         }
       })
 
@@ -41,7 +43,7 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .then((isChecked) => {
         if (isChecked !== required) {
           cy.get(Settings.FieldConfig.requiredCheckbox(field)).click()
-          cy.wait('@settingsPut')
+          loggedIn && cy.wait('@settingsPut')
         }
       })
   }
