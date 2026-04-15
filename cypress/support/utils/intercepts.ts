@@ -9,10 +9,13 @@ export const interceptCreate = () => {
 
 export type CreatedTask = Pick<Task, 'name' | 'status' | RankField>
 
-export function waitForCreate(task: CreatedTask) {
+export function waitForCreate(task: CreatedTask | CreatedTask[]): void {
+  const tasks = Array.isArray(task) ? task : [task]
   const loggedIn = isLoggedIn()
-  loggedIn && cy.wait('@createTask')
-  checkTaskExistsBackend(task, true)
+  loggedIn && cy.wait(Array(tasks.length).fill('@createTask'))
+  for (const t of tasks) {
+    checkTaskExistsBackend(t, true)
+  }
 }
 
 export const interceptDelete = () => {

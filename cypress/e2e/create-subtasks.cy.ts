@@ -59,13 +59,12 @@ describe('Create Subtasks', () => {
 
   it('create a subtask, check appears in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
     fillTaskForm(subtask)
     clickSubmitBtnCreate(subtask)
     checkTaskFormSubtasks([subtask])
 
     clickSubmitBtnUpdate() // TODO: bugfix: should be create
-
+    waitForCreate([rootTask, subtask])
     checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
 
@@ -85,7 +84,6 @@ describe('Create Subtasks', () => {
 
   it('create multiple subtasks, check appear in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
     fillTaskForm(subtask)
     clickSubmitBtnCreate(subtask)
     checkTaskFormSubtasks([subtask])
@@ -96,7 +94,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, subtask2])
 
     clickSubmitBtnUpdate() // TODO: bugfix: should be create
-
+    waitForCreate([rootTask, subtask, subtask2])
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
 
@@ -116,12 +114,10 @@ describe('Create Subtasks', () => {
 
   it('create nested subtasks, ensure appear in tree', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
     fillTaskForm(subtask)
 
     const nestedSubtasks: CreatedTask[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(subtask)
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
     nestedSubtasks.push(subtask2)
@@ -137,6 +133,7 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, ...nestedSubtasks])
 
     clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    waitForCreate([rootTask, subtask, subtask2, subtask3])
     checkTaskInTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: nestedSubtasks }],
