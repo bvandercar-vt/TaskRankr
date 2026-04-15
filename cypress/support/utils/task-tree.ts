@@ -5,13 +5,14 @@ const { TaskCard } = Selectors
 
 type TaskTreeNode = Pick<Task, 'name'> & { subtasks?: TaskTreeNode[] }
 
-const getTaskCard = (task: Pick<Task, 'name'>) =>
+export const getTaskCard = (task: Pick<Task, 'name'>) =>
   cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
     )
     .should('exist')
+    .should('have.length', 1)
     .closest(TaskCard.CARD)
 
 const checkTitleAndSubtasks = (task: TaskTreeNode) => {

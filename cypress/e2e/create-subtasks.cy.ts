@@ -14,11 +14,11 @@ import {
   clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
-import { checkTaskInTree } from '@cypress/support/utils/task-tree'
+import { checkTaskInTree, getTaskCard } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm, TaskCard } = Selectors
+const { TaskForm } = Selectors
 
 describe('Create Subtasks', () => {
   const rootTask = {
@@ -69,7 +69,7 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
-    cy.contains(TaskCard.CARD, rootTask.name).click()
+    getTaskCard(rootTask).click()
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
@@ -102,7 +102,7 @@ describe('Create Subtasks', () => {
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
-    cy.contains(TaskCard.CARD, rootTask.name).click()
+    getTaskCard(rootTask).click()
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask3)
     clickSubmitBtnCreate(subtask3)
