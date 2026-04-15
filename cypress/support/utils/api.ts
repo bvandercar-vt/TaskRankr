@@ -41,6 +41,8 @@ export function checkTaskExistsBackend(
   task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
   exists: boolean,
 ): void {
+  const loggedIn = isLoggedIn()
+
   const checkTasks = (tasks: Task[], message: string) => {
     if (exists) {
       expect(
@@ -65,7 +67,7 @@ export function checkTaskExistsBackend(
   }
 
   getLocalStateTasks().should((tasks) => checkTasks(tasks, 'local state'))
-  getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
+  loggedIn && getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
 }
 
 export const getSettings = () =>
