@@ -64,7 +64,7 @@ describe('Create Subtasks', () => {
     clickSubmitBtnCreate(subtask)
     checkTaskFormSubtasks([subtask])
 
-    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
@@ -78,7 +78,7 @@ describe('Create Subtasks', () => {
     clickSubmitBtnCreate(subtask2)
     checkTaskFormSubtasks([subtask, subtask2])
 
-    clickSubmitBtnUpdate(rootTask)
+    clickSubmitBtnUpdate()
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
   })
@@ -95,7 +95,7 @@ describe('Create Subtasks', () => {
     clickSubmitBtnCreate(subtask2)
     checkTaskFormSubtasks([subtask, subtask2])
 
-    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
@@ -109,7 +109,7 @@ describe('Create Subtasks', () => {
     clickSubmitBtnCreate(subtask3)
     checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
-    clickSubmitBtnUpdate(rootTask)
+    clickSubmitBtnUpdate()
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
     checkNumCalls({ create: 4, update: 0 })
   })
@@ -133,10 +133,10 @@ describe('Create Subtasks', () => {
     nestedSubtasks.push(subtask3)
     checkTaskFormSubtasks(nestedSubtasks)
 
-    clickSubmitBtnUpdate(subtask) // TODO: bugfix: should be create
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
     checkTaskFormSubtasks([subtask, ...nestedSubtasks])
 
-    clickSubmitBtnUpdate(rootTask) // TODO: bugfix: should be create
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
     checkTaskInTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: nestedSubtasks }],
