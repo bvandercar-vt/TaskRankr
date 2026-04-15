@@ -7,12 +7,8 @@ export const runBothModes = (
       [false, 'Guest Mode'],
       [true, 'Logged In Mode'],
     ] as const) {
-      it(
-        `${testTitle} - ${testTitleSuffix}`,
-        setLoggedIn(loggedIn),
-        async () => {
-          await runTest(loggedIn)
-        },
+      it(`${testTitle} - ${testTitleSuffix}`, setLoggedIn(loggedIn), () =>
+        runTest(loggedIn),
       )
     }
   })
