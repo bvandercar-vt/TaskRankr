@@ -6,6 +6,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
+import { type CreatedTask, waitForCreate } from './intercepts'
 import { isLoggedIn } from './test-runner'
 
 const { TaskForm } = Selectors
@@ -68,10 +69,7 @@ export const fillTaskForm = (
   }
 }
 
-export const clickSubmitBtn = (
-  submitBtnText: string,
-  afterSubmit?: () => void,
-) =>
+const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
   cy
     .get(TaskForm.SUBMIT_BTN)
     .should('have.text', submitBtnText)
@@ -82,10 +80,20 @@ export const clickSubmitBtn = (
       cy.wrap($btn).should('not.exist')
     })
 
+export const clickSubmitBtnCreate = (task: CreatedTask) =>
+  clickSubmitBtn('Create', () => waitForCreate(task))
+
+export const clickSubmitBtnUpdate = () =>
+  clickSubmitBtn(
+    'Save',
+    // () => waitForUpdate() // TODO: debug test
+  )
+
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested
   cy
     .get(TaskForm.SUBTASK_ROW)
+    .should('have.length', subtasks.length)
     .getElementArrayText()
     .should(
       'deep.equal',

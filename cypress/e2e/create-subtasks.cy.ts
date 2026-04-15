@@ -10,7 +10,8 @@ import {
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
-  clickSubmitBtn,
+  clickSubmitBtnCreate,
+  clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
@@ -58,14 +59,11 @@ describe('Create Subtasks', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
     fillTaskForm(subtask)
-    clickSubmitBtn('Create', () => waitForCreate(subtask))
+    clickSubmitBtnCreate(subtask)
     subtasks.push(subtask)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtn(
-      'Save', // TODO: bugfix: should be "Create"
-      // ()=> waitForUpdate() // TODO: debug test
-    )
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 2, update: 0 })
@@ -76,20 +74,17 @@ describe('Create Subtasks', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(rootTask)
     fillTaskForm(subtask)
-    clickSubmitBtn('Create', () => waitForCreate(subtask))
+    clickSubmitBtnCreate(subtask)
     subtasks.push(subtask)
     checkTaskFormSubtasks(subtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
-    clickSubmitBtn('Create', () => waitForCreate(subtask2))
+    clickSubmitBtnCreate(subtask2)
     subtasks.push(subtask2)
     checkTaskFormSubtasks(subtasks)
 
-    clickSubmitBtn(
-      'Save', // TODO: bugfix: should be "Create"
-      // ()=> waitForUpdate() // TODO: debug test
-    )
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 0 })
@@ -105,26 +100,20 @@ describe('Create Subtasks', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     waitForCreate(subtask)
     fillTaskForm(subtask2)
-    clickSubmitBtn('Create', () => waitForCreate(subtask2))
+    clickSubmitBtnCreate(subtask2)
     nestedSubtasks.push(subtask2)
     checkTaskFormSubtasks(nestedSubtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask3)
-    clickSubmitBtn('Create', () => waitForCreate(subtask3))
+    clickSubmitBtnCreate(subtask3)
     nestedSubtasks.push(subtask3)
     checkTaskFormSubtasks(nestedSubtasks)
 
-    clickSubmitBtn(
-      'Save', // TODO: bugfix: should be "Create"
-      // ()=> waitForUpdate() // TODO: debug test
-    )
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
     checkTaskFormSubtasks([subtask, ...nestedSubtasks])
 
-    clickSubmitBtn(
-      'Save', // TODO: bugfix: should be "Create"
-      // ()=> waitForUpdate() // TODO: debug test
-    )
+    clickSubmitBtnUpdate() // TODO: bugfix: should be create
 
     checkTaskInTree({
       ...rootTask,
