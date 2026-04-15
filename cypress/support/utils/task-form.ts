@@ -83,10 +83,7 @@ export const clickSubmitBtnCreate = (task: CreatedTask) => {
 }
 
 export const clickSubmitBtnUpdate = (task?: CreatedTask) =>
-  clickSubmitBtn(
-    'Save',
-    task && (() => waitForUpdate(task)) 
-  )
+  clickSubmitBtn('Save', task && (() => waitForUpdate(task)))
 
 export const assignSubtask = (
   /**
