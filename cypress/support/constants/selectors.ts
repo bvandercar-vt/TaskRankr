@@ -26,6 +26,7 @@ export const Selectors = {
     CARD: testIdStartsWith('task-card-'),
     TITLE: testId('task-title'),
     EXPAND_BTN: testIdStartsWith('button-expand-'),
+    COLLAPSE_BTN: testIdStartsWith('button-collapse-'),
   },
   TaskForm: {
     FORM: testId('task-form'),

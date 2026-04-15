@@ -110,9 +110,10 @@ export const SubtaskRowItem = ({
           </button>
         )}
         {task.depth > 0 && (
-          <span className="text-muted-foreground/50 text-xs leading-none">
-            └
-          </span>
+          <span
+            aria-hidden="true"
+            className="text-muted-foreground/50 text-xs leading-none select-none before:content-['└']"
+          />
         )}
         <CompletedCheckbox task={task} disabled={disableComplete} />
         <span

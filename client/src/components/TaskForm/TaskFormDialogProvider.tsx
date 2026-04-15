@@ -140,7 +140,7 @@ export const TaskFormDialogProvider = ({
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [activeTask, setActiveTask] = useState<Task | undefined>(undefined)
   const [parentId, setParentId] = useState<number | undefined>(undefined)
-  const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
+  const [returnToTaskStack, setReturnToTaskStack] = useState<Task[]>([])
 
   const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
     null,
@@ -157,15 +157,15 @@ export const TaskFormDialogProvider = ({
       setActiveTask((prev) =>
         prev?.id === tempId ? { ...prev, id: realId } : prev,
       )
-      setReturnToTask((prev) =>
-        prev?.id === tempId ? { ...prev, id: realId } : prev,
+      setReturnToTaskStack((prev) =>
+        prev.map((t) => (t.id === tempId ? { ...t, id: realId } : t)),
       )
     })
   }, [subscribeToIdReplacement])
 
   const openCreateDialog = (pid?: number) => {
     if (mode === 'edit' && activeTask && pid !== undefined) {
-      setReturnToTask(activeTask)
+      setReturnToTaskStack((prev) => [...prev, activeTask])
     }
     setMode('create')
     setParentId(pid)
@@ -177,13 +177,13 @@ export const TaskFormDialogProvider = ({
     setMode('edit')
     setActiveTask(task)
     setParentId(task.parentId ?? undefined)
-    setReturnToTask(undefined)
+    setReturnToTaskStack([])
     setIsOpen(true)
   }
 
   const handleEditSubtask = (task: Task) => {
     if (activeTask) {
-      setReturnToTask(activeTask)
+      setReturnToTaskStack((prev) => [...prev, activeTask])
     }
     setMode('edit')
     setActiveTask(task)
@@ -192,9 +192,9 @@ export const TaskFormDialogProvider = ({
   }
 
   const closeDialog = () => {
-    if (returnToTask) {
-      const taskToReturn = returnToTask
-      setReturnToTask(undefined)
+    if (returnToTaskStack.length > 0) {
+      const taskToReturn = returnToTaskStack[returnToTaskStack.length - 1]
+      setReturnToTaskStack((prev) => prev.slice(0, -1))
       setMode('edit')
       setActiveTask(taskToReturn)
       setParentId(taskToReturn.parentId ?? undefined)
@@ -207,12 +207,32 @@ export const TaskFormDialogProvider = ({
     }
   }
 
+  const hasChanges = (
+    data: Record<string, unknown>,
+    task: Record<string, unknown>,
+  ) =>
+    Object.keys(data).some((key) => {
+      const a = data[key]
+      const b = task[key]
+      if (a === b) return false
+      const sa = a instanceof Date ? a.toISOString() : JSON.stringify(a)
+      const sb = b instanceof Date ? b.toISOString() : JSON.stringify(b)
+      return sa !== sb
+    })
+
   const handleSubmit = (data: MutateTaskContent) => {
     if (mode === 'create') {
       createTask({ ...data, parentId } as CreateTask)
       closeDialog()
     } else if (mode === 'edit' && activeTask) {
-      updateTask({ id: activeTask.id, ...data })
+      if (
+        hasChanges(
+          data as Record<string, unknown>,
+          activeTask as Record<string, unknown>,
+        )
+      ) {
+        updateTask({ id: activeTask.id, ...data })
+      }
       closeDialog()
     }
   }
@@ -220,7 +240,7 @@ export const TaskFormDialogProvider = ({
   const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
     if (formData) {
       const newTask = createTask({ ...formData, parentId } as CreateTask)
-      setReturnToTask(newTask)
+      setReturnToTaskStack((prev) => [...prev, newTask])
       setMode('create')
       setActiveTask(undefined)
       setParentId(newTask.id)
@@ -235,7 +255,7 @@ export const TaskFormDialogProvider = ({
       setMode('edit')
       setActiveTask(newTask)
       setParentId(newTask.parentId ?? undefined)
-      setReturnToTask(undefined)
+      setReturnToTaskStack([])
       setAssignParentTask(newTask)
     } else {
       setAssignParentTask(task)

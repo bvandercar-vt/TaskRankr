@@ -18,11 +18,12 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
 
   if (!task.subtasks?.length) return
 
-  cardTitle().closest(TaskCard.CARD).find(TaskCard.EXPAND_BTN).click()
+  cardTitle().closest(TaskCard.CARD).find(TaskCard.EXPAND_BTN).first().click()
   cardTitle()
     .closest(TaskCard.CARD)
-    .find(TaskCard.EXPAND_BTN)
-    .should('not.exist')
+    .find(TaskCard.COLLAPSE_BTN)
+    .first()
+    .should('exist')
   cardTitle()
     .closest(TaskCard.CARD)
     .within(() => checkSubtasksInCard(task))
