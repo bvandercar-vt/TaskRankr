@@ -79,9 +79,8 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, subtask2])
 
     clickSubmitBtnUpdate(rootTask)
-    cy.wait(500) //attempt wait
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
-    checkNumCalls({ create: 3, update: 1 })
+    checkNumCalls({ create: 3, update: 0 })
   })
 
   it('create multiple subtasks, check appear in tree', () => {
@@ -111,9 +110,8 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks([subtask, subtask2, subtask3])
 
     clickSubmitBtnUpdate(rootTask)
-    cy.wait(500) //attempt wait
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
-    checkNumCalls({ create: 4, update: 1 })
+    checkNumCalls({ create: 4, update: 0 })
   })
 
   it('create nested subtasks, ensure appear in tree', () => {

@@ -22,11 +22,9 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
   if (!task.subtasks?.length) return
 
   thisTaskCard.then(($card) => {
-    if ($card.find(TaskCard.EXPAND_BTN).length > 0) {
-      thisTaskCard
-        .find(TaskCard.EXPAND_BTN)
-        .first()
-        .then(($btn) => cy.wrap($btn).click())
+    const expandBtns = $card.find(TaskCard.EXPAND_BTN)
+    if (expandBtns.length > 0) {
+      cy.wrap(expandBtns).each(($btn) => cy.wrap($btn).click())
     }
   })
 
