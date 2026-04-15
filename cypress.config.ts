@@ -3,7 +3,7 @@ import installTerminalReporter from 'cypress-terminal-report/src/installLogsPrin
 import vitePreprocessor from 'cypress-vite'
 
 export default defineConfig({
-  video: false,
+  video: true,
   screenshotOnRunFailure: true,
   fixturesFolder: false,
   e2e: {
@@ -17,7 +17,7 @@ export default defineConfig({
 
       installTerminalReporter(on, {
         outputVerbose: false,
-        compactLogs: 7,
+        compactLogs: 15,
         outputCompactLogs: false, // print all logs to file
         routeTrimLength: 1000, // don't print all GET data
         printLogsToConsole: 'onFail',
