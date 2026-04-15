@@ -97,7 +97,7 @@ describe('Task Creation', () => {
     () => {
       const fieldConfig = {
         ...FieldConfigAllFalse,
-        timeSpent: { visible: true, required: false },
+        timeSpent: { visible: true, required: true },
       } as const satisfies FieldConfig
 
       setSettings({ fieldConfig })
