@@ -54,10 +54,10 @@ describe('Task Creation', () => {
 
   runBothModes('create a task, check displays in main tree', (loggedIn) => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(DefaultTask)
+    fillTaskForm(rootTask)
     clickSubmitBtn()
-    waitForCreate(DefaultTask)
-    checkTaskInTree(DefaultTask)
+    waitForCreate(rootTask)
+    checkTaskInTree(rootTask)
     cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
   })
 
@@ -73,7 +73,7 @@ describe('Task Creation', () => {
       } as const satisfies FieldConfig
 
       const newTask = {
-        ...DefaultTask,
+        ...rootTask,
         name: 'Field Config Test Task',
         ease: null,
         enjoyment: null,
@@ -103,12 +103,12 @@ describe('Task Creation', () => {
       cy.get(Selectors.BACK_BTN).click()
 
       cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(DefaultTask, fieldConfig)
+      fillTaskForm(rootTask, fieldConfig)
       cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
       cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
       cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
       clickSubmitBtn()
-      waitForCreate({ ...DefaultTask, status: TaskStatus.COMPLETED })
+      waitForCreate({ ...rootTask, status: TaskStatus.COMPLETED })
       // TODO: check is in completed tree
       cy.get('@createTask').should('have.been.called', loggedIn ? 1 : 0)
     },
