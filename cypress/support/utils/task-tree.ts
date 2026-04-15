@@ -23,7 +23,8 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
     .find(TaskCard.EXPAND_BTN)
     .first()
     .then(($btn) => cy.wrap($btn).click())
-  thisTaskCard.within(() => checkSubtasksInCard(task))
+  // expanding changes the render, so we need to get the card again
+  getTaskCard(task).within(() => checkSubtasksInCard(task))
 }
 
 const checkSubtasksInCard = (task: TaskTreeNode) => {
