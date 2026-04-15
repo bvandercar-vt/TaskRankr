@@ -131,7 +131,7 @@ describe('Task Creation', () => {
         .first()
         .should('contain.text', subtask.name)
 
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask] })
@@ -163,7 +163,7 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('deep.equal', [subtask.name, subtask2.name])
 
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(rootTask)
 
       checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
@@ -206,7 +206,7 @@ describe('Task Creation', () => {
         .getElementArrayText()
         .should('deep.equal', [subtask.name, subtask2.name, subtask3.name])
 
-      clickSubmitBtn()
+      clickSubmitBtn('Save') // TODO: bugfix: should be "Create"
       waitForCreate(rootTask)
 
       checkTaskInTree({
