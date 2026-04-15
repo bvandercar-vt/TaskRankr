@@ -81,6 +81,6 @@ export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
     .get(TaskForm.SUBTASK_ROW)
     .getElementArrayText()
     .should(
-      'equal',
+      'deep.equal',
       subtasks.map((subtask) => subtask.name),
     )
