@@ -1,4 +1,6 @@
-import { TaskStatus } from '~/shared/schema'
+import type { SetOptional } from 'type-fest'
+
+import { type Task, TaskStatus } from '~/shared/schema'
 import { ApiPaths } from '../constants'
 import { checkTaskExistsBackend } from './api'
 import type { TaskFormData } from './task-form'
@@ -8,10 +10,12 @@ export const interceptCreate = () => {
   cy.intercept('POST', ApiPaths.CREATE_TASK).as('createTask')
 }
 
+export type CreatedTask = Pick<Task, keyof TaskFormData | 'status'>
+
 export function waitForCreate({
-  status = TaskStatus.PINNED,
+  status = TaskStatus.OPEN,
   ...task
-}: TaskFormData & { status?: TaskStatus }) {
+}: SetOptional<CreatedTask, 'status'>) {
   const loggedIn = isLoggedIn()
 
   loggedIn && cy.wait('@createTask')

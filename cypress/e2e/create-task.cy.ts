@@ -6,6 +6,7 @@ import {
 } from '@cypress/support/constants'
 import { isLoggedIn, runBothModes } from '@cypress/support/utils'
 import {
+  type CreatedTask,
   interceptCreate,
   waitForCreate,
 } from '@cypress/support/utils/intercepts'
@@ -25,22 +26,24 @@ describe('Task Creation', () => {
   const rootTask = {
     ...DefaultTask,
     name: 'E2E Root Level Task',
-  } as const satisfies TaskFormData
+    status: TaskStatus.PINNED,
+  } as const satisfies CreatedTask
 
   const subtask = {
     ...DefaultTask,
+    status: TaskStatus.OPEN,
     name: 'E2E Subtask 1',
-  } as const satisfies TaskFormData
+  } as const satisfies CreatedTask
 
   const subtask2 = {
-    ...DefaultTask,
+    ...subtask,
     name: 'E2E Subtask 2',
-  } as const satisfies TaskFormData
+  } as const satisfies CreatedTask
 
   const subtask3 = {
-    ...DefaultTask,
+    ...subtask,
     name: 'E2E Subtask 3',
-  } as const satisfies TaskFormData
+  } as const satisfies CreatedTask
 
   beforeEach(() => {
     interceptCreate()

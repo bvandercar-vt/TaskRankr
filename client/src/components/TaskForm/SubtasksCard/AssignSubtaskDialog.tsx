@@ -57,7 +57,7 @@ export const AssignSubtaskDialog = ({
     setSearch('')
     setShowCompleted(false)
   }
-  
+
   const handleConfirm = () => {
     if (selectedId === null) return
     updateTask({ id: selectedId, parentId: parentTask.id })
