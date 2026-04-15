@@ -73,7 +73,6 @@ describe('Create Subtasks', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
     clickSubmitBtnCreate(subtask2)
-    waitForCreate(subtask2)
     subtasks.push(subtask2)
     checkTaskFormSubtasks(subtasks)
 
@@ -107,7 +106,6 @@ describe('Create Subtasks', () => {
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask3)
     clickSubmitBtnCreate(subtask3)
-    waitForCreate(subtask3)
     subtasks.push(subtask3)
     checkTaskFormSubtasks(subtasks)
 

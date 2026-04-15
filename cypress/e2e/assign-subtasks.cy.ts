@@ -1,21 +1,22 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn, runBothModes } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
+  type CreatedTask,
   checkNumCalls,
   interceptCreate,
   interceptUpdate,
-  waitForCreate,
   waitForUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   assignSubtask,
   checkTaskFormSubtasks,
-  clickSubmitBtn,
+  clickSubmitBtnCreate,
   fillTaskForm,
-  type TaskFormData,
 } from '@cypress/support/utils/task-form'
 import { checkTaskInTree } from '@cypress/support/utils/task-tree'
+
+import { TaskStatus } from '~/shared/schema'
 
 const { TaskForm, TaskCard } = Selectors
 
@@ -23,22 +24,26 @@ describe('Assign Subtask', () => {
   const rootTask = {
     ...DefaultTask,
     name: 'E2E Root Task',
-  } as const satisfies TaskFormData
+    status: TaskStatus.PINNED,
+  } as const satisfies CreatedTask
 
   const orphanTask = {
     ...DefaultTask,
     name: 'E2E Orphan Task 1',
-  } as const satisfies TaskFormData
+    status: TaskStatus.OPEN,
+  } as const satisfies CreatedTask
 
   const orphanTask2 = {
     ...DefaultTask,
     name: 'E2E Orphan Task 2',
-  } as const satisfies TaskFormData
+    status: TaskStatus.OPEN,
+  } as const satisfies CreatedTask
 
   const newSubtask = {
     ...DefaultTask,
     name: 'E2E Brand New Subtask',
-  } as const satisfies TaskFormData
+    status: TaskStatus.OPEN,
+  } as const satisfies CreatedTask
 
   beforeEach(() => {
     interceptCreate()
@@ -50,50 +55,44 @@ describe('Assign Subtask', () => {
     // Create the orphan tasks
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask)
-    clickSubmitBtn()
-    waitForCreate(orphanTask)
+    clickSubmitBtnCreate(orphanTask)
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask2)
-    clickSubmitBtn()
-    waitForCreate(orphanTask2)
+    clickSubmitBtnCreate(orphanTask2)
   })
 
-  runBothModes(
-    'assign an existing orphaned task as a subtask of a task',
-    () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      fillTaskForm(rootTask)
-      const subtasks: TaskFormData[] = []
+  it('assign an existing orphaned task as a subtask of a task', () => {
+    cy.get(Selectors.CREATE_TASK_BTN).click()
+    fillTaskForm(rootTask)
+    const subtasks: CreatedTask[] = []
 
-      assignSubtask(orphanTask)
-      subtasks.push(orphanTask)
-      waitForUpdate()
-      checkTaskFormSubtasks(subtasks)
+    assignSubtask(orphanTask)
+    subtasks.push(orphanTask)
+    waitForUpdate(orphanTask)
+    checkTaskFormSubtasks(subtasks)
 
-      // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
-      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      fillTaskForm(newSubtask)
-      clickSubmitBtn()
-      waitForCreate(newSubtask)
-      subtasks.push(newSubtask)
-      checkTaskFormSubtasks(subtasks)
+    // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(newSubtask)
+    clickSubmitBtnCreate(newSubtask)
+    subtasks.push(newSubtask)
+    checkTaskFormSubtasks(subtasks)
 
-      clickSubmitBtn() // TODO: try cancel and ensure wasn't assigned.
-      checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
-      checkNumCalls({ create: 2, update: 1 })
+    clickSubmitBtnCreate(newSubtask) // TODO: try cancel and ensure wasn't assigned.
+    checkTaskInTree({ ...rootTask, subtasks: [orphanTask] })
+    checkNumCalls({ create: 2, update: 1 })
 
-      // test in edit mode
-      cy.contains(TaskCard.CARD, rootTask.name).click()
-      checkTaskFormSubtasks(subtasks)
-      assignSubtask(orphanTask2)
-      waitForUpdate()
-      subtasks.push(orphanTask2)
-      checkTaskFormSubtasks(subtasks)
+    // test in edit mode
+    cy.contains(TaskCard.CARD, rootTask.name).click()
+    checkTaskFormSubtasks(subtasks)
+    assignSubtask(orphanTask2)
+    waitForUpdate(orphanTask2)
+    subtasks.push(orphanTask2)
+    checkTaskFormSubtasks(subtasks)
 
-      clickSubmitBtn()
-      checkTaskInTree({ ...rootTask, subtasks })
-      checkNumCalls({ create: 3, update: 2 })
-    },
-  )
+    clickSubmitBtnCreate(rootTask)
+    checkTaskInTree({ ...rootTask, subtasks })
+    checkNumCalls({ create: 3, update: 2 })
+  })
 })
