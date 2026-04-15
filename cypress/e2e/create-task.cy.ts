@@ -64,7 +64,7 @@ describe('Task Creation', () => {
     cy.get(Selectors.BACK_BTN).click()
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(newTask, 0, fieldConfig)
+    fillTaskForm(newTask, fieldConfig)
     clickSubmitBtnCreate(newTask)
     checkTaskInTree(newTask)
     checkNumCalls({ create: 1 })
@@ -89,7 +89,7 @@ describe('Task Creation', () => {
     cy.get(Selectors.BACK_BTN).click()
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(taskAllNull, 0, fieldConfig)
+    fillTaskForm(taskAllNull, fieldConfig)
     cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
     cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
     cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')

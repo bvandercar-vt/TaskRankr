@@ -6,11 +6,14 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import type { CreatedTask } from './intercepts'
+import { type CreatedTask, waitForUpdate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
 type TaskFormData = Pick<Task, 'name' | RankField>
+
+export const getTaskForm = (tier = 0) =>
+  cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
@@ -48,27 +51,22 @@ export const fillTaskFormRankFields = (
  */
 export const fillTaskForm = (
   task: TaskFormData,
-  tier = 0,
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
   checkTaskExistsBackend(task, false)
 
-  cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`)
-    .should('be.visible')
-    .within(() => {
-      cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
+  cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
-      cy.get(TaskForm.NAME_INPUT).type(task.name)
+  cy.get(TaskForm.NAME_INPUT).type(task.name)
 
-      fillTaskFormRankFields(task, settings)
+  fillTaskFormRankFields(task, settings)
 
-      if (settings.timeSpent.visible) {
-        cy.get(TaskForm.TIME_SPENT_INPUT).should(
-          settings.timeSpent.visible ? 'be.visible' : 'not.exist',
-        )
-        // TODO: test required
-      }
-    })
+  if (settings.timeSpent.visible) {
+    cy.get(TaskForm.TIME_SPENT_INPUT).should(
+      settings.timeSpent.visible ? 'be.visible' : 'not.exist',
+    )
+    // TODO: test required
+  }
 }
 
 const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
@@ -93,22 +91,22 @@ export const assignSubtask = (
   /**
    * the orphan task to assign as subtask.
    */
-  task: Pick<Task, 'name'>,
+  task: CreatedTask,
 ) => {
   cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
-  cy.get(AssignSubtaskDialog.DIALOG)
+  cy.escapeWithin()
+    .find(AssignSubtaskDialog.DIALOG)
     .should('be.visible')
     .within(() => {
       cy.contains(AssignSubtaskDialog.TASK_OPTION, task.name).click()
+      cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
     })
-  cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
+  waitForUpdate(task)
 }
 
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   // TODO: test how they are nested
   cy
-    .get(TaskForm.FORM)
-    .should('be.visible')
     .find(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
     .getElementArrayText()
