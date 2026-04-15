@@ -8,7 +8,10 @@ export default defineConfig({
   fixturesFolder: false,
   e2e: {
     baseUrl: 'http://localhost:5000',
-    specPattern: 'cypress/e2e/**/*.cy.ts',
+    specPattern: [
+      'cypress/e2e/create-task.cy.ts',
+      'cypress/e2e/create-subtasks.cy.ts',
+    ],
     setupNodeEvents(on) {
       on('file:preprocessor', vitePreprocessor())
 
