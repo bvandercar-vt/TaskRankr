@@ -97,7 +97,7 @@ describe('Create Subtasks', () => {
   runBothModes('create nested subtasks, ensure appear in tree', () => {
     const subtasks: CreatedTask[] = []
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(subtask)
+    waitForCreate(rootTask)
     fillTaskForm(subtask2)
     clickSubmitBtn()
     waitForCreate(subtask2)
