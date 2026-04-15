@@ -193,7 +193,8 @@ export const TaskFormDialogProvider = ({
 
   const closeDialog = () => {
     if (returnToTaskStack.length > 0) {
-      const taskToReturn = returnToTaskStack[returnToTaskStack.length - 1]
+      const taskToReturn = returnToTaskStack.at(-1)
+      if (!taskToReturn) return
       setReturnToTaskStack((prev) => prev.slice(0, -1))
       setMode('edit')
       setActiveTask(taskToReturn)
@@ -225,12 +226,7 @@ export const TaskFormDialogProvider = ({
       createTask({ ...data, parentId } as CreateTask)
       closeDialog()
     } else if (mode === 'edit' && activeTask) {
-      if (
-        hasChanges(
-          data as Record<string, unknown>,
-          activeTask as Record<string, unknown>,
-        )
-      ) {
+      if (hasChanges(data, activeTask)) {
         updateTask({ id: activeTask.id, ...data })
       }
       closeDialog()
