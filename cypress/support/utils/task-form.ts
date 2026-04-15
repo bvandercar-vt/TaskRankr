@@ -50,6 +50,8 @@ export const fillTaskForm = (
   task: TaskFormData,
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
+  checkTaskExistsBackend(task, false)
+
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
   cy.get(TaskForm.NAME_INPUT).type(task.name)
