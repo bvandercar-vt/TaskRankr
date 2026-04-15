@@ -14,7 +14,7 @@ import {
   clickSubmitBtnUpdate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
-import { checkTaskInTree } from '@cypress/support/utils/task-tree'
+import { checkTaskInTree, getTaskCard } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
@@ -67,6 +67,18 @@ describe('Create Subtasks', () => {
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 2, update: 0 })
+
+    // test EDIT
+    getTaskCard(rootTask).click()
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask2)
+    clickSubmitBtnCreate(subtask2)
+    subtasks.push(subtask2)
+    checkTaskFormSubtasks(subtasks)
+
+    clickSubmitBtnUpdate(rootTask)
+    checkTaskInTree({ ...rootTask, subtasks })
+    checkNumCalls({ create: 3, update: 1 })
   })
 
   it('create multiple subtasks, check appear in tree', () => {
@@ -88,6 +100,18 @@ describe('Create Subtasks', () => {
 
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 0 })
+
+    // test EDIT
+    getTaskCard(rootTask).click()
+    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    fillTaskForm(subtask3)
+    clickSubmitBtnCreate(subtask3)
+    subtasks.push(subtask3)
+    checkTaskFormSubtasks(subtasks)
+
+    clickSubmitBtnUpdate(rootTask)
+    checkTaskInTree({ ...rootTask, subtasks })
+    checkNumCalls({ create: 4, update: 1 })
   })
 
   it('create nested subtasks, ensure appear in tree', () => {
@@ -119,5 +143,7 @@ describe('Create Subtasks', () => {
       subtasks: [{ ...subtask, subtasks: nestedSubtasks }],
     })
     checkNumCalls({ create: 4, update: 0 })
+
+    // TODO: test EDIT
   })
 })
