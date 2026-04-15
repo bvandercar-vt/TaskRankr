@@ -73,6 +73,7 @@ describe('Create Subtasks', () => {
 
     // test EDIT
     openTaskEditForm(rootTask)
+    checkTaskFormSubtasks(subtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask2)
@@ -81,7 +82,6 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtnUpdate(rootTask)
-    cy.wait(50) // wait for update to occur in the tree
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 3, update: 1 })
   })
@@ -108,6 +108,7 @@ describe('Create Subtasks', () => {
 
     // test EDIT
     openTaskEditForm(rootTask)
+    checkTaskFormSubtasks(subtasks)
 
     cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     fillTaskForm(subtask3)
@@ -116,7 +117,6 @@ describe('Create Subtasks', () => {
     checkTaskFormSubtasks(subtasks)
 
     clickSubmitBtnUpdate(rootTask)
-    cy.wait(50) // wait for update to occur in the tree
     checkTaskInTree({ ...rootTask, subtasks })
     checkNumCalls({ create: 4, update: 1 })
   })
