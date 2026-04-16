@@ -84,12 +84,13 @@ jobs:
       - name: Run Cypress tests (${{ matrix.suite }})
         run: npm run cy:run:${{ matrix.suite }}
 
-      - name: Upload screenshots on failure
+      - name: Upload results and screenshots on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots-${{ matrix.suite }}
+          name: cypress-results-${{ matrix.suite }}
           path: |
             cypress/screenshots
             cypress/videos
+            cypress/results
           if-no-files-found: ignore
