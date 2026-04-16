@@ -53,6 +53,7 @@ export const fillTaskForm = (
   task: TaskFormData,
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
+  cy.log('**filling task form...**')
   checkTaskExistsBackend(task, false)
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
@@ -67,6 +68,7 @@ export const fillTaskForm = (
     )
     // TODO: test required
   }
+  cy.log('**...task form filled**')
 }
 
 const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
