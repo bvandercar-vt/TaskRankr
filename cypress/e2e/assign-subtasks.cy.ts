@@ -72,7 +72,6 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
-      waitForUpdate(orphanTask)
     })  
       getTaskForm(0).within(() => { // re-renders
       checkTaskFormSubtasks([orphanTask])
@@ -98,7 +97,6 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
       assignSubtask(orphanTask2)
-      waitForUpdate(orphanTask2)
       checkTaskFormSubtasks([orphanTask, orphanTask2, newSubtask]) // all at same level, so we don't care about orde really.
       clickSubmitBtnUpdate()
     })
