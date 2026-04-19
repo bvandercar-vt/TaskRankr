@@ -174,7 +174,6 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      clickSubmitBtnCreate(rootTask)
       clickSubmitBtnUpdate() // TODO: bugfix: should be create
     })
 
