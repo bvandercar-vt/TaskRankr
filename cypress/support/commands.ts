@@ -11,6 +11,10 @@ declare global {
       /** Resets the test user's settings to their defaults on the server. */
       resetTestUserSettings(): Chainable<void>
 
+      /**
+       * Escapes if within a .within() by returning the entire `body` element
+       */
+      escapeWithin(): Chainable<JQuery<HTMLElement>>
       getElementArrayText(): Chainable<(string | null)[]>
       selectOption(trigger: string, value: string): Chainable<void>
       getCheckedState(): Chainable<boolean>
@@ -33,6 +37,8 @@ Cypress.Commands.add('resetTestUserSettings', () => {
     .should('have.property', 'status', 200)
 })
 
+Cypress.Commands.addQuery('escapeWithin', () => () => cy.$$('body'))
+
 Cypress.Commands.addQuery(
   'getElementArrayText',
   () => (subject: JQuery<HTMLElement>) => getElementArrayText(subject),
@@ -40,7 +46,8 @@ Cypress.Commands.addQuery(
 
 Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
   cy.get(trigger).click()
-  cy.get('[role="listbox"]')
+  cy.escapeWithin()
+    .find('[role="listbox"]')
     .contains(new RegExp(`^${value}$`))
     .click()
 })

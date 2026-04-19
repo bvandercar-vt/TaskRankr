@@ -96,7 +96,8 @@ export const assignSubtask = (
   task: CreatedTask,
 ) => {
   cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
-  cy.get(AssignSubtaskDialog.DIALOG)
+  cy.escapeWithin()
+    .find(AssignSubtaskDialog.DIALOG)
     .should('be.visible')
     .within(() => {
       cy.contains(AssignSubtaskDialog.TASK_OPTION, task.name).click()
