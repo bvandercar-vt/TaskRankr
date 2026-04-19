@@ -73,6 +73,8 @@ describe('Assign Subtasks', () => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
       waitForUpdate(orphanTask)
+    })  
+      getTaskForm(0).within(() => { // re-renders
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })
