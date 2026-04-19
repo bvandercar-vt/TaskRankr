@@ -67,7 +67,9 @@ export function checkTaskExistsBackend(
   }
 
   getLocalStateTasks().should((tasks) => checkTasks(tasks, 'local state'))
-  loggedIn && getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
+  if (loggedIn || !exists) {
+    getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
+  }
 }
 
 export const getSettings = () =>
