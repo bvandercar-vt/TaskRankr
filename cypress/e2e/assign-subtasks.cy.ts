@@ -6,7 +6,6 @@ import {
   checkNumCalls,
   interceptCreate,
   interceptUpdate,
-  waitForUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   assignSubtask,
@@ -72,8 +71,9 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
-    })  
-      getTaskForm(0).within(() => { // re-renders
+    })
+    getTaskForm(0).within(() => {
+      // re-renders
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })
