@@ -89,12 +89,12 @@ describe('Assign Subtasks', () => {
     })
 
     getTaskForm(0).within(() => {
-      checkTaskFormSubtasks([ orphanTask, newSubtask])
+      checkTaskFormSubtasks([orphanTask, newSubtask])
       checkTasksExistBackend([rootTask, newSubtask], false)
       clickSubmitBtnCreate()
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [ orphanTask, newSubtask] })
+    checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
     checkNumCalls({ create: 4, update: 1 })
 
     // test EDIT

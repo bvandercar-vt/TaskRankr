@@ -357,10 +357,7 @@ export const TaskFormDialogProvider = ({
     setNavStack((prev) => [...prev, { taskId: task.id, isNewDraft: false }])
   }
 
-  const handleAssignSubtask = (
-    _task: Task,
-    formData?: MutateTaskContent,
-  ) => {
+  const handleAssignSubtask = (_task: Task, formData?: MutateTaskContent) => {
     const top = navStack.at(-1)
     if (!top || !formData) return
 
@@ -376,7 +373,9 @@ export const TaskFormDialogProvider = ({
     setAssignTargetParentId(parentId)
   }
 
-  const handleAssignConfirm = ({ id: selectedId }: Pick<Task, 'id' | 'name'>) => {
+  const handleAssignConfirm = ({
+    id: selectedId,
+  }: Pick<Task, 'id' | 'name'>) => {
     if (assignTargetParentId === null) return
     if (isDraftId(assignTargetParentId)) {
       assignDraftSubtask(selectedId, assignTargetParentId)
@@ -407,7 +406,8 @@ export const TaskFormDialogProvider = ({
 
   const getFormKey = (): string | number => {
     if (!currentEntry) return 'empty'
-    if (currentEntry.taskId === null) return `new-${freshCreateParentId ?? 'root'}`
+    if (currentEntry.taskId === null)
+      return `new-${freshCreateParentId ?? 'root'}`
     return currentEntry.taskId
   }
 
@@ -511,4 +511,3 @@ export const TaskFormDialogProvider = ({
     </TaskFormDialogContext.Provider>
   )
 }
-
