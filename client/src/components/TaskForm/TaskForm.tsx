@@ -298,6 +298,7 @@ export const TaskForm = ({
                     onEditSubtask,
                     onDeleteSubtask,
                     onAssignSubtask,
+                    pendingSubtasks,
                   }
                 : {
                     task: STUB_TASK,

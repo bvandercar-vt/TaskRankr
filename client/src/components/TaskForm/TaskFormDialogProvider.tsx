@@ -173,6 +173,10 @@ export const TaskFormDialogProvider = ({
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([])
   const [pendingNavStack, setPendingNavStack] = useState<number[]>([])
   const [showingChildForm, setShowingChildForm] = useState(false)
+  const [pendingEditSubtasks, setPendingEditSubtasks] = useState<
+    MutateTaskContent[]
+  >([])
+  const [showingEditSubtaskForm, setShowingEditSubtaskForm] = useState(false)
   const pendingIdRef = useRef(-10_000)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
@@ -198,6 +202,8 @@ export const TaskFormDialogProvider = ({
     setShowingChildForm(false)
     setPendingAssignedTasks([])
     setPendingAssignOpen(false)
+    setPendingEditSubtasks([])
+    setShowingEditSubtaskForm(false)
     pendingIdRef.current = -10_000
   }
 
@@ -324,13 +330,21 @@ export const TaskFormDialogProvider = ({
     setIsOpen(true)
   }
 
-  const pendingSubtaskCount = isInSession
-    ? pendingTasks.filter((t) => t.parentLocalId !== null).length +
-      pendingAssignedTasks.length
-    : 0
+  const pendingSubtaskCount =
+    (isInSession
+      ? pendingTasks.filter((t) => t.parentLocalId !== null).length +
+        pendingAssignedTasks.length
+      : 0) + pendingEditSubtasks.length
 
   const closeDialog = () => {
-    if (returnToTask) {
+    if (showingEditSubtaskForm) {
+      const taskToReturn = returnToTask
+      setShowingEditSubtaskForm(false)
+      setReturnToTask(undefined)
+      setMode('edit')
+      setActiveTask(taskToReturn)
+      setParentId(taskToReturn?.parentId ?? undefined)
+    } else if (returnToTask) {
       const taskToReturn = returnToTask
       resetSession()
       setShowCancelConfirm(false)
@@ -344,7 +358,7 @@ export const TaskFormDialogProvider = ({
     } else if (isInSession && pendingNavStack.length > 1) {
       setPendingNavStack((prev) => prev.slice(0, -1))
       setActiveTask(undefined)
-    } else if (isInSession && pendingSubtaskCount > 0) {
+    } else if (pendingSubtaskCount > 0) {
       setShowCancelConfirm(true)
     } else {
       resetAndClose()
@@ -352,6 +366,16 @@ export const TaskFormDialogProvider = ({
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
+    if (showingEditSubtaskForm) {
+      setPendingEditSubtasks((prev) => [...prev, data])
+      setShowingEditSubtaskForm(false)
+      const taskToReturn = returnToTask
+      setReturnToTask(undefined)
+      setMode('edit')
+      setActiveTask(taskToReturn)
+      setParentId(taskToReturn?.parentId ?? undefined)
+      return
+    }
     if (mode === 'create') {
       if (isInSession && showingChildForm) {
         const parentLocalId = getTopOfStack(true)
@@ -399,6 +423,9 @@ export const TaskFormDialogProvider = ({
         }
       }
     } else if (mode === 'edit' && activeTask) {
+      for (const subtaskData of pendingEditSubtasks) {
+        createTask({ ...subtaskData, parentId: activeTask.id } as CreateTask)
+      }
       updateTask({ id: activeTask.id, ...data })
       if (returnToTask) {
         const taskToReturn = returnToTask
@@ -438,6 +465,12 @@ export const TaskFormDialogProvider = ({
       }
       setMode('create')
       setActiveTask(undefined)
+    } else if (mode === 'edit') {
+      setReturnToTask(activeTask)
+      setShowingEditSubtaskForm(true)
+      setMode('create')
+      setActiveTask(undefined)
+      setParentId(pid)
     } else {
       openCreateDialog(pid)
     }
@@ -481,6 +514,10 @@ export const TaskFormDialogProvider = ({
   const sessionParentId = getSessionParentId()
   const sessionDefaultFormData = getSessionDefaultFormData()
   const sessionPendingSubtasks = getSessionPendingSubtasks()
+  const allPendingSubtasks = [
+    ...sessionPendingSubtasks,
+    ...pendingEditSubtasks.map((d) => ({ name: d.name ?? '' })),
+  ]
 
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
@@ -493,7 +530,7 @@ export const TaskFormDialogProvider = ({
     onDeleteSubtask: setSubtaskToDelete,
     onAssignSubtask: handleAssignSubtask,
     defaultFormData: sessionDefaultFormData,
-    pendingSubtasks: sessionPendingSubtasks,
+    pendingSubtasks: allPendingSubtasks,
   }
 
   const isMobile = useIsMobile()
