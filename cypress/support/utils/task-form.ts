@@ -12,8 +12,10 @@ const { TaskForm, AssignSubtaskDialog } = Selectors
 
 type TaskFormData = Pick<Task, 'name' | RankField>
 
-export const getTaskForm = (tier = 0) =>
-  cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
+export const getTaskForm = (tier = 0) => {
+  cy.wait(50) // Re-renders. TODO: debug and fix src so this doesn't happen.
+  return cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
+}
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,

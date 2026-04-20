@@ -71,6 +71,9 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
+    })
+    getTaskForm(0).within(() => {
+      // re-renders TODO: fix code so doesn't re-render
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })

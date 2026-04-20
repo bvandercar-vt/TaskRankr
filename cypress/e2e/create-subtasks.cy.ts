@@ -61,7 +61,10 @@ describe('Create Subtasks', () => {
   })
 
   it('create a subtask, check appears in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
+
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
       clickSubmitBtnCreate(subtask)
@@ -98,7 +101,10 @@ describe('Create Subtasks', () => {
   })
 
   it('create multiple subtasks, check appear in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
+
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
       clickSubmitBtnCreate(subtask)
@@ -145,7 +151,10 @@ describe('Create Subtasks', () => {
   })
 
   it('create nested subtasks, ensure appear in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
+
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
