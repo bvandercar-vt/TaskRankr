@@ -48,7 +48,7 @@ export default defineConfig({
         printLogsToConsole: 'onFail',
         printLogsToFile: 'always',
         outputRoot: resultsDir,
-        specRoot: 'cypress/tests',
+        specRoot: 'cypress/e2e',
         outputTarget: { 'logs|html': 'html' },
       })
     },
