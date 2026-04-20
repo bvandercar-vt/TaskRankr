@@ -307,14 +307,8 @@ export const TaskForm = ({
                   }
                 : {
                     task: STUB_TASK,
-                    onAddSubtask: () =>
-                      form.handleSubmit((data) => {
-                        onAddSubtask(STUB_TASK.id, data)
-                      })(),
-                    onAssignSubtask: () =>
-                      form.handleSubmit((data) => {
-                        onAssignSubtask(STUB_TASK, data)
-                      })(),
+                    onAddSubtask: () => onAddSubtask(STUB_TASK.id, form.getValues()),
+                    onAssignSubtask: () => onAssignSubtask(STUB_TASK, form.getValues()),
                     pendingSubtasks,
                     disableAddSubtask: !nameValue,
                   })}
