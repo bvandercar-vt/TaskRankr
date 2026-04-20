@@ -60,9 +60,9 @@ export const fillTaskForm = (
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
-  cy.get(TaskForm.ADD_SUBTASK_BTN).should('be.disabled')
-  cy.get(TaskForm.NAME_INPUT).type(task.name)
-  cy.get(TaskForm.ADD_SUBTASK_BTN).should('be.enabled')
+  cy.get(TaskForm.ADD_SUBTASK_BTN).scrollIntoView().should('be.disabled')
+  cy.get(TaskForm.NAME_INPUT).scrollIntoView().type(task.name)
+  cy.get(TaskForm.ADD_SUBTASK_BTN).scrollIntoView().should('be.enabled')
 
   fillTaskFormRankFields(task, settings)
 
