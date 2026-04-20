@@ -65,6 +65,7 @@ interface TaskFormDialogProps
     | 'onEditSubtask'
     | 'onDeleteSubtask'
     | 'onAssignSubtask'
+    | 'isDraft'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -422,6 +423,7 @@ export const TaskFormDialogProvider = ({
     onEditSubtask: handleEditSubtask,
     onDeleteSubtask: setSubtaskToDelete,
     onAssignSubtask: handleAssignSubtask,
+    isDraft: activeTask != null && draftTaskIds.has(activeTask.id),
   }
 
   return (

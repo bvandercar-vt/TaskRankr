@@ -128,6 +128,7 @@ export interface TaskFormProps {
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
   defaultFormData?: MutateTaskContent
+  isDraft?: boolean
 }
 
 export const TaskForm = ({
@@ -140,6 +141,7 @@ export const TaskForm = ({
   onDeleteSubtask,
   onAssignSubtask,
   defaultFormData,
+  isDraft = false,
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
@@ -203,7 +205,7 @@ export const TaskForm = ({
     void form.trigger()
   }, [settings.fieldConfig, form, timeSpentRequired])
 
-  const isEditingExisting = initialData && initialData.id >= 0
+  const isEditingExisting = !!initialData && !isDraft
 
   return (
     <Form {...form}>
