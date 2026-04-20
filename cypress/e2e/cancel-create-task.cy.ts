@@ -55,15 +55,17 @@ describe('Task Form Cancellation', () => {
   })
 
   context('New Task', () => {
+    afterEach(() => {
+      checkTasksDontExist([rootTask, subtask, subtask2])
+      checkNumCalls({ create: 0, update: 0 })
+    })
+
     it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       getTaskForm(0).within(() => {
         fillTaskForm(rootTask)
         cy.get(TaskForm.CANCEL_BTN).click()
       })
-
-      checkTasksDontExist([rootTask])
-      checkNumCalls({ create: 0, update: 0 })
     })
 
     it('cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all', () => {
@@ -87,9 +89,6 @@ describe('Task Form Cancellation', () => {
         .should('be.visible')
         .should('contain.text', '1 subtask')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-
-      checkTasksDontExist([rootTask, subtask])
-      checkNumCalls({ create: 0, update: 0 })
     })
 
     it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
@@ -124,9 +123,6 @@ describe('Task Form Cancellation', () => {
         .should('contain.text', '2 subtasks')
         .should('be.visible ')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-
-      checkTasksDontExist([rootTask, subtask, subtask2])
-      checkNumCalls({ create: 0, update: 0 })
     })
 
     it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
@@ -145,9 +141,6 @@ describe('Task Form Cancellation', () => {
         cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
         cy.get(TaskForm.CANCEL_BTN).click()
       })
-
-      checkTasksDontExist([rootTask, subtask])
-      checkNumCalls({ create: 0, update: 0 })
     })
 
     it('cancel confirmation "Go Back" returns to parent form without discarding', () => {
@@ -174,9 +167,6 @@ describe('Task Form Cancellation', () => {
         cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
         checkTaskFormSubtasks([subtask])
       })
-
-      checkTasksDontExist([rootTask, subtask])
-      checkNumCalls({ create: 0, update: 0 })
     })
   })
 
@@ -190,6 +180,11 @@ describe('Task Form Cancellation', () => {
       })
 
       openTaskEditForm(rootTask)
+      checkNumCalls({ create: 1, update: 0 })
+    })
+
+    afterEach(() => {
+      checkTasksDontExist([subtask, subtask2])
       checkNumCalls({ create: 1, update: 0 })
     })
 
@@ -213,9 +208,6 @@ describe('Task Form Cancellation', () => {
         .should('be.visible')
         .should('contain.text', '1 subtask')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-
-      checkTasksDontExist([subtask])
-      checkNumCalls({ create: 1, update: 0 })
     })
 
     it('cancel on edit form after adding multiple subtasks — confirmation shows correct count, discard removes all', () => {
@@ -248,9 +240,6 @@ describe('Task Form Cancellation', () => {
         .should('be.visible')
         .should('contain.text', '2 subtasks')
       cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-
-      checkTasksDontExist([subtask, subtask2])
-      checkNumCalls({ create: 1, update: 0 })
     })
 
     it('cancel on subtask form during edit — navigates back to edit form without confirmation', () => {
@@ -269,8 +258,6 @@ describe('Task Form Cancellation', () => {
       })
 
       cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('not.exist')
-      checkTasksDontExist([subtask])
-      checkNumCalls({ create: 1, update: 0 })
     })
 
     it('cancel confirmation "Go Back" during edit — returns to edit form with pending subtask still shown', () => {
@@ -295,9 +282,6 @@ describe('Task Form Cancellation', () => {
         cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
         checkTaskFormSubtasks([subtask])
       })
-
-      checkTasksDontExist([subtask])
-      checkNumCalls({ create: 1, update: 0 })
     })
   })
 })
