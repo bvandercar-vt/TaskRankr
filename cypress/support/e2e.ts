@@ -2,9 +2,11 @@ import './commands'
 
 import installLogsCollector from 'cypress-terminal-report/src/installLogsCollector'
 
-import { isLoggedIn } from './utils'
+import { isLoggedIn, setUserMode } from './utils'
 
 installLogsCollector()
+
+setUserMode(Cypress.env('userMode'))
 
 beforeEach(() => {
   const loggedIn = isLoggedIn()
