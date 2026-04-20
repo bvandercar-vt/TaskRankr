@@ -34,7 +34,7 @@ export const fillTaskFormRankFields = (
     const value = task[field]
     const config = settings[field]
     if (config.visible) {
-      cy.get(RankSelect).should('be.visible')
+      cy.get(RankSelect).scrollIntoView().should('be.visible')
       if (value !== null) {
         cy.selectOption(RankSelect, value)
         filled.add(field)
