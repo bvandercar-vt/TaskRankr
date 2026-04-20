@@ -26,7 +26,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       config.env.userMode = config.env.userMode?.toUpperCase()
       setUserMode(config.env.userMode)
-      const resultsDirRaw = `cypress/results/${config.env.userMode}`
+      const resultsDirRaw = `cypress/results/${config.env.userMode}_mode`
       config.screenshotsFolder = `${resultsDirRaw}/screenshots`
       config.videosFolder = `${resultsDirRaw}/videos`
       const resultsDir = processResultsDir(resultsDirRaw)
