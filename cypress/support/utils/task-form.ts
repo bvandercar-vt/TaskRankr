@@ -15,7 +15,7 @@ type TaskFormData = Pick<Task, 'name' | RankField>
 export const getTaskForm = (tier = 0) =>
   {
     cy.wait(100) // re-renders TODO: debug
-    cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')}
+    return cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')}
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
