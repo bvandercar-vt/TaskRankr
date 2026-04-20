@@ -71,6 +71,7 @@ interface TaskFormDialogProps
   mode: 'create' | 'edit'
   parentId?: number
   activeTask?: Task
+  formKey: string | number
   onClose: () => void
 }
 
@@ -80,6 +81,7 @@ const DesktopDialog = ({
   mode,
   parentId,
   activeTask,
+  formKey,
   onClose,
   ...taskFormArgs
 }: TaskFormDialogProps) => (
@@ -113,7 +115,7 @@ const DesktopDialog = ({
         </DialogHeader>
         <TaskForm
           {...taskFormArgs}
-          key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
+          key={formKey}
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
@@ -127,6 +129,7 @@ const MobileDialog = ({
   isOpen,
   activeTask,
   parentId,
+  formKey,
   onClose,
   ...taskFormArgs
 }: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'>) => (
@@ -142,7 +145,7 @@ const MobileDialog = ({
       >
         <TaskForm
           {...taskFormArgs}
-          key={activeTask?.id ?? `new-${parentId ?? 'root'}`}
+          key={formKey}
           initialData={activeTask}
           parentId={parentId}
           onCancel={onClose}
@@ -530,10 +533,18 @@ export const TaskFormDialogProvider = ({
   ]
   const pendingChainItems = getPendingChainItems()
 
+  const getFormKey = (): string | number => {
+    if (activeTask) return activeTask.id
+    if (isInSession && showingChildForm) return `child-${getTopOfStack()}`
+    if (showingEditSubtaskForm) return `edit-subtask-${returnToTask?.id ?? 'unknown'}`
+    return `new-${sessionParentId ?? 'root'}`
+  }
+
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
     activeTask,
     parentId: sessionParentId,
+    formKey: getFormKey(),
     onClose: closeDialog,
     onSubmit: handleSubmit,
     onAddSubtask: handleAddSubtask,
