@@ -129,6 +129,8 @@ export interface TaskFormProps {
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
   defaultFormData?: MutateTaskContent
   pendingSubtasks?: PendingSubtask[]
+  /** Pending (not-yet-created) ancestors to append to the parent chain display. */
+  pendingChainItems?: Pick<Task, 'id' | 'name'>[]
 }
 
 export const TaskForm = ({
@@ -142,8 +144,10 @@ export const TaskForm = ({
   onAssignSubtask,
   defaultFormData,
   pendingSubtasks = [],
+  pendingChainItems = [],
 }: TaskFormProps) => {
   const parentChain = useTaskParentChain(parentId ?? undefined)
+  const fullChain = [...parentChain, ...pendingChainItems]
   const { data: allTasks } = useTasks()
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
@@ -191,6 +195,7 @@ export const TaskForm = ({
   const {
     formState: { isValid },
   } = form
+  const nameValue = form.watch('name')
 
   useEffect(() => {
     form.reset(getFormDefaults(initialData))
@@ -213,10 +218,10 @@ export const TaskForm = ({
         })}
         className="flex flex-col h-full"
         data-testid="task-form"
-        data-tier={parentChain.length}
+        data-tier={fullChain.length}
       >
         <div className="pb-2  px-4 pt-2">
-          <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
+          <TagChain items={fullChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
             name="name"
@@ -311,6 +316,7 @@ export const TaskForm = ({
                         onAssignSubtask(STUB_TASK, data)
                       })(),
                     pendingSubtasks,
+                    disableAddSubtask: !nameValue,
                   })}
             />
 

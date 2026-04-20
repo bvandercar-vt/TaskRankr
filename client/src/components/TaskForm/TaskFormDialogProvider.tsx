@@ -50,6 +50,8 @@ interface PendingTask {
   localId: number
   data: MutateTaskContent
   parentLocalId: number | null
+  /** Real task ID of the parent, if the root pending task was opened as a subtask of an existing task. */
+  realParentId: number | null
 }
 
 interface TaskFormDialogProps
@@ -62,6 +64,7 @@ interface TaskFormDialogProps
     | 'onAssignSubtask'
     | 'defaultFormData'
     | 'pendingSubtasks'
+    | 'pendingChainItems'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -239,13 +242,13 @@ export const TaskFormDialogProvider = ({
     for (const t of pending) addNode(t.localId)
 
     for (const task of sorted) {
-      const realParentId =
+      const resolvedParentId =
         task.parentLocalId !== null
           ? localIdToRealId.get(task.parentLocalId)
-          : undefined
+          : (task.realParentId ?? undefined)
       const created = createTask({
         ...task.data,
-        parentId: realParentId,
+        parentId: resolvedParentId,
       } as CreateTask)
       localIdToRealId.set(task.localId, created.id)
       if (!rootCreatedTask) rootCreatedTask = created
@@ -281,12 +284,20 @@ export const TaskFormDialogProvider = ({
 
   const getSessionParentId = (): number | undefined => {
     if (!isInSession) return parentId
-    // -1 is a sentinel meaning "parent is a pending task with no real ID yet".
-    // TaskForm's useTaskParentChain won't find it and will render no breadcrumbs,
-    // which is the correct behaviour for a not-yet-created parent.
-    if (showingChildForm) return -1
+    // When showing the child form, parentId state still holds the real ancestor's
+    // ID (set before the session started). Pending ancestors are tracked separately
+    // via getPendingChainItems so they appear in the TagChain.
+    if (showingChildForm) return parentId
     const current = getCurrentPending()
     return current?.parentLocalId != null ? current.parentLocalId : undefined
+  }
+
+  const getPendingChainItems = (): Pick<Task, 'id' | 'name'>[] => {
+    if (!isInSession || !showingChildForm) return []
+    return pendingNavStack.map((localId) => {
+      const t = pendingTasks.find((p) => p.localId === localId)
+      return { id: localId, name: t?.data.name ?? '' }
+    })
   }
 
   const getSessionDefaultFormData = (): MutateTaskContent | undefined => {
@@ -443,7 +454,7 @@ export const TaskFormDialogProvider = ({
     if (formData) {
       if (!isInSession) {
         const localId = pendingIdRef.current--
-        setPendingTasks([{ localId, data: formData, parentLocalId: null }])
+        setPendingTasks([{ localId, data: formData, parentLocalId: null, realParentId: parentId ?? null }])
         setPendingNavStack([localId])
         setShowingChildForm(true)
       } else if (showingChildForm) {
@@ -451,7 +462,7 @@ export const TaskFormDialogProvider = ({
         const localId = pendingIdRef.current--
         setPendingTasks((prev) => [
           ...prev,
-          { localId, data: formData, parentLocalId },
+          { localId, data: formData, parentLocalId, realParentId: null },
         ])
         setPendingNavStack((prev) => [...prev, localId])
       } else {
@@ -490,7 +501,7 @@ export const TaskFormDialogProvider = ({
       } else {
         // Start a pending session — root task is NOT created until Submit
         const localId = pendingIdRef.current--
-        setPendingTasks([{ localId, data: formData, parentLocalId: null }])
+        setPendingTasks([{ localId, data: formData, parentLocalId: null, realParentId: parentId ?? null }])
         setPendingNavStack([localId])
         setPendingAssignOpen(true)
       }
@@ -517,6 +528,7 @@ export const TaskFormDialogProvider = ({
     ...sessionPendingSubtasks,
     ...pendingEditSubtasks.map((d) => ({ name: d.name ?? '' })),
   ]
+  const pendingChainItems = getPendingChainItems()
 
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
@@ -530,6 +542,7 @@ export const TaskFormDialogProvider = ({
     onAssignSubtask: handleAssignSubtask,
     defaultFormData: sessionDefaultFormData,
     pendingSubtasks: allPendingSubtasks,
+    pendingChainItems,
   }
 
   const isMobile = useIsMobile()
