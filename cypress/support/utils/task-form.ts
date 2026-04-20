@@ -6,7 +6,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTasksExistBackend } from './api'
-import { type CreatedTask, waitForUpdate } from './intercepts'
+import type { CreatedTask } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
@@ -93,7 +93,6 @@ export const assignSubtask = (
    * the orphan task to assign as subtask.
    */
   task: CreatedTask,
-  { awaitUpdate = true }: { awaitUpdate?: boolean } = {},
 ) => {
   cy.get(TaskForm.ASSIGN_SUBTASK_BTN).click()
   cy.escapeWithin()
@@ -103,9 +102,6 @@ export const assignSubtask = (
       cy.contains(AssignSubtaskDialog.TASK_OPTION, task.name).click()
       cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
     })
-  if (awaitUpdate) {
-    waitForUpdate(task)
-  }
 }
 
 export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
