@@ -51,6 +51,8 @@ export default defineConfig({
         specRoot: 'cypress/e2e',
         outputTarget: { 'logs|html': 'html' },
       })
+
+      return config
     },
   },
 })
