@@ -6,9 +6,9 @@ import { isLoggedIn, setUserMode } from './utils'
 
 installLogsCollector()
 
-setUserMode(Cypress.env('userMode'))
-
 beforeEach(() => {
+  setUserMode(Cypress.env('userMode'))
+
   const loggedIn = isLoggedIn()
   if (loggedIn) {
     cy.loginAsTestUser()
