@@ -63,7 +63,7 @@ describe('Assign Subtasks', () => {
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask2)
-    clickSubmitBtnCreate(orphanTask2, true)
+    clickSubmitBtnCreate(orphanTask2)
   })
 
   it('assign an existing orphaned task as a subtask of a task', () => {
@@ -81,7 +81,7 @@ describe('Assign Subtasks', () => {
     // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
     getTaskForm(1).within(() => {
       fillTaskForm(newSubtask)
-      clickSubmitBtnCreate(newSubtask)
+      clickSubmitBtnCreate(newSubtask,true)
     })
 
     getTaskForm(0).within(() => {
