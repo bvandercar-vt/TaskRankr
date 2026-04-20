@@ -4,7 +4,7 @@
     "date": "2026-04-14",
     "title": "Task Creation Cancel Fix",
     "changes": [
-      "When cancelling task creation, subtasks that were created now properly don't get created as well."
+      "No subtasks of a new task should get created when the root-level task creation is cancelled."
     ]
   },
   {
