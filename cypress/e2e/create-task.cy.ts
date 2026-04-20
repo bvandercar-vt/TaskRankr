@@ -4,12 +4,11 @@ import {
   FieldConfigAllFalse,
   Selectors,
 } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
   interceptCreate,
-  waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
@@ -39,9 +38,7 @@ describe('Task Creation', () => {
   it('create a task, check displays in main tree', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(task)
-    checkTasksExistBackend([task], false)
-    clickSubmitBtnCreate()
-    waitForCreate(task)
+    clickSubmitBtnCreate({ newTasks: [task] })
     checkTaskInTree(task)
     checkNumCalls({ create: 1 })
   })
@@ -68,9 +65,7 @@ describe('Task Creation', () => {
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(newTask, fieldConfig)
-    checkTasksExistBackend([task], false)
-    clickSubmitBtnCreate()
-    waitForCreate(newTask)
+    clickSubmitBtnCreate({ newTasks: [newTask] })
     checkTaskInTree(newTask)
     checkNumCalls({ create: 1 })
   })
@@ -98,9 +93,9 @@ describe('Task Creation', () => {
     cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
     cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
     cy.get(TaskForm.TIME_SPENT_INPUT_HOURS).type('1')
-    checkTasksExistBackend([taskAllNull], false)
-    clickSubmitBtnCreate()
-    waitForCreate({ ...taskAllNull, status: TaskStatus.COMPLETED })
+    clickSubmitBtnCreate({
+      newTasks: [{ ...taskAllNull, status: TaskStatus.COMPLETED }],
+    })
     // TODO: check is in completed tree
     checkNumCalls({ create: 1 })
   })

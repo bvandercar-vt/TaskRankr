@@ -6,7 +6,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTasksExistBackend } from './api'
-import type { CreatedTask } from './intercepts'
+import { type CreatedTask, waitForCreate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
@@ -84,7 +84,19 @@ const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
       cy.wrap($btn).should('not.exist')
     })
 
-export const clickSubmitBtnCreate = () => clickSubmitBtn('Create')
+export const clickSubmitBtnCreate = ({
+  newTasks,
+}: {
+  newTasks?: CreatedTask[]
+} = {}) => {
+  if (newTasks) {
+    checkTasksExistBackend(newTasks, false)
+  }
+  clickSubmitBtn('Create')
+  if (newTasks) {
+    waitForCreate(newTasks)
+  }
+}
 
 export const clickSubmitBtnUpdate = () => clickSubmitBtn('Save')
 

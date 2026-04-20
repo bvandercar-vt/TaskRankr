@@ -6,7 +6,6 @@ import {
   checkNumCalls,
   interceptCreate,
   interceptUpdate,
-  waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -71,8 +70,7 @@ describe('Task Form Cancellation', () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
         getTaskForm(0).within(() => {
           fillTaskForm(rootTask)
-          clickSubmitBtnCreate()
-          waitForCreate([rootTask])
+          clickSubmitBtnCreate({ newTasks: [rootTask] })
         })
 
         openTaskEditForm(rootTask)

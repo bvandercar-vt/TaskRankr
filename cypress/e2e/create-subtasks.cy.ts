@@ -6,7 +6,6 @@ import {
   checkNumCalls,
   interceptCreate,
   interceptUpdate,
-  waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -72,9 +71,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask])
-      checkTasksExistBackend([rootTask, subtask], false)
-      clickSubmitBtnCreate()
-      waitForCreate([rootTask, subtask])
+      clickSubmitBtnCreate({ newTasks: [rootTask, subtask] })
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask] })
@@ -124,9 +121,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      checkTasksExistBackend([rootTask, subtask, subtask2], false)
-      clickSubmitBtnCreate()
-      waitForCreate([rootTask, subtask, subtask2])
+      clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
@@ -186,9 +181,9 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      checkTasksExistBackend([rootTask, subtask, subtask2, subtask3], false)
-      clickSubmitBtnCreate()
-      waitForCreate([rootTask, subtask, subtask2, subtask3])
+      clickSubmitBtnCreate({
+        newTasks: [rootTask, subtask, subtask2, subtask3],
+      })
     })
 
     checkTaskInTree({
