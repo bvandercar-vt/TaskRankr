@@ -20,7 +20,7 @@ import {
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
-import { TaskStatus } from '~/shared/schema'
+import { Priority, TaskStatus } from '~/shared/schema'
 
 const { TaskForm } = Selectors
 
@@ -33,18 +33,21 @@ describe('Assign Subtasks', () => {
 
   const orphanTask = {
     ...DefaultTask,
+    priority: Priority.HIGH,
     name: 'E2E Orphan Task 1',
     status: TaskStatus.PINNED,
   } as const satisfies CreatedTask
 
   const orphanTask2 = {
     ...DefaultTask,
+    priority: Priority.MEDIUM,
     name: 'E2E Orphan Task 2',
     status: TaskStatus.PINNED,
   } as const satisfies CreatedTask
 
   const newSubtask = {
     ...DefaultTask,
+    priority: Priority.LOW,
     name: 'E2E Brand New Subtask',
     status: TaskStatus.OPEN,
   } as const satisfies CreatedTask
