@@ -21,7 +21,7 @@
     "ts:check": "tsc",
     "cy:ts:check": "tsc  --project cypress/tsconfig.json",
     "cy:run": "npm run cy:run:user",
-    "cy:run:all": "npm run cy:run:user && npm run cy:run:guest",
+    "cy:run:all": "npm run cy:run:user ; npm run cy:run:guest",
     "cy:run:user": "cypress run --env userMode=USER",
     "cy:run:guest": "cypress run --env userMode=GUEST"
   },
