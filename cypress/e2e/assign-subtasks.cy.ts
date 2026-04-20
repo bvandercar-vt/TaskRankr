@@ -71,9 +71,6 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
-    })
-    getTaskForm(0).within(() => {
-      // re-renders
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })
@@ -81,7 +78,7 @@ describe('Assign Subtasks', () => {
     // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
     getTaskForm(1).within(() => {
       fillTaskForm(newSubtask)
-      clickSubmitBtnCreate(newSubtask,true)
+      clickSubmitBtnCreate(newSubtask, true)
     })
 
     getTaskForm(0).within(() => {
