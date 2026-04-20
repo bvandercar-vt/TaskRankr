@@ -5,7 +5,7 @@ import {
   type Task,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
-import { checkTaskExistsBackend } from './api'
+import { checkTasksExistBackend } from './api'
 import { type CreatedTask, waitForCreate, waitForUpdate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
@@ -56,7 +56,7 @@ export const fillTaskForm = (
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
   cy.log('**filling task form...**')
-  checkTaskExistsBackend(task, false)
+  checkTasksExistBackend([task], false)
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
@@ -88,7 +88,7 @@ export const clickSubmitBtnCreate = (
   task: CreatedTask,
   noCreateCheck?: boolean,
 ) => {
-  checkTaskExistsBackend(task, false)
+  checkTasksExistBackend([task], false)
   clickSubmitBtn(
     'Create',
     noCreateCheck ? undefined : () => waitForCreate(task),
