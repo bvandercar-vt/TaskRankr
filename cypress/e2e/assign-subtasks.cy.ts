@@ -64,12 +64,12 @@ describe('Assign Subtasks', () => {
     // Create the orphan tasks
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask)
-    clickSubmitBtnCreate()
+    clickSubmitBtnCreate({ newTasks: [orphanTask] })
     cy.get(Selectors.TaskForm.FORM).should('not.exist')
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask2)
-    clickSubmitBtnCreate()
+    clickSubmitBtnCreate({ newTasks: [orphanTask2] })
     cy.get(Selectors.TaskForm.FORM).should('not.exist')
   })
 
