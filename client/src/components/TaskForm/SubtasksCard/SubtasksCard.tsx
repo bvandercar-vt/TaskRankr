@@ -43,6 +43,7 @@ interface SubtasksCardProps {
   onEditSubtask?: (task: Task) => void
   onDeleteSubtask?: (task: DeleteTaskArgs) => void
   onAssignSubtask?: (task: Task) => void
+  disableAddSubtask?: boolean
 }
 
 export const SubtasksCard = ({
@@ -51,6 +52,7 @@ export const SubtasksCard = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
+  disableAddSubtask = false,
 }: SubtasksCardProps) => {
   const { data: allTasks } = useTasks()
   const { reorderSubtasks } = useTaskActions()
@@ -229,7 +231,11 @@ export const SubtasksCard = ({
         <button
           type="button"
           onClick={() => onAddSubtask(task.id)}
-          className={cn(ADD_SUBTASK_BTN_CLASS, 'flex-[4] gap-2')}
+          disabled={disableAddSubtask}
+          className={cn(
+            ADD_SUBTASK_BTN_CLASS,
+            'flex-[4] gap-2 disabled:opacity-40 disabled:cursor-not-allowed',
+          )}
           data-testid="button-add-subtask"
         >
           <Plus className="size-4" />

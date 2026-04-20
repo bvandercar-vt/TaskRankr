@@ -185,6 +185,7 @@ export const TaskForm = ({
   const {
     formState: { isValid },
   } = form
+  const nameValue = form.watch('name')
 
   useEffect(() => {
     form.reset(getFormDefaults(initialData))
@@ -303,6 +304,7 @@ export const TaskForm = ({
                       form.handleSubmit((data) => {
                         onAssignSubtask(STUB_TASK, data)
                       })(),
+                    disableAddSubtask: !nameValue,
                   })}
             />
 
