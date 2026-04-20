@@ -203,6 +203,8 @@ export const TaskForm = ({
     void form.trigger()
   }, [settings.fieldConfig, form, timeSpentRequired])
 
+  const isEditingExisting = initialData && initialData.id >= 0
+
   return (
     <Form {...form}>
       <form
@@ -409,7 +411,7 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg disabled:bg-primary/80 disabled:cursor-not-allowed"
             data-testid="submit-button"
           >
-            {initialData && initialData.id >= 0 ? 'Save' : 'Create'}
+            {isEditingExisting ? 'Save' : 'Create'}
           </Button>
         </div>
       </form>
