@@ -86,26 +86,26 @@ describe('Assign Subtasks', () => {
     })
 
     getTaskForm(0).within(() => {
-      checkTaskFormSubtasks([newSubtask, orphanTask])
+      checkTaskFormSubtasks([ orphanTask, newSubtask])
       checkTasksExistBackend([rootTask, newSubtask], false)
       clickSubmitBtnCreate()
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [newSubtask, orphanTask] })
+    checkTaskInTree({ ...rootTask, subtasks: [ orphanTask, newSubtask] })
     checkNumCalls({ create: 4, update: 1 })
 
     // test EDIT
     openTaskEditForm(rootTask)
     getTaskForm(0).within(() => {
-      checkTaskFormSubtasks([newSubtask, orphanTask])
+      checkTaskFormSubtasks([orphanTask, newSubtask])
       assignSubtask(orphanTask2)
-      checkTaskFormSubtasks([newSubtask, orphanTask, orphanTask2]) // all at same level, so we don't care about orde really.
+      checkTaskFormSubtasks([orphanTask, newSubtask, orphanTask2]) // all at same level, so we don't care about orde really.
       clickSubmitBtnUpdate()
     })
 
     checkTaskInTree({
       ...rootTask,
-      subtasks: [newSubtask, orphanTask, orphanTask2],
+      subtasks: [orphanTask, newSubtask, orphanTask2],
     })
     checkNumCalls({ create: 4, update: 2 })
   })
