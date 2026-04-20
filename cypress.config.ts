@@ -1,6 +1,15 @@
+import { existsSync, mkdirSync, rmSync } from 'fs'
+import path from 'path'
 import { defineConfig } from 'cypress'
 import installTerminalReporter from 'cypress-terminal-report/src/installLogsPrinter'
 import vitePreprocessor from 'cypress-vite'
+
+import { setUserMode } from './cypress/support/utils/test-runner'
+
+const processResultsDir = (resultsDir: string) =>
+  process.cwd().endsWith('cypress') && resultsDir.startsWith('cypress')
+    ? path.relative('cypress', resultsDir)
+    : resultsDir
 
 export default defineConfig({
   video: true,
@@ -14,7 +23,21 @@ export default defineConfig({
       'cypress/e2e/assign-subtasks.cy.ts',
       // 'cypress/e2e/cancel-task-form.cy.ts',
     ],
-    setupNodeEvents(on) {
+    setupNodeEvents(on, config) {
+      config.env.userMode = config.env.userMode?.toUpperCase()
+      setUserMode(config.env.userMode)
+      const resultsDirRaw = `cypress/results/${config.env.userMode}`
+      config.screenshotsFolder = `${resultsDirRaw}/screenshots`
+      config.videosFolder = `${resultsDirRaw}/videos`
+      const resultsDir = processResultsDir(resultsDirRaw)
+
+      // delete previous run folders
+      if (config.trashAssetsBeforeRuns && existsSync(resultsDir)) {
+        console.log(`Clearing previous test run folder ${resultsDir}`)
+        rmSync(resultsDir, { recursive: true, force: true })
+        mkdirSync(resultsDir, { recursive: true })
+      }
+
       on('file:preprocessor', vitePreprocessor())
 
       installTerminalReporter(on, {
@@ -24,8 +47,8 @@ export default defineConfig({
         routeTrimLength: 1000, // don't print all GET data
         printLogsToConsole: 'onFail',
         printLogsToFile: 'always',
-        outputRoot: 'cypress/results',
-        specRoot: 'cypress/e2e',
+        outputRoot: resultsDir,
+        specRoot: 'cypress/tests',
         outputTarget: { 'logs|html': 'html' },
       })
     },
