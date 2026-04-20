@@ -409,7 +409,7 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg disabled:bg-primary/80 disabled:cursor-not-allowed"
             data-testid="submit-button"
           >
-            {initialData ? 'Save' : 'Create'}
+            {initialData && initialData.id >= 0 ? 'Save' : 'Create'}
           </Button>
         </div>
       </form>
