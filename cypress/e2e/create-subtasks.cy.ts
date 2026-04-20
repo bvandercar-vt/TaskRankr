@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -67,12 +67,13 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask])
-      clickSubmitBtnCreate(rootTask)
+      checkTasksExistBackend([rootTask, subtask], false)
+      clickSubmitBtnCreate()
       waitForCreate([rootTask, subtask])
     })
 
@@ -88,11 +89,12 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
+      checkTasksExistBackend([subtask2], false)
       clickSubmitBtnUpdate()
     })
 
@@ -107,7 +109,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
@@ -117,12 +119,13 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      clickSubmitBtnCreate(rootTask)
+      checkTasksExistBackend([rootTask, subtask, subtask2], false)
+      clickSubmitBtnCreate()
       waitForCreate([rootTask, subtask, subtask2])
     })
 
@@ -138,11 +141,12 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask3)
-      clickSubmitBtnCreate(subtask3)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
+      checkTasksExistBackend([subtask3], false)
       clickSubmitBtnUpdate()
     })
 
@@ -162,7 +166,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(2).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(1).within(() => {
@@ -172,17 +176,18 @@ describe('Create Subtasks', () => {
 
     getTaskForm(2).within(() => {
       fillTaskForm(subtask3)
-      clickSubmitBtnCreate(subtask3)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(1).within(() => {
       checkTaskFormSubtasks([subtask2, subtask3])
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      clickSubmitBtnCreate(rootTask)
+      checkTasksExistBackend([rootTask, subtask, subtask2, subtask3], false)
+      clickSubmitBtnCreate()
       waitForCreate([rootTask, subtask, subtask2, subtask3])
     })
 

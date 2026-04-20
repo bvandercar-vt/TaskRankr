@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTaskExistsBackend } from '@cypress/support/utils/api'
+import { checkTasksExistBackend } from '@cypress/support/utils/api'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -39,8 +39,8 @@ const subtask2 = {
 const checkTasksDontExist = (tasks: CreatedTask[]) => {
   tasks.forEach((task) => {
     cy.contains(task.name).should('not.exist')
-    checkTaskExistsBackend(task, false)
   })
+  checkTasksExistBackend(tasks, false)
 }
 
 describe('Task Creation Cancellation', () => {
@@ -71,7 +71,7 @@ describe('Task Creation Cancellation', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
@@ -97,7 +97,7 @@ describe('Task Creation Cancellation', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
@@ -107,7 +107,7 @@ describe('Task Creation Cancellation', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
@@ -155,7 +155,7 @@ describe('Task Creation Cancellation', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {

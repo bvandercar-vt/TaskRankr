@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -56,14 +56,16 @@ describe('Assign Subtasks', () => {
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
 
+    checkTasksExistBackend([orphanTask, orphanTask2], false)
+
     // Create the orphan tasks
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask)
-    clickSubmitBtnCreate(orphanTask)
+    clickSubmitBtnCreate()
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask2)
-    clickSubmitBtnCreate(orphanTask2)
+    clickSubmitBtnCreate()
   })
 
   it('assign an existing orphaned task as a subtask of a task', () => {
@@ -81,11 +83,12 @@ describe('Assign Subtasks', () => {
     // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
     getTaskForm(1).within(() => {
       fillTaskForm(newSubtask)
-      clickSubmitBtnCreate(newSubtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
+      checkTasksExistBackend([rootTask, newSubtask], false)
       clickSubmitBtnUpdate() // TODO: bugfix: should be create
     })
 

@@ -29,46 +29,52 @@ const getLocalStateTasks = () =>
     return JSON.parse(storedTasks)
   })
 
-export function checkTaskExistsBackend(
-  task: Pick<Task, 'name' | 'status'>,
+export function checkTasksExistBackend(
+  tasks: Pick<Task, 'name' | 'status'>[],
   exists: true,
 ): void
-export function checkTaskExistsBackend(
-  task: Pick<Task, 'name'>,
+export function checkTasksExistBackend(
+  tasks: Pick<Task, 'name'>[],
   exists: false,
 ): void
-export function checkTaskExistsBackend(
-  task: Pick<Task, 'name'> | Pick<Task, 'name' | 'status'>,
+export function checkTasksExistBackend(
+  tasks: Pick<Task, 'name'>[] | Pick<Task, 'name' | 'status'>[],
   exists: boolean,
 ): void {
   const loggedIn = isLoggedIn()
 
-  const checkTasks = (tasks: Task[], message: string) => {
+  const expectedTaskNames = tasks.map((t) => t.name)
+  const checkTasks = (givenTasks: Task[], message: string) => {
     if (exists) {
       expect(
-        tasks.map((t) => t.name),
+        givenTasks.map((t) => t.name),
         `task names in ${message}`,
-      ).to.include(task.name)
-      const tasksInBackend = tasks.filter((t) => t.name === task.name)
-      expect(
-        tasksInBackend,
-        `tasks with name "${task.name}" in ${message}`,
-      ).to.have.length(1)
-      expect(
-        tasksInBackend[0],
-        `Task "${task.name}" should exist in ${message} with correct props`,
-      ).to.include(task)
+      ).to.include.members(expectedTaskNames)
+      expect(givenTasks, 'no duplicate tasks').to.have.length(
+        Cypress._.uniqBy(givenTasks, (t) => t.name).length,
+      )
+      for (const expectedTask of tasks) {
+        const givenTask = givenTasks.find((t) => t.name === expectedTask.name)
+        expect(
+          givenTask,
+          `Task "${expectedTask.name}" exists in ${message} with correct props`,
+        ).to.include(expectedTask)
+      }
     } else {
       expect(
-        tasks.map((t) => t.name),
-        `task names in ${message}`,
-      ).to.not.include(task.name)
+        givenTasks.reduce((running: Record<string, Task>, curr) => {
+          running[curr.name] = curr
+          return running
+        }, {}),
+      ).to.not.include.any.keys(expectedTaskNames)
     }
   }
 
-  getLocalStateTasks().should((tasks) => checkTasks(tasks, 'local state'))
+  getLocalStateTasks().should((givenTasks) =>
+    checkTasks(givenTasks, 'local state'),
+  )
   if (loggedIn || !exists) {
-    getApiTasks().then((tasks) => checkTasks(tasks, 'backend'))
+    getApiTasks().then((givenTasks) => checkTasks(givenTasks, 'backend'))
   }
 }
 
