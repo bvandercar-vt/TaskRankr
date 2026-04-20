@@ -155,7 +155,7 @@ describe('Create Subtasks', () => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       waitForCreate(rootTask)
     })
-    
+
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
     })

@@ -6,16 +6,16 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { checkTaskExistsBackend } from './api'
-import { type CreatedTask, waitForUpdate } from './intercepts'
+import { type CreatedTask, waitForCreate, waitForUpdate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
 type TaskFormData = Pick<Task, 'name' | RankField>
 
-export const getTaskForm = (tier = 0) =>
-  {
-    cy.wait(100) // re-renders TODO: debug
-    return cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')}
+export const getTaskForm = (tier = 0) => {
+  cy.wait(100) // re-renders TODO: debug
+  return cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
+}
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
@@ -86,7 +86,7 @@ const clickSubmitBtn = (submitBtnText: string, afterSubmit?: () => void) =>
 
 export const clickSubmitBtnCreate = (task: CreatedTask) => {
   checkTaskExistsBackend(task, false)
-  clickSubmitBtn('Create')
+  clickSubmitBtn('Create', () => waitForCreate(task))
 }
 
 export const clickSubmitBtnUpdate = () => clickSubmitBtn('Save')
