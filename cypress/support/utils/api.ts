@@ -61,6 +61,7 @@ export function checkTasksExistBackend(
         ).to.include(expectedTask)
       }
     } else {
+      // best way to check that array doesn't include any members
       expect(
         givenTasks.reduce((running: Record<string, Task>, curr) => {
           running[curr.name] = curr
