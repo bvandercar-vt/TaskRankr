@@ -12,6 +12,7 @@ export default defineConfig({
       'cypress/e2e/create-task.cy.ts',
       'cypress/e2e/create-subtasks.cy.ts',
       'cypress/e2e/assign-subtasks.cy.ts',
+      // 'cypress/e2e/cancel-task-form.cy.ts',
     ],
     setupNodeEvents(on) {
       on('file:preprocessor', vitePreprocessor())
