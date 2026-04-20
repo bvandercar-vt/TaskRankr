@@ -122,7 +122,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate(rootTask)
       waitForCreate([rootTask, subtask, subtask2])
     })
 
