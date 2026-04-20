@@ -94,10 +94,7 @@ export const clickSubmitBtnCreate = ({
   if (newTasks) {
     checkTasksExistBackend(newTasks, false)
   }
-  clickSubmitBtn('Create')
-  if (newTasks) {
-    waitForCreate(newTasks)
-  }
+  clickSubmitBtn('Create', newTasks && (() => waitForCreate(newTasks)))
 }
 
 export const clickSubmitBtnUpdate = () => clickSubmitBtn('Save')
