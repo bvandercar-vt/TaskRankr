@@ -13,6 +13,7 @@ import {
   clickSubmitBtnCreate,
   clickSubmitBtnUpdate,
   fillTaskForm,
+  getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
   checkTaskInTree,
@@ -54,92 +55,141 @@ describe('Create Subtasks', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
-    fillTaskForm(rootTask)
+    getTaskForm(0).within(() => {
+      fillTaskForm(rootTask)
+    })
   })
 
   it('create a subtask, check appears in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
-    fillTaskForm(subtask)
-    clickSubmitBtnCreate(subtask)
-    checkTaskFormSubtasks([subtask])
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      waitForCreate(rootTask)
+    })
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask)
+      clickSubmitBtnCreate(subtask)
+    })
+
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask])
+      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
     openTaskEditForm(rootTask)
-    checkTaskFormSubtasks([subtask])
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask])
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
 
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask2)
-    clickSubmitBtnCreate(subtask2)
-    checkTaskFormSubtasks([subtask, subtask2])
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask2)
+      clickSubmitBtnCreate(subtask2)
+    })
 
-    clickSubmitBtnUpdate()
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask, subtask2])
+      clickSubmitBtnUpdate()
+    })
+
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
   })
 
   it('create multiple subtasks, check appear in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
-    fillTaskForm(subtask)
-    clickSubmitBtnCreate(subtask)
-    checkTaskFormSubtasks([subtask])
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      waitForCreate(rootTask)
+    })
 
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask2)
-    clickSubmitBtnCreate(subtask2)
-    checkTaskFormSubtasks([subtask, subtask2])
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask)
+      clickSubmitBtnCreate(subtask)
+    })
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask])
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
+
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask2)
+      clickSubmitBtnCreate(subtask2)
+    })
+
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask, subtask2])
+      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
     openTaskEditForm(rootTask)
-    checkTaskFormSubtasks([subtask, subtask2])
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask, subtask2])
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
 
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask3)
-    clickSubmitBtnCreate(subtask3)
-    checkTaskFormSubtasks([subtask, subtask2, subtask3])
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask3)
+      clickSubmitBtnCreate(subtask3)
+    })
 
-    clickSubmitBtnUpdate()
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask, subtask2, subtask3])
+      clickSubmitBtnUpdate()
+    })
+
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
     checkNumCalls({ create: 4, update: 0 })
   })
 
   it('create nested subtasks, ensure appear in tree', () => {
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(rootTask)
-    fillTaskForm(subtask)
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      waitForCreate(rootTask)
+    })
 
-    const nestedSubtasks: CreatedTask[] = []
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    waitForCreate(subtask)
-    fillTaskForm(subtask2)
-    clickSubmitBtnCreate(subtask2)
-    nestedSubtasks.push(subtask2)
-    checkTaskFormSubtasks(nestedSubtasks)
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask)
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      waitForCreate(subtask)
+    })
 
-    cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    fillTaskForm(subtask3)
-    clickSubmitBtnCreate(subtask3)
-    nestedSubtasks.push(subtask3)
-    checkTaskFormSubtasks(nestedSubtasks)
+    getTaskForm(2).within(() => {
+      fillTaskForm(subtask2)
+      clickSubmitBtnCreate(subtask2)
+    })
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
-    checkTaskFormSubtasks([subtask, ...nestedSubtasks])
+    getTaskForm(1).within(() => {
+      checkTaskFormSubtasks([subtask2])
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
 
-    clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    getTaskForm(2).within(() => {
+      fillTaskForm(subtask3)
+      clickSubmitBtnCreate(subtask3)
+    })
+
+    getTaskForm(1).within(() => {
+      checkTaskFormSubtasks([subtask2, subtask3])
+      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    })
+
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask, subtask2, subtask3])
+      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+    })
+
     checkTaskInTree({
       ...rootTask,
-      subtasks: [{ ...subtask, subtasks: nestedSubtasks }],
+      subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
     })
     checkNumCalls({ create: 4, update: 0 })
 
