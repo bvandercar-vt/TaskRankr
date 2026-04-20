@@ -47,7 +47,7 @@ import {
 import { TagChain } from '../primitives/TagChain'
 import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
-import { type PendingSubtask, SubtasksCard } from './SubtasksCard'
+import { SubtasksCard } from './SubtasksCard'
 
 const STUB_TASK: Task = taskSchema.parse({
   id: 0,
@@ -128,9 +128,6 @@ export interface TaskFormProps {
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
   defaultFormData?: MutateTaskContent
-  pendingSubtasks?: PendingSubtask[]
-  /** Pending (not-yet-created) ancestors to append to the parent chain display. */
-  pendingChainItems?: Pick<Task, 'id' | 'name'>[]
 }
 
 export const TaskForm = ({
@@ -143,12 +140,12 @@ export const TaskForm = ({
   onDeleteSubtask,
   onAssignSubtask,
   defaultFormData,
-  pendingSubtasks = [],
-  pendingChainItems = [],
 }: TaskFormProps) => {
-  const parentChain = useTaskParentChain(parentId ?? undefined)
-  const fullChain = [...parentChain, ...pendingChainItems]
-  const { data: allTasks } = useTasks()
+  const parentChain = useTaskParentChain(parentId ?? undefined, {
+    includeDrafts: true,
+  })
+  const fullChain = parentChain
+  const { data: allTasks } = useTasks({ includeDrafts: true })
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
@@ -296,22 +293,12 @@ export const TaskForm = ({
             />
 
             <SubtasksCard
-              {...(initialData
-                ? {
-                    task: initialData,
-                    onAddSubtask,
-                    onEditSubtask,
-                    onDeleteSubtask,
-                    onAssignSubtask,
-                    pendingSubtasks,
-                  }
-                : {
-                    task: STUB_TASK,
-                    onAddSubtask: () => onAddSubtask(STUB_TASK.id, form.getValues()),
-                    onAssignSubtask: () => onAssignSubtask(STUB_TASK, form.getValues()),
-                    pendingSubtasks,
-                    disableAddSubtask: !nameValue,
-                  })}
+              task={initialData ?? STUB_TASK}
+              onAddSubtask={(pid) => onAddSubtask(pid, form.getValues())}
+              onEditSubtask={onEditSubtask}
+              onDeleteSubtask={onDeleteSubtask}
+              onAssignSubtask={(t) => onAssignSubtask(t, form.getValues())}
+              disableAddSubtask={!initialData && !nameValue}
             />
 
             <div className="flex flex-col gap-4 mt-2 pb-4">

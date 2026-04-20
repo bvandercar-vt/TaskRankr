@@ -1,14 +1,18 @@
 /**
  * @fileoverview Context provider for task create/edit dialog with
- * desktop/mobile variants.
+ * desktop/mobile variants. Builds a navigation stack of tasks (real or draft)
+ * being edited. All in-flight subtask additions and assignments live in
+ * LocalStateProvider's draft session and are committed atomically on Submit
+ * or discarded on Cancel.
  */
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
-import { useTaskActions } from '@/hooks/useTasks'
+import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import type {
+  CreateTaskContent,
   DeleteTaskArgs,
   MutateTaskContent,
 } from '@/providers/LocalStateProvider'
@@ -23,7 +27,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../primitives/overlays/Dialog'
-import type { PendingSubtask } from '../TaskForm/SubtasksCard'
 import { AssignSubtaskDialog } from '../TaskForm/SubtasksCard/AssignSubtaskDialog'
 import { SubtaskActionDialog } from '../TaskForm/SubtasksCard/SubtaskActionDialog'
 import { TaskForm, type TaskFormProps } from '../TaskForm/TaskForm'
@@ -46,12 +49,12 @@ export const useTaskDialog = () => {
   return context
 }
 
-interface PendingTask {
-  localId: number
-  data: MutateTaskContent
-  parentLocalId: number | null
-  /** Real task ID of the parent, if the root pending task was opened as a subtask of an existing task. */
-  realParentId: number | null
+interface NavEntry {
+  /** ID of task being edited at this nav level. Null = fresh-create (no draft yet). */
+  taskId: number | null
+  /** True if this entry was created via "Add Subtask" during the session.
+   *  Backing out (Cancel) from such an entry deletes the draft. */
+  isNewDraft: boolean
 }
 
 interface TaskFormDialogProps
@@ -62,9 +65,6 @@ interface TaskFormDialogProps
     | 'onEditSubtask'
     | 'onDeleteSubtask'
     | 'onAssignSubtask'
-    | 'defaultFormData'
-    | 'pendingSubtasks'
-    | 'pendingChainItems'
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
@@ -160,357 +160,238 @@ export const TaskFormDialogProvider = ({
   // biome-ignore lint/complexity/noBannedTypes: is fine
 }: React.PropsWithChildren<{}>) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [mode, setMode] = useState<'create' | 'edit'>('create')
-  const [activeTask, setActiveTask] = useState<Task | undefined>(undefined)
-  const [parentId, setParentId] = useState<number | undefined>(undefined)
-  const [returnToTask, setReturnToTask] = useState<Task | undefined>(undefined)
-
+  const [navStack, setNavStack] = useState<NavEntry[]>([])
+  const [freshCreateParentId, setFreshCreateParentId] = useState<number | null>(
+    null,
+  )
   const [subtaskToDelete, setSubtaskToDelete] = useState<DeleteTaskArgs | null>(
     null,
   )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
-  const [assignParentTask, setAssignParentTask] = useState<Task | null>(null)
-  const [pendingAssignedTasks, setPendingAssignedTasks] = useState<
-    Pick<Task, 'id' | 'name'>[]
-  >([])
-  const [pendingAssignOpen, setPendingAssignOpen] = useState(false)
-
-  const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([])
-  const [pendingNavStack, setPendingNavStack] = useState<number[]>([])
-  const [showingChildForm, setShowingChildForm] = useState(false)
-  const [pendingEditSubtasks, setPendingEditSubtasks] = useState<
-    MutateTaskContent[]
-  >([])
-  const [showingEditSubtaskForm, setShowingEditSubtaskForm] = useState(false)
-  const pendingIdRef = useRef(-10_000)
+  /** When non-null, AssignSubtaskDialog is open and the picked task should be
+   *  assigned under this parent (real or draft). */
+  const [assignTargetParentId, setAssignTargetParentId] = useState<
+    number | null
+  >(null)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
-  const { subscribeToIdReplacement } = useLocalState()
+  const { data: tasksWithDrafts } = useTasks({ includeDrafts: true })
+  const {
+    createDraftTask,
+    assignDraftSubtask,
+    commitDraftSession,
+    discardDraftSession,
+    hasDraftSession,
+    draftTaskIds,
+    draftAssignmentCount,
+    subscribeToIdReplacement,
+  } = useLocalState()
 
+  // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {
     return subscribeToIdReplacement((tempId, realId) => {
-      setParentId((prev) => (prev === tempId ? realId : prev))
-      setActiveTask((prev) =>
-        prev?.id === tempId ? { ...prev, id: realId } : prev,
-      )
-      setReturnToTask((prev) =>
-        prev?.id === tempId ? { ...prev, id: realId } : prev,
+      setNavStack((prev) =>
+        prev.map((e) => (e.taskId === tempId ? { ...e, taskId: realId } : e)),
       )
     })
   }, [subscribeToIdReplacement])
 
-  const isInSession = pendingNavStack.length > 0
+  const isMobile = useIsMobile()
 
-  const resetSession = () => {
-    setPendingTasks([])
-    setPendingNavStack([])
-    setShowingChildForm(false)
-    setPendingAssignedTasks([])
-    setPendingAssignOpen(false)
-    setPendingEditSubtasks([])
-    setShowingEditSubtaskForm(false)
-    pendingIdRef.current = -10_000
-  }
+  const currentEntry: NavEntry | null = navStack.at(-1) ?? null
+  const rootEntry: NavEntry | null = navStack[0] ?? null
+  const currentTask =
+    currentEntry?.taskId != null
+      ? tasksWithDrafts.find((t) => t.id === currentEntry.taskId)
+      : undefined
+  const isDraftId = (id: number) => draftTaskIds.has(id)
+
+  // The form's "parentId" prop drives the parent breadcrumb chain.
+  const dialogParentId =
+    currentEntry?.taskId === null
+      ? (freshCreateParentId ?? undefined)
+      : (currentTask?.parentId ?? undefined)
+
+  // Submit button label: 'Create' for fresh-create / new draft entries.
+  const dialogMode: 'create' | 'edit' =
+    !currentEntry ||
+    currentEntry.taskId === null ||
+    currentEntry.isNewDraft ||
+    (navStack.length === 1 &&
+      currentEntry.taskId != null &&
+      isDraftId(currentEntry.taskId))
+      ? 'create'
+      : 'edit'
+
+  // Pass undefined initialData for fresh-create so the form starts blank.
+  // For new drafts (just added via "Add Subtask"), pass the draft task so
+  // edits flow back to it through updateTask routing.
+  const activeTask =
+    currentEntry?.taskId != null && !currentEntry.isNewDraft
+      ? currentTask
+      : currentEntry?.taskId != null
+        ? currentTask
+        : undefined
+
+  // Count for the cancel-confirm dialog. Excludes the root entry if it's a
+  // draft (the root represents the entity being created, not a "subtask").
+  const pendingSubtaskCount = (() => {
+    const rootId = rootEntry?.taskId
+    let drafts = draftTaskIds.size
+    if (rootId != null && draftTaskIds.has(rootId)) drafts -= 1
+    return drafts + draftAssignmentCount
+  })()
 
   const resetAndClose = () => {
-    resetSession()
+    discardDraftSession()
     setShowCancelConfirm(false)
     setIsOpen(false)
     setTimeout(() => {
-      setActiveTask(undefined)
-      setParentId(undefined)
-      setReturnToTask(undefined)
+      setNavStack([])
+      setFreshCreateParentId(null)
     }, 300)
   }
 
-  const commitPendingTasks = (pending: PendingTask[]): Task => {
-    const localIdToRealId = new Map<number, number>()
-    let rootCreatedTask: Task | null = null
-
-    const sorted: PendingTask[] = []
-    const added = new Set<number>()
-
-    const addNode = (localId: number) => {
-      if (added.has(localId)) return
-      const node = pending.find((t) => t.localId === localId)
-      if (!node) return
-      if (node.parentLocalId !== null && !added.has(node.parentLocalId)) {
-        addNode(node.parentLocalId)
-      }
-      sorted.push(node)
-      added.add(localId)
-    }
-
-    for (const t of pending) addNode(t.localId)
-
-    for (const task of sorted) {
-      const resolvedParentId =
-        task.parentLocalId !== null
-          ? localIdToRealId.get(task.parentLocalId)
-          : (task.realParentId ?? undefined)
-      const created = createTask({
-        ...task.data,
-        parentId: resolvedParentId,
-      } as CreateTask)
-      localIdToRealId.set(task.localId, created.id)
-      if (!rootCreatedTask) rootCreatedTask = created
-    }
-
-    if (!rootCreatedTask) {
-      throw new Error('No tasks were created from pending tasks')
-    }
-    return rootCreatedTask
-  }
-
-  const getTopOfStack = <T extends boolean>(ensureNotNull?: T) => {
-    const top = pendingNavStack.at(-1) ?? null
-    if (ensureNotNull && top === null) {
-      throw new Error('No top of stack found')
-    }
-    return top as T extends true ? number : number | null
-  }
-
-  const getCurrentPending = () => {
-    const topId = getTopOfStack()
-    if (topId === null) return null
-    return pendingTasks.find((t) => t.localId === topId) ?? null
-  }
-
-  const getPendingSubtasksForTop = (): PendingSubtask[] => {
-    const topId = getTopOfStack()
-    if (topId === null) return []
-    return pendingTasks
-      .filter((t) => t.parentLocalId === topId)
-      .map((t) => ({ name: t.data.name ?? '' }))
-  }
-
-  const getSessionParentId = (): number | undefined => {
-    if (!isInSession) return parentId
-    // When showing the child form, parentId state still holds the real ancestor's
-    // ID (set before the session started). Pending ancestors are tracked separately
-    // via getPendingChainItems so they appear in the TagChain.
-    if (showingChildForm) return parentId
-    const current = getCurrentPending()
-    return current?.parentLocalId != null ? current.parentLocalId : undefined
-  }
-
-  const getPendingChainItems = (): Pick<Task, 'id' | 'name'>[] => {
-    if (!isInSession || !showingChildForm) return []
-    return pendingNavStack.map((localId) => {
-      const t = pendingTasks.find((p) => p.localId === localId)
-      return { id: localId, name: t?.data.name ?? '' }
-    })
-  }
-
-  const getSessionDefaultFormData = (): MutateTaskContent | undefined => {
-    if (!isInSession || showingChildForm) return undefined
-    return getCurrentPending()?.data
-  }
-
-  const getSessionPendingSubtasks = (): PendingSubtask[] => {
-    if (!isInSession || showingChildForm) return []
-    const created = getPendingSubtasksForTop()
-    const assigned = pendingAssignedTasks.map((t) => ({ name: t.name }))
-    return [...created, ...assigned]
-  }
-
   const openCreateDialog = (pid?: number) => {
-    if (mode === 'edit' && activeTask && pid !== undefined) {
-      setReturnToTask(activeTask)
-    }
-    setMode('create')
-    setParentId(pid)
-    setActiveTask(undefined)
+    discardDraftSession()
+    setFreshCreateParentId(pid ?? null)
+    setNavStack([{ taskId: null, isNewDraft: false }])
     setIsOpen(true)
   }
 
   const openEditDialog = (task: Task) => {
-    setMode('edit')
-    setActiveTask(task)
-    setParentId(task.parentId ?? undefined)
-    setReturnToTask(undefined)
-    resetSession()
+    discardDraftSession()
+    setFreshCreateParentId(null)
+    setNavStack([{ taskId: task.id, isNewDraft: false }])
     setIsOpen(true)
   }
-
-  const handleEditSubtask = (task: Task) => {
-    if (activeTask) {
-      setReturnToTask(activeTask)
-    }
-    setMode('edit')
-    setActiveTask(task)
-    setParentId(task.parentId ?? undefined)
-    setIsOpen(true)
-  }
-
-  const pendingSubtaskCount =
-    (isInSession
-      ? pendingTasks.filter((t) => t.parentLocalId !== null).length +
-        pendingAssignedTasks.length
-      : 0) + pendingEditSubtasks.length
 
   const closeDialog = () => {
-    if (showingEditSubtaskForm) {
-      const taskToReturn = returnToTask
-      setShowingEditSubtaskForm(false)
-      setReturnToTask(undefined)
-      setMode('edit')
-      setActiveTask(taskToReturn)
-      setParentId(taskToReturn?.parentId ?? undefined)
-    } else if (returnToTask) {
-      const taskToReturn = returnToTask
-      resetSession()
-      setShowCancelConfirm(false)
-      setReturnToTask(undefined)
-      setMode('edit')
-      setActiveTask(taskToReturn)
-      setParentId(taskToReturn.parentId ?? undefined)
-    } else if (isInSession && showingChildForm) {
-      setShowingChildForm(false)
-      setActiveTask(undefined)
-    } else if (isInSession && pendingNavStack.length > 1) {
-      setPendingNavStack((prev) => prev.slice(0, -1))
-      setActiveTask(undefined)
-    } else if (pendingSubtaskCount > 0) {
-      setShowCancelConfirm(true)
-    } else {
-      resetAndClose()
+    if (navStack.length > 1) {
+      const top = navStack.at(-1)!
+      // Backing out of a freshly-added subtask drops the draft.
+      if (top.isNewDraft && top.taskId != null && isDraftId(top.taskId)) {
+        deleteTask(top.taskId)
+      }
+      setNavStack((prev) => prev.slice(0, -1))
+      return
     }
+    if (pendingSubtaskCount > 0) {
+      setShowCancelConfirm(true)
+      return
+    }
+    resetAndClose()
+  }
+
+  /** Promote a fresh-create entry to a draft root using the current form
+   *  values. Returns the new draft id and updates the nav stack. */
+  const promoteFreshToDraft = (data: MutateTaskContent): number => {
+    const draft = createDraftTask({
+      ...(data as CreateTaskContent),
+      parentId: freshCreateParentId ?? undefined,
+    } as CreateTaskContent)
+    setNavStack((prev) =>
+      prev.map((e, i) => (i === 0 ? { ...e, taskId: draft.id } : e)),
+    )
+    return draft.id
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
-    if (showingEditSubtaskForm) {
-      setPendingEditSubtasks((prev) => [...prev, data])
-      setShowingEditSubtaskForm(false)
-      const taskToReturn = returnToTask
-      setReturnToTask(undefined)
-      setMode('edit')
-      setActiveTask(taskToReturn)
-      setParentId(taskToReturn?.parentId ?? undefined)
+    const top = navStack.at(-1)
+    if (!top) return
+    const isRoot = navStack.length === 1
+
+    if (top.taskId === null) {
+      // Fresh create with no draft: just create directly.
+      createTask({
+        ...(data as CreateTaskContent),
+        parentId: freshCreateParentId ?? undefined,
+      } as CreateTask)
+      // Defensive: any stray drafts get committed (shouldn't exist here).
+      if (hasDraftSession) commitDraftSession()
+      resetAndClose()
       return
     }
-    if (mode === 'create') {
-      if (isInSession && showingChildForm) {
-        const parentLocalId = getTopOfStack(true)
-        const localId = pendingIdRef.current--
-        setPendingTasks((prev) => [...prev, { localId, data, parentLocalId }])
-        setShowingChildForm(false)
-        setActiveTask(undefined)
-      } else if (isInSession && pendingNavStack.length === 1) {
-        const rootLocalId = pendingNavStack[0]
-        const finalTasks = pendingTasks.map((t) =>
-          t.localId === rootLocalId ? { ...t, data } : t,
-        )
-        const rootTask = commitPendingTasks(finalTasks)
-        for (const { id: assignedId } of pendingAssignedTasks) {
-          updateTask({ id: assignedId, parentId: rootTask.id })
-        }
-        if (returnToTask) {
-          const taskToReturn = returnToTask
-          resetSession()
-          setShowCancelConfirm(false)
-          setReturnToTask(undefined)
-          setMode('edit')
-          setActiveTask(taskToReturn)
-          setParentId(taskToReturn.parentId ?? undefined)
-        } else {
-          resetAndClose()
-        }
-      } else if (isInSession && pendingNavStack.length > 1) {
-        const currentLocalId = getTopOfStack(true)
-        setPendingTasks((prev) =>
-          prev.map((t) => (t.localId === currentLocalId ? { ...t, data } : t)),
-        )
-        setPendingNavStack((prev) => prev.slice(0, -1))
-        setActiveTask(undefined)
-      } else {
-        createTask({ ...data, parentId } as CreateTask)
-        if (returnToTask) {
-          const taskToReturn = returnToTask
-          setReturnToTask(undefined)
-          setMode('edit')
-          setActiveTask(taskToReturn)
-          setParentId(taskToReturn.parentId ?? undefined)
-        } else {
-          resetAndClose()
-        }
-      }
-    } else if (mode === 'edit' && activeTask) {
-      for (const subtaskData of pendingEditSubtasks) {
-        createTask({ ...subtaskData, parentId: activeTask.id } as CreateTask)
-      }
-      updateTask({ id: activeTask.id, ...data })
-      if (returnToTask) {
-        const taskToReturn = returnToTask
-        setReturnToTask(undefined)
-        setMode('edit')
-        setActiveTask(taskToReturn)
-        setParentId(taskToReturn.parentId ?? undefined)
-      } else {
-        resetAndClose()
-      }
+
+    // Save form data to current entity. updateTask routes drafts internally.
+    updateTask({ id: top.taskId, ...data })
+
+    if (isRoot) {
+      if (hasDraftSession) commitDraftSession()
+      resetAndClose()
+    } else {
+      // Returning from a nested form: pop back to the parent.
+      setNavStack((prev) => prev.slice(0, -1))
     }
   }
 
-  const handleAddSubtask = (pid: number, formData?: MutateTaskContent) => {
-    if (formData) {
-      if (!isInSession) {
-        const localId = pendingIdRef.current--
-        setPendingTasks([{ localId, data: formData, parentLocalId: null, realParentId: parentId ?? null }])
-        setPendingNavStack([localId])
-        setShowingChildForm(true)
-      } else if (showingChildForm) {
-        const parentLocalId = getTopOfStack(true)
-        const localId = pendingIdRef.current--
-        setPendingTasks((prev) => [
-          ...prev,
-          { localId, data: formData, parentLocalId, realParentId: null },
-        ])
-        setPendingNavStack((prev) => [...prev, localId])
-      } else {
-        const currentLocalId = getTopOfStack(true)
-        setPendingTasks((prev) =>
-          prev.map((t) =>
-            t.localId === currentLocalId ? { ...t, data: formData } : t,
-          ),
-        )
-        setShowingChildForm(true)
-      }
-      setMode('create')
-      setActiveTask(undefined)
-    } else if (mode === 'edit') {
-      setReturnToTask(activeTask)
-      setShowingEditSubtaskForm(true)
-      setMode('create')
-      setActiveTask(undefined)
-      setParentId(pid)
+  const handleAddSubtask = (_pid: number, formData?: MutateTaskContent) => {
+    const top = navStack.at(-1)
+    if (!top || !formData) return
+
+    let parentForChildId: number
+    if (top.taskId === null) {
+      // First subtask added in a fresh-create flow: promote the root form
+      // into a draft, then add a draft child under it.
+      parentForChildId = promoteFreshToDraft(formData)
+    } else if (isDraftId(top.taskId)) {
+      // Persist current draft edits — safe, never touches sync.
+      updateTask({ id: top.taskId, ...formData })
+      parentForChildId = top.taskId
     } else {
-      openCreateDialog(pid)
+      // Real entity (edit mode): do NOT write form data here, so a subsequent
+      // Cancel produces zero backend updates. Unsaved field edits are lost
+      // when navigating away (matches prior behavior).
+      parentForChildId = top.taskId
     }
+
+    const child = createDraftTask({
+      name: '',
+      parentId: parentForChildId,
+    } as CreateTaskContent)
+    setNavStack((prev) => [...prev, { taskId: child.id, isNewDraft: true }])
   }
 
-  const handleAssignSubtask = (task: Task, formData?: MutateTaskContent) => {
-    if (formData) {
-      if (isInSession) {
-        // Save current root form data without committing — defer until Submit
-        const rootLocalId = pendingNavStack[0]
-        setPendingTasks((prev) =>
-          prev.map((t) =>
-            t.localId === rootLocalId ? { ...t, data: formData } : t,
-          ),
-        )
-        setPendingAssignOpen(true)
-      } else {
-        // Start a pending session — root task is NOT created until Submit
-        const localId = pendingIdRef.current--
-        setPendingTasks([{ localId, data: formData, parentLocalId: null, realParentId: parentId ?? null }])
-        setPendingNavStack([localId])
-        setPendingAssignOpen(true)
-      }
+  const handleEditSubtask = (task: Task) => {
+    setNavStack((prev) => [...prev, { taskId: task.id, isNewDraft: false }])
+  }
+
+  const handleAssignSubtask = (
+    _task: Task,
+    formData?: MutateTaskContent,
+  ) => {
+    const top = navStack.at(-1)
+    if (!top || !formData) return
+
+    let parentId: number
+    if (top.taskId === null) {
+      parentId = promoteFreshToDraft(formData)
+    } else if (isDraftId(top.taskId)) {
+      updateTask({ id: top.taskId, ...formData })
+      parentId = top.taskId
     } else {
-      setAssignParentTask(task)
+      parentId = top.taskId
     }
+    setAssignTargetParentId(parentId)
+  }
+
+  const handleAssignConfirm = ({ id: selectedId }: Pick<Task, 'id' | 'name'>) => {
+    if (assignTargetParentId === null) return
+    if (isDraftId(assignTargetParentId)) {
+      assignDraftSubtask(selectedId, assignTargetParentId)
+    } else {
+      // Real parent (editing an existing task): immediate update.
+      updateTask({ id: selectedId, parentId: assignTargetParentId })
+      const parent = tasksWithDrafts.find((t) => t.id === assignTargetParentId)
+      if (parent && parent.subtaskSortMode === SubtaskSortMode.MANUAL) {
+        updateTask({
+          id: assignTargetParentId,
+          subtaskOrder: [...parent.subtaskOrder, selectedId],
+        })
+      }
+    }
+    setAssignTargetParentId(null)
   }
 
   useEffect(() => {
@@ -524,26 +405,16 @@ export const TaskFormDialogProvider = ({
     }
   }, [isOpen])
 
-  const sessionParentId = getSessionParentId()
-  const sessionDefaultFormData = getSessionDefaultFormData()
-  const sessionPendingSubtasks = getSessionPendingSubtasks()
-  const allPendingSubtasks = [
-    ...sessionPendingSubtasks,
-    ...pendingEditSubtasks.map((d) => ({ name: d.name ?? '' })),
-  ]
-  const pendingChainItems = getPendingChainItems()
-
   const getFormKey = (): string | number => {
-    if (activeTask) return activeTask.id
-    if (isInSession && showingChildForm) return `child-${getTopOfStack()}`
-    if (showingEditSubtaskForm) return `edit-subtask-${returnToTask?.id ?? 'unknown'}`
-    return `new-${sessionParentId ?? 'root'}`
+    if (!currentEntry) return 'empty'
+    if (currentEntry.taskId === null) return `new-${freshCreateParentId ?? 'root'}`
+    return currentEntry.taskId
   }
 
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
     activeTask,
-    parentId: sessionParentId,
+    parentId: dialogParentId,
     formKey: getFormKey(),
     onClose: closeDialog,
     onSubmit: handleSubmit,
@@ -551,12 +422,7 @@ export const TaskFormDialogProvider = ({
     onEditSubtask: handleEditSubtask,
     onDeleteSubtask: setSubtaskToDelete,
     onAssignSubtask: handleAssignSubtask,
-    defaultFormData: sessionDefaultFormData,
-    pendingSubtasks: allPendingSubtasks,
-    pendingChainItems,
   }
-
-  const isMobile = useIsMobile()
 
   return (
     <TaskFormDialogContext.Provider
@@ -570,7 +436,7 @@ export const TaskFormDialogProvider = ({
         <DesktopDialog
           {...taskFormDialogProps}
           setIsOpen={setIsOpen}
-          mode={mode}
+          mode={dialogMode}
         />
       )}
 
@@ -586,13 +452,17 @@ export const TaskFormDialogProvider = ({
               parentId: null,
               hidden: false,
             })
-            if (activeTask) {
-              updateTask({
-                id: activeTask.id,
-                subtaskOrder: activeTask.subtaskOrder.filter(
-                  (sid) => sid !== subtaskToDelete.id,
-                ),
-              })
+            const top = currentEntry?.taskId
+            if (top != null) {
+              const parent = tasksWithDrafts.find((t) => t.id === top)
+              if (parent) {
+                updateTask({
+                  id: top,
+                  subtaskOrder: parent.subtaskOrder.filter(
+                    (sid) => sid !== subtaskToDelete.id,
+                  ),
+                })
+              }
             }
             setSubtaskToDelete(null)
           }
@@ -627,31 +497,18 @@ export const TaskFormDialogProvider = ({
       />
 
       <AssignSubtaskDialog
-        open={pendingAssignOpen || !!assignParentTask}
+        open={assignTargetParentId !== null}
         onOpenChange={(open) => {
-          if (!open) {
-            setAssignParentTask(null)
-            setPendingAssignOpen(false)
-          }
+          if (!open) setAssignTargetParentId(null)
         }}
-        parentTaskId={assignParentTask?.id ?? null}
-        onConfirm={({ id: selectedId, name }) => {
-          if (pendingAssignOpen) {
-            setPendingAssignedTasks((prev) => [
-              ...prev,
-              { id: selectedId, name },
-            ])
-          } else if (assignParentTask) {
-            updateTask({ id: selectedId, parentId: assignParentTask.id })
-            if (assignParentTask.subtaskSortMode === SubtaskSortMode.MANUAL) {
-              updateTask({
-                id: assignParentTask.id,
-                subtaskOrder: [...assignParentTask.subtaskOrder, selectedId],
-              })
-            }
-          }
-        }}
+        parentTaskId={
+          assignTargetParentId !== null && !isDraftId(assignTargetParentId)
+            ? assignTargetParentId
+            : null
+        }
+        onConfirm={handleAssignConfirm}
       />
     </TaskFormDialogContext.Provider>
   )
 }
+

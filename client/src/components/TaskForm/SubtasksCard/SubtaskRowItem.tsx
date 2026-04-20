@@ -63,7 +63,7 @@ export const SubtaskRowItem = ({
   isDragDisabled,
   isHiddenItem,
 }: SubtaskRowItemProps) => {
-  const { data: allTasks } = useTasks()
+  const { data: allTasks } = useTasks({ includeDrafts: true })
   const {
     attributes,
     listeners,

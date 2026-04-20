@@ -11,9 +11,20 @@ import {
 } from '@/providers/LocalStateProvider'
 import type { Task, UpdateTask } from '~/shared/schema'
 
-export const useTasks = () => {
+interface UseTasksOptions {
+  /** Include in-memory draft tasks from an active TaskForm session.
+   *  Defaults to false so app-wide views never see drafts. Form components
+   *  opt in. */
+  includeDrafts?: boolean
+}
+
+export const useTasks = ({ includeDrafts = false }: UseTasksOptions = {}) => {
   const localState = useLocalStateSafe()
-  const tasks = localState?.tasks ?? []
+  const tasks = localState
+    ? includeDrafts
+      ? localState.tasksWithDrafts
+      : localState.tasks
+    : []
   const isLoading = localState ? !localState.isInitialized : true
   return {
     data: tasks,
@@ -22,8 +33,11 @@ export const useTasks = () => {
   }
 }
 
-export const useTaskParentChain = (parentId?: number) => {
-  const { data: tasks } = useTasks()
+export const useTaskParentChain = (
+  parentId?: number,
+  options?: UseTasksOptions,
+) => {
+  const { data: tasks } = useTasks(options)
 
   if (!parentId) return []
 
