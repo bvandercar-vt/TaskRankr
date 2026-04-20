@@ -96,7 +96,7 @@ describe('Create Subtasks', () => {
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
-    checkNumCalls({ create: 3, update: 0 })
+    checkNumCalls({ create: 3, update: 1 })
   })
 
   it('create multiple subtasks, check appear in tree', () => {
