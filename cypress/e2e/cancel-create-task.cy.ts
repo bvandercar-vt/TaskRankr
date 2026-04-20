@@ -54,9 +54,10 @@ describe('Task Creation Cancellation', () => {
 
   it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
+        getTaskForm(0).within(() => {
     fillTaskForm(rootTask)
-
     cy.get(TaskForm.CANCEL_BTN).click()
+        })
 
     checkTasksDontExist([rootTask])
     checkNumCalls({ create: 0, update: 0 })
