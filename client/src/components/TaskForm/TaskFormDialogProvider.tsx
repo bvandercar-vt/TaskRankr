@@ -6,7 +6,7 @@
  * or discarded on Cancel.
  */
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
@@ -244,17 +244,28 @@ export const TaskFormDialogProvider = ({
     return drafts + draftAssignmentCount
   })()
 
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cancelPendingReset = () => {
+    if (resetTimerRef.current != null) {
+      clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = null
+    }
+  }
+
   const resetAndClose = () => {
     discardDraftSession()
     setShowCancelConfirm(false)
     setIsOpen(false)
-    setTimeout(() => {
+    cancelPendingReset()
+    resetTimerRef.current = setTimeout(() => {
+      resetTimerRef.current = null
       setNavStack([])
       setFreshCreateParentId(null)
     }, 300)
   }
 
   const openCreateDialog = (pid?: number) => {
+    cancelPendingReset()
     discardDraftSession()
     setFreshCreateParentId(pid ?? null)
     setNavStack([{ taskId: null, isNewDraft: false }])
@@ -262,6 +273,7 @@ export const TaskFormDialogProvider = ({
   }
 
   const openEditDialog = (task: Task) => {
+    cancelPendingReset()
     discardDraftSession()
     setFreshCreateParentId(null)
     setNavStack([{ taskId: task.id, isNewDraft: false }])
