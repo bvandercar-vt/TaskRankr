@@ -249,7 +249,7 @@ export const SubtasksCard = ({
           type="button"
           onClick={() => onAddSubtask(task.id)}
           disabled={disableAddSubtask}
-          className={cn(ADD_SUBTASK_BTN_CLASS, 'flex-[4] gap-2', disableAddSubtask && 'opacity-40 cursor-not-allowed')}
+          className={cn(ADD_SUBTASK_BTN_CLASS, 'flex-[4] gap-2 disabled:opacity-40 disabled:cursor-not-allowed')}
           data-testid="button-add-subtask"
         >
           <Plus className="size-4" />
