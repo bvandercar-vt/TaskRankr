@@ -4,7 +4,7 @@ import { defineConfig } from 'cypress'
 import installTerminalReporter from 'cypress-terminal-report/src/installLogsPrinter'
 import vitePreprocessor from 'cypress-vite'
 
-import { setUserMode } from './cypress/support/utils/test-runner'
+import { checkUserMode } from './cypress/support/utils/test-runner'
 
 const processResultsDir = (resultsDir: string) =>
   process.cwd().endsWith('cypress') && resultsDir.startsWith('cypress')
@@ -23,10 +23,9 @@ export default defineConfig({
       'cypress/e2e/assign-subtasks.cy.ts',
     ],
     setupNodeEvents(on, config) {
-      config.env.userMode = config.env.userMode?.toUpperCase()
-      setUserMode(config.env.userMode)
+      const userMode = checkUserMode(config.env.userMode)
 
-      const resultsDirRaw = `cypress/results/${config.env.userMode}_mode`
+      const resultsDirRaw = `cypress/results/${userMode}_mode`
       config.screenshotsFolder = `${resultsDirRaw}/screenshots`
       config.videosFolder = `${resultsDirRaw}/videos`
       const resultsDir = processResultsDir(resultsDirRaw)
