@@ -66,7 +66,8 @@ export function checkTasksExistBackend(
         givenTasks.reduce((running: Record<string, Task>, curr) => {
           running[curr.name] = curr
           return running
-        }, {}), `tasks do not exist in ${message}`,
+        }, {}),
+        `tasks do not exist in ${message}`,
       ).to.not.include.any.keys(expectedTaskNames)
     }
   }
