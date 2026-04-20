@@ -65,17 +65,19 @@ describe('Assign Subtasks', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask)
     clickSubmitBtnCreate()
+    cy.get(Selectors.TaskForm.FORM).should('not.exist')
 
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask2)
     clickSubmitBtnCreate()
+    cy.get(Selectors.TaskForm.FORM).should('not.exist')
   })
 
   it('assign an existing orphaned task as a subtask of a task', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
-      assignSubtask(orphanTask, { awaitUpdate: false })
+      assignSubtask(orphanTask)
     })
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask])
