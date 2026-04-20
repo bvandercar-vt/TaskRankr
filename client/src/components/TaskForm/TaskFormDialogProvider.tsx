@@ -488,12 +488,11 @@ export const TaskFormDialogProvider = ({
         )
         setPendingAssignOpen(true)
       } else {
-        const newTask = createTask({ ...formData, parentId } as CreateTask)
-        setMode('edit')
-        setActiveTask(newTask)
-        setParentId(newTask.parentId ?? undefined)
-        setReturnToTask(undefined)
-        setAssignParentTask(newTask)
+        // Start a pending session — root task is NOT created until Submit
+        const localId = pendingIdRef.current--
+        setPendingTasks([{ localId, data: formData, parentLocalId: null }])
+        setPendingNavStack([localId])
+        setPendingAssignOpen(true)
       }
     } else {
       setAssignParentTask(task)

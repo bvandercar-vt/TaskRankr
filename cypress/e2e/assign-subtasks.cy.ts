@@ -72,16 +72,15 @@ describe('Assign Subtasks', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
-      assignSubtask(orphanTask)
+      assignSubtask(orphanTask, { awaitUpdate: false })
     })
     getTaskForm(0).within(() => {
-      // re-renders TODO: fix code so doesn't re-render
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })
 
-    // add a brand-new subtask via the add button (just to test that it works alongside the assign flow)
-    getTaskForm(1).within(() => {
+    // add a brand-new subtask via the add button alongside the assign flow
+    getTaskForm(0).within(() => {
       fillTaskForm(newSubtask)
       clickSubmitBtnCreate()
     })
@@ -89,7 +88,7 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
       checkTasksExistBackend([rootTask, newSubtask], false)
-      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+      clickSubmitBtnCreate()
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
