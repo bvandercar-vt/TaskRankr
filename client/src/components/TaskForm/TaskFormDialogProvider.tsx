@@ -269,9 +269,9 @@ export const TaskFormDialogProvider = ({
 
   const closeDialog = () => {
     if (navStack.length > 1) {
-      const top = navStack.at(-1)!
+      const top = navStack.at(-1)
       // Backing out of a freshly-added subtask drops the draft.
-      if (top.isNewDraft && top.taskId != null && isDraftId(top.taskId)) {
+      if (top?.isNewDraft && top.taskId != null && isDraftId(top.taskId)) {
         deleteTask(top.taskId)
       }
       setNavStack((prev) => prev.slice(0, -1))

@@ -1154,7 +1154,8 @@ export const LocalStateProvider = ({
     while (remaining.size > 0) {
       let progressed = false
       Array.from(remaining).forEach((id) => {
-        const t = byId.get(id)!
+        const t = byId.get(id)
+        if (!t) return
         const parentIsDraft = t.parentId != null && remaining.has(t.parentId)
         if (!parentIsDraft) {
           ordered.push(t)
@@ -1164,7 +1165,10 @@ export const LocalStateProvider = ({
       })
       if (!progressed) {
         // Cycle (shouldn't happen) — bail out by appending the rest in order.
-        Array.from(remaining).forEach((id) => ordered.push(byId.get(id)!))
+        Array.from(remaining).forEach((id) => {
+          const t = byId.get(id)
+          if (t) ordered.push(t)
+        })
         break
       }
     }
