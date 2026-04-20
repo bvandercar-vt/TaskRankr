@@ -298,7 +298,7 @@ export const TaskForm = ({
               onEditSubtask={onEditSubtask}
               onDeleteSubtask={onDeleteSubtask}
               onAssignSubtask={(t) => onAssignSubtask(t, form.getValues())}
-              disableAddSubtask={!initialData && !nameValue}
+              disableAddSubtask={!nameValue}
             />
 
             <div className="flex flex-col gap-4 mt-2 pb-4">
