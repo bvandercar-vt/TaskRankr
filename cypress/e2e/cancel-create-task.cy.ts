@@ -54,234 +54,143 @@ describe('Task Form Cancellation', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  context('New Task', () => {
-    afterEach(() => {
-      checkTasksDontExist([rootTask, subtask, subtask2])
-      checkNumCalls({ create: 0, update: 0 })
-    })
+  for (const { contextName, beforeEachHook, afterEachHook } of [
+    {
+      contextName: 'New Task',
+      beforeEachHook: () => {
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+      },
+      afterEachHook: () => {
+        checkTasksDontExist([rootTask, subtask, subtask2])
+        checkNumCalls({ create: 0, update: 0 })
+      },
+    },
+    {
+      contextName: 'Edit Task',
+      beforeEachHook: () => {
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          clickSubmitBtnCreate()
+          waitForCreate([rootTask])
+        })
 
-    it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.CANCEL_BTN).click()
+        openTaskEditForm(rootTask)
+        checkNumCalls({ create: 1, update: 0 })
+      },
+      afterEachHook: () => {
+        checkTasksDontExist([subtask, subtask2])
+        checkNumCalls({ create: 1, update: 0 })
+      },
+    },
+  ]) {
+    context(contextName, () => {
+      beforeEach(beforeEachHook)
+      afterEach(afterEachHook)
+
+      it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+      })
+
+      it('cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all', () => {
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          fillTaskForm(subtask)
+          clickSubmitBtnCreate()
+        })
+
+        getTaskForm(0).within(() => {
+          checkTaskFormSubtasks([subtask])
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+
+        cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
+          .should('be.visible')
+          .should('contain.text', '1 subtask')
+        cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
+      })
+
+      it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          fillTaskForm(subtask)
+          clickSubmitBtnCreate()
+        })
+
+        getTaskForm(0).within(() => {
+          checkTaskFormSubtasks([subtask])
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          fillTaskForm(subtask2)
+          clickSubmitBtnCreate()
+        })
+
+        getTaskForm(0).within(() => {
+          checkTaskFormSubtasks([subtask, subtask2])
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+
+        cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
+          .should('be.visible')
+          .should('contain.text', '2 subtasks')
+          .should('be.visible ')
+        cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
+      })
+
+      it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          cy.get(TaskForm.NAME_INPUT).type(subtask.name)
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+
+        getTaskForm(0).within(() => {
+          cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+      })
+
+      it('cancel confirmation "Go Back" returns to parent form without discarding', () => {
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          fillTaskForm(subtask)
+          clickSubmitBtnCreate()
+        })
+
+        getTaskForm(0).within(() => {
+          checkTaskFormSubtasks([subtask])
+          cy.get(TaskForm.CANCEL_BTN).click()
+        })
+
+        cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('be.visible')
+        cy.get(TaskForm.CANCEL_DENY_BTN).click()
+
+        getTaskForm(0).within(() => {
+          cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
+          checkTaskFormSubtasks([subtask])
+        })
       })
     })
-
-    it('cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all', () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
-        .should('be.visible')
-        .should('contain.text', '1 subtask')
-      cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-    })
-
-    it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask, subtask2])
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
-        .should('be.visible')
-        .should('contain.text', '2 subtasks')
-        .should('be.visible ')
-      cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-    })
-
-    it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        cy.get(TaskForm.NAME_INPUT).type(subtask.name)
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-    })
-
-    it('cancel confirmation "Go Back" returns to parent form without discarding', () => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('be.visible')
-      cy.get(TaskForm.CANCEL_DENY_BTN).click()
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-        checkTaskFormSubtasks([subtask])
-      })
-    })
-  })
-
-  context('Edit Task', () => {
-    beforeEach(() => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        clickSubmitBtnCreate()
-        waitForCreate([rootTask])
-      })
-
-      openTaskEditForm(rootTask)
-      checkNumCalls({ create: 1, update: 0 })
-    })
-
-    afterEach(() => {
-      checkTasksDontExist([subtask, subtask2])
-      checkNumCalls({ create: 1, update: 0 })
-    })
-
-    it('cancel on edit form after adding subtask — confirmation dialog appears, discard removes new subtask', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        checkTasksExistBackend([subtask], false)
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
-        .should('be.visible')
-        .should('contain.text', '1 subtask')
-      cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-    })
-
-    it('cancel on edit form after adding multiple subtasks — confirmation shows correct count, discard removes all', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask, subtask2])
-        checkTasksExistBackend([subtask, subtask2], false)
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
-        .should('be.visible')
-        .should('contain.text', '2 subtasks')
-      cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-    })
-
-    it('cancel on subtask form during edit — navigates back to edit form without confirmation', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        cy.get(TaskForm.NAME_INPUT).type(subtask.name)
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-        cy.get(TaskForm.SUBTASK_ROW).should('not.exist')
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('not.exist')
-    })
-
-    it('cancel confirmation "Go Back" during edit — returns to edit form with pending subtask still shown', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        cy.get(TaskForm.CANCEL_BTN).click()
-      })
-
-      cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('be.visible')
-      cy.get(TaskForm.CANCEL_DENY_BTN).click()
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
-        checkTaskFormSubtasks([subtask])
-      })
-    })
-  })
+  }
 })
