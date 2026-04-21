@@ -6,18 +6,19 @@
  * or discarded on Cancel.
  */
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { getTaskById } from '@/lib/task-utils'
-import type {
-  CreateTaskContent,
-  DeleteTaskArgs,
-  MutateTaskContent,
+import {
+  type CreateTaskContent,
+  type DeleteTaskArgs,
+  type MutateTaskContent,
+  useDraftSession,
+  useTaskActionsContext,
 } from '@/providers/LocalStateProvider'
-import { useLocalState } from '@/providers/LocalStateProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { SubtaskSortMode } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
@@ -54,7 +55,9 @@ interface NavEntry {
   /** ID of task being edited at this nav level. Null = fresh-create (no draft yet). */
   taskId: number | null
   /** True if this entry was created via "Add Subtask" during the session.
-   *  Backing out (Cancel) from such an entry deletes the draft. */
+   *  Backing out (Cancel) from such an entry deletes the draft.
+   *  Note: not used for dialogMode/activeTask derivation — those rely on
+   *  draftTaskIds membership directly. */
   isNewDraft: boolean
 }
 
@@ -166,6 +169,7 @@ export const TaskFormDialogProvider = ({
   children,
   // biome-ignore lint/complexity/noBannedTypes: is fine
 }: React.PropsWithChildren<{}>) => {
+  const isMobile = useIsMobile()
   const [isOpen, setIsOpen] = useState(false)
   const [navStack, setNavStack] = useState<NavEntry[]>([])
   const [freshCreateParentId, setFreshCreateParentId] = useState<number | null>(
@@ -183,6 +187,7 @@ export const TaskFormDialogProvider = ({
   >(null)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
+  const { subscribeToIdReplacement } = useTaskActionsContext()
   const { data: tasksWithDrafts } = useTasks({ includeDrafts: true })
   const {
     createDraftTask,
@@ -192,8 +197,7 @@ export const TaskFormDialogProvider = ({
     hasDraftSession,
     draftTaskIds,
     draftAssignmentCount,
-    subscribeToIdReplacement,
-  } = useLocalState()
+  } = useDraftSession()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {
@@ -203,8 +207,6 @@ export const TaskFormDialogProvider = ({
       )
     })
   }, [subscribeToIdReplacement])
-
-  const isMobile = useIsMobile()
 
   const currentEntry: NavEntry | null = navStack.at(-1) ?? null
   const rootEntry: NavEntry | null = navStack[0] ?? null
@@ -220,58 +222,52 @@ export const TaskFormDialogProvider = ({
       ? (freshCreateParentId ?? undefined)
       : (currentTask?.parentId ?? undefined)
 
-  // Submit button label: 'Create' for fresh-create / new draft entries.
+  // Submit button label: 'Create' for fresh-create or any draft entry (root
+  // promoted via Add Subtask, or nested draft just added). Real entities show
+  // 'Edit'.
   const dialogMode: TaskFormDialogMode =
     !currentEntry ||
     currentEntry.taskId === null ||
-    currentEntry.isNewDraft ||
-    (navStack.length === 1 &&
-      currentEntry.taskId != null &&
-      isDraftId(currentEntry.taskId))
+    isDraftId(currentEntry.taskId)
       ? TaskFormDialogMode.CREATE
       : TaskFormDialogMode.EDIT
 
-  // Pass undefined initialData for fresh-create so the form starts blank.
-  // For new drafts (just added via "Add Subtask"), pass the draft task so
-  // edits flow back to it through updateTask routing.
-  const activeTask =
-    currentEntry?.taskId != null && !currentEntry.isNewDraft
-      ? currentTask
-      : currentEntry?.taskId != null
-        ? currentTask
-        : undefined
+  // Pass undefined initialData for fresh-create so the form starts blank;
+  // otherwise show the looked-up task (real or draft).
+  const activeTask = currentEntry?.taskId != null ? currentTask : undefined
 
   // Count for the cancel-confirm dialog. Excludes the root entry if it's a
   // draft (the root represents the entity being created, not a "subtask").
-  const pendingSubtaskCount = (() => {
-    const rootId = rootEntry?.taskId
-    let drafts = draftTaskIds.size
-    if (rootId != null && draftTaskIds.has(rootId)) drafts -= 1
-    return drafts + draftAssignmentCount
-  })()
+  const rootIsDraft =
+    rootEntry?.taskId != null && draftTaskIds.has(rootEntry.taskId)
+  const pendingSubtaskCount =
+    draftTaskIds.size - (rootIsDraft ? 1 : 0) + draftAssignmentCount
 
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const cancelPendingReset = () => {
-    if (resetTimerRef.current != null) {
-      clearTimeout(resetTimerRef.current)
-      resetTimerRef.current = null
-    }
-  }
+  const formKey: string | number = !currentEntry
+    ? 'empty'
+    : currentEntry.taskId === null
+      ? `new-${freshCreateParentId ?? 'root'}`
+      : currentEntry.taskId
+
+  // Clear nav state shortly after the dialog closes so the close animation
+  // can play out without the form blanking. If the user reopens before the
+  // timer fires, the effect cleanup cancels it.
+  useEffect(() => {
+    if (isOpen) return
+    const t = setTimeout(() => {
+      setNavStack([])
+      setFreshCreateParentId(null)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [isOpen])
 
   const resetAndClose = () => {
     discardDraftSession()
     setShowCancelConfirm(false)
     setIsOpen(false)
-    cancelPendingReset()
-    resetTimerRef.current = setTimeout(() => {
-      resetTimerRef.current = null
-      setNavStack([])
-      setFreshCreateParentId(null)
-    }, 300)
   }
 
   const openCreateDialog = (pid?: number) => {
-    cancelPendingReset()
     discardDraftSession()
     setFreshCreateParentId(pid ?? null)
     setNavStack([{ taskId: null, isNewDraft: false }])
@@ -279,7 +275,6 @@ export const TaskFormDialogProvider = ({
   }
 
   const openEditDialog = (task: Task) => {
-    cancelPendingReset()
     discardDraftSession()
     setFreshCreateParentId(null)
     setNavStack([{ taskId: task.id, isNewDraft: false }])
@@ -304,16 +299,30 @@ export const TaskFormDialogProvider = ({
   }
 
   /** Promote a fresh-create entry to a draft root using the current form
-   *  values. Returns the new draft id and updates the nav stack. */
+   *  values. Returns the new draft id and updates the nav stack. Only ever
+   *  called when navStack has exactly one entry whose taskId is null. */
   const promoteFreshToDraft = (data: MutateTaskContent): number => {
     const draft = createDraftTask({
-      ...(data as CreateTaskContent),
+      ...data,
       parentId: freshCreateParentId ?? undefined,
     } as CreateTaskContent)
-    setNavStack((prev) =>
-      prev.map((e, i) => (i === 0 ? { ...e, taskId: draft.id } : e)),
-    )
+    setNavStack([{ taskId: draft.id, isNewDraft: false }])
     return draft.id
+  }
+
+  /** Returns the parent id (real or draft) the next child/assignee should
+   *  attach to, promoting the root to a draft if needed. Persists current
+   *  form edits to draft roots; leaves real entities untouched so a Cancel
+   *  produces zero backend writes. */
+  const ensureMutableParent = (formData: MutateTaskContent): number | null => {
+    const top = navStack.at(-1)
+    if (!top) return null
+    if (top.taskId === null) return promoteFreshToDraft(formData)
+    if (isDraftId(top.taskId)) {
+      updateTask({ id: top.taskId, ...formData })
+      return top.taskId
+    }
+    return top.taskId
   }
 
   const handleSubmit = (data: MutateTaskContent) => {
@@ -324,7 +333,7 @@ export const TaskFormDialogProvider = ({
     if (top.taskId === null) {
       // Fresh create with no draft: just create directly.
       createTask({
-        ...(data as CreateTaskContent),
+        ...data,
         parentId: freshCreateParentId ?? undefined,
       } as CreateTask)
       // Defensive: any stray drafts get committed (shouldn't exist here).
@@ -346,25 +355,9 @@ export const TaskFormDialogProvider = ({
   }
 
   const handleAddSubtask = (_pid: number, formData?: MutateTaskContent) => {
-    const top = navStack.at(-1)
-    if (!top || !formData) return
-
-    let parentForChildId: number
-    if (top.taskId === null) {
-      // First subtask added in a fresh-create flow: promote the root form
-      // into a draft, then add a draft child under it.
-      parentForChildId = promoteFreshToDraft(formData)
-    } else if (isDraftId(top.taskId)) {
-      // Persist current draft edits — safe, never touches sync.
-      updateTask({ id: top.taskId, ...formData })
-      parentForChildId = top.taskId
-    } else {
-      // Real entity (edit mode): do NOT write form data here, so a subsequent
-      // Cancel produces zero backend updates. Unsaved field edits are lost
-      // when navigating away (matches prior behavior).
-      parentForChildId = top.taskId
-    }
-
+    if (!formData) return
+    const parentForChildId = ensureMutableParent(formData)
+    if (parentForChildId === null) return
     const child = createDraftTask({
       name: '',
       parentId: parentForChildId,
@@ -377,18 +370,9 @@ export const TaskFormDialogProvider = ({
   }
 
   const handleAssignSubtask = (_task: Task, formData?: MutateTaskContent) => {
-    const top = navStack.at(-1)
-    if (!top || !formData) return
-
-    let parentId: number
-    if (top.taskId === null) {
-      parentId = promoteFreshToDraft(formData)
-    } else if (isDraftId(top.taskId)) {
-      updateTask({ id: top.taskId, ...formData })
-      parentId = top.taskId
-    } else {
-      parentId = top.taskId
-    }
+    if (!formData) return
+    const parentId = ensureMutableParent(formData)
+    if (parentId === null) return
     setAssignTargetParentId(parentId)
   }
 
@@ -423,18 +407,11 @@ export const TaskFormDialogProvider = ({
     }
   }, [isOpen])
 
-  const getFormKey = (): string | number => {
-    if (!currentEntry) return 'empty'
-    if (currentEntry.taskId === null)
-      return `new-${freshCreateParentId ?? 'root'}`
-    return currentEntry.taskId
-  }
-
   const taskFormDialogProps: Omit<TaskFormDialogProps, 'setIsOpen' | 'mode'> = {
     isOpen,
     activeTask,
     parentId: dialogParentId,
-    formKey: getFormKey(),
+    formKey,
     onClose: closeDialog,
     onSubmit: handleSubmit,
     onAddSubtask: handleAddSubtask,
@@ -521,11 +498,7 @@ export const TaskFormDialogProvider = ({
         onOpenChange={(open) => {
           if (!open) setAssignTargetParentId(null)
         }}
-        parentTaskId={
-          assignTargetParentId !== null && !isDraftId(assignTargetParentId)
-            ? assignTargetParentId
-            : null
-        }
+        parentTaskId={assignTargetParentId}
         onConfirm={handleAssignConfirm}
       />
     </TaskFormDialogContext.Provider>

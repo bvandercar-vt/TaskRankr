@@ -7,7 +7,10 @@ import { useMemo } from 'react'
 import { toMerged } from 'es-toolkit'
 
 import { DEFAULT_SETTINGS } from '@/lib/constants'
-import { useLocalStateSafe } from '@/providers/LocalStateProvider'
+import {
+  useSettingsContext,
+  useTasksContext,
+} from '@/providers/LocalStateProvider'
 import {
   type FieldConfig,
   type FieldFlags,
@@ -18,18 +21,19 @@ import {
 export type UserSettingsContent = Omit<UserSettings, 'userId'>
 
 export const useSettings = () => {
-  const localState = useLocalStateSafe()
+  const settingsCtx = useSettingsContext()
+  const tasksCtx = useTasksContext()
 
-  const rawSettings = localState?.settings
+  const rawSettings = settingsCtx?.settings
   const settings: UserSettings = useMemo(
     () => sanitizeSettings(toMerged(DEFAULT_SETTINGS, rawSettings ?? {})),
     [rawSettings],
   )
-  const isLoading = !localState?.isInitialized
+  const isLoading = !tasksCtx?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
-    if (!localState) return
-    localState.updateSettings(sanitizeSettings(value))
+    if (!settingsCtx) return
+    settingsCtx.updateSettings(sanitizeSettings(value))
   }
 
   const updateFieldFlags = (

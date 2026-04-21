@@ -1,6 +1,14 @@
 /**
  * @fileoverview Local-first state provider for tasks and settings.
  * Manages localStorage persistence with sync queue for server synchronization.
+ *
+ * The single underlying store is exposed via several narrow contexts so
+ * consumers only re-render on the slice they actually use:
+ *   - TasksContext            : tasks, tasksWithDrafts, isInitialized, demo flags
+ *   - TaskActionsContext      : create/update/delete/reorder/setStatus + id-replace subscription
+ *   - SettingsContext         : settings + updateSettings
+ *   - DraftSessionContext     : in-memory draft session for the TaskForm dialog
+ *   - ServerSyncBridgeContext : sync queue + setTasksFromServer (for SyncProvider only)
  */
 
 import {
@@ -67,50 +75,67 @@ export type SyncOperation =
       orderedIds: number[]
     }
 
-interface LocalStateContextValue {
+// ---------------------------------------------------------------------------
+// Context value shapes
+// ---------------------------------------------------------------------------
+
+interface TasksContextValue {
   tasks: Task[]
   /** `tasks` merged with the in-memory draft session overlay. Drafts have
    *  negative IDs and are NOT persisted to localStorage or enqueued for sync. */
   tasksWithDrafts: Task[]
-  /** Set of task IDs currently in the draft session. */
-  draftTaskIds: Set<number>
-  /** Number of real tasks that have been reassigned to a draft parent during
-   *  the session. Used by the cancel-confirmation dialog. */
-  draftAssignmentCount: number
-  hasDraftSession: boolean
-  settings: UserSettings
-  syncQueue: SyncOperation[]
   isInitialized: boolean
   hasDemoData: boolean
+  deleteDemoData: () => void
+}
+
+interface TaskActionsContextValue {
   createTask: (data: CreateTaskContent) => Task
   updateTask: (id: number, updates: UpdateTaskContent) => Task
   setTaskStatus: (id: number, status: TaskStatus) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-  /** Create a draft (in-memory) task. Returns the draft Task with a
-   *  negative ID. Does not persist or enqueue. */
-  createDraftTask: (data: CreateTaskContent) => Task
-  /** Reparent an existing real task to a draft parent for the duration of the
-   *  session. Reverts on `discardDraftSession`. */
-  assignDraftSubtask: (realTaskId: number, draftParentId: number) => void
-  /** Promote all drafts to real tasks (enqueues CREATE_TASK + UPDATE_TASK
-   *  ops) and clears the session. */
-  commitDraftSession: () => void
-  /** Drop all drafts and revert assignments. Nothing was ever persisted. */
-  discardDraftSession: () => void
-  updateSettings: (updates: Partial<UserSettings>) => void
-  clearSyncQueue: () => void
-  removeSyncOperation: (index: number) => void
-  replaceTaskId: (tempId: number, realId: number) => void
-  setTasksFromServer: (tasks: Task[]) => void
-  setSettingsFromServer: (settings: UserSettings) => void
-  deleteDemoData: () => void
   subscribeToIdReplacement: (
     cb: (tempId: number, realId: number) => void,
   ) => () => void
 }
 
-const LocalStateContext = createContext<LocalStateContextValue | null>(null)
+interface SettingsContextValue {
+  settings: UserSettings
+  updateSettings: (updates: Partial<UserSettings>) => void
+}
+
+interface DraftSessionContextValue {
+  /** Set of task IDs currently in the draft session. */
+  draftTaskIds: Set<number>
+  /** Number of real tasks reassigned to a draft parent during the session. */
+  draftAssignmentCount: number
+  hasDraftSession: boolean
+  /** Create a draft (in-memory) task with a negative ID. */
+  createDraftTask: (data: CreateTaskContent) => Task
+  /** Reparent an existing real task to a draft parent for the session. */
+  assignDraftSubtask: (realTaskId: number, draftParentId: number) => void
+  /** Promote all drafts to real tasks and clear the session. */
+  commitDraftSession: () => void
+  /** Drop all drafts; nothing was ever persisted. */
+  discardDraftSession: () => void
+}
+
+interface ServerSyncBridgeContextValue {
+  syncQueue: SyncOperation[]
+  clearSyncQueue: () => void
+  removeSyncOperation: (index: number) => void
+  replaceTaskId: (tempId: number, realId: number) => void
+  setTasksFromServer: (tasks: Task[]) => void
+  setSettingsFromServer: (settings: UserSettings) => void
+}
+
+const TasksContext = createContext<TasksContextValue | null>(null)
+const TaskActionsContext = createContext<TaskActionsContextValue | null>(null)
+const SettingsContext = createContext<SettingsContextValue | null>(null)
+const DraftSessionContext = createContext<DraftSessionContextValue | null>(null)
+const ServerSyncBridgeContext =
+  createContext<ServerSyncBridgeContextValue | null>(null)
 
 export enum StorageMode {
   AUTH = 'auth',
@@ -373,9 +398,9 @@ export const LocalStateProvider = ({
   // create/update path. On discard, drafts are simply dropped.
   // ---------------------------------------------------------------------------
   const [draftTasks, setDraftTasks] = useState<Task[]>([])
-  // realTaskId -> { newParentId: draftId, originalParentId: number | null }
+  // realTaskId -> draft parent id for the duration of the session.
   const [draftAssignedParents, setDraftAssignedParents] = useState<
-    Map<number, { newParentId: number; originalParentId: number | null }>
+    Map<number, number>
   >(new Map())
   // realParentId -> overridden subtaskOrder for the session
   const [draftSubtaskOrderOverrides, setDraftSubtaskOrderOverrides] = useState<
@@ -401,19 +426,8 @@ export const LocalStateProvider = ({
   const tasksWithDrafts = useMemo<Task[]>(() => {
     if (!hasDraftSession) return tasks
 
-    // Apply assignment + order overrides to real tasks.
-    const overridden = tasks.map((t) => {
-      let next = t
-      const assignment = draftAssignedParents.get(t.id)
-      if (assignment) next = { ...next, parentId: assignment.newParentId }
-      const orderOverride = draftSubtaskOrderOverrides.get(t.id)
-      if (orderOverride) next = { ...next, subtaskOrder: orderOverride }
-      return next
-    })
-
-    // For real parents that have draft children but no explicit order
-    // override, append draft child IDs to subtaskOrder when MANUAL so drag
-    // handles render in a stable order.
+    // Index draft children by real parent so we can append them when no
+    // explicit override is present.
     const draftChildrenByRealParent = new Map<number, number[]>()
     for (const d of draftTasks) {
       if (d.parentId != null && d.parentId >= 0) {
@@ -422,19 +436,32 @@ export const LocalStateProvider = ({
         draftChildrenByRealParent.set(d.parentId, arr)
       }
     }
-    const augmented = overridden.map((t) => {
-      const additions = draftChildrenByRealParent.get(t.id)
-      if (
-        additions &&
-        !draftSubtaskOrderOverrides.has(t.id) &&
+
+    // Single pass: apply assignment + order override + draft-children append.
+    const merged = tasks.map((t) => {
+      const newParentId = draftAssignedParents.get(t.id)
+      const orderOverride = draftSubtaskOrderOverrides.get(t.id)
+      const draftChildren = draftChildrenByRealParent.get(t.id)
+      const shouldAppendDrafts =
+        draftChildren != null &&
+        orderOverride == null &&
         t.subtaskSortMode === SubtaskSortMode.MANUAL
-      ) {
-        return { ...t, subtaskOrder: [...t.subtaskOrder, ...additions] }
+
+      if (newParentId == null && orderOverride == null && !shouldAppendDrafts) {
+        return t
       }
-      return t
+      return {
+        ...t,
+        ...(newParentId != null ? { parentId: newParentId } : {}),
+        ...(orderOverride
+          ? { subtaskOrder: orderOverride }
+          : shouldAppendDrafts
+            ? { subtaskOrder: [...t.subtaskOrder, ...draftChildren] }
+            : {}),
+      }
     })
 
-    return [...augmented, ...draftTasks]
+    return [...merged, ...draftTasks]
   }, [
     hasDraftSession,
     tasks,
@@ -502,32 +529,33 @@ export const LocalStateProvider = ({
       }
       collect(id)
 
-      // Drop any assignment overrides whose new parent is being deleted, and
-      // drop any subtaskOrder overrides for parents being deleted.
+      // Drop any assignment overrides whose new parent is being deleted.
       setDraftAssignedParents((prevAssigned) => {
         if (prevAssigned.size === 0) return prevAssigned
         let changed = false
         const next = new Map(prevAssigned)
-        prevAssigned.forEach((info, taskId) => {
-          if (idsToDelete.has(info.newParentId)) {
+        prevAssigned.forEach((newParentId, taskId) => {
+          if (idsToDelete.has(newParentId)) {
             next.delete(taskId)
             changed = true
           }
         })
         return changed ? next : prevAssigned
       })
+
+      // Drop overrides whose key (real parent) is being deleted, AND strip
+      // deleted draft ids out of any remaining overrides whose key is still
+      // alive (otherwise stale negative ids leak into commit and sync).
       setDraftSubtaskOrderOverrides((prevOverrides) => {
         if (prevOverrides.size === 0) return prevOverrides
         let changed = false
         const next = new Map(prevOverrides)
-        prevOverrides.forEach((_v, pid) => {
+        prevOverrides.forEach((order, pid) => {
           if (idsToDelete.has(pid)) {
             next.delete(pid)
             changed = true
+            return
           }
-        })
-        // Strip deleted ids out of remaining overrides
-        Array.from(next.entries()).forEach(([pid, order]) => {
           const filtered = order.filter((sid: number) => !idsToDelete.has(sid))
           if (filtered.length !== order.length) {
             next.set(pid, filtered)
@@ -560,19 +588,9 @@ export const LocalStateProvider = ({
 
   const assignDraftSubtask = useCallback(
     (realTaskId: number, draftParentId: number) => {
-      const realTask = getTaskById(tasksRef.current, realTaskId)
-      if (!realTask) return
       setDraftAssignedParents((prev) => {
         const next = new Map(prev)
-        // Preserve the very first originalParentId we observed for this task
-        // so multiple reassigns within the session still revert correctly.
-        const existing = prev.get(realTaskId)
-        next.set(realTaskId, {
-          newParentId: draftParentId,
-          originalParentId: existing
-            ? existing.originalParentId
-            : realTask.parentId,
-        })
+        next.set(realTaskId, draftParentId)
         return next
       })
       // If the draft parent is MANUAL, append the assigned task to its order.
@@ -1124,10 +1142,11 @@ export const LocalStateProvider = ({
   // ---------------------------------------------------------------------------
   // commitDraftSession: promote all in-memory drafts to real tasks.
   //
-  // Walk drafts parent-first so each child can resolve its parentId from the
-  // freshly minted real id. The existing `createTask` mints its own temp id
-  // (separate from the draft id), so we maintain a draft.id -> newTask.id
-  // map and translate parentId / order references through it.
+  // `draftTasks` is already in topological order by construction: a draft
+  // child cannot exist until its draft parent has been created (you have to
+  // navigate into the parent draft to add a subtask). We replay through the
+  // public `createTask`, mapping draft.id -> real.id so children resolve their
+  // parentId from the freshly minted real id.
   // ---------------------------------------------------------------------------
   const commitDraftSession = useCallback(() => {
     if (
@@ -1147,33 +1166,7 @@ export const LocalStateProvider = ({
     const idMap = new Map<number, number>()
     const resolve = (id: number) => idMap.get(id) ?? id
 
-    // Topological sort: parents before children.
-    const ordered: Task[] = []
-    const remaining = new Set(draftTasks.map((t) => t.id))
-    const byId = new Map(draftTasks.map((t) => [t.id, t]))
-    while (remaining.size > 0) {
-      let progressed = false
-      Array.from(remaining).forEach((id) => {
-        const t = byId.get(id)
-        if (!t) return
-        const parentIsDraft = t.parentId != null && remaining.has(t.parentId)
-        if (!parentIsDraft) {
-          ordered.push(t)
-          remaining.delete(id)
-          progressed = true
-        }
-      })
-      if (!progressed) {
-        // Cycle (shouldn't happen) — bail out by appending the rest in order.
-        Array.from(remaining).forEach((id) => {
-          const t = byId.get(id)
-          if (t) ordered.push(t)
-        })
-        break
-      }
-    }
-
-    for (const draft of ordered) {
+    for (const draft of draftTasks) {
       const created = createTask({
         name: draft.name,
         description: draft.description,
@@ -1212,7 +1205,7 @@ export const LocalStateProvider = ({
 
     // For MANUAL draft parents whose user-defined order differs from the
     // append-order produced by sequential createTask calls, lock in the order.
-    for (const draft of ordered) {
+    for (const draft of draftTasks) {
       if (draft.subtaskSortMode !== SubtaskSortMode.MANUAL) continue
       if (draft.subtaskOrder.length === 0) continue
       const realId = resolve(draft.id)
@@ -1221,8 +1214,8 @@ export const LocalStateProvider = ({
     }
 
     // Apply assignments: real task -> resolved (draft) parent.
-    draftAssignedParents.forEach((info, realTaskId) => {
-      directUpdate(realTaskId, { parentId: resolve(info.newParentId) })
+    draftAssignedParents.forEach((newParentId, realTaskId) => {
+      directUpdate(realTaskId, { parentId: resolve(newParentId) })
     })
 
     // Apply real-parent subtaskOrder overrides (resolving any draft ids).
@@ -1318,48 +1311,136 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
+  // ---------------------------------------------------------------------------
+  // Memoized per-context values
+  // ---------------------------------------------------------------------------
+
+  const tasksValue = useMemo<TasksContextValue>(
+    () => ({
+      tasks,
+      tasksWithDrafts,
+      isInitialized,
+      hasDemoData,
+      deleteDemoData,
+    }),
+    [tasks, tasksWithDrafts, isInitialized, hasDemoData, deleteDemoData],
+  )
+
+  const taskActionsValue = useMemo<TaskActionsContextValue>(
+    () => ({
+      createTask,
+      updateTask,
+      setTaskStatus,
+      deleteTask,
+      reorderSubtasks,
+      subscribeToIdReplacement,
+    }),
+    [
+      createTask,
+      updateTask,
+      setTaskStatus,
+      deleteTask,
+      reorderSubtasks,
+      subscribeToIdReplacement,
+    ],
+  )
+
+  const settingsValue = useMemo<SettingsContextValue>(
+    () => ({ settings, updateSettings }),
+    [settings, updateSettings],
+  )
+
+  const draftValue = useMemo<DraftSessionContextValue>(
+    () => ({
+      draftTaskIds,
+      draftAssignmentCount: draftAssignedParents.size,
+      hasDraftSession,
+      createDraftTask,
+      assignDraftSubtask,
+      commitDraftSession,
+      discardDraftSession,
+    }),
+    [
+      draftTaskIds,
+      draftAssignedParents.size,
+      hasDraftSession,
+      createDraftTask,
+      assignDraftSubtask,
+      commitDraftSession,
+      discardDraftSession,
+    ],
+  )
+
+  const syncBridgeValue = useMemo<ServerSyncBridgeContextValue>(
+    () => ({
+      syncQueue,
+      clearSyncQueue,
+      removeSyncOperation,
+      replaceTaskId,
+      setTasksFromServer,
+      setSettingsFromServer,
+    }),
+    [
+      syncQueue,
+      clearSyncQueue,
+      removeSyncOperation,
+      replaceTaskId,
+      setTasksFromServer,
+      setSettingsFromServer,
+    ],
+  )
+
   return (
-    <LocalStateContext.Provider
-      value={{
-        tasks,
-        tasksWithDrafts,
-        draftTaskIds,
-        draftAssignmentCount: draftAssignedParents.size,
-        hasDraftSession,
-        settings,
-        syncQueue,
-        isInitialized,
-        hasDemoData,
-        createTask,
-        updateTask,
-        setTaskStatus,
-        deleteTask,
-        reorderSubtasks,
-        createDraftTask,
-        assignDraftSubtask,
-        commitDraftSession,
-        discardDraftSession,
-        updateSettings,
-        clearSyncQueue,
-        removeSyncOperation,
-        replaceTaskId,
-        setTasksFromServer,
-        setSettingsFromServer,
-        deleteDemoData,
-        subscribeToIdReplacement,
-      }}
-    >
-      {children}
-    </LocalStateContext.Provider>
+    <TasksContext.Provider value={tasksValue}>
+      <TaskActionsContext.Provider value={taskActionsValue}>
+        <SettingsContext.Provider value={settingsValue}>
+          <DraftSessionContext.Provider value={draftValue}>
+            <ServerSyncBridgeContext.Provider value={syncBridgeValue}>
+              {children}
+            </ServerSyncBridgeContext.Provider>
+          </DraftSessionContext.Provider>
+        </SettingsContext.Provider>
+      </TaskActionsContext.Provider>
+    </TasksContext.Provider>
   )
 }
 
-export const useLocalStateSafe = () => useContext(LocalStateContext)
+// ---------------------------------------------------------------------------
+// Hooks
+// ---------------------------------------------------------------------------
 
-export const useLocalState = () => {
-  const context = useLocalStateSafe()
-  if (!context) {
-    throw new Error('useLocalState must be used within a LocalStateProvider')
-  }
-  return context
+export const useTasksContext = () => useContext(TasksContext)
+export const useTasksContextRequired = () => {
+  const ctx = useContext(TasksContext)
+  if (!ctx)
+    throw new Error('useTasksContext must be used within LocalStateProvider')
+  return ctx
+}
+
+export const useTaskActionsContext = () => {
+  const ctx = useContext(TaskActionsContext)
+  if (!ctx)
+    throw new Error(
+      'useTaskActionsContext must be used within LocalStateProvider',
+    )
+  return ctx
+}
+export const useTaskActionsContextSafe = () => useContext(TaskActionsContext)
+
+export const useSettingsContext = () => useContext(SettingsContext)
+
+export const useDraftSession = () => {
+  const ctx = useContext(DraftSessionContext)
+  if (!ctx)
+    throw new Error('useDraftSession must be used within LocalStateProvider')
+  return ctx
+}
+
+export const useServerSyncBridge = () => {
+  const ctx = useContext(ServerSyncBridgeContext)
+  if (!ctx)
+    throw new Error(
+      'useServerSyncBridge must be used within LocalStateProvider',
+    )
+  return ctx
 }

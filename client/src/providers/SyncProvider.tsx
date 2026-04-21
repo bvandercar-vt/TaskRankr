@@ -15,7 +15,11 @@ import {
 
 import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
-import { SyncOperationType, useLocalState } from './LocalStateProvider'
+import {
+  SyncOperationType,
+  useServerSyncBridge,
+  useTasksContextRequired,
+} from './LocalStateProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -49,8 +53,8 @@ export const SyncProvider = ({
     replaceTaskId,
     setTasksFromServer,
     setSettingsFromServer,
-    isInitialized,
-  } = useLocalState()
+  } = useServerSyncBridge()
+  const { isInitialized } = useTasksContextRequired()
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
