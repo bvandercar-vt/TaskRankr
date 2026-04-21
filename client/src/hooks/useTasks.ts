@@ -19,9 +19,13 @@ interface UseTasksOptions {
 }
 
 export const useTasks = ({ includeDrafts = false }: UseTasksOptions = {}) => {
-  const ctx = useLocalStateSafe()
-  const tasks = ctx ? (includeDrafts ? ctx.tasksWithDrafts : ctx.tasks) : []
-  const isLoading = ctx ? !ctx.isInitialized : true
+  const localState = useLocalStateSafe()
+  const tasks = localState
+    ? includeDrafts
+      ? localState.tasksWithDrafts
+      : localState.tasks
+    : []
+  const isLoading = localState ? !localState.isInitialized : true
   return {
     data: tasks,
     isLoading,
@@ -60,9 +64,9 @@ export const useTaskActions = (): {
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
 } => {
-  const ctx = useLocalStateSafe()
+  const localState = useLocalStateSafe()
 
-  if (!ctx) {
+  if (!localState) {
     const noop = () => {
       throw new Error('Local state not initialized')
     }
@@ -76,11 +80,11 @@ export const useTaskActions = (): {
   }
 
   return {
-    createTask: (data) => ctx.createTask(data),
-    updateTask: ({ id, ...updates }) => ctx.updateTask(id, updates),
-    setTaskStatus: (id, status) => ctx.setTaskStatus(id, status),
-    deleteTask: (id) => ctx.deleteTask(id),
+    createTask: (data) => localState.createTask(data),
+    updateTask: ({ id, ...updates }) => localState.updateTask(id, updates),
+    setTaskStatus: (id, status) => localState.setTaskStatus(id, status),
+    deleteTask: (id) => localState.deleteTask(id),
     reorderSubtasks: (parentId, orderedIds) =>
-      ctx.reorderSubtasks(parentId, orderedIds),
+      localState.reorderSubtasks(parentId, orderedIds),
   }
 }

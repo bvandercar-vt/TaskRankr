@@ -18,18 +18,18 @@ import {
 export type UserSettingsContent = Omit<UserSettings, 'userId'>
 
 export const useSettings = () => {
-  const ctx = useLocalStateSafe()
+  const localState = useLocalStateSafe()
 
-  const rawSettings = ctx?.settings
+  const rawSettings = localState?.settings
   const settings: UserSettings = useMemo(
     () => sanitizeSettings(toMerged(DEFAULT_SETTINGS, rawSettings ?? {})),
     [rawSettings],
   )
-  const isLoading = !ctx?.isInitialized
+  const isLoading = !localState?.isInitialized
 
   const updateSettings = (value: Partial<UserSettings>) => {
-    if (!ctx) return
-    ctx.updateSettings(sanitizeSettings(value))
+    if (!localState) return
+    localState.updateSettings(sanitizeSettings(value))
   }
 
   const updateFieldFlags = (
