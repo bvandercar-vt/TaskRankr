@@ -69,7 +69,13 @@ export const SyncProvider = ({
     async (force = false) => {
       if (!isAuthenticated || !isOnline) return
       if (!force && hasLoadedServerData.current) return
-      if (!force && syncQueue.length > 0) return
+      if (syncQueue.length > 0) {
+        debugLog.log('sync', 'loadServerData:skipped', {
+          reason: 'pending sync operations',
+          pending: syncQueue.length,
+        })
+        return
+      }
 
       try {
         debugLog.log('sync', 'loadServerData:start', { force })
@@ -128,21 +134,6 @@ export const SyncProvider = ({
       hasLoadedServerData.current = false
     }
   }, [isAuthenticated])
-
-  useEffect(() => {
-    if (!isAuthenticated) return
-
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
-        await loadServerData(true)
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [isAuthenticated, loadServerData])
 
   const flushQueue = useCallback(async () => {
     if (isSyncingRef.current || !isOnline || !isAuthenticated) return
@@ -288,6 +279,21 @@ export const SyncProvider = ({
     await flushQueue()
     await loadServerData(true)
   }, [flushQueue, loadServerData])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        await forceSync()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isAuthenticated, forceSync])
 
   const value = useMemo(
     () => ({
