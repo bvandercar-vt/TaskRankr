@@ -38,7 +38,7 @@ import {
   getHasIncompleteSubtasks,
   removeIds,
   updateItem,
-} from '@/lib/task-utils'
+} from '@/lib/task-tree-utils'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
   type SyncOperation,

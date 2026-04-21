@@ -41,7 +41,7 @@ import { omit } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
-import { removeIds } from '@/lib/task-utils'
+import { removeIds } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
   type UpdateTaskContent,

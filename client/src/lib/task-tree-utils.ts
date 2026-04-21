@@ -1,22 +1,20 @@
 /**
- * @fileoverview Sorting logic, sort-chain definitions, and rank-field column
- * metadata for task lists. Single source of truth for sort order, direction,
- * labels, and the "best" value derivation used by `SortInfo`.
+ * @fileoverview Tree-walking helpers + sorting/filtering logic for task
+ * lists.
  */
 
 import type { ValueOf } from 'type-fest'
 
 import type { TaskWithSubtasks } from '@/types'
 import {
-  Ease,
-  Enjoyment,
-  Priority,
-  type RankField,
+  type Ease,
+  type Enjoyment,
+  type Priority,
   SortOption,
   SubtaskSortMode,
   type Task,
   TaskStatus,
-  Time,
+  type Time,
 } from '~/shared/schema'
 
 export * from '~/shared/utils/task-utils'
@@ -140,49 +138,6 @@ export const sortTaskTree = (
 
   return sortTasksByField(withSortedChildren, sort)
 }
-
-// *****************************************************************************
-// Column criteria
-// *****************************************************************************
-
-export const RANK_FIELD_ENUMS = {
-  [SortOption.PRIORITY]: Priority,
-  [SortOption.EASE]: Ease,
-  [SortOption.ENJOYMENT]: Enjoyment,
-  [SortOption.TIME]: Time,
-} as const satisfies Record<RankField, Record<string, string>>
-
-export type RankFieldValueMap = {
-  [K in RankField]: ValueOf<(typeof RANK_FIELD_ENUMS)[K]>
-}
-
-export const SORT_LABELS = {
-  [SortOption.DATE_CREATED]: 'Date Created',
-  [SortOption.PRIORITY]: 'Priority',
-  [SortOption.EASE]: 'Ease',
-  [SortOption.ENJOYMENT]: 'Enjoyment',
-  [SortOption.TIME]: 'Time',
-} as const satisfies Record<SortOption, string>
-
-/** Rank-field column metadata in display order (name, label, enum values). */
-export const RANK_FIELDS_COLUMNS = (
-  [
-    SortOption.PRIORITY,
-    SortOption.EASE,
-    SortOption.ENJOYMENT,
-    SortOption.TIME,
-  ] as const
-).map((name) => ({
-  name,
-  label: SORT_LABELS[name],
-  labelShort: name === SortOption.ENJOYMENT ? 'Enjoy' : undefined,
-  levels: Object.values(RANK_FIELD_ENUMS[name]),
-})) satisfies {
-  name: RankField
-  label: string
-  labelShort?: string
-  levels: readonly string[]
-}[]
 
 // *****************************************************************************
 // Filtering

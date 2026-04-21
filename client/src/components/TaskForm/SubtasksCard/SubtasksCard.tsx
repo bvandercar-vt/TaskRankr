@@ -25,7 +25,7 @@ import {
   getById,
   getDirectSubtasks,
   sortTasksByIdOrder,
-} from '@/lib/task-utils'
+} from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'

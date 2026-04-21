@@ -2,15 +2,14 @@
  * @fileoverview Collapsible sort order info component showing primary/secondary sort criteria.
  */
 
+import { SORT_LABELS } from '@/lib/columns'
+import { RANK_FIELD_ENUMS, type RankFieldValueMap } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
-  RANK_FIELD_ENUMS,
-  type RankFieldValueMap,
   SORT_DIRECTIONS,
-  SORT_LABELS,
   SORT_ORDER_MAP,
   SortDirection,
-} from '@/lib/task-utils'
+} from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { SortOption } from '~/shared/schema'
 import { CollapsibleCard } from '../primitives/CollapsibleCard'

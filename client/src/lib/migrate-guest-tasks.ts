@@ -5,7 +5,7 @@
 
 import { omit } from 'es-toolkit'
 
-import { removeIds } from '@/lib/task-utils'
+import { removeIds } from '@/lib/task-tree-utils'
 import { SyncOperationType } from '@/providers/TaskSyncQueueProvider'
 import type { Task } from '~/shared/schema'
 import { storage } from './storage'

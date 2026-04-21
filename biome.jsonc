@@ -119,7 +119,10 @@
       "!!**/coverage",
       "!!**/dist",
       "!!**/dev-dist",
-      "!**/node_modules"
+      "!**/node_modules",
+      "!.cache",
+      "!.config",
+      "!.local"
     ]
   }
 }

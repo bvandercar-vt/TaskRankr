@@ -13,11 +13,8 @@ import {
   TaskListPageWrapper,
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
-import {
-  filterAndSortTree,
-  getDirectSubtasks,
-  RANK_FIELDS_COLUMNS,
-} from '@/lib/task-utils'
+import { RANK_FIELDS_COLUMNS } from '@/lib/columns'
+import { filterAndSortTree, getDirectSubtasks } from '@/lib/task-tree-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { TaskStatus } from '~/shared/schema'
