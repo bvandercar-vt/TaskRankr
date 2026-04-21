@@ -320,8 +320,65 @@ export const LocalStateProvider = ({
 
     setSettings(loadedSettings)
     nextIdRef.current = loadedNextId
-    setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
+
+    // Recovery: any persisted task with a negative id is an unsynced create
+    // (drafts are never persisted). If its CREATE_TASK op is missing from the
+    // queue (e.g. dropped by a previous version of the sync code), re-enqueue
+    // it so the server assigns a real id. Enqueue parents before children so
+    // the in-flight idMap can resolve parentId references in order.
+    let recoveredQueue = loadedQueue
+    if (shouldSync && loadedTasks.length > 0) {
+      const queuedTempIds = new Set(
+        loadedQueue
+          .filter((op) => op.type === SyncOperationType.CREATE_TASK)
+          .map((op) => (op as { tempId: number }).tempId),
+      )
+      const taskById = new Map(loadedTasks.map((t) => [t.id, t]))
+      const orphaned: Task[] = []
+      for (const t of loadedTasks) {
+        if (t.id >= 0) continue
+        if (queuedTempIds.has(t.id)) continue
+        // "Parent exists" means either no parent, parent is a real task, or
+        // parent is another negative-id task we'll also be re-enqueuing.
+        if (t.parentId != null && !taskById.has(t.parentId)) continue
+        orphaned.push(t)
+      }
+      if (orphaned.length > 0) {
+        // Topo-sort: a task must appear after its (negative-id) parent, but
+        // only traverse to parents that are themselves in the recoverable
+        // set — never re-add a parent that already has a queued CREATE op.
+        const recoverableIds = new Set(orphaned.map((t) => t.id))
+        const sorted: Task[] = []
+        const visited = new Set<number>()
+        const visit = (t: Task) => {
+          if (visited.has(t.id)) return
+          visited.add(t.id)
+          if (
+            t.parentId != null &&
+            t.parentId < 0 &&
+            recoverableIds.has(t.parentId)
+          ) {
+            const parent = taskById.get(t.parentId)
+            if (parent) visit(parent)
+          }
+          sorted.push(t)
+        }
+        for (const t of orphaned) visit(t)
+
+        const recoveryOps: SyncOperation[] = sorted.map((t) => ({
+          type: SyncOperationType.CREATE_TASK,
+          tempId: t.id,
+          data: omit(t, ['id', 'userId']) as CreateTaskContent,
+        }))
+        recoveredQueue = [...loadedQueue, ...recoveryOps]
+        debugLog.log('sync', 'recoverOrphanedTasks', {
+          count: recoveryOps.length,
+          tempIds: sorted.map((t) => t.id),
+        })
+      }
+    }
+    setSyncQueue(recoveredQueue)
 
     if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
@@ -338,7 +395,7 @@ export const LocalStateProvider = ({
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, reconcileAndSetTasks])
+  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync])
 
   useEffect(() => {
     if (isInitialized) {
