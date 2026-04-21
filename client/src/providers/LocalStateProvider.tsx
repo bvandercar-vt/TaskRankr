@@ -1,7 +1,7 @@
 /**
  * @fileoverview Local-first state provider for tasks.
  * Manages tasks in-memory + localStorage persistence. Every task mutation also
- * pushes an entry onto the task sync queue owned by `SyncQueueProvider` (which
+ * pushes an entry onto the task sync queue owned by `TaskSyncQueueProvider` (which
  * must wrap this provider); `SyncProvider` drains that queue in the
  * background.
  *
@@ -43,8 +43,8 @@ import { useSettings } from '@/providers/SettingsProvider'
 import {
   type SyncOperation,
   SyncOperationType,
-  useSyncQueue,
-} from '@/providers/SyncQueueProvider'
+  useTaskSyncQueue,
+} from '@/providers/TaskSyncQueueProvider'
 import {
   allRankFieldsNull,
   type CreateTask,
@@ -78,7 +78,7 @@ interface LocalStateContextValue {
   ) => () => void
 
   // Server sync bridge (used by SyncProvider). The task sync queue itself
-  // lives in SyncQueueProvider — these are the tasks-side bridge methods.
+  // lives in TaskSyncQueueProvider — these are the tasks-side bridge methods.
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: Task[]) => void
 }
@@ -200,7 +200,7 @@ export const LocalStateProvider = ({
 }: LocalStateProviderProps) => {
   const { settings } = useSettings()
   const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
-    useSyncQueue()
+    useTaskSyncQueue()
   const [isInitialized, setIsInitialized] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])

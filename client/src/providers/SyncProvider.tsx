@@ -18,7 +18,7 @@ import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
 import { useLocalState } from './LocalStateProvider'
 import { useSettings } from './SettingsProvider'
-import { SyncOperationType, useSyncQueue } from './SyncQueueProvider'
+import { SyncOperationType, useTaskSyncQueue } from './TaskSyncQueueProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -51,7 +51,7 @@ export const SyncProvider = ({
     isInitialized: tasksInitialized,
   } = useLocalState()
 
-  const { syncQueue, removeProcessedOperations } = useSyncQueue()
+  const { syncQueue, removeProcessedOperations } = useTaskSyncQueue()
 
   const {
     pendingSettingsSync,

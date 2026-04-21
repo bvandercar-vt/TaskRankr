@@ -34,7 +34,7 @@ import {
 import { LocalStateProvider } from '@/providers/LocalStateProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
-import { SyncQueueProvider } from '@/providers/SyncQueueProvider'
+import { TaskSyncQueueProvider } from '@/providers/TaskSyncQueueProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
 import { WhatsNewDialog } from './components/appInfo/WhatsNewDialog'
 import { Routes } from './lib/constants'
@@ -117,7 +117,7 @@ const AuthenticatedApp = () => {
 
   return (
     <SettingsProvider shouldSync={shouldSync} storageMode={storageMode}>
-      <SyncQueueProvider
+      <TaskSyncQueueProvider
         key={storageMode} // necessary to reset the queue when switching between guest/auth modes
         shouldSync={shouldSync}
         storageMode={storageMode}
@@ -135,7 +135,7 @@ const AuthenticatedApp = () => {
             </ExpandedTasksProvider>
           </SyncProvider>
         </LocalStateProvider>
-      </SyncQueueProvider>
+      </TaskSyncQueueProvider>
     </SettingsProvider>
   )
 }

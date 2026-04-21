@@ -48,7 +48,7 @@ export type SyncOperation =
       orderedIds: number[]
     }
 
-interface SyncQueueContextValue {
+interface TaskSyncQueueContextValue {
   syncQueue: SyncOperation[]
   enqueue: (op: SyncOperation) => void
   enqueueMany: (ops: SyncOperation[]) => void
@@ -57,19 +57,19 @@ interface SyncQueueContextValue {
   replaceTempIdInQueue: (tempId: number, realId: number) => void
 }
 
-const SyncQueueContext = createContext<SyncQueueContextValue | null>(null)
+const TaskSyncQueueContext = createContext<TaskSyncQueueContextValue | null>(null)
 
-interface SyncQueueProviderProps {
+interface TaskSyncQueueProviderProps {
   children: React.ReactNode
   shouldSync: boolean
   storageMode: StorageMode
 }
 
-export const SyncQueueProvider = ({
+export const TaskSyncQueueProvider = ({
   children,
   shouldSync,
   storageMode,
-}: SyncQueueProviderProps) => {
+}: TaskSyncQueueProviderProps) => {
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   // Synchronous load so the queue is populated before any consumer (including
@@ -133,7 +133,7 @@ export const SyncQueueProvider = ({
     )
   }, [])
 
-  const value = useMemo<SyncQueueContextValue>(
+  const value = useMemo<TaskSyncQueueContextValue>(
     () => ({
       syncQueue,
       enqueue,
@@ -153,15 +153,15 @@ export const SyncQueueProvider = ({
   )
 
   return (
-    <SyncQueueContext.Provider value={value}>
+    <TaskSyncQueueContext.Provider value={value}>
       {children}
-    </SyncQueueContext.Provider>
+    </TaskSyncQueueContext.Provider>
   )
 }
 
-export const useSyncQueue = () => {
-  const ctx = useContext(SyncQueueContext)
+export const useTaskSyncQueue = () => {
+  const ctx = useContext(TaskSyncQueueContext)
   if (!ctx)
-    throw new Error('useSyncQueue must be used within a SyncQueueProvider')
+    throw new Error('useTaskSyncQueue must be used within a TaskSyncQueueProvider')
   return ctx
 }
