@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { omit, toMerged, without } from 'es-toolkit'
+import { omit, toMerged } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
@@ -597,7 +597,7 @@ export const LocalStateProvider = ({
             changed = true
             return
           }
-          const filtered = without(order, ...Array.from(idsToDelete))
+          const filtered = order.filter((sid) => !idsToDelete.has(sid))
           if (filtered.length !== order.length) {
             next.set(pid, filtered)
             changed = true
@@ -608,7 +608,7 @@ export const LocalStateProvider = ({
 
       return removeIds(prev, idsToDelete).map((t) => ({
         ...t,
-        subtaskOrder: without(t.subtaskOrder, ...Array.from(idsToDelete)),
+        subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
       }))
     })
     debugLog.log('task', 'deleteDraft', { id })
@@ -1124,7 +1124,7 @@ export const LocalStateProvider = ({
             ...(totalTime > 0
               ? { timeSpent: (t.timeSpent ?? 0) + totalTime }
               : {}),
-            subtaskOrder: without(t.subtaskOrder, ...Array.from(idsToDelete)),
+            subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
           }))
         }
 
