@@ -9,6 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { intersection } from 'es-toolkit'
 import type { EmptyObject } from 'type-fest'
 
 export enum BannerKey {
@@ -64,5 +65,20 @@ export const useIsBannerHidden = (key: BannerKey): boolean =>
 /** Mutators for code that needs to seed or clear the suppression set. */
 export const useBannersMutations = () => {
   const { hideBanners, clearHiddenBanners } = useBanners()
-  return { hideBanners, clearHiddenBanners }
+
+  const hideBannersByUrlParam = useCallback(() => {
+    const params = new URLSearchParams(window.location.search)
+    const hideParam = params.get('hide')
+
+    if (hideParam) {
+      hideBanners(
+        intersection<BannerKey>(
+          hideParam.split(',') as BannerKey[],
+          Object.values(BannerKey),
+        ),
+      )
+    }
+  }, [hideBanners])
+
+  return { hideBanners, clearHiddenBanners, hideBannersByUrlParam }
 }

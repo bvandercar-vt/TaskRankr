@@ -28,11 +28,12 @@ export const GuestModeProvider = ({
   children,
 }: React.PropsWithChildren<EmptyObject>) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
-  const { clearHiddenBanners } = useBannersMutations()
+  const { hideBannersByUrlParam, clearHiddenBanners } = useBannersMutations()
 
   const enterGuestMode = useCallback(() => {
     setIsGuestMode(true)
-  }, [])
+    hideBannersByUrlParam()
+  }, [hideBannersByUrlParam])
 
   const exitGuestMode = useCallback(() => {
     setIsGuestMode(false)
