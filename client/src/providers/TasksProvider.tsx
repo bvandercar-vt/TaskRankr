@@ -1,30 +1,17 @@
 /**
- * @fileoverview Local-first state provider for tasks.
- * Manages tasks in-memory + localStorage persistence. Every task mutation also
- * pushes an entry onto the task sync queue owned by `TaskSyncQueueProvider` (which
- * must wrap this provider); `SyncProvider` drains that queue in the
- * background.
+ * @fileoverview Local-first task state with localStorage persistence. Every
+ * mutation also pushes an op onto `TaskSyncQueueProvider` (which must wrap
+ * this provider) for `SyncProvider` to drain in the background.
  *
- * Exposes two contexts for re-render isolation:
- *   - `useTasks()` returns the reactive view (`tasks`, `hasDemoData`).
- *     Consumers re-render on every task mutation.
- *   - `useTaskMutations()` returns the stable mutator/server-bridge callbacks
- *     plus `isInitialized` (`createTask`, `updateTask`, `setTaskStatus`,
- *     `deleteTask`, `reorderSubtasks`, `deleteDemoData`, `replaceTaskId`,
- *     `setTasksFromServer`, `subscribeToIdReplacement`). Components that only
- *     fire mutations subscribe here and never re-render on task list changes.
- * `isInitialized` lives on the mutations context so consumers that only need
- * the init flag (like `SyncProvider`) don't subscribe to the task array.
+ * Two contexts for re-render isolation:
+ *   - `useTasks()` — reactive view: `tasks`, `hasDemoData`.
+ *   - `useTaskMutations()` — stable callbacks + `isInitialized`. Components
+ *     that only fire mutations subscribe here and never re-render on task
+ *     list changes.
  *
- * Settings live in `SettingsProvider` — independent context, independent sync
- * pointer. SyncProvider drains both.
- *
- * The TaskForm dialog's in-memory draft session (drafts, parent reassignments,
- * order overrides, and `tasksWithDrafts` overlay) lives in
- * `DraftSessionProvider`, which is mounted inside `TaskFormDialogProvider`
- * below this provider in the tree. Mutators here are draft-unaware; the
- * dialog subtree consumes draft-aware mutators from
- * `useDraftSessionMutations()` instead.
+ * Mutators here are strictly real-only and draft-unaware. The TaskForm
+ * dialog's in-memory drafts live in `DraftSessionProvider` further down
+ * the tree.
  */
 
 import {

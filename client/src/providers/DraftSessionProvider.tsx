@@ -1,44 +1,34 @@
 /**
- * @fileoverview In-memory draft session used by the TaskForm dialog.
+ * @fileoverview In-memory draft session for the TaskForm dialog. Lets users
+ * add subtasks, reassign parents, and reorder children mid-edit and have it
+ * all commit atomically on Save or vanish on Cancel.
  *
- * Drafts are Task records with negative ids that live only in React state
- * (never persisted, never enqueued for sync) so that subtasks added mid-edit
- * can be committed atomically on Submit or dropped on Cancel.
+ * Three layers are parked during an open session:
+ *   - `draftTasks` — new tasks with negative ids; never persisted, never
+ *     enqueued for sync.
+ *   - `draftAssignedParents` — real-task id → draft parent id.
+ *   - `draftSubtaskOrderOverrides` — real-parent id → subtaskOrder containing
+ *     draft ids, kept out of the sync queue until commit.
  *
- * Three in-memory layers are parked here during an open session:
- *   - `draftTasks`: newly created tasks that have never been persisted.
- *   - `draftAssignedParents`: real-task id -> draft parent id, for tasks
- *     reassigned to a draft parent during the session.
- *   - `draftSubtaskOrderOverrides`: real parent id -> subtaskOrder override
- *     that contains draft ids, parked until commit so nothing stale leaks
- *     into the sync queue.
+ * `tasksWithDrafts` overlays all three on top of `TasksProvider.tasks` so
+ * the dialog subtree renders the in-progress tree like normal.
  *
- * `tasksWithDrafts` overlays these on top of `TasksProvider.tasks` so
- * the dialog subtree renders the in-progress tree exactly like real tasks.
+ * Two contexts mirror the `TasksProvider` split:
+ *   - `useDraftSession()` — reactive view (`tasksWithDrafts`, `draftTaskIds`,
+ *     `draftAssignmentCount`, `hasDraftSession`, `isDraftId`).
+ *   - `useDraftSessionMutations()` — stable draft-aware callbacks. They read
+ *     draft state through refs so consumers that only fire mutations don't
+ *     re-render on keystrokes that mutate `tasksWithDrafts`.
  *
- * This provider exposes two contexts for re-render isolation, mirroring
- * the `TasksProvider` split:
- *   - `useDraftSession()` returns the reactive view (`tasksWithDrafts`,
- *     `draftTaskIds`, `draftAssignmentCount`, `hasDraftSession`,
- *     `isDraftId`). Consumers re-render whenever drafts change.
- *   - `useDraftSessionMutations()` returns stable draft-aware callbacks
- *     (`updateTask`, `deleteTask`, `reorderSubtasks`, `setTaskStatus`,
- *     `createDraftTask`, `assignDraftSubtask`, `commitDraftSession`,
- *     `discardDraftSession`). All callbacks have empty deps and read
- *     the latest draft state through refs, so consumers that only fire
- *     mutations (like `SubtaskRowItem`'s checkbox) never re-render on
- *     keystrokes that mutate `tasksWithDrafts`.
+ * Draft-aware mutators route by id: drafts stay in the layers above, real
+ * ids fall through to the underlying `TasksProvider` mutators. Only the
+ * dialog subtree sees these; everything else uses `useTaskMutations()`
+ * directly and never knows drafts exist.
  *
- * The draft-aware mutators route to either the draft layer or the
- * underlying `TasksProvider` mutators based on whether the id is a draft.
- * Only consumers inside the TaskForm dialog subtree see the draft-aware
- * versions; the rest of the app reads real mutators directly from
- * `useTaskMutations()` and stays oblivious to draft state.
- *
- * `commitDraftSession` promotes drafts in dependency order, building an
- * idMap from temp draft ids to freshly minted real ids, then applies parent
- * reassignments and manual reorders against the *real* TasksProvider mutators
- * (which, after the draft split, are draft-unaware and won't re-park).
+ * On Save, `commitDraftSession` promotes drafts in dependency order — minting
+ * real ids via `createTask`, then applying reorders and parent reassignments
+ * through the real (draft-unaware) `TasksProvider` mutators. On Cancel,
+ * `discardDraftSession` drops all three layers.
  */
 
 import {

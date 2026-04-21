@@ -1,15 +1,13 @@
 /**
- * @fileoverview Task sync queue (append-only log of operations bound for the
- * server). Lives in its own provider so queue mutations — which happen on
- * every task change AND every flush tick — don't re-render the task context
- * consumers (Home, TaskCard, etc.).
+ * @fileoverview Append-only log of task operations bound for the server.
+ * Owns its own context so queue churn (every task mutation + every flush tick)
+ * doesn't re-render task consumers.
  *
- * Owned operations:
- *   - Push: mutators in `TasksProvider` call `enqueue`/`enqueueMany`.
- *   - Drain: `SyncProvider` reads `syncQueue`, sends ops, then calls
- *     `removeProcessedOperations(successCount)`.
- *   - Temp-id fixup: after a CREATE_TASK succeeds, the queue's tempIds get
- *     rewritten to real ids via `replaceTempIdInQueue`.
+ * Contract:
+ *   - `TasksProvider` pushes via `enqueue` / `enqueueMany`.
+ *   - `SyncProvider` drains via `syncQueue` + `removeProcessedOperations`.
+ *   - After a CREATE_TASK succeeds, tempIds in the queue get rewritten to
+ *     real ids via `replaceTempIdInQueue`.
  */
 
 import {
