@@ -74,6 +74,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   │   ├── RankFieldSelect.tsx  # Select component for rank fields in task form
 │       │   │   ├── TaskForm.tsx      # Full-screen task create/edit form (uses `key={formKey}` from provider to remount between fresh-create sessions; also self-resets via useEffect on `initialData` change)
 │       │   │   ├── TaskFormDialogProvider.tsx  # Dialog state + nav stack (parent ↔ subtask navigation), owns draft-session lifecycle: opens session on create/edit, commits on Save, shows cancel-confirm with `pendingSubtaskCount` when draft work would be lost, then discards on confirm
+│       │   │   ├── useTaskFormParentChain.ts  # Breadcrumb-style parent chain walker over `tasksWithDrafts` (dialog-scoped)
 │       │   │   └── SubtasksCard/    # Subtask list with settings and drag-and-drop
 │       │   │       ├── index.ts          # Barrel export
 │       │   │       ├── SubtasksCard.tsx  # Main subtask list with DnD and hierarchy
