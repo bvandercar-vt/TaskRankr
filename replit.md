@@ -123,7 +123,6 @@ Load-bearing facts that span multiple files. Anything more specific lives in the
 
 ## Coding Conventions
 
-
 ### Shared task utilities
 Tree-walking, sort/filter, and id-list helpers live in `shared/utils/task-utils.ts` (re-exported from `client/src/lib/task-tree-utils.ts`). Always prefer these over inline implementations. Read the file directly for the available helpers and their JSDoc.
 
