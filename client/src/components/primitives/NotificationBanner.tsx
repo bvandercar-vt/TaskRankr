@@ -5,20 +5,23 @@ import { X } from 'lucide-react'
 import { Button } from './Button'
 
 type NotificationBannerProps = React.PropsWithChildren<{
-  storageKey: string
+  /**
+   * Unique ID for this banner, used for dismissal persistence in localStorage.
+   */
+  id: string
   icon: LucideIcon
   hidden?: boolean
   'data-testid'?: string
 }>
 
 export const NotificationBanner = ({
-  storageKey: storageKeyId,
+  id,
   icon: Icon,
   children,
   hidden = false,
-  'data-testid': testId = `banner-${storageKeyId}`,
+  'data-testid': testId = `banner-${id}`,
 }: NotificationBannerProps) => {
-  const storageKey = `taskrankr-${storageKeyId}-dismissed`
+  const storageKey = `taskrankr-${id}-dismissed`
   const [isDismissed, setIsDismissed] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
 

@@ -11,7 +11,7 @@ export const InstallBanner = () => {
 
   return (
     <NotificationBanner
-      storageKey={BannerKey.INSTALL}
+      id={BannerKey.INSTALL}
       icon={Download}
       hidden={isStandalonePWA()}
     >
