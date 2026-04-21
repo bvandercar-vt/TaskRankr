@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
-import { getHasIncompleteSubtasks } from '@/lib/task-utils'
+import { getHasIncompleteSubtasks } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'

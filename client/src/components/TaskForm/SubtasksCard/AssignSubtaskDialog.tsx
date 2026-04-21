@@ -4,7 +4,11 @@
 
 import { useMemo, useState } from 'react'
 
-import { filterRootTasks, getAllDescendantIds, getById } from '@/lib/task-utils'
+import {
+  filterRootTasks,
+  getAllDescendantIds,
+  getById,
+} from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useTasks } from '@/providers/TasksProvider'
 import { type Task, TaskStatus } from '~/shared/schema'

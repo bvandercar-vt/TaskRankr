@@ -33,17 +33,13 @@ import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
   collectSubtreeIds,
-  reconcileInheritCompletionState,
-  topoSortForRecovery,
-} from '@/lib/task-cascades'
-import {
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
   removeIds,
   updateItem,
-} from '@/lib/task-utils'
+} from '@/lib/task-tree-utils'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
   type SyncOperation,
@@ -64,6 +60,109 @@ export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
+
+/**
+ * Walks the tree until fixed point, auto-completing parents with
+ * `inheritCompletionState` once all their children are completed and
+ * auto-reverting them when any child is not completed. When a parent is
+ * auto-completed and its grandparent has `autoHideCompleted`, cascades
+ * `hidden: true` down the parent's subtree. Returns the reconciled tasks
+ * plus the list of status corrections so callers can enqueue sync ops.
+ */
+function reconcileInheritCompletionState(tasks: Task[]): {
+  tasks: Task[]
+  corrections: { id: number; status: TaskStatus }[]
+} {
+  const corrections: { id: number; status: TaskStatus }[] = []
+  let updated = tasks
+  let changed = true
+
+  while (changed) {
+    changed = false
+    const parents = updated.filter((t) => t.inheritCompletionState)
+    for (const parent of parents) {
+      const children = getDirectSubtasks(updated, parent.id)
+      if (children.length === 0) continue
+
+      const allChildrenCompleted = children.every(
+        (c) => c.status === TaskStatus.COMPLETED,
+      )
+
+      if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
+        const latestCompletedAt = getChildrenLatestCompletedAt(children)
+
+        const shouldHide = parent.parentId
+          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
+          : false
+
+        updated = updateItem(updated, parent.id, (t) => ({
+          ...t,
+          status: TaskStatus.COMPLETED,
+          completedAt: latestCompletedAt ?? new Date(),
+          inProgressStartedAt: null,
+          ...(shouldHide ? { hidden: true } : {}),
+        }))
+
+        if (shouldHide) {
+          const toHide = collectSubtreeIds(updated, [parent.id])
+          if (toHide.size > 0) {
+            updated = updated.map((t) =>
+              toHide.has(t.id) ? { ...t, hidden: true } : t,
+            )
+          }
+        }
+
+        corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
+        changed = true
+      } else if (
+        !allChildrenCompleted &&
+        parent.status === TaskStatus.COMPLETED
+      ) {
+        updated = updateItem(updated, parent.id, (t) => ({
+          ...t,
+          status: TaskStatus.OPEN,
+          completedAt: null,
+          inProgressStartedAt: null,
+        }))
+        corrections.push({ id: parent.id, status: TaskStatus.OPEN })
+        changed = true
+      }
+    }
+  }
+
+  return { tasks: updated, corrections }
+}
+
+/**
+ * Topologically orders a set of tasks so that any task with a parent in the
+ * same recoverable set appears after that parent. Only traverses to parents
+ * that are themselves in `recoverableIds` — never to parents that already
+ * have a queued CREATE op (those resolve via the queue's own idMap at flush
+ * time). Used when re-enqueuing orphaned negative-id creates.
+ */
+function topoSortForRecovery(
+  orphaned: Task[],
+  taskById: Map<number, Task>,
+  recoverableIds: Set<number>,
+): Task[] {
+  const sorted: Task[] = []
+  const visited = new Set<number>()
+  const visit = (t: Task) => {
+    if (visited.has(t.id)) return
+    visited.add(t.id)
+    if (
+      t.parentId != null &&
+      t.parentId < 0 &&
+      recoverableIds.has(t.parentId)
+    ) {
+      const parent = taskById.get(t.parentId)
+      if (parent) visit(parent)
+    }
+    sorted.push(t)
+  }
+  for (const t of orphaned) visit(t)
+  return sorted
+}
 
 /**
  * Tasks state — the pieces that change whenever the task list mutates.

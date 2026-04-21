@@ -4,7 +4,7 @@
  */
 
 import type { RankField } from '~/shared/schema'
-import type { RankFieldValueMap } from './task-utils'
+import type { RankFieldValueMap } from './constants'
 
 const STYLES_COMMON = {
   red: 'text-red-400 bg-red-400/10 border-red-500/20',

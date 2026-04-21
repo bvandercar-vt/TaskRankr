@@ -8,15 +8,14 @@ import type { ValueOf } from 'type-fest'
 
 import type { TaskWithSubtasks } from '@/types'
 import {
-  Ease,
-  Enjoyment,
-  Priority,
-  type RankField,
+  type Ease,
+  type Enjoyment,
+  type Priority,
   SortOption,
   SubtaskSortMode,
   type Task,
   TaskStatus,
-  Time,
+  type Time,
 } from '~/shared/schema'
 
 export * from '~/shared/utils/task-utils'
@@ -142,49 +141,6 @@ export const sortTaskTree = (
 }
 
 // *****************************************************************************
-// Column criteria
-// *****************************************************************************
-
-export const RANK_FIELD_ENUMS = {
-  [SortOption.PRIORITY]: Priority,
-  [SortOption.EASE]: Ease,
-  [SortOption.ENJOYMENT]: Enjoyment,
-  [SortOption.TIME]: Time,
-} as const satisfies Record<RankField, Record<string, string>>
-
-export type RankFieldValueMap = {
-  [K in RankField]: ValueOf<(typeof RANK_FIELD_ENUMS)[K]>
-}
-
-export const SORT_LABELS = {
-  [SortOption.DATE_CREATED]: 'Date Created',
-  [SortOption.PRIORITY]: 'Priority',
-  [SortOption.EASE]: 'Ease',
-  [SortOption.ENJOYMENT]: 'Enjoyment',
-  [SortOption.TIME]: 'Time',
-} as const satisfies Record<SortOption, string>
-
-/** Rank-field column metadata in display order (name, label, enum values). */
-export const RANK_FIELDS_COLUMNS = (
-  [
-    SortOption.PRIORITY,
-    SortOption.EASE,
-    SortOption.ENJOYMENT,
-    SortOption.TIME,
-  ] as const
-).map((name) => ({
-  name,
-  label: SORT_LABELS[name],
-  labelShort: name === SortOption.ENJOYMENT ? 'Enjoy' : undefined,
-  levels: Object.values(RANK_FIELD_ENUMS[name]),
-})) satisfies {
-  name: RankField
-  label: string
-  labelShort?: string
-  levels: readonly string[]
-}[]
-
-// *****************************************************************************
 // Filtering
 // *****************************************************************************
 
@@ -223,3 +179,41 @@ export const filterAndSortTree = (
     undefined,
     childSort,
   )
+
+// ***************************************************************************
+// Everything Else
+// ***************************************************************************
+
+/**
+ * Collects every descendant of `rootIds` through the `parentId` graph. Pass
+ * `includeRoots: true` to also include the roots themselves.
+ */
+export function collectSubtreeIds(
+  tasks: Task[],
+  rootIds: Iterable<number>,
+  opts: { includeRoots?: boolean } = {},
+): Set<number> {
+  const result = new Set<number>()
+  const rootSet = new Set(rootIds)
+  if (opts.includeRoots) {
+    rootSet.forEach((id) => {
+      result.add(id)
+    })
+  }
+  let frontier: Set<number> = rootSet
+  while (frontier.size > 0) {
+    const next = new Set<number>()
+    for (const t of tasks) {
+      if (
+        t.parentId !== null &&
+        frontier.has(t.parentId) &&
+        !result.has(t.id)
+      ) {
+        result.add(t.id)
+        next.add(t.id)
+      }
+    }
+    frontier = next
+  }
+  return result
+}

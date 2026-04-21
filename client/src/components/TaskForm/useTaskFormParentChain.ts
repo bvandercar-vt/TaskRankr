@@ -3,7 +3,7 @@
  * breadcrumb-style ancestor list.
  */
 
-import { getById } from '@/lib/task-utils'
+import { getById } from '@/lib/task-tree-utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
 import type { Task } from '~/shared/schema'
 

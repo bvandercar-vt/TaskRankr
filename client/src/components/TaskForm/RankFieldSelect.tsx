@@ -4,8 +4,8 @@
 
 import type { ControllerRenderProps } from 'react-hook-form'
 
+import type { RankFieldValueMap } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import type { RankFieldValueMap } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import type { MutateTask, RankField } from '~/shared/schema'
 import { FormControl, FormItem, FormLabel } from '../primitives/forms/Form'

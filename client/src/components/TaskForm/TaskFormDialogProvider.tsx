@@ -11,7 +11,7 @@ import { without } from 'es-toolkit'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
-import { getById } from '@/lib/task-utils'
+import { getById } from '@/lib/task-tree-utils'
 import {
   DraftSessionProvider,
   useDraftSession,
