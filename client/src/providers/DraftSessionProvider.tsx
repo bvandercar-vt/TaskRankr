@@ -561,7 +561,9 @@ export const DraftSessionProvider = ({
 export const useDraftSession = () => {
   const ctx = useContext(DraftSessionContext)
   if (!ctx)
-    throw new Error('useDraftSession must be used within a DraftSessionProvider')
+    throw new Error(
+      'useDraftSession must be used within a DraftSessionProvider',
+    )
   return ctx
 }
 
