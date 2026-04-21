@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { toMerged } from 'es-toolkit'
+import { omit, toMerged } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
@@ -1151,21 +1151,8 @@ export const LocalStateProvider = ({
 
     for (const draft of draftTasks) {
       const created = createTask({
-        name: draft.name,
-        description: draft.description,
-        status: draft.status,
-        priority: draft.priority,
-        ease: draft.ease,
-        enjoyment: draft.enjoyment,
-        time: draft.time,
-        timeSpent: draft.timeSpent,
-        parentId:
-          draft.parentId != null ? resolve(draft.parentId) : draft.parentId,
-        subtaskSortMode: draft.subtaskSortMode,
-        subtasksShowNumbers: draft.subtasksShowNumbers,
-        autoHideCompleted: draft.autoHideCompleted,
-        inheritCompletionState: draft.inheritCompletionState,
-        hidden: draft.hidden,
+        ...omit(draft, ['id', 'userId']),
+        parentId: draft.parentId != null ? resolve(draft.parentId) : null,
       })
       idMap.set(draft.id, created.id)
     }
