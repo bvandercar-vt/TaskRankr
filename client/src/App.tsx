@@ -4,6 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { intersection } from 'es-toolkit'
 import { Route, Switch, useLocation } from 'wouter'
 
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -56,11 +57,11 @@ const GuestRedirect = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const hideParam = params.get('hide')
-    const validKeys = Object.values(BannerKey) as string[]
     const hideBanners = hideParam
-      ? (hideParam
-          .split(',')
-          .filter((k) => validKeys.includes(k)) as BannerKey[])
+      ? intersection<BannerKey>(
+          hideParam.split(',') as BannerKey[],
+          Object.values(BannerKey),
+        )
       : undefined
     enterGuestMode(hideBanners)
     setLocation(Routes.HOME)

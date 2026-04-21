@@ -369,7 +369,7 @@ export const LocalStateProvider = ({
         const recoveryOps: SyncOperation[] = sorted.map((t) => ({
           type: SyncOperationType.CREATE_TASK,
           tempId: t.id,
-          data: omit(t, ['id', 'userId']) as CreateTaskContent,
+          data: omit(t, ['id', 'userId']),
         }))
         recoveredQueue = [...loadedQueue, ...recoveryOps]
         debugLog.log('sync', 'recoverOrphanedTasks', {
