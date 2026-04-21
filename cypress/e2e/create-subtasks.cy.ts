@@ -1,12 +1,11 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
   interceptCreate,
   interceptUpdate,
-  waitForCreate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -63,17 +62,16 @@ describe('Create Subtasks', () => {
   it('create a subtask, check appears in tree', () => {
     getTaskForm(0).within(() => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
     })
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask])
-      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+      clickSubmitBtnCreate({ newTasks: [rootTask, subtask] })
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask] })
@@ -88,27 +86,27 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
+      checkTasksExistBackend([subtask2], false)
       clickSubmitBtnUpdate()
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
-    checkNumCalls({ create: 3, update: 0 })
+    checkNumCalls({ create: 3, update: 1 })
   })
 
   it('create multiple subtasks, check appear in tree', () => {
     getTaskForm(0).within(() => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
     })
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
-      clickSubmitBtnCreate(subtask)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
@@ -118,12 +116,12 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+      clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
@@ -138,33 +136,32 @@ describe('Create Subtasks', () => {
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask3)
-      clickSubmitBtnCreate(subtask3)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
+      checkTasksExistBackend([subtask3], false)
       clickSubmitBtnUpdate()
     })
 
     checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
-    checkNumCalls({ create: 4, update: 0 })
+    checkNumCalls({ create: 4, update: 1 })
   })
 
   it('create nested subtasks, ensure appear in tree', () => {
     getTaskForm(0).within(() => {
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(rootTask)
     })
 
     getTaskForm(1).within(() => {
       fillTaskForm(subtask)
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      waitForCreate(subtask)
     })
 
     getTaskForm(2).within(() => {
       fillTaskForm(subtask2)
-      clickSubmitBtnCreate(subtask2)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(1).within(() => {
@@ -174,17 +171,19 @@ describe('Create Subtasks', () => {
 
     getTaskForm(2).within(() => {
       fillTaskForm(subtask3)
-      clickSubmitBtnCreate(subtask3)
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(1).within(() => {
       checkTaskFormSubtasks([subtask2, subtask3])
-      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+      clickSubmitBtnCreate()
     })
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      clickSubmitBtnUpdate() // TODO: bugfix: should be create
+      clickSubmitBtnCreate({
+        newTasks: [rootTask, subtask, subtask2, subtask3],
+      })
     })
 
     checkTaskInTree({

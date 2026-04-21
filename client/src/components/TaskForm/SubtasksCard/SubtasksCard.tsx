@@ -54,7 +54,7 @@ export const SubtasksCard = ({
   onAssignSubtask,
   disableAddSubtask = false,
 }: SubtasksCardProps) => {
-  const { data: allTasks } = useTasks()
+  const { data: allTasks } = useTasks({ includeDrafts: true })
   const { reorderSubtasks } = useTaskActions()
 
   const task = getTaskById(allTasks, taskProp.id) ?? taskProp

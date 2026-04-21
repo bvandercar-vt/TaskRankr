@@ -127,6 +127,8 @@ export interface TaskFormProps {
   onEditSubtask: (task: Task) => void
   onDeleteSubtask: (task: DeleteTaskArgs) => void
   onAssignSubtask: (task: Task, formData?: MutateTaskContent) => void
+  defaultFormData?: MutateTaskContent
+  isDraft?: boolean
 }
 
 export const TaskForm = ({
@@ -138,9 +140,13 @@ export const TaskForm = ({
   onEditSubtask,
   onDeleteSubtask,
   onAssignSubtask,
+  defaultFormData,
+  isDraft = false,
 }: TaskFormProps) => {
-  const parentChain = useTaskParentChain(parentId ?? undefined)
-  const { data: allTasks } = useTasks()
+  const parentChain = useTaskParentChain(parentId ?? undefined, {
+    includeDrafts: true,
+  })
+  const { data: allTasks } = useTasks({ includeDrafts: true })
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
@@ -168,13 +174,15 @@ export const TaskForm = ({
   const getFormDefaults = useCallback(
     (data: TaskFormDefaults | undefined): TaskFormDefaults =>
       taskFormDefaultsSchema.parse(
-        (data ?? {
-          ...allRankFieldsNull,
-          name: '',
-          parentId,
-        }) satisfies z.input<typeof taskFormDefaultsSchema>,
+        data ??
+          defaultFormData ??
+          ({
+            ...allRankFieldsNull,
+            name: '',
+            parentId,
+          } satisfies z.input<typeof taskFormDefaultsSchema>),
       ),
-    [parentId],
+    [parentId, defaultFormData],
   )
 
   const form = useForm<MutateTask>({
@@ -195,6 +203,8 @@ export const TaskForm = ({
   useEffect(() => {
     void form.trigger()
   }, [settings.fieldConfig, form, timeSpentRequired])
+
+  const isEditingExisting = !!initialData && !isDraft
 
   return (
     <Form {...form}>
@@ -286,26 +296,12 @@ export const TaskForm = ({
             />
 
             <SubtasksCard
-              {...(initialData
-                ? {
-                    task: initialData,
-                    onAddSubtask,
-                    onEditSubtask,
-                    onDeleteSubtask,
-                    onAssignSubtask,
-                  }
-                : {
-                    task: STUB_TASK,
-                    onAddSubtask: () =>
-                      form.handleSubmit((data) => {
-                        onAddSubtask(STUB_TASK.id, data)
-                      })(),
-                    onAssignSubtask: () =>
-                      form.handleSubmit((data) => {
-                        onAssignSubtask(STUB_TASK, data)
-                      })(),
-                    disableAddSubtask: !nameValue,
-                  })}
+              task={initialData ?? STUB_TASK}
+              onAddSubtask={(pid) => onAddSubtask(pid, form.getValues())}
+              onEditSubtask={onEditSubtask}
+              onDeleteSubtask={onDeleteSubtask}
+              onAssignSubtask={(t) => onAssignSubtask(t, form.getValues())}
+              disableAddSubtask={!nameValue}
             />
 
             <div className="flex flex-col gap-4 mt-2 pb-4">
@@ -416,7 +412,7 @@ export const TaskForm = ({
             className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg disabled:bg-primary/80 disabled:cursor-not-allowed"
             data-testid="submit-button"
           >
-            {initialData ? 'Save' : 'Create'}
+            {isEditingExisting ? 'Save' : 'Create'}
           </Button>
         </div>
       </form>
