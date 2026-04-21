@@ -15,7 +15,7 @@ Multi-user, offline-first task manager with hierarchical tasks, a status workflo
 - Documentation: Keep `replit.md` focused on cross-cutting architecture and conventions. File-level mechanics, function signatures, and internal helpers belong in the relevant file's docstring, not here.
 
 ## State Management
-Offline-first architecture split across focused providers, each owning one slice so consumers re-render only when their slice changes. Provider order in `App.tsx` (outer → inner): `SettingsProvider > TaskSyncQueueProvider > TasksProvider > SyncProvider > ExpandedTasksProvider > TaskFormDialogProvider`. `TaskFormDialogProvider` internally mounts `DraftSessionProvider` so draft state is scoped to the dialog subtree. `GuestModeProvider` wraps everything. See each provider's file docstring for its contract.
+Offline-first architecture split across focused providers, each owning one slice so consumers re-render only when their slice changes. Provider order in `App.tsx` (outer → inner): `BannersProvider > GuestModeProvider > SettingsProvider > TaskSyncQueueProvider > TasksProvider > SyncProvider > ExpandedTasksProvider > TaskFormDialogProvider`. `TaskFormDialogProvider` internally mounts `DraftSessionProvider` so draft state is scoped to the dialog subtree. See each provider's file docstring for its contract.
 
 ### Cross-Cutting Architecture Notes
 Load-bearing facts that span multiple files. Anything more specific lives in the file docstring of the named module.
@@ -88,6 +88,7 @@ Load-bearing facts that span multiple files. Anything more specific lives in the
 │       │   ├── TasksProvider.tsx          # Local-first task state; enqueues onto TaskSyncQueueProvider
 │       │   ├── SyncProvider.tsx           # Background sync orchestrator (drains task queue + settings pending)
 │       │   ├── GuestModeProvider.tsx      # Guest mode flag (isGuestMode)
+│       │   ├── BannersProvider.tsx        # Cross-cutting banner-suppression set
 │       │   └── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       ├── lib/
 │       │   ├── task-tree-utils.ts  # Tree-walking, sort/filter; re-exports shared/utils/task-utils

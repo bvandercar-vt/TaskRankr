@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 
-import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useHiddenBanner } from '@/providers/BannersProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 import { WhyDifferentDialog } from './WhyDifferentDialog'
 
 export const WhyDifferentBanner = () => {
-  const { hiddenBanners } = useGuestMode()
+  const hidden = useHiddenBanner(BannerKey.WHY_DIFFERENT)
   const [showDialog, setShowDialog] = useState(false)
 
-  if (hiddenBanners.has(BannerKey.WHY_DIFFERENT)) return null
+  if (hidden) return null
 
   return (
     <>

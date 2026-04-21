@@ -2,14 +2,12 @@ import { isStandalonePWA } from 'is-standalone-pwa'
 import { Download } from 'lucide-react'
 
 import { Routes } from '@/lib/constants'
-import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useHiddenBanner } from '@/providers/BannersProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const InstallBanner = () => {
-  const { hiddenBanners } = useGuestMode()
-
-  if (hiddenBanners.has(BannerKey.INSTALL)) return null
+  if (useHiddenBanner(BannerKey.INSTALL)) return null
 
   return (
     <NotificationBanner
