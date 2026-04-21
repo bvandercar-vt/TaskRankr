@@ -1063,9 +1063,7 @@ export const LocalStateProvider = ({
           updated = updateTaskInList(updated, taskToDelete.parentId, (t) => ({
             ...t,
             ...(totalTime > 0
-              ? {
-                  timeSpent: (t.timeSpent ?? 0) + totalTime,
-                }
+              ? { timeSpent: (t.timeSpent ?? 0) + totalTime }
               : {}),
             subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
           }))
