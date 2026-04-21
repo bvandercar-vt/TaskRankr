@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 
 import { filterRootTasks, getAllDescendantIds, getById } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import { useTasks } from '@/providers/LocalStateProvider'
+import { useTasks } from '@/providers/TasksProvider'
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Checkbox } from '../../primitives/forms/Checkbox'

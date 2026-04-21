@@ -131,17 +131,17 @@ const loadTasksFromStorage = (key: string): Task[] => {
   }
 }
 
-interface LocalStateProviderProps {
+interface TasksProviderProps {
   children: React.ReactNode
   shouldSync: boolean
   storageMode: StorageMode
 }
 
-export const LocalStateProvider = ({
+export const TasksProvider = ({
   children,
   shouldSync,
   storageMode,
-}: LocalStateProviderProps) => {
+}: TasksProviderProps) => {
   const { settings } = useSettings()
   const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
     useTaskSyncQueue()
@@ -767,13 +767,13 @@ export const LocalStateProvider = ({
 
 export const useTasks = () => {
   const ctx = useContext(TasksContext)
-  if (!ctx) throw new Error('useTasks must be used within a LocalStateProvider')
+  if (!ctx) throw new Error('useTasks must be used within a TasksProvider')
   return ctx
 }
 
 export const useTaskMutations = () => {
   const ctx = useContext(TaskMutationsContext)
   if (!ctx)
-    throw new Error('useTaskMutations must be used within a LocalStateProvider')
+    throw new Error('useTaskMutations must be used within a TasksProvider')
   return ctx
 }

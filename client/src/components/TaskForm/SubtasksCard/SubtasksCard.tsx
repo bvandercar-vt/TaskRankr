@@ -28,7 +28,7 @@ import {
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
-import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
+import type { DeleteTaskArgs } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'

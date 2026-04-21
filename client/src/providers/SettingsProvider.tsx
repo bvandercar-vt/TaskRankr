@@ -2,7 +2,7 @@
  * @fileoverview Local-first state provider for user settings.
  * Owns settings state with localStorage persistence and an in-provider sync
  * queue. SyncProvider drains the queue against the server. Independent of
- * LocalStateProvider — settings have no causal dependency on tasks.
+ * TasksProvider — settings have no causal dependency on tasks.
  */
 
 import {

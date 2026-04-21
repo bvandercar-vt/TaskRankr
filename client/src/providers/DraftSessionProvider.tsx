@@ -13,19 +13,19 @@
  *     that contains draft ids, parked until commit so nothing stale leaks
  *     into the sync queue.
  *
- * `tasksWithDrafts` overlays these on top of `LocalStateProvider.tasks` so
+ * `tasksWithDrafts` overlays these on top of `TasksProvider.tasks` so
  * the dialog subtree renders the in-progress tree exactly like real tasks.
  *
  * This provider also exposes draft-aware mutators (`updateTask`,
  * `deleteTask`, `reorderSubtasks`, `setTaskStatus`) that route to either the
- * draft layer or the underlying `LocalStateProvider` mutators based on
+ * draft layer or the underlying `TasksProvider` mutators based on
  * `isDraftId(id)`. Only consumers inside the TaskForm dialog subtree see the
  * draft-aware versions; the rest of the app reads real mutators directly
  * from `useTaskMutations()` and stays oblivious to draft state.
  *
  * `commitDraftSession` promotes drafts in dependency order, building an
  * idMap from temp draft ids to freshly minted real ids, then applies parent
- * reassignments and manual reorders against the *real* LocalState mutators
+ * reassignments and manual reorders against the *real* TasksProvider mutators
  * (which, after the draft split, are draft-unaware and won't re-park).
  */
 
@@ -47,7 +47,7 @@ import {
   type UpdateTaskContent,
   useTaskMutations,
   useTasks,
-} from '@/providers/LocalStateProvider'
+} from '@/providers/TasksProvider'
 import {
   allRankFieldsNull,
   SubtaskSortMode,
@@ -57,7 +57,7 @@ import {
 } from '~/shared/schema'
 
 interface DraftSessionContextValue {
-  /** `LocalStateProvider.tasks` merged with the in-memory draft overlay. */
+  /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
   tasksWithDrafts: Task[]
   draftTaskIds: Set<number>
   /** Number of real tasks reassigned to a draft parent during the session. */
@@ -66,7 +66,7 @@ interface DraftSessionContextValue {
   isDraftId: (id: number) => boolean
 
   // Draft-aware mutators: route to the draft layer if the id is a draft,
-  // otherwise fall through to the real LocalStateProvider mutator.
+  // otherwise fall through to the real TasksProvider mutator.
   updateTask: (id: number, updates: UpdateTaskContent) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
@@ -95,7 +95,7 @@ export const DraftSessionProvider = ({
     setTaskStatus: realSetTaskStatus,
   } = useTaskMutations()
   // Keep a ref so callbacks can read the latest tasks without invalidating on
-  // every tasks change (mirrors LocalStateProvider's tasksRef pattern).
+  // every tasks change (mirrors TasksProvider's tasksRef pattern).
   const tasksRef = useRef(tasks)
   tasksRef.current = tasks
 
@@ -325,7 +325,7 @@ export const DraftSessionProvider = ({
   // ---------------------------------------------------------------------------
   // Draft-aware mutators exposed to dialog consumers. Route to the draft
   // layer if `id` is a draft, otherwise fall through to the underlying
-  // LocalStateProvider mutator.
+  // TasksProvider mutator.
   // ---------------------------------------------------------------------------
 
   const updateTask = useCallback(
@@ -457,7 +457,7 @@ export const DraftSessionProvider = ({
   // navigate into the parent draft to add a subtask). We replay through
   // `createTask`, mapping draft.id -> real.id so children resolve their
   // parentId from the freshly minted real id. Reorders and assignments then
-  // go through the *real* mutators from LocalStateProvider — which are now
+  // go through the *real* mutators from TasksProvider — which are now
   // draft-unaware after the draft split — so no re-parking into the draft
   // layer is possible.
   // ---------------------------------------------------------------------------

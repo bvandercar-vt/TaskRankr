@@ -2,7 +2,7 @@
  * @fileoverview Context provider for task create/edit dialog with
  * desktop/mobile variants. Builds a navigation stack of tasks (real or draft)
  * being edited. All in-flight subtask additions and assignments live in
- * LocalStateProvider's draft session and are committed atomically on Submit
+ * TasksProvider's draft session and are committed atomically on Submit
  * or discarded on Cancel.
  */
 
@@ -21,7 +21,7 @@ import {
   type DeleteTaskArgs,
   type MutateTaskContent,
   useTaskMutations,
-} from '@/providers/LocalStateProvider'
+} from '@/providers/TasksProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { SubtaskSortMode } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { useTaskMutations } from '@/providers/LocalStateProvider'
+import { useTaskMutations } from '@/providers/TasksProvider'
 import { SubtaskSortMode } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Switch } from '../../primitives/forms/Switch'

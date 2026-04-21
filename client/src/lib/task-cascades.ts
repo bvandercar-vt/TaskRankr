@@ -3,7 +3,7 @@
  *
  * All exports are side-effect-free: they take a flat task list and return a
  * new list (or a derived id set) without touching any state. Kept out of
- * `LocalStateProvider` so the provider file stays focused on state wiring
+ * `TasksProvider` so the provider file stays focused on state wiring
  * and so this logic is easier to unit-test in isolation.
  */
 

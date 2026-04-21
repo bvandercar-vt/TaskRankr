@@ -31,7 +31,7 @@ import {
   GuestModeProvider,
   useGuestMode,
 } from '@/providers/GuestModeProvider'
-import { LocalStateProvider } from '@/providers/LocalStateProvider'
+import { TasksProvider } from '@/providers/TasksProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { TaskSyncQueueProvider } from '@/providers/TaskSyncQueueProvider'
@@ -122,7 +122,7 @@ const AuthenticatedApp = () => {
         shouldSync={shouldSync}
         storageMode={storageMode}
       >
-        <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
+        <TasksProvider shouldSync={shouldSync} storageMode={storageMode}>
           <SyncProvider isAuthenticated={shouldSync}>
             <ExpandedTasksProvider>
               <TaskFormDialogProvider>
@@ -134,7 +134,7 @@ const AuthenticatedApp = () => {
               </TaskFormDialogProvider>
             </ExpandedTasksProvider>
           </SyncProvider>
-        </LocalStateProvider>
+        </TasksProvider>
       </TaskSyncQueueProvider>
     </SettingsProvider>
   )

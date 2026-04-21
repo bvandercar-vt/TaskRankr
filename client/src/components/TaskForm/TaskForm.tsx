@@ -16,7 +16,7 @@ import { useDraftSession } from '@/providers/DraftSessionProvider'
 import type {
   DeleteTaskArgs,
   MutateTaskContent,
-} from '@/providers/LocalStateProvider'
+} from '@/providers/TasksProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
   allRankFieldsNull,

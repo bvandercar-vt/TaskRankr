@@ -5,7 +5,7 @@
  * consumers (Home, TaskCard, etc.).
  *
  * Owned operations:
- *   - Push: mutators in `LocalStateProvider` call `enqueue`/`enqueueMany`.
+ *   - Push: mutators in `TasksProvider` call `enqueue`/`enqueueMany`.
  *   - Drain: `SyncProvider` reads `syncQueue`, sends ops, then calls
  *     `removeProcessedOperations(successCount)`.
  *   - Temp-id fixup: after a CREATE_TASK succeeds, the queue's tempIds get
@@ -23,7 +23,7 @@ import {
 
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import type { TaskStatus } from '~/shared/schema'
-import type { CreateTaskContent, UpdateTaskContent } from './LocalStateProvider'
+import type { CreateTaskContent, UpdateTaskContent } from './TasksProvider'
 
 export enum SyncOperationType {
   CREATE_TASK = 'create_task',
@@ -75,7 +75,7 @@ export const TaskSyncQueueProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   // Synchronous load so the queue is populated before any consumer (including
-  // LocalStateProvider's init effect running recovery) observes it.
+  // TasksProvider's init effect running recovery) observes it.
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>(() =>
     storage.get<SyncOperation[]>(storageKeys.syncQueue, []),
   )
