@@ -67,83 +67,83 @@ These are the few load-bearing facts that span multiple files. Anything more spe
 │       │   │   ├── ScrollablePage.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
 │       │   ├── appInfo/            # Informational/status components
-│       │   │   ├── ContactCard.tsx
-│       │   │   ├── HowToUseBanner.tsx
-│       │   │   ├── InstallBanner.tsx
-│       │   │   ├── SortInfo.tsx
-│       │   │   ├── StatusBanner.tsx
-│       │   │   └── WhatsNewDialog.tsx
+│       │   │   ├── ContactCard.tsx       # Contact/email card with optional debug download
+│       │   │   ├── HowToUseBanner.tsx    # Dismissible banner linking to How To Use page
+│       │   │   ├── InstallBanner.tsx     # PWA install prompt banner
+│       │   │   ├── SortInfo.tsx          # Reusable sort explanation component
+│       │   │   ├── StatusBanner.tsx      # Auth/guest status banner
+│       │   │   └── WhatsNewDialog.tsx    # Changelog dialog (auto-shows on new version) + settings button
 │       │   ├── TaskForm/           # Task form and related components
-│       │   │   ├── RankFieldSelect.tsx
-│       │   │   ├── TaskForm.tsx
-│       │   │   ├── TaskFormDialogProvider.tsx
-│       │   │   ├── useTaskFormParentChain.ts
+│       │   │   ├── RankFieldSelect.tsx       # Select component for rank fields in task form
+│       │   │   ├── TaskForm.tsx              # Full-screen task create/edit form
+│       │   │   ├── TaskFormDialogProvider.tsx # Dialog state + nav stack; owns draft-session lifecycle
+│       │   │   ├── useTaskFormParentChain.ts  # Breadcrumb-style parent chain walker (dialog-scoped)
 │       │   │   └── SubtasksCard/
-│       │   │       ├── index.ts
-│       │   │       ├── SubtasksCard.tsx
-│       │   │       ├── SubtasksSettings.tsx
-│       │   │       ├── SubtaskRowItem.tsx
-│       │   │       ├── AssignSubtaskDialog.tsx
-│       │   │       └── SubtaskActionDialog.tsx
-│       │   ├── BackButton.tsx
-│       │   ├── ErrorBoundary.tsx
-│       │   ├── DropdownMenuHeader.tsx
-│       │   ├── PageStates.tsx
-│       │   ├── SortButton.tsx
-│       │   ├── TaskCard.tsx
-│       │   ├── TaskListPage.tsx
-│       │   ├── ChangeStatusDialog.tsx
-│       │   ├── ConfirmDeleteDialog.tsx
-│       │   └── SearchInput.tsx
+│       │   │       ├── index.ts              # Barrel export
+│       │   │       ├── SubtasksCard.tsx      # Main subtask list with DnD and hierarchy
+│       │   │       ├── SubtasksSettings.tsx  # Subtask settings panel (sort, hide, etc.)
+│       │   │       ├── SubtaskRowItem.tsx    # Individual subtask row with actions
+│       │   │       ├── AssignSubtaskDialog.tsx  # Dialog to assign existing task as subtask
+│       │   │       └── SubtaskActionDialog.tsx  # Cancel/Delete/Remove as Subtask dialog
+│       │   ├── BackButton.tsx        # Back navigation button to home
+│       │   ├── ErrorBoundary.tsx     # Global error boundary with red crash dialog
+│       │   ├── DropdownMenuHeader.tsx # Page header with hamburger menu, title + search
+│       │   ├── PageStates.tsx        # Shared PageLoading, PageError, EmptyState
+│       │   ├── SortButton.tsx        # Sort option toggle button
+│       │   ├── TaskCard.tsx          # Task display with status indicators
+│       │   ├── TaskListPage.tsx      # TaskListPageWrapper, TaskListPageHeader, TaskListTreeLayout
+│       │   ├── ChangeStatusDialog.tsx # Task status change modal
+│       │   ├── ConfirmDeleteDialog.tsx # Permanent delete confirmation dialog
+│       │   └── SearchInput.tsx       # Reusable search input with icon
 │       ├── hooks/
-│       │   ├── useAuth.ts
-│       │   ├── useExpandedTasks.ts
-│       │   ├── useMobile.tsx
-│       │   └── useToast.ts
+│       │   ├── useAuth.ts            # Authentication state hook
+│       │   ├── useExpandedTasks.ts   # Task expansion state (persists in localStorage)
+│       │   ├── useMobile.tsx         # Mobile detection hook
+│       │   └── useToast.ts           # Toast notifications
 │       ├── pages/
-│       │   ├── Home.tsx
-│       │   ├── Settings.tsx
-│       │   ├── Completed.tsx
-│       │   ├── HowToUse.tsx
-│       │   ├── HowToInstall.tsx
-│       │   ├── Landing.tsx
+│       │   ├── Home.tsx              # Main task list with sorting
+│       │   ├── Settings.tsx          # User preferences & attribute visibility
+│       │   ├── Completed.tsx         # Completed tasks view
+│       │   ├── HowToUse.tsx          # Instructional page (tap-to-edit, hold-for-status)
+│       │   ├── HowToInstall.tsx      # PWA install instructions (iOS, Android, Desktop)
+│       │   ├── Landing.tsx           # Unauthenticated landing page
 │       │   └── NotFound.tsx
 │       ├── providers/              # See "State Management" above
-│       │   ├── SettingsProvider.tsx
-│       │   ├── TaskSyncQueueProvider.tsx
-│       │   ├── TasksProvider.tsx
-│       │   ├── SyncProvider.tsx
-│       │   ├── GuestModeProvider.tsx
-│       │   └── ExpandedTasksProvider.tsx
+│       │   ├── SettingsProvider.tsx       # User settings + coalesced pending settings sync
+│       │   ├── TaskSyncQueueProvider.tsx  # Task sync queue (owns SyncOperation types)
+│       │   ├── TasksProvider.tsx          # Local-first task state; enqueues onto TaskSyncQueueProvider
+│       │   ├── SyncProvider.tsx           # Background sync orchestrator (drains task queue + settings pending)
+│       │   ├── GuestModeProvider.tsx      # Guest mode flag (isGuestMode)
+│       │   └── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       ├── lib/
 │       │   ├── task-tree-utils.ts  # Tree-walking, sort/filter; re-exports shared/utils/task-utils
 │       │   ├── columns.ts          # Rank-column UI metadata
-│       │   ├── rank-field-styles.ts
+│       │   ├── rank-field-styles.ts # Rank field color mappings
 │       │   ├── ts-rest.ts          # ts-rest client + QueryKeys
 │       │   ├── query-client.ts     # @tanstack/react-query client
 │       │   ├── utils.ts            # cn, time conversions, etc.
-│       │   ├── auth-utils.ts
-│       │   ├── changelog.ts
+│       │   ├── auth-utils.ts       # Authentication helpers
+│       │   ├── changelog.ts        # Changelog entries, version tracking, unseen detection
 │       │   ├── constants.ts        # App-wide constants (Routes, date formats, rank-field enums)
 │       │   ├── storage.ts          # localStorage namespacing + JSON helper
-│       │   ├── demo-tasks.ts
-│       │   └── migrate-guest-tasks.ts
-│       ├── App.tsx
-│       └── main.tsx
+│       │   ├── demo-tasks.ts       # Demo task data for guest mode
+│       │   └── migrate-guest-tasks.ts  # Guest→auth task migration
+│       ├── App.tsx               # Main app with routing and providers
+│       └── main.tsx              # React entry point
 ├── server/
 │   ├── index.ts          # Server entry point
 │   ├── routes.ts         # API route handlers (ts-rest)
 │   ├── storage.ts        # Database access layer
-│   ├── db.ts
-│   ├── static.ts
-│   ├── vite.ts
+│   ├── db.ts             # Database connection
+│   ├── static.ts         # Static file serving
+│   ├── vite.ts           # Vite dev server integration
 │   └── replit_integrations/auth/  # Replit Auth (OIDC)
 ├── shared/
 │   ├── schema/           # Drizzle tables + Zod schemas (tasks, settings, auth)
 │   ├── utils/            # Shared task utilities (used by client + server)
 │   ├── contract.ts       # ts-rest API contract
-│   ├── constants.ts
-│   └── models/auth.ts
+│   ├── constants.ts      # Auth path constants
+│   └── models/auth.ts    # Auth model utilities
 └── migrations/           # Database migrations
 ```
 
