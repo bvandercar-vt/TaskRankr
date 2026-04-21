@@ -1,4 +1,4 @@
-name: E2E Tests
+name: workflow_dispatch
 
 on:
   push:
@@ -34,6 +34,7 @@ jobs:
         run: npm run check
 
   e2e:
+    name: E2E Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
