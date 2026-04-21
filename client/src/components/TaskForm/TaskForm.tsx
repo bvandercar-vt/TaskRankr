@@ -146,7 +146,6 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
   })
-  const fullChain = parentChain
   const { data: allTasks } = useTasks({ includeDrafts: true })
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
@@ -219,10 +218,10 @@ export const TaskForm = ({
         })}
         className="flex flex-col h-full"
         data-testid="task-form"
-        data-tier={fullChain.length}
+        data-tier={parentChain.length}
       >
         <div className="pb-2  px-4 pt-2">
-          <TagChain items={fullChain} label="Parent" className="px-1 mb-2" />
+          <TagChain items={parentChain} label="Parent" className="px-1 mb-2" />
           <FormField
             control={form.control}
             name="name"
