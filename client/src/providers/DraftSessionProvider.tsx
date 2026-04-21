@@ -566,8 +566,3 @@ export const useDraftSession = () => {
     )
   return ctx
 }
-
-/** Optional variant for hooks that can be called both inside and outside the
- *  dialog subtree (e.g. `useTaskParentChain` with `includeDrafts`). Returns
- *  null when no provider is mounted above. */
-export const useOptionalDraftSession = () => useContext(DraftSessionContext)
