@@ -66,8 +66,25 @@ These are the few load-bearing facts that span multiple files. Anything more spe
 │       │   │   ├── DropdownMenu.tsx, TagChain.tsx
 │       │   │   ├── ScrollablePage.tsx
 │       │   │   └── LucideIcon.tsx  # Dynamic icon helper
-│       │   ├── appInfo/            # Banners, status, contact, What's New dialog
-│       │   ├── TaskForm/           # Task form, dialog provider, subtasks card
+│       │   ├── appInfo/            # Informational/status components
+│       │   │   ├── ContactCard.tsx
+│       │   │   ├── HowToUseBanner.tsx
+│       │   │   ├── InstallBanner.tsx
+│       │   │   ├── SortInfo.tsx
+│       │   │   ├── StatusBanner.tsx
+│       │   │   └── WhatsNewDialog.tsx
+│       │   ├── TaskForm/           # Task form and related components
+│       │   │   ├── RankFieldSelect.tsx
+│       │   │   ├── TaskForm.tsx
+│       │   │   ├── TaskFormDialogProvider.tsx
+│       │   │   ├── useTaskFormParentChain.ts
+│       │   │   └── SubtasksCard/
+│       │   │       ├── index.ts
+│       │   │       ├── SubtasksCard.tsx
+│       │   │       ├── SubtasksSettings.tsx
+│       │   │       ├── SubtaskRowItem.tsx
+│       │   │       ├── AssignSubtaskDialog.tsx
+│       │   │       └── SubtaskActionDialog.tsx
 │       │   ├── BackButton.tsx
 │       │   ├── ErrorBoundary.tsx
 │       │   ├── DropdownMenuHeader.tsx
@@ -78,9 +95,26 @@ These are the few load-bearing facts that span multiple files. Anything more spe
 │       │   ├── ChangeStatusDialog.tsx
 │       │   ├── ConfirmDeleteDialog.tsx
 │       │   └── SearchInput.tsx
-│       ├── hooks/                  # useAuth, useExpandedTasks, useMobile, useToast
-│       ├── pages/                  # Home, Settings, Completed, HowToUse, HowToInstall, Landing, NotFound
+│       ├── hooks/
+│       │   ├── useAuth.ts
+│       │   ├── useExpandedTasks.ts
+│       │   ├── useMobile.tsx
+│       │   └── useToast.ts
+│       ├── pages/
+│       │   ├── Home.tsx
+│       │   ├── Settings.tsx
+│       │   ├── Completed.tsx
+│       │   ├── HowToUse.tsx
+│       │   ├── HowToInstall.tsx
+│       │   ├── Landing.tsx
+│       │   └── NotFound.tsx
 │       ├── providers/              # See "State Management" above
+│       │   ├── SettingsProvider.tsx
+│       │   ├── TaskSyncQueueProvider.tsx
+│       │   ├── TasksProvider.tsx
+│       │   ├── SyncProvider.tsx
+│       │   ├── GuestModeProvider.tsx
+│       │   └── ExpandedTasksProvider.tsx
 │       ├── lib/
 │       │   ├── task-tree-utils.ts  # Tree-walking, sort/filter; re-exports shared/utils/task-utils
 │       │   ├── columns.ts          # Rank-column UI metadata
