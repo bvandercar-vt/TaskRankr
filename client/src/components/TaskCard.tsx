@@ -17,6 +17,7 @@ import {
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
+import { useSettings } from '@/providers/SettingsProvider'
 import type { TaskWithSubtasks } from '@/types'
 import {
   type FieldConfig,
@@ -210,7 +211,7 @@ const CompletedTimeDisplay = ({
 const TimeSpentDisplay = (
   task: Parameters<typeof getTotalAccumulatedTime>[0],
 ) => {
-  const { settings } = useLocalState()
+  const { settings } = useSettings()
   const totalTime = getTotalAccumulatedTime(task)
 
   if (!settings.fieldConfig.timeSpent.visible || totalTime <= 0) return null
@@ -243,7 +244,8 @@ export const TaskCard = ({
   const holdStartY = useRef<number | null>(null)
   const SCROLL_THRESHOLD = 10
 
-  const { setTaskStatus, deleteTask, updateTask, settings } = useLocalState()
+  const { setTaskStatus, deleteTask, updateTask } = useLocalState()
+  const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
 

@@ -1,6 +1,7 @@
 /**
  * @fileoverview Background sync provider for server synchronization.
- * Processes sync queue from LocalStateProvider when online and authenticated.
+ * Drains the task sync queue from LocalStateProvider and the coalesced
+ * settings update from SettingsProvider when online and authenticated.
  */
 
 import {
@@ -16,6 +17,7 @@ import {
 import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
 import { SyncOperationType, useLocalState } from './LocalStateProvider'
+import { useSettings } from './SettingsProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -47,9 +49,18 @@ export const SyncProvider = ({
     removeProcessedOperations,
     replaceTaskId,
     setTasksFromServer,
-    setSettingsFromServer,
-    isInitialized,
+    isInitialized: tasksInitialized,
   } = useLocalState()
+
+  const {
+    pendingSettingsSync,
+    acknowledgeSettingsSync,
+    setSettingsFromServer,
+    isInitialized: settingsInitialized,
+  } = useSettings()
+
+  const isInitialized = tasksInitialized && settingsInitialized
+  const hasPendingSync = syncQueue.length > 0 || pendingSettingsSync !== null
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
@@ -68,10 +79,11 @@ export const SyncProvider = ({
     async (force = false) => {
       if (!isAuthenticated || !isOnline) return
       if (!force && hasLoadedServerData.current) return
-      if (syncQueue.length > 0) {
+      if (hasPendingSync) {
         debugLog.log('sync', 'loadServerData:skipped', {
           reason: 'pending sync operations',
-          pending: syncQueue.length,
+          pendingTasks: syncQueue.length,
+          pendingSettings: pendingSettingsSync !== null,
         })
         return
       }
@@ -103,7 +115,9 @@ export const SyncProvider = ({
     [
       isAuthenticated,
       isOnline,
+      hasPendingSync,
       syncQueue.length,
+      pendingSettingsSync,
       setTasksFromServer,
       setSettingsFromServer,
     ],
@@ -115,7 +129,7 @@ export const SyncProvider = ({
       isOnline &&
       isInitialized &&
       !hasLoadedServerData.current &&
-      syncQueue.length === 0
+      !hasPendingSync
     ) {
       // biome-ignore lint/nursery/noFloatingPromises: from replit, TODO: investigate
       loadServerData()
@@ -124,7 +138,7 @@ export const SyncProvider = ({
     isAuthenticated,
     isOnline,
     isInitialized,
-    syncQueue.length,
+    hasPendingSync,
     loadServerData,
   ])
 
@@ -136,13 +150,14 @@ export const SyncProvider = ({
 
   const flushQueue = useCallback(async () => {
     if (isSyncingRef.current || !isOnline || !isAuthenticated) return
-    if (syncQueue.length === 0) return
+    if (syncQueue.length === 0 && pendingSettingsSync === null) return
 
     isSyncingRef.current = true
     setIsSyncing(true)
     setLastSyncError(null)
 
     const queueSnapshot = [...syncQueue]
+    const settingsSnapshot = pendingSettingsSync
     const idMap = new Map<number, number>()
 
     const resolveId = (id: number): number => idMap.get(id) ?? id
@@ -203,11 +218,6 @@ export const SyncProvider = ({
             success = result.status === 204
             break
           }
-          case SyncOperationType.UPDATE_SETTINGS: {
-            const result = await tsr.settings.update.mutate({ body: op.data })
-            success = result.status === 200
-            break
-          }
           case SyncOperationType.REORDER_SUBTASKS: {
             const realParentId = resolveId(op.parentId)
             if (realParentId < 0) {
@@ -243,6 +253,25 @@ export const SyncProvider = ({
       // appended by the user during the in-flight sync, and clearing would
       // silently drop them.
       removeProcessedOperations(successCount)
+
+      // Settings: send the snapshot captured at flush start, then acknowledge
+      // the synced fields. `acknowledgeSettingsSync` retains any fields the
+      // user changed mid-flight so we don't clobber concurrent edits.
+      if (settingsSnapshot !== null) {
+        try {
+          const result = await tsr.settings.update.mutate({
+            body: settingsSnapshot,
+          })
+          if (result.status === 200) {
+            acknowledgeSettingsSync(settingsSnapshot)
+          } else {
+            setLastSyncError('Failed to sync: settings')
+          }
+        } catch (err) {
+          debugLog.log('sync', 'settingsFlush:error', { error: String(err) })
+          setLastSyncError('Failed to sync: settings')
+        }
+      }
     } catch (err) {
       debugLog.log('sync', 'flushQueue:error', { error: String(err) })
       console.error('Sync failed:', err)
@@ -253,23 +282,25 @@ export const SyncProvider = ({
     }
   }, [
     syncQueue,
+    pendingSettingsSync,
     isOnline,
     isAuthenticated,
     replaceTaskId,
     removeProcessedOperations,
+    acknowledgeSettingsSync,
   ])
 
   useEffect(() => {
     if (
       isOnline &&
       isAuthenticated &&
-      syncQueue.length > 0 &&
+      hasPendingSync &&
       !isSyncingRef.current
     ) {
       const timer = setTimeout(flushQueue, 500)
       return () => clearTimeout(timer)
     }
-  }, [syncQueue, isOnline, isAuthenticated, flushQueue])
+  }, [hasPendingSync, isOnline, isAuthenticated, flushQueue])
 
   const forceSync = useCallback(async () => {
     await flushQueue()
@@ -291,15 +322,18 @@ export const SyncProvider = ({
     }
   }, [isAuthenticated, forceSync])
 
+  const pendingCount =
+    syncQueue.length + (pendingSettingsSync !== null ? 1 : 0)
+
   const value = useMemo(
     () => ({
       isSyncing,
       isOnline,
-      pendingCount: syncQueue.length,
+      pendingCount,
       lastSyncError,
       forceSync,
     }),
-    [isSyncing, isOnline, syncQueue.length, lastSyncError, forceSync],
+    [isSyncing, isOnline, pendingCount, lastSyncError, forceSync],
   )
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>

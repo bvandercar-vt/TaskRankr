@@ -12,7 +12,7 @@ import {
 } from 'react'
 
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { getStorageKeys, StorageMode } from '@/providers/LocalStateProvider'
+import { getStorageKeys, StorageMode } from '@/lib/storage-keys'
 
 interface ExpandedTasksContextValue {
   expandedIds: Set<number>

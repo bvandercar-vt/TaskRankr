@@ -45,6 +45,7 @@ import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
 import { useLocalState } from '@/providers/LocalStateProvider'
+import { useSettings } from '@/providers/SettingsProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, type FieldFlags, TaskStatus } from '~/shared/schema'
@@ -431,12 +432,8 @@ const ChangelogCard = () => {
 }
 
 const Settings = () => {
-  const {
-    settings,
-    updateSettings,
-    tasks: allTasks,
-    setTaskStatus,
-  } = useLocalState()
+  const { tasks: allTasks, setTaskStatus } = useLocalState()
+  const { settings, updateSettings } = useSettings()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
 

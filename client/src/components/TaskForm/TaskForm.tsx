@@ -18,6 +18,7 @@ import {
   type MutateTaskContent,
   useLocalState,
 } from '@/providers/LocalStateProvider'
+import { useSettings } from '@/providers/SettingsProvider'
 import {
   allRankFieldsNull,
   insertTaskSchemaRefined,
@@ -146,7 +147,8 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
   })
-  const { tasksWithDrafts: allTasks, settings } = useLocalState()
+  const { tasksWithDrafts: allTasks } = useLocalState()
+  const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false

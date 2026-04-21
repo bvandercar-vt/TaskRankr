@@ -1,9 +1,12 @@
 /**
- * @fileoverview Local-first state provider for tasks and settings.
+ * @fileoverview Local-first state provider for tasks.
  * Manages localStorage persistence with sync queue for server synchronization.
  * Includes an in-memory draft session used by the TaskForm dialog so that
  * subtasks added/assigned mid-edit are committed atomically on Submit and
  * dropped on Cancel.
+ *
+ * Settings live in `SettingsProvider` — independent context, independent
+ * sync queue. SyncProvider drains both.
  */
 
 import {
@@ -15,13 +18,18 @@ import {
   useRef,
   useState,
 } from 'react'
-import { omit, toMerged } from 'es-toolkit'
+import { omit } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
-import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
+import {
+  getStorageKeys,
+  loadFromStorageJson,
+  StorageMode,
+} from '@/lib/storage-keys'
+import { useSettings } from '@/providers/SettingsProvider'
 import {
   getById,
   getChildrenLatestCompletedAt,
@@ -34,20 +42,11 @@ import {
   allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
-  sanitizeSettings,
   type Task,
   TaskStatus,
   taskSchema,
   type UpdateTask,
-  type UserSettings,
 } from '~/shared/schema'
-
-/** Normalize incoming settings: fill missing fields from defaults and enforce
- *  the fieldConfig invariant (`required` is false whenever `visible` is
- *  false). Applied at every write boundary (initial load, server push,
- *  user updates) so consumers can trust `settings` without re-checking. */
-const normalizeSettings = (raw: Partial<UserSettings>): UserSettings =>
-  sanitizeSettings(toMerged(DEFAULT_SETTINGS, raw))
 
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
@@ -59,7 +58,6 @@ export enum SyncOperationType {
   UPDATE_TASK = 'update_task',
   SET_STATUS = 'set_status',
   DELETE_TASK = 'delete_task',
-  UPDATE_SETTINGS = 'update_settings',
   REORDER_SUBTASKS = 'reorder_subtasks',
 }
 
@@ -72,7 +70,6 @@ export type SyncOperation =
   | { type: SyncOperationType.UPDATE_TASK; id: number; data: UpdateTaskContent }
   | { type: SyncOperationType.SET_STATUS; id: number; status: TaskStatus }
   | { type: SyncOperationType.DELETE_TASK; id: number }
-  | { type: SyncOperationType.UPDATE_SETTINGS; data: Partial<UserSettings> }
   | {
       type: SyncOperationType.REORDER_SUBTASKS
       parentId: number
@@ -99,10 +96,6 @@ interface LocalStateContextValue {
     cb: (tempId: number, realId: number) => void,
   ) => () => void
 
-  // Settings
-  settings: UserSettings
-  updateSettings: (updates: Partial<UserSettings>) => void
-
   // Draft session (used by TaskFormDialogProvider)
   /** Set of task IDs currently in the draft session. */
   draftTaskIds: Set<number>
@@ -125,47 +118,28 @@ interface LocalStateContextValue {
   removeProcessedOperations: (count: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: Task[]) => void
-  setSettingsFromServer: (settings: UserSettings) => void
 }
 
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 
-export enum StorageMode {
-  AUTH = 'auth',
-  GUEST = 'guest',
-}
-
-export const getStorageKeys = (mode: StorageMode) =>
-  ({
-    tasks: `taskrankr-${mode}-tasks`,
-    settings: `taskrankr-${mode}-settings`,
-    nextId: `taskrankr-${mode}-next-id`,
-    syncQueue: `taskrankr-${mode}-sync-queue`,
-    demoTaskIds: `taskrankr-${mode}-demo-task-ids`,
-    expanded: `taskrankr-${mode}-expanded`,
-  }) as const
-
-const loadFromStorage = <T,>(key: string, fallback: T): T => {
+const loadTasksFromStorage = (key: string): Task[] => {
   try {
     const stored = localStorage.getItem(key)
-    if (!stored) return fallback
-    const parsed = JSON.parse(stored)
-    if (key.endsWith('-tasks')) {
-      const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
-        const result: Task[] = []
-        for (const t of tasks) {
-          result.push(taskSchema.parse(t))
-          if (t.subtasks?.length) {
-            result.push(...flatten(t.subtasks))
-          }
+    if (!stored) return []
+    const parsed = JSON.parse(stored) as (Task & { subtasks?: Task[] })[]
+    const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
+      const result: Task[] = []
+      for (const t of tasks) {
+        result.push(taskSchema.parse(t))
+        if (t.subtasks?.length) {
+          result.push(...flatten(t.subtasks))
         }
-        return result
       }
-      return flatten(parsed) as T
+      return result
     }
-    return parsed
+    return flatten(parsed)
   } catch {
-    return fallback
+    return []
   }
 }
 
@@ -261,8 +235,8 @@ export const LocalStateProvider = ({
   shouldSync,
   storageMode,
 }: LocalStateProviderProps) => {
+  const { settings } = useSettings()
   const [isInitialized, setIsInitialized] = useState(false)
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS)
   const [tasks, setTasks] = useState<Task[]>([])
   const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
@@ -312,21 +286,20 @@ export const LocalStateProvider = ({
   )
 
   useEffect(() => {
-    const loadedSettings: UserSettings = normalizeSettings(
-      loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
+    const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
+    const loadedNextId: number = loadFromStorageJson<number>(
+      storageKeys.nextId,
+      -1,
     )
-    const loadedTasks: Task[] = loadFromStorage<Task[]>(storageKeys.tasks, [])
-    const loadedNextId: number = loadFromStorage<number>(storageKeys.nextId, -1)
-    const loadedQueue: SyncOperation[] = loadFromStorage<SyncOperation[]>(
+    const loadedQueue: SyncOperation[] = loadFromStorageJson<SyncOperation[]>(
       storageKeys.syncQueue,
       [],
     )
-    const loadedDemoIds: number[] = loadFromStorage<number[]>(
+    const loadedDemoIds: number[] = loadFromStorageJson<number[]>(
       storageKeys.demoTaskIds,
       [],
     )
 
-    setSettings(loadedSettings)
     nextIdRef.current = loadedNextId
     setDemoTaskIds(loadedDemoIds)
 
@@ -413,12 +386,6 @@ export const LocalStateProvider = ({
   useEffect(() => {
     tasksRef.current = tasks
   }, [tasks])
-
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem(storageKeys.settings, JSON.stringify(settings))
-    }
-  }, [settings, isInitialized, storageKeys])
 
   useEffect(() => {
     if (isInitialized) {
@@ -1269,16 +1236,6 @@ export const LocalStateProvider = ({
     discardDraftSession,
   ])
 
-  const updateSettings = useCallback(
-    (updates: Partial<UserSettings>) => {
-      const sanitized = sanitizeSettings(updates)
-      setSettings((prev) => normalizeSettings({ ...prev, ...sanitized }))
-      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: sanitized })
-      debugLog.log('settings', 'update', sanitized)
-    },
-    [enqueue],
-  )
-
   const setTasksFromServer = useCallback(
     (serverTasks: Task[]) => {
       if (serverTasks.length === 0 && demoTaskIds.length > 0) {
@@ -1326,12 +1283,6 @@ export const LocalStateProvider = ({
     [storageKeys, demoTaskIds, reconcileAndSetTasks],
   )
 
-  const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
-    const normalized = normalizeSettings(serverSettings)
-    setSettings(normalized)
-    debugLog.log('sync', 'setSettingsFromServer', normalized)
-  }, [])
-
   useEffect(() => {
     if (isInitialized) {
       localStorage.setItem(storageKeys.demoTaskIds, JSON.stringify(demoTaskIds))
@@ -1359,8 +1310,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      settings,
-      updateSettings,
       draftTaskIds,
       draftAssignmentCount: draftAssignedParents.size,
       hasDraftSession,
@@ -1374,7 +1323,6 @@ export const LocalStateProvider = ({
       removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
-      setSettingsFromServer,
     }),
     [
       tasks,
@@ -1388,8 +1336,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      settings,
-      updateSettings,
       draftTaskIds,
       draftAssignedParents.size,
       hasDraftSession,
@@ -1403,7 +1349,6 @@ export const LocalStateProvider = ({
       removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
-      setSettingsFromServer,
     ],
   )
 
