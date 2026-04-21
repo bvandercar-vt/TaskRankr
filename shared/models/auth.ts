@@ -1,9 +1,4 @@
-/**
- * @fileoverview Auth-related database models for Replit Auth integration.
- *
- * Defines sessions table for session storage and users table for user data.
- * These tables are mandatory for Replit Auth functionality.
- */
+/** @fileoverview Replit Auth tables (sessions, users). Mandatory — do not drop. */
 
 import { sql } from 'drizzle-orm'
 import { index, jsonb, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'

@@ -1,3 +1,5 @@
+/** @fileoverview Display labels and column metadata for sort/rank fields. */
+
 import { type RankField, SortOption } from '~/shared/schema'
 import { RANK_FIELD_ENUMS } from './constants'
 

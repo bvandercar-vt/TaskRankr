@@ -48,6 +48,9 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  /**
+   * Loads all tasks for `userId`, opportunistically self-healing legacy data.
+   */
   async getTasks(userId: string): Promise<Task[]> {
     const result = await db
       .select()
@@ -228,6 +231,10 @@ export class DatabaseStorage implements IStorage {
     return task
   }
 
+  /**
+   * Rolls a parent up to COMPLETED when its last incomplete child finishes, if
+   * `parentId` opted into `inheritCompletionState`.
+   */
   private async checkInheritCompletionState(
     parentId: number,
     userId: string,
@@ -279,6 +286,10 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  /**
+   * Counterpart to `checkInheritCompletionState`: if a previously-rolled-up
+   * parent gains a non-completed child (via create or reparent), reopen it.
+   */
   private async revertParentIfInheritCompletionState(
     parentId: number,
     userId: string,
@@ -368,6 +379,7 @@ export class DatabaseStorage implements IStorage {
     return updated
   }
 
+  /** Sum of `timeSpent` across the task itself, and its full descendant subtree. */
   private async getTotalTimeForTask(
     id: number,
     userId: string,
@@ -389,6 +401,9 @@ export class DatabaseStorage implements IStorage {
     return total
   }
 
+  /**
+   * Deletes a task and its entire subtree.
+   */
   async deleteTask(id: number, userId: string): Promise<void> {
     const taskToDelete = await this.getTask(id, userId)
     if (!taskToDelete) return

@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Loads and validates `CHANGELOG.json` (newest entry first) and
+ * tracks which version the user has already seen via localStorage so the
+ * "what's new" badge can light up after a release.
+ */
+
 import { z } from 'zod'
 
 import changelogData from '../../../CHANGELOG.json' with { type: 'json' }

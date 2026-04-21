@@ -1,8 +1,8 @@
 /**
- * @fileoverview Local-first state provider for user settings.
- * Owns settings state with localStorage persistence and an in-provider sync
- * queue. SyncProvider drains the queue against the server. Independent of
- * TasksProvider — settings have no causal dependency on tasks.
+ * @fileoverview Local-first user settings with localStorage persistence.
+ * Pending changes are tracked as a single coalesced partial-update pointer
+ * (not a queue, since settings updates are idempotent merges). SyncProvider
+ * drains it. Independent of TasksProvider.
  */
 
 import {
