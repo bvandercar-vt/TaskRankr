@@ -8,21 +8,10 @@ import { omit } from 'es-toolkit'
 import { removeIds } from '@/lib/task-tree-utils'
 import { SyncOperationType } from '@/providers/TaskSyncQueueProvider'
 import type { Task } from '~/shared/schema'
-import { storage } from './storage'
+import { getStorageKeys, StorageMode, storage } from './storage'
 
-const GUEST_STORAGE_KEYS = {
-  tasks: 'taskrankr-guest-tasks',
-  demoTaskIds: 'taskrankr-guest-demo-task-ids',
-  settings: 'taskrankr-guest-settings',
-  nextId: 'taskrankr-guest-next-id',
-  syncQueue: 'taskrankr-guest-sync-queue',
-}
-
-const AUTH_STORAGE_KEYS = {
-  tasks: 'taskrankr-auth-tasks',
-  syncQueue: 'taskrankr-auth-sync-queue',
-  nextId: 'taskrankr-auth-next-id',
-}
+const GUEST_STORAGE_KEYS = getStorageKeys(StorageMode.GUEST)
+const AUTH_STORAGE_KEYS = getStorageKeys(StorageMode.AUTH)
 
 export interface MigrationResult {
   migratedCount: number
