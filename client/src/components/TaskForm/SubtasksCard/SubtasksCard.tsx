@@ -27,10 +27,8 @@ import {
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import {
-  type DeleteTaskArgs,
-  useLocalState,
-} from '@/providers/LocalStateProvider'
+import { useDraftSession } from '@/providers/DraftSessionProvider'
+import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
@@ -56,7 +54,7 @@ export const SubtasksCard = ({
   onAssignSubtask,
   disableAddSubtask = false,
 }: SubtasksCardProps) => {
-  const { tasksWithDrafts: allTasks, reorderSubtasks } = useLocalState()
+  const { tasksWithDrafts: allTasks, reorderSubtasks } = useDraftSession()
 
   const task = getById(allTasks, taskProp.id) ?? taskProp
 

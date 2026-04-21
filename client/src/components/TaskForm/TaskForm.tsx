@@ -10,13 +10,12 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
-import { useTaskParentChain } from '@/hooks/useTaskParentChain'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import {
-  type DeleteTaskArgs,
-  type MutateTaskContent,
-  useLocalState,
+import { useDraftSession } from '@/providers/DraftSessionProvider'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
@@ -49,6 +48,7 @@ import { TagChain } from '../primitives/TagChain'
 import { SubtaskBlockedTooltip } from '../SubtaskBlockedTooltip'
 import { RankFieldSelect } from './RankFieldSelect'
 import { SubtasksCard } from './SubtasksCard'
+import { useTaskFormParentChain } from './useTaskFormParentChain'
 
 const STUB_TASK: Task = taskSchema.parse({
   id: 0,
@@ -144,10 +144,8 @@ export const TaskForm = ({
   defaultFormData,
   isDraft = false,
 }: TaskFormProps) => {
-  const parentChain = useTaskParentChain(parentId ?? undefined, {
-    includeDrafts: true,
-  })
-  const { tasksWithDrafts: allTasks } = useLocalState()
+  const parentChain = useTaskFormParentChain(parentId ?? undefined)
+  const { tasksWithDrafts: allTasks } = useDraftSession()
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)

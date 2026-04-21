@@ -1,12 +1,15 @@
 /**
  * @fileoverview Local-first state provider for tasks.
  * Manages localStorage persistence with sync queue for server synchronization.
- * Includes an in-memory draft session used by the TaskForm dialog so that
- * subtasks added/assigned mid-edit are committed atomically on Submit and
- * dropped on Cancel.
  *
  * Settings live in `SettingsProvider` — independent context, independent
  * sync queue. SyncProvider drains both.
+ *
+ * The TaskForm dialog's in-memory draft session (drafts, parent reassignments,
+ * order overrides, and `tasksWithDrafts` overlay) lives in
+ * `DraftSessionProvider`, which wraps this provider. Mutators here are
+ * draft-unaware; the dialog subtree consumes draft-aware mutators from
+ * `useDraftSession()` instead.
  */
 
 import {
@@ -75,9 +78,6 @@ export type SyncOperation =
 interface LocalStateContextValue {
   // Tasks
   tasks: Task[]
-  /** `tasks` merged with the in-memory draft session overlay. Drafts have
-   *  negative IDs and are NOT persisted to localStorage or enqueued for sync. */
-  tasksWithDrafts: Task[]
   isInitialized: boolean
   hasDemoData: boolean
   deleteDemoData: () => void
@@ -91,21 +91,6 @@ interface LocalStateContextValue {
   subscribeToIdReplacement: (
     cb: (tempId: number, realId: number) => void,
   ) => () => void
-
-  // Draft session (used by TaskFormDialogProvider)
-  /** Set of task IDs currently in the draft session. */
-  draftTaskIds: Set<number>
-  /** Number of real tasks reassigned to a draft parent during the session. */
-  draftAssignmentCount: number
-  hasDraftSession: boolean
-  /** Create a draft (in-memory) task with a negative ID. */
-  createDraftTask: (data: CreateTaskContent) => Task
-  /** Reparent an existing real task to a draft parent for the session. */
-  assignDraftSubtask: (realTaskId: number, draftParentId: number) => void
-  /** Promote all drafts to real tasks and clear the session. */
-  commitDraftSession: () => void
-  /** Drop all drafts; nothing was ever persisted. */
-  discardDraftSession: () => void
 
   // Server sync bridge (used by SyncProvider)
   syncQueue: SyncOperation[]
@@ -391,235 +376,6 @@ export const LocalStateProvider = ({
     [shouldSync],
   )
 
-  // ---------------------------------------------------------------------------
-  // Draft session state
-  //
-  // Drafts are in-memory-only Task records used by the TaskForm dialog so that
-  // newly-added subtasks render through `useLocalState()` exactly like
-  // persisted subtasks (drag/edit/delete/sort all work uniformly), without
-  // writing anything to localStorage or the sync queue until the user commits
-  // the root form. On commit, drafts are promoted to real tasks via the
-  // regular create/update path. On discard, drafts are simply dropped.
-  // ---------------------------------------------------------------------------
-  const [draftTasks, setDraftTasks] = useState<Task[]>([])
-  // realTaskId -> draft parent id for the duration of the session.
-  const [draftAssignedParents, setDraftAssignedParents] = useState<
-    Map<number, number>
-  >(new Map())
-  // realParentId -> overridden subtaskOrder for the session
-  const [draftSubtaskOrderOverrides, setDraftSubtaskOrderOverrides] = useState<
-    Map<number, number[]>
-  >(new Map())
-  // Dedicated id ref for drafts so we don't burn or persist the real nextIdRef.
-  // Drafts use very-negative IDs to avoid colliding with sync-pending temp ids.
-  const draftIdRef = useRef(-100_000_000)
-
-  const draftTaskIds = useMemo(
-    () => new Set(draftTasks.map((t) => t.id)),
-    [draftTasks],
-  )
-  const isDraftId = useCallback(
-    (id: number) => draftTaskIds.has(id),
-    [draftTaskIds],
-  )
-  const hasDraftSession =
-    draftTasks.length > 0 ||
-    draftAssignedParents.size > 0 ||
-    draftSubtaskOrderOverrides.size > 0
-
-  const tasksWithDrafts = useMemo<Task[]>(() => {
-    if (!hasDraftSession) return tasks
-
-    // Index draft children by real parent so we can append them when no
-    // explicit override is present.
-    const draftChildrenByRealParent = new Map<number, number[]>()
-    for (const d of draftTasks) {
-      if (d.parentId != null && d.parentId >= 0) {
-        const arr = draftChildrenByRealParent.get(d.parentId) ?? []
-        arr.push(d.id)
-        draftChildrenByRealParent.set(d.parentId, arr)
-      }
-    }
-
-    // Single pass: apply assignment + order override + draft-children append.
-    const merged = tasks.map((t) => {
-      const newParentId = draftAssignedParents.get(t.id)
-      const orderOverride = draftSubtaskOrderOverrides.get(t.id)
-      const draftChildren = draftChildrenByRealParent.get(t.id)
-      const shouldAppendDrafts =
-        draftChildren != null &&
-        orderOverride == null &&
-        t.subtaskSortMode === SubtaskSortMode.MANUAL
-
-      if (newParentId == null && orderOverride == null && !shouldAppendDrafts) {
-        return t
-      }
-      return {
-        ...t,
-        ...(newParentId != null ? { parentId: newParentId } : {}),
-        ...(orderOverride
-          ? { subtaskOrder: orderOverride }
-          : shouldAppendDrafts
-            ? { subtaskOrder: [...t.subtaskOrder, ...draftChildren] }
-            : {}),
-      }
-    })
-
-    return [...merged, ...draftTasks]
-  }, [
-    hasDraftSession,
-    tasks,
-    draftTasks,
-    draftAssignedParents,
-    draftSubtaskOrderOverrides,
-  ])
-
-  const createDraftTask = useCallback((data: CreateTaskContent): Task => {
-    const tempId = draftIdRef.current--
-    const newTask: Task = taskSchema.parse({
-      ...allRankFieldsNull,
-      ...data,
-      id: tempId,
-      userId: 'local',
-      status: data.status ?? TaskStatus.OPEN,
-    } satisfies z.input<typeof taskSchema>)
-
-    setDraftTasks((prev) => {
-      let updated = [...prev, newTask]
-      if (data.parentId != null) {
-        // If parent is itself a draft and MANUAL, append to its subtaskOrder.
-        updated = updated.map((t) => {
-          if (t.id !== data.parentId) return t
-          if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
-            return { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
-          }
-          return t
-        })
-      }
-      return updated
-    })
-    debugLog.log('task', 'createDraft', {
-      tempId,
-      name: data.name,
-      parentId: data.parentId,
-    })
-    return newTask
-  }, [])
-
-  const updateDraftTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
-      let updated: Task | undefined
-      setDraftTasks((prev) =>
-        prev.map((t) => {
-          if (t.id !== id) return t
-          updated = { ...t, ...updates }
-          return updated
-        }),
-      )
-      // biome-ignore lint/style/noNonNullAssertion: id was verified by caller as a draft
-      return updated!
-    },
-    [],
-  )
-
-  const deleteDraftTask = useCallback((id: number) => {
-    setDraftTasks((prev) => {
-      const idsToDelete = new Set<number>()
-      const collect = (pid: number) => {
-        idsToDelete.add(pid)
-        for (const t of prev) {
-          if (t.parentId === pid) collect(t.id)
-        }
-      }
-      collect(id)
-
-      // Drop any assignment overrides whose new parent is being deleted.
-      setDraftAssignedParents((prevAssigned) => {
-        if (prevAssigned.size === 0) return prevAssigned
-        let changed = false
-        const next = new Map(prevAssigned)
-        prevAssigned.forEach((newParentId, taskId) => {
-          if (idsToDelete.has(newParentId)) {
-            next.delete(taskId)
-            changed = true
-          }
-        })
-        return changed ? next : prevAssigned
-      })
-
-      // Drop overrides whose key (real parent) is being deleted, AND strip
-      // deleted draft ids out of any remaining overrides whose key is still
-      // alive (otherwise stale negative ids leak into commit and sync).
-      setDraftSubtaskOrderOverrides((prevOverrides) => {
-        if (prevOverrides.size === 0) return prevOverrides
-        let changed = false
-        const next = new Map(prevOverrides)
-        prevOverrides.forEach((order, pid) => {
-          if (idsToDelete.has(pid)) {
-            next.delete(pid)
-            changed = true
-            return
-          }
-          const filtered = order.filter((sid) => !idsToDelete.has(sid))
-          if (filtered.length !== order.length) {
-            next.set(pid, filtered)
-            changed = true
-          }
-        })
-        return changed ? next : prevOverrides
-      })
-
-      return removeIds(prev, idsToDelete).map((t) => ({
-        ...t,
-        subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
-      }))
-    })
-    debugLog.log('task', 'deleteDraft', { id })
-  }, [])
-
-  const reorderDraftSubtasks = useCallback(
-    (parentId: number, orderedIds: number[]) => {
-      setDraftTasks((prev) =>
-        prev.map((t) =>
-          t.id === parentId ? { ...t, subtaskOrder: orderedIds } : t,
-        ),
-      )
-    },
-    [],
-  )
-
-  const assignDraftSubtask = useCallback(
-    (realTaskId: number, draftParentId: number) => {
-      setDraftAssignedParents((prev) => {
-        const next = new Map(prev)
-        next.set(realTaskId, draftParentId)
-        return next
-      })
-      // If the draft parent is MANUAL, append the assigned task to its order.
-      setDraftTasks((prev) =>
-        prev.map((t) => {
-          if (t.id !== draftParentId) return t
-          if (t.subtaskSortMode !== SubtaskSortMode.MANUAL) return t
-          if (t.subtaskOrder.includes(realTaskId)) return t
-          return { ...t, subtaskOrder: [...t.subtaskOrder, realTaskId] }
-        }),
-      )
-      debugLog.log('task', 'assignDraftSubtask', {
-        realTaskId,
-        draftParentId,
-      })
-    },
-    [],
-  )
-
-  const discardDraftSession = useCallback(() => {
-    setDraftTasks([])
-    setDraftAssignedParents(new Map())
-    setDraftSubtaskOrderOverrides(new Map())
-    draftIdRef.current = -100_000_000
-    debugLog.log('task', 'discardDraftSession', {})
-  }, [])
-
   const clearSyncQueue = useCallback(() => {
     setSyncQueue([])
   }, [])
@@ -765,9 +521,6 @@ export const LocalStateProvider = ({
 
   const updateTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
-      if (isDraftId(id)) {
-        return updateDraftTask(id, updates)
-      }
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
@@ -839,24 +592,11 @@ export const LocalStateProvider = ({
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue, updateTaskById, isDraftId, updateDraftTask],
+    [enqueue, updateTaskById],
   )
 
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
-      if (isDraftId(id)) {
-        const next: Partial<Task> =
-          status === TaskStatus.IN_PROGRESS
-            ? { status, inProgressStartedAt: new Date() }
-            : status === TaskStatus.COMPLETED
-              ? {
-                  status,
-                  completedAt: new Date(),
-                  inProgressStartedAt: null,
-                }
-              : { status, inProgressStartedAt: null }
-        return updateDraftTask(id, next as UpdateTaskContent)
-      }
       if (status === TaskStatus.COMPLETED) {
         const hasIncompleteSubtasks = getHasIncompleteSubtasks(
           tasksRef.current,
@@ -1041,23 +781,11 @@ export const LocalStateProvider = ({
       // biome-ignore lint/style/noNonNullAssertion: from Replit. Maybe we should investigate? Throw an error if not defined?
       return updatedTask!
     },
-    [enqueue, updateTaskById, isDraftId, updateDraftTask],
+    [enqueue, updateTaskById],
   )
 
   const deleteTask = useCallback(
     (id: number) => {
-      if (isDraftId(id)) {
-        deleteDraftTask(id)
-        return
-      }
-      // If the user deletes a real task that was assigned during the session,
-      // drop the assignment so we don't try to UPDATE_TASK it on commit.
-      setDraftAssignedParents((prev) => {
-        if (!prev.has(id)) return prev
-        const next = new Map(prev)
-        next.delete(id)
-        return next
-      })
       setTasks((prev) => {
         const taskToDelete = getById(prev, id)
         if (!taskToDelete) return prev
@@ -1093,34 +821,11 @@ export const LocalStateProvider = ({
       enqueue({ type: SyncOperationType.DELETE_TASK, id })
       debugLog.log('task', 'delete', { id })
     },
-    [enqueue, isDraftId, deleteDraftTask],
+    [enqueue],
   )
 
   const reorderSubtasks = useCallback(
     (parentId: number, orderedIds: number[]) => {
-      if (isDraftId(parentId)) {
-        reorderDraftSubtasks(parentId, orderedIds)
-        return
-      }
-      // Real parent: if any draft children/assignments are involved (i.e. we
-      // are inside a draft session), park the new order in the override map
-      // so it is not persisted/synced until commit. Otherwise, reorder
-      // normally.
-      if (
-        hasDraftSession &&
-        orderedIds.some((id) => isDraftId(id) || draftAssignedParents.has(id))
-      ) {
-        setDraftSubtaskOrderOverrides((prev) => {
-          const next = new Map(prev)
-          next.set(parentId, orderedIds)
-          return next
-        })
-        debugLog.log('task', 'reorderSubtasks:draftOverride', {
-          parentId,
-          orderedIds,
-        })
-        return
-      }
       updateTaskById(parentId, () => ({ subtaskOrder: orderedIds }))
       enqueue({
         type: SyncOperationType.REORDER_SUBTASKS,
@@ -1129,98 +834,8 @@ export const LocalStateProvider = ({
       })
       debugLog.log('task', 'reorderSubtasks', { parentId, orderedIds })
     },
-    [
-      enqueue,
-      updateTaskById,
-      isDraftId,
-      reorderDraftSubtasks,
-      hasDraftSession,
-      draftAssignedParents,
-    ],
+    [enqueue, updateTaskById],
   )
-
-  // ---------------------------------------------------------------------------
-  // commitDraftSession: promote all in-memory drafts to real tasks.
-  //
-  // `draftTasks` is already in topological order by construction: a draft
-  // child cannot exist until its draft parent has been created (you have to
-  // navigate into the parent draft to add a subtask). We replay through the
-  // public `createTask`, mapping draft.id -> real.id so children resolve their
-  // parentId from the freshly minted real id.
-  // ---------------------------------------------------------------------------
-  const commitDraftSession = useCallback(() => {
-    if (
-      draftTasks.length === 0 &&
-      draftAssignedParents.size === 0 &&
-      draftSubtaskOrderOverrides.size === 0
-    ) {
-      return
-    }
-
-    debugLog.log('task', 'commitDraftSession:start', {
-      draftCount: draftTasks.length,
-      assignmentCount: draftAssignedParents.size,
-      overrideCount: draftSubtaskOrderOverrides.size,
-    })
-
-    const idMap = new Map<number, number>()
-    const resolve = (id: number) => idMap.get(id) ?? id
-
-    for (const draft of draftTasks) {
-      const created = createTask({
-        ...omit(draft, ['id', 'userId']),
-        parentId: draft.parentId != null ? resolve(draft.parentId) : null,
-      })
-      idMap.set(draft.id, created.id)
-    }
-
-    // Bypass the public mutators' draft-routing for the rest of commit:
-    // hasDraftSession is still true here (state setters batch), so calls
-    // through reorderSubtasks/updateTask might re-park into draft overrides.
-    const directReorder = (parentId: number, orderedIds: number[]) => {
-      updateTaskById(parentId, () => ({ subtaskOrder: orderedIds }))
-      enqueue({
-        type: SyncOperationType.REORDER_SUBTASKS,
-        parentId,
-        orderedIds,
-      })
-    }
-    const directUpdate = (id: number, updates: UpdateTaskContent) => {
-      updateTaskById(id, () => updates)
-      enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
-    }
-
-    // For MANUAL draft parents whose user-defined order differs from the
-    // append-order produced by sequential createTask calls, lock in the order.
-    for (const draft of draftTasks) {
-      if (draft.subtaskSortMode !== SubtaskSortMode.MANUAL) continue
-      if (draft.subtaskOrder.length === 0) continue
-      const realId = resolve(draft.id)
-      const resolvedOrder = draft.subtaskOrder.map(resolve)
-      directReorder(realId, resolvedOrder)
-    }
-
-    // Apply assignments: real task -> resolved (draft) parent.
-    draftAssignedParents.forEach((newParentId, realTaskId) => {
-      directUpdate(realTaskId, { parentId: resolve(newParentId) })
-    })
-
-    // Apply real-parent subtaskOrder overrides (resolving any draft ids).
-    draftSubtaskOrderOverrides.forEach((order, realParentId) => {
-      directReorder(realParentId, order.map(resolve))
-    })
-
-    discardDraftSession()
-    debugLog.log('task', 'commitDraftSession:complete', { mapped: idMap.size })
-  }, [
-    draftTasks,
-    draftAssignedParents,
-    draftSubtaskOrderOverrides,
-    createTask,
-    updateTaskById,
-    enqueue,
-    discardDraftSession,
-  ])
 
   const setTasksFromServer = useCallback(
     (serverTasks: Task[]) => {
@@ -1286,7 +901,6 @@ export const LocalStateProvider = ({
   const value = useMemo<LocalStateContextValue>(
     () => ({
       tasks,
-      tasksWithDrafts,
       isInitialized,
       hasDemoData,
       deleteDemoData,
@@ -1296,13 +910,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      draftTaskIds,
-      draftAssignmentCount: draftAssignedParents.size,
-      hasDraftSession,
-      createDraftTask,
-      assignDraftSubtask,
-      commitDraftSession,
-      discardDraftSession,
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
@@ -1312,7 +919,6 @@ export const LocalStateProvider = ({
     }),
     [
       tasks,
-      tasksWithDrafts,
       isInitialized,
       hasDemoData,
       deleteDemoData,
@@ -1322,13 +928,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      draftTaskIds,
-      draftAssignedParents.size,
-      hasDraftSession,
-      createDraftTask,
-      assignDraftSubtask,
-      commitDraftSession,
-      discardDraftSession,
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,

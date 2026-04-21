@@ -13,6 +13,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useIsMobile } from '@/hooks/useMobile'
 import { getById } from '@/lib/task-utils'
 import {
+  DraftSessionProvider,
+  useDraftSession,
+} from '@/providers/DraftSessionProvider'
+import {
   type CreateTaskContent,
   type DeleteTaskArgs,
   type MutateTaskContent,
@@ -164,7 +168,7 @@ const MobileDialog = ({
   </AnimatePresence>
 )
 
-export const TaskFormDialogProvider = ({
+const TaskFormDialogProviderInner = ({
   children,
   // biome-ignore lint/complexity/noBannedTypes: is fine
 }: React.PropsWithChildren<{}>) => {
@@ -185,12 +189,11 @@ export const TaskFormDialogProvider = ({
     number | null
   >(null)
 
+  const { createTask, subscribeToIdReplacement } = useLocalState()
   const {
     tasksWithDrafts,
-    createTask,
     updateTask,
     deleteTask,
-    subscribeToIdReplacement,
     createDraftTask,
     assignDraftSubtask,
     commitDraftSession,
@@ -198,7 +201,7 @@ export const TaskFormDialogProvider = ({
     hasDraftSession,
     draftTaskIds,
     draftAssignmentCount,
-  } = useLocalState()
+  } = useDraftSession()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {
@@ -503,3 +506,17 @@ export const TaskFormDialogProvider = ({
     </TaskFormDialogContext.Provider>
   )
 }
+
+/**
+ * Mounts the draft session context (scoped to this dialog subtree) and then
+ * the dialog provider that consumes it. Draft state lives here because its
+ * only purpose is the TaskForm dialog chain.
+ */
+export const TaskFormDialogProvider = ({
+  children,
+  // biome-ignore lint/complexity/noBannedTypes: is fine
+}: React.PropsWithChildren<{}>) => (
+  <DraftSessionProvider>
+    <TaskFormDialogProviderInner>{children}</TaskFormDialogProviderInner>
+  </DraftSessionProvider>
+)
