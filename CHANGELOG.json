@@ -2,8 +2,9 @@
   {
     "version": "1.2.2",
     "date": "2026-04-20",
-    "title": "Task Creation Cancel Fix",
+    "title": "Less Logouts; Task Creation Cancel Fix",
     "changes": [
+      "Log outs should be less frequent now (increase from 1 week of no activity to 30 days)",
       "Bugfix: No subtasks of a new task should get created when the root-level task creation is cancelled.",
       "Bugfix: Sync reload issue when page reloaded."
     ]
@@ -11,7 +12,7 @@
   {
     "version": "1.2.1",
     "date": "2026-04-14",
-    "title": "Time Spent Settings & Subtask Fixes",
+    "title": "Time Spent Settings; Subtask Fixes",
     "changes": [
       "Modified the configurable settings for tracking time spent on tasks (can now show/hide time spent independently of enabling In Progress status)",
       "Bugfix: Fixed a bug where subtasks were orphaned when creating a parent task"
