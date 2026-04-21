@@ -34,6 +34,7 @@ import {
 import { LocalStateProvider } from '@/providers/LocalStateProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
+import { TaskSyncQueueProvider } from '@/providers/TaskSyncQueueProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
 import { WhatsNewDialog } from './components/appInfo/WhatsNewDialog'
 import { Routes } from './lib/constants'
@@ -116,19 +117,25 @@ const AuthenticatedApp = () => {
 
   return (
     <SettingsProvider shouldSync={shouldSync} storageMode={storageMode}>
-      <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
-        <SyncProvider isAuthenticated={shouldSync}>
-          <ExpandedTasksProvider>
-            <TaskFormDialogProvider>
-              <div className="h-dvh flex flex-col overflow-hidden">
-                <StatusBanner />
-                <Router />
-                <WhatsNewDialog />
-              </div>
-            </TaskFormDialogProvider>
-          </ExpandedTasksProvider>
-        </SyncProvider>
-      </LocalStateProvider>
+      <TaskSyncQueueProvider
+        key={storageMode} // necessary to reset the queue when switching between guest/auth modes
+        shouldSync={shouldSync}
+        storageMode={storageMode}
+      >
+        <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
+          <SyncProvider isAuthenticated={shouldSync}>
+            <ExpandedTasksProvider>
+              <TaskFormDialogProvider>
+                <div className="h-dvh flex flex-col overflow-hidden">
+                  <StatusBanner />
+                  <Router />
+                  <WhatsNewDialog />
+                </div>
+              </TaskFormDialogProvider>
+            </ExpandedTasksProvider>
+          </SyncProvider>
+        </LocalStateProvider>
+      </TaskSyncQueueProvider>
     </SettingsProvider>
   )
 }

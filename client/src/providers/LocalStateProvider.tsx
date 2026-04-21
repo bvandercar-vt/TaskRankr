@@ -1,9 +1,12 @@
 /**
  * @fileoverview Local-first state provider for tasks.
- * Manages localStorage persistence with sync queue for server synchronization.
+ * Manages tasks in-memory + localStorage persistence. Every task mutation also
+ * pushes an entry onto the task sync queue owned by `TaskSyncQueueProvider` (which
+ * must wrap this provider); `SyncProvider` drains that queue in the
+ * background.
  *
- * Settings live in `SettingsProvider` — independent context, independent
- * sync queue. SyncProvider drains both.
+ * Settings live in `SettingsProvider` — independent context, independent sync
+ * pointer. SyncProvider drains both.
  *
  * The TaskForm dialog's in-memory draft session (drafts, parent reassignments,
  * order overrides, and `tasksWithDrafts` overlay) lives in
@@ -38,6 +41,11 @@ import {
 } from '@/lib/task-utils'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
+  type SyncOperation,
+  SyncOperationType,
+  useTaskSyncQueue,
+} from '@/providers/TaskSyncQueueProvider'
+import {
   allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
@@ -51,29 +59,6 @@ export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
-
-export enum SyncOperationType {
-  CREATE_TASK = 'create_task',
-  UPDATE_TASK = 'update_task',
-  SET_STATUS = 'set_status',
-  DELETE_TASK = 'delete_task',
-  REORDER_SUBTASKS = 'reorder_subtasks',
-}
-
-export type SyncOperation =
-  | {
-      type: SyncOperationType.CREATE_TASK
-      tempId: number
-      data: CreateTaskContent
-    }
-  | { type: SyncOperationType.UPDATE_TASK; id: number; data: UpdateTaskContent }
-  | { type: SyncOperationType.SET_STATUS; id: number; status: TaskStatus }
-  | { type: SyncOperationType.DELETE_TASK; id: number }
-  | {
-      type: SyncOperationType.REORDER_SUBTASKS
-      parentId: number
-      orderedIds: number[]
-    }
 
 interface LocalStateContextValue {
   // Tasks
@@ -92,11 +77,8 @@ interface LocalStateContextValue {
     cb: (tempId: number, realId: number) => void,
   ) => () => void
 
-  // Server sync bridge (used by SyncProvider)
-  syncQueue: SyncOperation[]
-  clearSyncQueue: () => void
-  removeSyncOperation: (index: number) => void
-  removeProcessedOperations: (count: number) => void
+  // Server sync bridge (used by SyncProvider). The task sync queue itself
+  // lives in TaskSyncQueueProvider — these are the tasks-side bridge methods.
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: Task[]) => void
 }
@@ -217,12 +199,16 @@ export const LocalStateProvider = ({
   storageMode,
 }: LocalStateProviderProps) => {
   const { settings } = useSettings()
+  const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
+    useTaskSyncQueue()
   const [isInitialized, setIsInitialized] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
-  const [syncQueue, setSyncQueue] = useState<SyncOperation[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
   const tasksRef = useRef<Task[]>([])
+  // Capture the initial sync queue once so the init effect can scan for
+  // orphaned negative-id tasks without re-running when the queue changes.
+  const initialQueueRef = useRef(syncQueue)
   const idReplacedCallbacks = useRef<
     Set<(tempId: number, realId: number) => void>
   >(new Set())
@@ -248,31 +234,24 @@ export const LocalStateProvider = ({
         debugLog.log('reconcile', `inheritCompletionState:${source}`, {
           corrections,
         })
-        if (shouldSync) {
-          setSyncQueue((prev) => [
-            ...prev,
-            ...corrections.map(
-              (c) =>
-                ({
-                  type: SyncOperationType.SET_STATUS,
-                  id: c.id,
-                  status: c.status,
-                }) as const,
-            ),
-          ])
-        }
+        enqueueMany(
+          corrections.map(
+            (c) =>
+              ({
+                type: SyncOperationType.SET_STATUS,
+                id: c.id,
+                status: c.status,
+              }) as const,
+          ),
+        )
       }
     },
-    [shouldSync],
+    [enqueueMany],
   )
 
   useEffect(() => {
     const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
     const loadedNextId: number = storage.get<number>(storageKeys.nextId, -1)
-    const loadedQueue: SyncOperation[] = storage.get<SyncOperation[]>(
-      storageKeys.syncQueue,
-      [],
-    )
     const loadedDemoIds: number[] = storage.get<number[]>(
       storageKeys.demoTaskIds,
       [],
@@ -286,8 +265,8 @@ export const LocalStateProvider = ({
     // queue (e.g. dropped by a previous version of the sync code), re-enqueue
     // it so the server assigns a real id. Enqueue parents before children so
     // the in-flight idMap can resolve parentId references in order.
-    let recoveredQueue = loadedQueue
     if (shouldSync && loadedTasks.length > 0) {
+      const loadedQueue = initialQueueRef.current
       const queuedTempIds = new Set(
         loadedQueue
           .filter((op) => op.type === SyncOperationType.CREATE_TASK)
@@ -329,14 +308,13 @@ export const LocalStateProvider = ({
           tempId: t.id,
           data: omit(t, ['id', 'userId']),
         }))
-        recoveredQueue = [...loadedQueue, ...recoveryOps]
+        enqueueMany(recoveryOps)
         debugLog.log('sync', 'recoverOrphanedTasks', {
           count: recoveryOps.length,
           tempIds: sorted.map((t) => t.id),
         })
       }
     }
-    setSyncQueue(recoveredQueue)
 
     if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
@@ -349,7 +327,7 @@ export const LocalStateProvider = ({
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync])
+  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync, enqueueMany])
 
   useEffect(() => {
     if (isInitialized) {
@@ -360,34 +338,6 @@ export const LocalStateProvider = ({
   useEffect(() => {
     tasksRef.current = tasks
   }, [tasks])
-
-  useEffect(() => {
-    if (isInitialized) {
-      storage.set(storageKeys.syncQueue, syncQueue)
-    }
-  }, [syncQueue, isInitialized, storageKeys])
-
-  const enqueue = useCallback(
-    (op: SyncOperation) => {
-      if (shouldSync) {
-        setSyncQueue((prev) => [...prev, op])
-      }
-    },
-    [shouldSync],
-  )
-
-  const clearSyncQueue = useCallback(() => {
-    setSyncQueue([])
-  }, [])
-
-  const removeSyncOperation = useCallback((index: number) => {
-    setSyncQueue((prev) => prev.filter((_, i) => i !== index))
-  }, [])
-
-  const removeProcessedOperations = useCallback((count: number) => {
-    if (count <= 0) return
-    setSyncQueue((prev) => prev.slice(count))
-  }, [])
 
   // Helper to update a task by ID
   const updateTaskById = useCallback(
@@ -415,43 +365,24 @@ export const LocalStateProvider = ({
     [],
   )
 
-  const replaceTaskId = useCallback((tempId: number, realId: number) => {
-    setTasks((prev) =>
-      prev.map((t) => ({
-        ...(t.id === tempId ? { ...t, id: realId } : t),
-        parentId: t.parentId === tempId ? realId : t.parentId,
-        subtaskOrder: t.subtaskOrder.map((sid) =>
-          sid === tempId ? realId : sid,
-        ),
-      })),
-    )
-    setSyncQueue((prev) =>
-      prev.map((op) => {
-        if (op.type === SyncOperationType.CREATE_TASK) {
-          if (op.tempId === tempId) return { ...op, tempId: realId }
-          if (op.data.parentId === tempId)
-            return { ...op, data: { ...op.data, parentId: realId } }
-          return op
-        }
-        if (op.type === SyncOperationType.REORDER_SUBTASKS) {
-          return {
-            ...op,
-            parentId: op.parentId === tempId ? realId : op.parentId,
-            orderedIds: op.orderedIds.map((oid) =>
-              oid === tempId ? realId : oid,
-            ),
-          }
-        }
-        if ('id' in op && op.id === tempId) {
-          return { ...op, id: realId }
-        }
-        return op
-      }),
-    )
-    idReplacedCallbacks.current.forEach((cb) => {
-      cb(tempId, realId)
-    })
-  }, [])
+  const replaceTaskId = useCallback(
+    (tempId: number, realId: number) => {
+      setTasks((prev) =>
+        prev.map((t) => ({
+          ...(t.id === tempId ? { ...t, id: realId } : t),
+          parentId: t.parentId === tempId ? realId : t.parentId,
+          subtaskOrder: t.subtaskOrder.map((sid) =>
+            sid === tempId ? realId : sid,
+          ),
+        })),
+      )
+      replaceTempIdInQueue(tempId, realId)
+      idReplacedCallbacks.current.forEach((cb) => {
+        cb(tempId, realId)
+      })
+    },
+    [replaceTempIdInQueue],
+  )
 
   const createTask = useCallback(
     (data: CreateTaskContent): Task => {
@@ -863,9 +794,8 @@ export const LocalStateProvider = ({
         debugLog.log('sync', 'setTasksFromServer:orphanedParentIds', {
           ids: orphaned.map((t) => t.id),
         })
-        setSyncQueue((prev) => [
-          ...prev,
-          ...orphaned.map(
+        enqueueMany(
+          orphaned.map(
             (t) =>
               ({
                 type: SyncOperationType.UPDATE_TASK,
@@ -873,7 +803,7 @@ export const LocalStateProvider = ({
                 data: { parentId: null },
               }) as const,
           ),
-        ])
+        )
       }
 
       reconcileAndSetTasks(sanitized, 'fromServer')
@@ -881,7 +811,7 @@ export const LocalStateProvider = ({
       storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
-    [storageKeys, demoTaskIds, reconcileAndSetTasks],
+    [storageKeys, demoTaskIds, reconcileAndSetTasks, enqueueMany],
   )
 
   useEffect(() => {
@@ -910,10 +840,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      syncQueue,
-      clearSyncQueue,
-      removeSyncOperation,
-      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
     }),
@@ -928,10 +854,6 @@ export const LocalStateProvider = ({
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-      syncQueue,
-      clearSyncQueue,
-      removeSyncOperation,
-      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
     ],
