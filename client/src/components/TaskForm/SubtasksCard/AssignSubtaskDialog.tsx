@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react'
 
 import {
-  collectSubtreeIds,
+  collectDescendantIds,
   filterRootTasks,
   getById,
 } from '@/lib/task-tree-utils'
@@ -46,7 +46,7 @@ export const AssignSubtaskDialog = ({
   const orphanTasks = useMemo(() => {
     const descendantIds =
       parentTaskId !== null
-        ? collectSubtreeIds(allTasks, [parentTaskId], { includeRoots: true })
+        ? collectDescendantIds(allTasks, [parentTaskId], { includeRoots: true })
         : new Set<number>()
     return allTasks.filter(
       (t) =>

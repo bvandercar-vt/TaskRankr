@@ -9,7 +9,7 @@ export const getDirectSubtasks = (allTasks: Task[], id: number): Task[] =>
  * Collects every descendant of `rootIds` through the `parentId` graph. Pass
  * `includeRoots: true` to also include the roots themselves.
  */
-export const collectSubtreeIds = (
+export const collectDescendantIds = (
   tasks: Task[],
   rootIds: Iterable<number>,
   opts: { includeRoots?: boolean } = {},

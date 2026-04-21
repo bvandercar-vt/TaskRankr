@@ -44,7 +44,7 @@ import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
-  collectSubtreeIds,
+  collectDescendantIds,
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
@@ -116,7 +116,7 @@ function reconcileInheritCompletionState(tasks: Task[]): {
         }))
 
         if (shouldHide) {
-          const toHide = collectSubtreeIds(updated, [parent.id])
+          const toHide = collectDescendantIds(updated, [parent.id])
           if (toHide.size > 0) {
             updated = updated.map((t) =>
               toHide.has(t.id) ? { ...t, hidden: true } : t,
@@ -500,7 +500,7 @@ export const TasksProvider = ({
             .filter((t) => t.status === TaskStatus.COMPLETED)
             .map((t) => t.id)
           if (completedDirectIds.length === 0) return prev
-          const toHide = collectSubtreeIds(prev, completedDirectIds, {
+          const toHide = collectDescendantIds(prev, completedDirectIds, {
             includeRoots: true,
           })
           return prev.map((t) =>
@@ -616,7 +616,7 @@ export const TasksProvider = ({
 
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
         setTasks((prev) => {
-          const toHide = collectSubtreeIds(prev, [id])
+          const toHide = collectDescendantIds(prev, [id])
           if (toHide.size === 0) return prev
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: true } : t,
