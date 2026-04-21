@@ -5,14 +5,26 @@
  * must wrap this provider); `SyncProvider` drains that queue in the
  * background.
  *
+ * Exposes two contexts for re-render isolation:
+ *   - `useTasks()` returns the reactive view (`tasks`, `hasDemoData`).
+ *     Consumers re-render on every task mutation.
+ *   - `useTaskMutations()` returns the stable mutator/server-bridge callbacks
+ *     plus `isInitialized` (`createTask`, `updateTask`, `setTaskStatus`,
+ *     `deleteTask`, `reorderSubtasks`, `deleteDemoData`, `replaceTaskId`,
+ *     `setTasksFromServer`, `subscribeToIdReplacement`). Components that only
+ *     fire mutations subscribe here and never re-render on task list changes.
+ * `isInitialized` lives on the mutations context so consumers that only need
+ * the init flag (like `SyncProvider`) don't subscribe to the task array.
+ *
  * Settings live in `SettingsProvider` — independent context, independent sync
  * pointer. SyncProvider drains both.
  *
  * The TaskForm dialog's in-memory draft session (drafts, parent reassignments,
  * order overrides, and `tasksWithDrafts` overlay) lives in
- * `DraftSessionProvider`, which wraps this provider. Mutators here are
- * draft-unaware; the dialog subtree consumes draft-aware mutators from
- * `useDraftSession()` instead.
+ * `DraftSessionProvider`, which is mounted inside `TaskFormDialogProvider`
+ * below this provider in the tree. Mutators here are draft-unaware; the
+ * dialog subtree consumes draft-aware mutators from
+ * `useDraftSessionMutations()` instead.
  */
 
 import {
