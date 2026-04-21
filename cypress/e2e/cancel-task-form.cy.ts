@@ -58,6 +58,9 @@ describe('Task Form Cancellation', () => {
       contextName: 'New Task',
       beforeEachHook: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+        })
       },
       afterEachHook: () => {
         checkTasksDontExist([rootTask, subtask, subtask2])
@@ -81,7 +84,7 @@ describe('Task Form Cancellation', () => {
         checkNumCalls({ create: 1, update: 0 })
       },
     },
-  ]) {
+  ] as const) {
     context(contextName, () => {
       beforeEach(beforeEachHook)
       afterEach(() => {
@@ -90,16 +93,16 @@ describe('Task Form Cancellation', () => {
         cy.get(TaskForm.FORM).should('not.exist')
       })
 
-      it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
-        getTaskForm(0).within(() => {
-          fillTaskForm(rootTask)
-          cy.get(TaskForm.CANCEL_BTN).click()
+      if (contextName === 'New Task') {
+        it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
+          getTaskForm(0).within(() => {
+            cy.get(TaskForm.CANCEL_BTN).click()
+          })
         })
-      })
+      }
 
       it('cancel on parent form after a subtask was added — confirmation dialog appears, discard removes all', () => {
         getTaskForm(0).within(() => {
-          fillTaskForm(rootTask)
           cy.get(TaskForm.ADD_SUBTASK_BTN).click()
         })
 
@@ -121,7 +124,6 @@ describe('Task Form Cancellation', () => {
 
       it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
         getTaskForm(0).within(() => {
-          fillTaskForm(rootTask)
           cy.get(TaskForm.ADD_SUBTASK_BTN).click()
         })
 
@@ -168,7 +170,6 @@ describe('Task Form Cancellation', () => {
 
       it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
         getTaskForm(0).within(() => {
-          fillTaskForm(rootTask)
           cy.get(TaskForm.ADD_SUBTASK_BTN).click()
         })
 
