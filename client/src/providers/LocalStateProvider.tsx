@@ -26,10 +26,9 @@ import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
   getStorageKeys,
-  loadFromStorageJson,
-  StorageMode,
+  loadFromStorage,
+  type StorageMode,
 } from '@/lib/storage-keys'
-import { useSettings } from '@/providers/SettingsProvider'
 import {
   getById,
   getChildrenLatestCompletedAt,
@@ -38,6 +37,7 @@ import {
   removeIds,
   updateItem,
 } from '@/lib/task-utils'
+import { useSettings } from '@/providers/SettingsProvider'
 import {
   allRankFieldsNull,
   type CreateTask,
@@ -123,11 +123,10 @@ interface LocalStateContextValue {
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 
 const loadTasksFromStorage = (key: string): Task[] => {
+  type TasksInStorage = (Task & { subtasks?: Task[] })[]
   try {
-    const stored = localStorage.getItem(key)
-    if (!stored) return []
-    const parsed = JSON.parse(stored) as (Task & { subtasks?: Task[] })[]
-    const flatten = (tasks: (Task & { subtasks?: Task[] })[]): Task[] => {
+    const parsed = loadFromStorage<TasksInStorage>(key, [])
+    const flatten = (tasks: TasksInStorage): Task[] => {
       const result: Task[] = []
       for (const t of tasks) {
         result.push(taskSchema.parse(t))
@@ -287,15 +286,12 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
-    const loadedNextId: number = loadFromStorageJson<number>(
-      storageKeys.nextId,
-      -1,
-    )
-    const loadedQueue: SyncOperation[] = loadFromStorageJson<SyncOperation[]>(
+    const loadedNextId: number = loadFromStorage<number>(storageKeys.nextId, -1)
+    const loadedQueue: SyncOperation[] = loadFromStorage<SyncOperation[]>(
       storageKeys.syncQueue,
       [],
     )
-    const loadedDemoIds: number[] = loadFromStorageJson<number[]>(
+    const loadedDemoIds: number[] = loadFromStorage<number[]>(
       storageKeys.demoTaskIds,
       [],
     )

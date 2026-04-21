@@ -19,7 +19,7 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import {
   getStorageKeys,
-  loadFromStorageJson,
+  loadFromStorage,
   type StorageMode,
 } from '@/lib/storage-keys'
 import { sanitizeSettings, type UserSettings } from '~/shared/schema'
@@ -71,14 +71,11 @@ export const SettingsProvider = ({
 
   useEffect(() => {
     const loaded = normalizeSettings(
-      loadFromStorageJson<UserSettings>(
-        storageKeys.settings,
-        DEFAULT_SETTINGS,
-      ),
+      loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
     )
     setSettings(loaded)
     setPendingSettingsSync(
-      loadFromStorageJson<Partial<UserSettings> | null>(
+      loadFromStorage<Partial<UserSettings> | null>(
         pendingSyncStorageKey,
         null,
       ),

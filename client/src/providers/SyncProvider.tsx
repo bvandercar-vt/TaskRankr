@@ -134,13 +134,7 @@ export const SyncProvider = ({
       // biome-ignore lint/nursery/noFloatingPromises: from replit, TODO: investigate
       loadServerData()
     }
-  }, [
-    isAuthenticated,
-    isOnline,
-    isInitialized,
-    hasPendingSync,
-    loadServerData,
-  ])
+  }, [isAuthenticated, isOnline, isInitialized, hasPendingSync, loadServerData])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -322,8 +316,7 @@ export const SyncProvider = ({
     }
   }, [isAuthenticated, forceSync])
 
-  const pendingCount =
-    syncQueue.length + (pendingSettingsSync !== null ? 1 : 0)
+  const pendingCount = syncQueue.length + (pendingSettingsSync !== null ? 1 : 0)
 
   const value = useMemo(
     () => ({

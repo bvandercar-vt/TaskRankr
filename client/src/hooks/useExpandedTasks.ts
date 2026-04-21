@@ -11,8 +11,8 @@ import {
   useState,
 } from 'react'
 
-import { useGuestMode } from '@/providers/GuestModeProvider'
 import { getStorageKeys, StorageMode } from '@/lib/storage-keys'
+import { useGuestMode } from '@/providers/GuestModeProvider'
 
 interface ExpandedTasksContextValue {
   expandedIds: Set<number>

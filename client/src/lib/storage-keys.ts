@@ -19,7 +19,10 @@ export const getStorageKeys = (mode: StorageMode) =>
     expanded: `taskrankr-${mode}-expanded`,
   }) as const
 
-export const loadFromStorageJson = <T,>(key: string, fallback: T): T => {
+/**
+ * Load JSON from storage
+ */
+export const loadFromStorage = <T>(key: string, fallback: T): T => {
   try {
     const stored = localStorage.getItem(key)
     if (!stored) return fallback

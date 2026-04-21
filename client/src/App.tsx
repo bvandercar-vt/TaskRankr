@@ -17,6 +17,7 @@ import {
   clearGuestStorage,
   migrateGuestTasksToAuth,
 } from '@/lib/migrate-guest-tasks'
+import { StorageMode } from '@/lib/storage-keys'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
 import HowToInstall from '@/pages/HowToInstall'
@@ -30,7 +31,6 @@ import {
   GuestModeProvider,
   useGuestMode,
 } from '@/providers/GuestModeProvider'
-import { StorageMode } from '@/lib/storage-keys'
 import { LocalStateProvider } from '@/providers/LocalStateProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
