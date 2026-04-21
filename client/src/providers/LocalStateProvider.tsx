@@ -122,6 +122,7 @@ interface LocalStateContextValue {
 
 const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 
+// TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
 const loadTasksFromStorage = (key: string): Task[] => {
   type TasksInStorage = (Task & { subtasks?: Task[] })[]
   try {
