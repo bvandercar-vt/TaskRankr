@@ -3,6 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
+import { toMerged } from 'es-toolkit'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ChevronRight,
@@ -135,7 +136,10 @@ const AttributeCheckboxRow = ({
 }: FieldFlags & {
   name: keyof FieldConfig
   label: string
-  updateFieldFlags: (field: keyof FieldConfig, flags: Partial<FieldFlags>) => void
+  updateFieldFlags: (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) => void
   className?: string
 }) => (
   <tr className={className}>
@@ -168,7 +172,10 @@ const AttributeSettingsCard = ({
   updateFieldFlags,
 }: {
   fieldConfig: FieldConfig
-  updateFieldFlags: (field: keyof FieldConfig, flags: Partial<FieldFlags>) => void
+  updateFieldFlags: (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) => void
 }) => (
   <Card className="mt-4">
     <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
@@ -424,8 +431,12 @@ const ChangelogCard = () => {
 }
 
 const Settings = () => {
-  const { settings, updateSettings, tasks: allTasks, setTaskStatus } =
-    useLocalState()
+  const {
+    settings,
+    updateSettings,
+    tasks: allTasks,
+    setTaskStatus,
+  } = useLocalState()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
 
@@ -434,10 +445,7 @@ const Settings = () => {
     flags: Partial<FieldFlags>,
   ) =>
     updateSettings({
-      fieldConfig: {
-        ...settings.fieldConfig,
-        [field]: { ...settings.fieldConfig[field], ...flags },
-      },
+      fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
     })
 
   return (

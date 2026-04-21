@@ -15,8 +15,8 @@ import {
   StopCircle,
 } from 'lucide-react'
 
-import { useLocalState } from '@/providers/LocalStateProvider'
 import { cn } from '@/lib/utils'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
 import { Button } from './primitives/Button'

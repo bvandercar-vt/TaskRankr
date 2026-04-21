@@ -34,11 +34,11 @@ import {
   allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
+  sanitizeSettings,
   type Task,
   TaskStatus,
   taskSchema,
   type UpdateTask,
-  sanitizeSettings,
   type UserSettings,
 } from '~/shared/schema'
 
