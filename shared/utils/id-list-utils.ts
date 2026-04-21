@@ -7,8 +7,11 @@ export const getById = <T extends HasId>(
 
 export const removeIds = <T extends HasId>(
   allItems: T[],
-  ids: T['id'][],
-): T[] => allItems.filter((i) => !ids.includes(i.id))
+  ids: T['id'][] | Set<T['id']>,
+): T[] => {
+  const idsSet = ids instanceof Set ? ids : new Set(ids)
+  return allItems.filter((i) => !idsSet.has(i.id))
+}
 
 export const updateItem = <T extends HasId>(
   allItems: T[],

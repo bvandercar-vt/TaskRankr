@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { omit, toMerged, uniq, without } from 'es-toolkit'
+import { omit, toMerged, without } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
@@ -606,7 +606,7 @@ export const LocalStateProvider = ({
         return changed ? next : prevOverrides
       })
 
-      return removeIds(prev, Array.from(idsToDelete)).map((t) => ({
+      return removeIds(prev, idsToDelete).map((t) => ({
         ...t,
         subtaskOrder: without(t.subtaskOrder, ...Array.from(idsToDelete)),
       }))
@@ -1116,7 +1116,7 @@ export const LocalStateProvider = ({
           if (idsToDelete.has(t.id)) totalTime += t.timeSpent
         }
 
-        let updated = removeIds(prev, Array.from(idsToDelete))
+        let updated = removeIds(prev, idsToDelete)
 
         if (taskToDelete.parentId) {
           updated = updateItem(updated, taskToDelete.parentId, (t) => ({
@@ -1330,7 +1330,7 @@ export const LocalStateProvider = ({
   }, [demoTaskIds, isInitialized, storageKeys])
 
   const deleteDemoData = useCallback(() => {
-    setTasks((prev) => removeIds(prev, uniq(demoTaskIds)))
+    setTasks((prev) => removeIds(prev, demoTaskIds))
     setDemoTaskIds([])
   }, [demoTaskIds])
 

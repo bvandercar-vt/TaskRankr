@@ -3,7 +3,7 @@
  * Migrates guest mode tasks to authenticated storage on login.
  */
 
-import { omit, uniq } from 'es-toolkit'
+import { omit } from 'es-toolkit'
 
 import { removeIds } from '@/lib/task-utils'
 import { SyncOperationType } from '@/providers/LocalStateProvider'
@@ -43,7 +43,7 @@ export const getGuestTasksToMigrate = (): MigrationResult => {
     const guestTasks: Task[] = JSON.parse(guestTasksRaw)
     const demoIds: number[] = demoIdsRaw ? JSON.parse(demoIdsRaw) : []
 
-    const userCreatedTasks = removeIds(guestTasks, uniq(demoIds))
+    const userCreatedTasks = removeIds(guestTasks, demoIds)
 
     return {
       migratedCount: userCreatedTasks.length,
