@@ -151,6 +151,11 @@ Always prefer these over inline implementations:
 - `getHasIncompleteSubtasks(allTasks, taskId)` — Whether any direct subtask of the given task is not completed.
 - `getChildrenLatestCompletedAt(children)` — Returns the most recent `completedAt` date among the given tasks, or `null`. Handles string-to-Date conversion.
 
+## Coding Conventions
+
+### Object copying
+When copying many same-named properties from one object to another, use `omit` or `pick` from `es-toolkit` instead of enumerating every field by hand. Example: `createTask({ ...omit(draft, ['id', 'userId']), parentId: resolved })` rather than listing all 14 fields explicitly. Only enumerate when the field set is small (≤3) or every field needs a transformation.
+
 ## External Dependencies
 
 ### Database
