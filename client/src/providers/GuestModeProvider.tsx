@@ -1,9 +1,8 @@
 /**
  * @fileoverview Guest-mode flag for trying the app without authentication.
  *
- * `enterGuestMode(hideBanners?)` flips the flag and seeds the cross-cutting
- * suppression set in `BannersProvider`; `exitGuestMode` clears it. Banner
- * suppression itself lives in `BannersProvider` — see that file for why.
+ * Manages guest mode state for trying the app without authentication (local
+ * only, no API sync).
  */
 
 import {
