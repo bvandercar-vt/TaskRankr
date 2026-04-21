@@ -33,11 +33,6 @@ export function setLastSeenVersion(version: string) {
   localStorage.setItem(LAST_SEEN_VERSION_KEY, version)
 }
 
-/**
- * Entries newer than the last-seen version. Returns `[]` for first-time users
- * (nothing recorded yet) and the full list if the recorded version no longer
- * exists in the changelog.
- */
 export function getUnseenEntries(): ChangelogEntry[] {
   const lastSeen = getLastSeenVersion()
   if (!lastSeen) return []

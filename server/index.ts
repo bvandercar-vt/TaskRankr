@@ -1,7 +1,9 @@
 /**
- * @fileoverview Express entry point. Mounts JSON body parsing (with raw-body
- * capture), API request logging, error handler, then registers routes and
- * either Vite middleware (dev) or the static build (prod).
+ * @fileoverview Express entry point.
+ *
+ * Mounts JSON body parsing (with raw-body capture), API request logging, an
+ * error handler, then registers routes and either Vite middleware (dev) or
+ * the static build (prod).
  */
 
 import { createServer } from 'node:http'

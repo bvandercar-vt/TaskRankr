@@ -1,10 +1,12 @@
 /**
  * @fileoverview Migrates user-created guest tasks into the auth localStorage
- * bucket on login. Demo tasks are skipped. New temp ids are minted (negative,
- * to match TasksProvider's optimistic-id scheme), the parent/child graph is
- * rewritten in two passes (roots, then children with the remapped parentId),
- * and a matching CREATE_TASK op per task is appended to the auth sync queue
- * so the next sync flush pushes them to the server.
+ * bucket on login.
+ *
+ * Demo tasks are skipped. New temp ids are minted (negative, to match
+ * TasksProvider's optimistic-id scheme), the parent/child graph is rewritten
+ * in two passes (roots, then children with the remapped parentId), and a
+ * matching CREATE_TASK op per task is appended to the auth sync queue so the
+ * next sync flush pushes them to the server.
  */
 
 import { omit } from 'es-toolkit'

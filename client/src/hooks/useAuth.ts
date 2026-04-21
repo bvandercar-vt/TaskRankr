@@ -1,6 +1,7 @@
 /**
- * @fileoverview `useAuth`: react-query-backed session state + logout. Caches
- * the last user in localStorage so that offline / network-error reloads can
+ * @fileoverview `useAuth`: react-query-backed session state + logout.
+ *
+ * Caches the last user in localStorage so offline / network-error reloads can
  * still surface an authenticated UI instead of bouncing through the login
  * screen. A real 401 always wins (clears the cache and returns null).
  */

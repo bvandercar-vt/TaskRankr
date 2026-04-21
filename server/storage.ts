@@ -1,8 +1,9 @@
 /**
- * @fileoverview Drizzle-backed `IStorage`. Beyond plain CRUD, owns the
- * non-trivial task lifecycle: in-progress timer accounting, status cascades
- * across the parent/child tree, the `inheritCompletionState` parent rollup,
- * and time-accumulation on delete.
+ * @fileoverview Drizzle-backed `IStorage`.
+ *
+ * Beyond plain CRUD, owns the non-trivial task lifecycle: in-progress timer
+ * accounting, status cascades across the parent/child tree, the
+ * `inheritCompletionState` parent rollup, and time-accumulation on delete.
  */
 
 import { and, eq } from 'drizzle-orm'
@@ -48,10 +49,11 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   /**
-   * Loads all tasks for `userId`, opportunistically self-healing two
-   * inconsistencies that older data may carry: orphan `parentId` references
-   * are nulled out, and missing entries in `parent.subtaskOrder` are appended.
-   * Repairs are persisted in a single fan-out write before returning.
+   * Loads all tasks for `userId`, opportunistically self-healing legacy data.
+   *
+   * Orphan `parentId` references are nulled out and missing entries in
+   * `parent.subtaskOrder` are appended. Repairs are persisted in a single
+   * fan-out write before returning.
    */
   async getTasks(userId: string): Promise<Task[]> {
     const result = await db
@@ -107,9 +109,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Inserts a task. If the new task is non-completed and lands under a parent
-   * that was previously rolled up via `inheritCompletionState`, the parent is
-   * reopened.
+   * Inserts a task.
+   *
+   * If the new task is non-completed and lands under a parent that was
+   * previously rolled up via `inheritCompletionState`, the parent is reopened.
    */
   async createTask(insertTask: InsertTask): Promise<Task> {
     const [task] = await db.insert(tasks).values(insertTask).returning()
@@ -126,8 +129,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Transitions a task to `newStatus`, applying every side effect that flows
-   * from the change in one place:
+   * Transitions a task to `newStatus`, applying every side effect in one place.
+   *
    *  - Entering IN_PROGRESS demotes any other in-progress task to PINNED and
    *    flushes its accumulated time.
    *  - Leaving IN_PROGRESS folds elapsed time into `timeSpent`.
@@ -253,10 +256,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * If `parentId` opts into `inheritCompletionState` and every other child is
-   * already completed, mark the parent completed too — and recurse upward.
-   * `justCompletedChildId` lets the caller skip a stale read of the child it
-   * just wrote.
+   * Rolls a parent up to COMPLETED when its last incomplete child finishes.
+   *
+   * Only fires if `parentId` opted into `inheritCompletionState`. Recurses
+   * upward. `justCompletedChildId` lets the caller skip a stale read of the
+   * child it just wrote.
    */
   private async checkInheritCompletionState(
     parentId: number,
@@ -337,8 +341,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Patches `updates` onto a task. Beyond the write itself, it reconciles a
-   * few derived bits:
+   * Patches `updates` onto a task and reconciles derived state.
+   *
    *  - Reparenting to root clears `hidden` (auto-hide only applies under a
    *    parent).
    *  - Toggling `autoHideCompleted` propagates `hidden` to all already-
@@ -437,10 +441,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   /**
-   * Deletes a task and its entire subtree. Before the cascade, the subtree's
-   * total `timeSpent` is rolled up into the surviving parent (if any) so
-   * tracked work is never silently lost. Descendants delete via the
-   * non-rollup path.
+   * Deletes a task and its entire subtree.
+   *
+   * Before the cascade, the subtree's total `timeSpent` is rolled up into the
+   * surviving parent (if any) so tracked work is never silently lost.
+   * Descendants delete via the non-rollup path.
    */
   async deleteTask(id: number, userId: string): Promise<void> {
     const taskToDelete = await this.getTask(id, userId)

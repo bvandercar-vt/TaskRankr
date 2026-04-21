@@ -1,7 +1,9 @@
 /**
- * @fileoverview Replit OIDC auth via Passport: pg-backed session store, login
- * /callback/logout routes, and an `isAuthenticated` middleware that
- * transparently refreshes expired access tokens.
+ * @fileoverview Replit OIDC auth via Passport.
+ *
+ * Wires up a pg-backed session store, login/callback/logout routes, and an
+ * `isAuthenticated` middleware that transparently refreshes expired access
+ * tokens.
  */
 
 /** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */
