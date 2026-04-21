@@ -21,7 +21,7 @@
  * draft layer or the underlying `LocalStateProvider` mutators based on
  * `isDraftId(id)`. Only consumers inside the TaskForm dialog subtree see the
  * draft-aware versions; the rest of the app reads real mutators directly
- * from `useLocalState()` and stays oblivious to draft state.
+ * from `useTaskMutations()` and stays oblivious to draft state.
  *
  * `commitDraftSession` promotes drafts in dependency order, building an
  * idMap from temp draft ids to freshly minted real ids, then applies parent
@@ -45,7 +45,8 @@ import { removeIds } from '@/lib/task-utils'
 import {
   type CreateTaskContent,
   type UpdateTaskContent,
-  useLocalState,
+  useTaskMutations,
+  useTasks,
 } from '@/providers/LocalStateProvider'
 import {
   allRankFieldsNull,
@@ -85,14 +86,14 @@ export const DraftSessionProvider = ({
 }: {
   children: React.ReactNode
 }) => {
+  const { tasks } = useTasks()
   const {
-    tasks,
     createTask,
     updateTask: realUpdateTask,
     deleteTask: realDeleteTask,
     reorderSubtasks: realReorderSubtasks,
     setTaskStatus: realSetTaskStatus,
-  } = useLocalState()
+  } = useTaskMutations()
   // Keep a ref so callbacks can read the latest tasks without invalidating on
   // every tasks change (mirrors LocalStateProvider's tasksRef pattern).
   const tasksRef = useRef(tasks)

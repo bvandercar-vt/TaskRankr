@@ -16,7 +16,7 @@ import {
 
 import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
-import { useLocalState } from './LocalStateProvider'
+import { useTaskMutations } from './LocalStateProvider'
 import { useSettings } from './SettingsProvider'
 import { SyncOperationType, useTaskSyncQueue } from './TaskSyncQueueProvider'
 
@@ -46,10 +46,10 @@ export const SyncProvider = ({
   const hasLoadedServerData = useRef(false)
 
   const {
+    isInitialized: tasksInitialized,
     replaceTaskId,
     setTasksFromServer,
-    isInitialized: tasksInitialized,
-  } = useLocalState()
+  } = useTaskMutations()
 
   const { syncQueue, removeProcessedOperations } = useTaskSyncQueue()
 

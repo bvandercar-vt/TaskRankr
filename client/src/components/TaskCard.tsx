@@ -16,7 +16,7 @@ import {
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import { useTaskMutations } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import type { TaskWithSubtasks } from '@/types'
 import {
@@ -244,7 +244,7 @@ export const TaskCard = ({
   const holdStartY = useRef<number | null>(null)
   const SCROLL_THRESHOLD = 10
 
-  const { setTaskStatus, deleteTask, updateTask } = useLocalState()
+  const { setTaskStatus, deleteTask, updateTask } = useTaskMutations()
   const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()

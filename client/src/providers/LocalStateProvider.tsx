@@ -60,19 +60,36 @@ export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 
-interface LocalStateContextValue {
-  // Tasks
+/**
+ * Tasks state — the pieces that change whenever the task list mutates.
+ * Consumers of `useTasks()` re-render on every task change. Use this only
+ * from components that actually render task data.
+ *
+ * NOTE: `isInitialized` lives on the mutations context instead of here so
+ * consumers that only need the init flag (e.g. `SyncProvider`) don't
+ * subscribe to the task array.
+ */
+interface TasksContextValue {
   tasks: Task[]
-  isInitialized: boolean
   hasDemoData: boolean
-  deleteDemoData: () => void
+}
 
+/**
+ * Task mutations + server bridge — stable values whose identity changes at
+ * most once (when `isInitialized` flips false→true at boot). Consumers of
+ * `useTaskMutations()` do NOT re-render on task list changes, so click
+ * handlers / dialog submitters / list-item buttons / the sync orchestrator
+ * can subscribe here without paying the re-render cost of `useTasks()`.
+ */
+interface TaskMutationsContextValue {
+  isInitialized: boolean
   // Task mutations
   createTask: (data: CreateTaskContent) => Task
   updateTask: (id: number, updates: UpdateTaskContent) => Task
   setTaskStatus: (id: number, status: TaskStatus) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
+  deleteDemoData: () => void
   subscribeToIdReplacement: (
     cb: (tempId: number, realId: number) => void,
   ) => () => void
@@ -83,7 +100,10 @@ interface LocalStateContextValue {
   setTasksFromServer: (tasks: Task[]) => void
 }
 
-const LocalStateContext = createContext<LocalStateContextValue | null>(null)
+const TasksContext = createContext<TasksContextValue | null>(null)
+const TaskMutationsContext = createContext<TaskMutationsContextValue | null>(
+  null,
+)
 
 // TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
 const loadTasksFromStorage = (key: string): Task[] => {
@@ -828,31 +848,32 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
-  const value = useMemo<LocalStateContextValue>(
+  const tasksValue = useMemo<TasksContextValue>(
+    () => ({ tasks, hasDemoData }),
+    [tasks, hasDemoData],
+  )
+
+  const mutationsValue = useMemo<TaskMutationsContextValue>(
     () => ({
-      tasks,
       isInitialized,
-      hasDemoData,
-      deleteDemoData,
       createTask,
       updateTask,
       setTaskStatus,
       deleteTask,
       reorderSubtasks,
+      deleteDemoData,
       subscribeToIdReplacement,
       replaceTaskId,
       setTasksFromServer,
     }),
     [
-      tasks,
       isInitialized,
-      hasDemoData,
-      deleteDemoData,
       createTask,
       updateTask,
       setTaskStatus,
       deleteTask,
       reorderSubtasks,
+      deleteDemoData,
       subscribeToIdReplacement,
       replaceTaskId,
       setTasksFromServer,
@@ -860,15 +881,23 @@ export const LocalStateProvider = ({
   )
 
   return (
-    <LocalStateContext.Provider value={value}>
-      {children}
-    </LocalStateContext.Provider>
+    <TaskMutationsContext.Provider value={mutationsValue}>
+      <TasksContext.Provider value={tasksValue}>
+        {children}
+      </TasksContext.Provider>
+    </TaskMutationsContext.Provider>
   )
 }
 
-export const useLocalState = () => {
-  const ctx = useContext(LocalStateContext)
+export const useTasks = () => {
+  const ctx = useContext(TasksContext)
+  if (!ctx) throw new Error('useTasks must be used within a LocalStateProvider')
+  return ctx
+}
+
+export const useTaskMutations = () => {
+  const ctx = useContext(TaskMutationsContext)
   if (!ctx)
-    throw new Error('useLocalState must be used within a LocalStateProvider')
+    throw new Error('useTaskMutations must be used within a LocalStateProvider')
   return ctx
 }

@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 
 import { filterRootTasks, getAllDescendantIds, getById } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import { useTasks } from '@/providers/LocalStateProvider'
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Checkbox } from '../../primitives/forms/Checkbox'
@@ -34,7 +34,7 @@ export const AssignSubtaskDialog = ({
   parentTaskId,
   onConfirm,
 }: AssignSubtaskDialogProps) => {
-  const { tasks: allTasks } = useLocalState()
+  const { tasks: allTasks } = useTasks()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)

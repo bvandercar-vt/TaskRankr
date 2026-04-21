@@ -20,7 +20,7 @@ import {
   type CreateTaskContent,
   type DeleteTaskArgs,
   type MutateTaskContent,
-  useLocalState,
+  useTaskMutations,
 } from '@/providers/LocalStateProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { SubtaskSortMode } from '~/shared/schema'
@@ -189,7 +189,7 @@ const TaskFormDialogProviderInner = ({
     number | null
   >(null)
 
-  const { createTask, subscribeToIdReplacement } = useLocalState()
+  const { createTask, subscribeToIdReplacement } = useTaskMutations()
   const {
     tasksWithDrafts,
     updateTask,

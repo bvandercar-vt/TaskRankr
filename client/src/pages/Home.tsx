@@ -24,7 +24,10 @@ import {
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/task-utils'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import {
+  useTaskMutations,
+  useTasks,
+} from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
@@ -117,12 +120,8 @@ const EmptyState = ({
 )
 
 const Home = () => {
-  const {
-    tasks: allTasks,
-    isInitialized,
-    hasDemoData,
-    deleteDemoData,
-  } = useLocalState()
+  const { tasks: allTasks, hasDemoData } = useTasks()
+  const { isInitialized, deleteDemoData } = useTaskMutations()
   const { settings, updateSettings } = useSettings()
   const { openCreateDialog } = useTaskDialog()
   const [search, setSearch] = useState('')

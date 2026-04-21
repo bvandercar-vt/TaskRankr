@@ -44,7 +44,10 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import {
+  useTaskMutations,
+  useTasks,
+} from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
@@ -227,7 +230,7 @@ const AttributeSettingsCard = ({
 )
 
 const ExportButton = () => {
-  const { tasks } = useLocalState()
+  const { tasks } = useTasks()
   const hasNoTasks = tasks.length === 0
 
   return (
@@ -432,7 +435,8 @@ const ChangelogCard = () => {
 }
 
 const Settings = () => {
-  const { tasks: allTasks, setTaskStatus } = useLocalState()
+  const { tasks: allTasks } = useTasks()
+  const { setTaskStatus } = useTaskMutations()
   const { settings, updateSettings } = useSettings()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
