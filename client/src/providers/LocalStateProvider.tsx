@@ -34,12 +34,20 @@ import {
   allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
+  sanitizeSettings,
   type Task,
   TaskStatus,
   taskSchema,
   type UpdateTask,
   type UserSettings,
 } from '~/shared/schema'
+
+/** Normalize incoming settings: fill missing fields from defaults and enforce
+ *  the fieldConfig invariant (`required` is false whenever `visible` is
+ *  false). Applied at every write boundary (initial load, server push,
+ *  user updates) so consumers can trust `settings` without re-checking. */
+const normalizeSettings = (raw: Partial<UserSettings>): UserSettings =>
+  sanitizeSettings(toMerged(DEFAULT_SETTINGS, raw))
 
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
@@ -304,8 +312,7 @@ export const LocalStateProvider = ({
   )
 
   useEffect(() => {
-    const loadedSettings: UserSettings = toMerged(
-      DEFAULT_SETTINGS,
+    const loadedSettings: UserSettings = normalizeSettings(
       loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
     )
     const loadedTasks: Task[] = loadFromStorage<Task[]>(storageKeys.tasks, [])
@@ -432,11 +439,11 @@ export const LocalStateProvider = ({
   // Draft session state
   //
   // Drafts are in-memory-only Task records used by the TaskForm dialog so that
-  // newly-added subtasks render through `useTasks()` exactly like persisted
-  // subtasks (drag/edit/delete/sort all work uniformly), without writing
-  // anything to localStorage or the sync queue until the user commits the
-  // root form. On commit, drafts are promoted to real tasks via the regular
-  // create/update path. On discard, drafts are simply dropped.
+  // newly-added subtasks render through `useLocalState()` exactly like
+  // persisted subtasks (drag/edit/delete/sort all work uniformly), without
+  // writing anything to localStorage or the sync queue until the user commits
+  // the root form. On commit, drafts are promoted to real tasks via the
+  // regular create/update path. On discard, drafts are simply dropped.
   // ---------------------------------------------------------------------------
   const [draftTasks, setDraftTasks] = useState<Task[]>([])
   // realTaskId -> draft parent id for the duration of the session.
@@ -1264,9 +1271,10 @@ export const LocalStateProvider = ({
 
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
-      setSettings((prev) => ({ ...prev, ...updates }))
-      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: updates })
-      debugLog.log('settings', 'update', updates)
+      const sanitized = sanitizeSettings(updates)
+      setSettings((prev) => normalizeSettings({ ...prev, ...sanitized }))
+      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: sanitized })
+      debugLog.log('settings', 'update', sanitized)
     },
     [enqueue],
   )
@@ -1319,8 +1327,9 @@ export const LocalStateProvider = ({
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
-    setSettings(serverSettings)
-    debugLog.log('sync', 'setSettingsFromServer', serverSettings)
+    const normalized = normalizeSettings(serverSettings)
+    setSettings(normalized)
+    debugLog.log('sync', 'setSettingsFromServer', normalized)
   }, [])
 
   useEffect(() => {
@@ -1405,9 +1414,8 @@ export const LocalStateProvider = ({
   )
 }
 
-export const useLocalStateSafe = () => useContext(LocalStateContext)
 export const useLocalState = () => {
-  const ctx = useLocalStateSafe()
+  const ctx = useContext(LocalStateContext)
   if (!ctx)
     throw new Error('useLocalState must be used within a LocalStateProvider')
   return ctx

@@ -18,8 +18,6 @@ import {
   TaskListPageWrapper,
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
-import { useSettings } from '@/hooks/useSettings'
-import { useTasks } from '@/hooks/useTasks'
 import {
   filterAndSortTree,
   getTaskStatuses,
@@ -118,10 +116,15 @@ const EmptyState = ({
 )
 
 const Home = () => {
-  const { data: allTasks, isLoading } = useTasks()
+  const {
+    tasks: allTasks,
+    isInitialized,
+    hasDemoData,
+    deleteDemoData,
+    settings,
+    updateSettings,
+  } = useLocalState()
   const { openCreateDialog } = useTaskDialog()
-  const { settings, updateSettings } = useSettings()
-  const { hasDemoData, deleteDemoData } = useLocalState()
   const [search, setSearch] = useState('')
 
   const sortBy = settings.sortBy
@@ -202,7 +205,7 @@ const Home = () => {
   }, [taskTree, inProgressTask, pinnedTasks, search, sortBy, settings])
 
   return (
-    <TaskListPageWrapper isLoading={isLoading}>
+    <TaskListPageWrapper isLoading={!isInitialized}>
       <TaskListPageHeader
         title="Home (Open Tasks)"
         showTitle={false}

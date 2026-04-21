@@ -5,7 +5,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 
 ## User Preferences
 - Preferred communication style: Simple, everyday language.
-- File naming: kebab-case for utility/helper files (e.g., `auth-utils.ts`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useSettings.ts`, `useTasks.ts`)
+- File naming: kebab-case for utility/helper files (e.g., `auth-utils.ts`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useAuth.ts`, `useTaskParentChain.ts`)
 - Icon helper: Use `Icon` component from `LucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
 - JSDoc style: Keep descriptions concise (1-2 lines max), omit obvious info, use exact package names as imported (e.g., `@radix-ui` not "Radix UI")
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
@@ -44,9 +44,10 @@ TaskRankr is a multi-user task management application designed for tracking task
 - **Subtask Ordering**: Supports both inherited sorting from parent tasks and manual drag-and-drop reordering.
 - **Changelog & Version Tracking**: A "What's New" dialog automatically appears when users open the app after an update with new changelog entries (new users without a last-seen version are silently marked as current and skip the dialog). Users can also view the full changelog from Settings. Version number is displayed at the bottom of Settings. Changelog content lives in `CHANGELOG.json` at the project root — add new entries at the top of the array. Logic and utilities are in `client/src/lib/changelog.ts`. **Before every publish, add a new changelog entry** to `CHANGELOG.json` summarizing what changed — bump the version, set today's date, give it a title, and list the changes. The entry at index 0 is always treated as the current version.
 - **Sorting & Filtering Architecture**: All sorting and filtering logic lives in `client/src/lib/task-utils.ts`. `SORT_ORDER_MAP` defines tiebreaker chains per sort option. `sortTasks()` accepts a chain of `SortOption[]` fields. `RANK_FIELD_ENUMS` maps each rank field to its enum object; `RankFieldValueMap` and `RANK_FIELDS_COLUMNS` (display-order column metadata) are derived from it. `SORT_LABELS` and `SORT_DIRECTIONS` provide display names and ASC/DESC per field.
-- **Task Hooks Architecture**: `useTasks.ts` exports data hooks (`useTasks`, `useTask`, `useTaskParentChain`) and `useTaskActions()` which returns direct calls to `LocalStateProvider` methods. All mutations are synchronous local-first operations — no `useMutation` wrappers or `isPending` states.
+- **App State & Mutations**: Components consume tasks, settings, and all mutations directly from `useLocalState()` (e.g. `const { tasks, settings, updateTask, updateSettings } = useLocalState()`). There are no wrapper hooks (`useTasks`, `useTaskActions`, `useSettings`) — `LocalStateProvider` is the single source of truth. All mutations are synchronous local-first writes (no `useMutation`, no `isPending`); `SyncProvider` reconciles to the server in the background. Loading state is `!isInitialized`. The only remaining task-data helper hook is `hooks/useTaskParentChain.ts`, which walks `parentId` chains for breadcrumbs.
+- **Settings Invariants**: `LocalStateProvider` normalizes settings (`normalizeSettings` = merge with `DEFAULT_SETTINGS` + `sanitizeSettings`) at every write boundary — initial localStorage load, `setSettingsFromServer`, and `updateSettings`. The fieldConfig invariant (`required` is always false when `visible` is false) is enforced at the storage layer, not at the consumer, so any code reading `settings` can trust it without re-sanitizing.
 - **Draft Sessions (Parent-Task Create Flow)**: When the user opens the create-task dialog, `LocalStateProvider` starts a draft session via `beginDraftSession`. All edits (new tasks, subtask additions, parent reassignments, manual reorders) are parked in three in-memory layers — `draftTasks`, `draftAssignedParents`, `draftSubtaskOrderOverrides` — instead of being written to real state or the sync queue. `tasksWithDrafts` overlays these on top of `tasks` so the UI sees the in-progress tree. On Save the dialog calls `commitDraftSession`, which promotes drafts in dependency order: it builds an idMap from temp draft IDs to freshly minted real IDs, calls `createTask` for each draft (using `omit(draft, ['id', 'userId'])` plus a resolved `parentId`), then applies parent reassignments and manual orders directly (bypassing the public mutators to avoid re-parking into draft layers). On Cancel `discardDraftSession` clears all three layers. `isDraftId(id)` is the predicate the public mutators (`updateTask`, `deleteTask`, `reorderSubtasks`) use to route writes into the draft layer while a session is active.
-- **`useLocalState` vs `useLocalStateSafe`**: `useLocalState()` throws if called outside `LocalStateProvider` and is the default for app code that always runs inside the provider. `useLocalStateSafe()` returns `null` outside the provider — used by hooks (`useTasks`, `useSettings`) that may also run in environments without local state, and by code that needs to feature-detect provider presence.
+
 
 ### Project Structure
 ```
@@ -92,8 +93,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── useAuth.ts        # Authentication state hook
 │       │   ├── useExpandedTasks.ts  # Task expansion state (persists in localStorage)
 │       │   ├── useMobile.tsx     # Mobile detection hook
-│       │   ├── useSettings.ts    # User settings with optimistic updates
-│       │   ├── useTasks.ts       # Task data hooks (useTasks, useTask, useTaskParentChain) + useTaskActions
+│       │   ├── useTaskParentChain.ts  # Breadcrumb-style parent chain walker
 │       │   └── useToast.ts       # Toast notifications
 │       ├── pages/
 │       │   ├── Home.tsx          # Main task list with sorting

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
 
-import { useTaskActions } from '@/hooks/useTasks'
 import { cn } from '@/lib/utils'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { SubtaskSortMode } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Switch } from '../../primitives/forms/Switch'
@@ -20,7 +20,7 @@ const SortingMethodSwitch = ({
   sortMode: SubtaskSortMode
   onSortModeChange: (mode: SubtaskSortMode) => void
 }) => {
-  const { updateTask, reorderSubtasks } = useTaskActions()
+  const { updateTask, reorderSubtasks } = useLocalState()
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
@@ -35,7 +35,7 @@ const SortingMethodSwitch = ({
       reorderSubtasks(taskId, directChildIds)
     }
 
-    updateTask({ id: taskId, subtaskSortMode: newMode })
+    updateTask(taskId, { subtaskSortMode: newMode })
   }
 
   return (
@@ -156,7 +156,7 @@ const SubtasksSettingsMenu = ({
   onShowNumbersChange,
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
-  const { updateTask } = useTaskActions()
+  const { updateTask } = useLocalState()
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
@@ -182,10 +182,7 @@ const SubtasksSettingsMenu = ({
               checked={showNumbers}
               onCheckedChange={(checked) => {
                 onShowNumbersChange(checked)
-                updateTask({
-                  id: taskId,
-                  subtasksShowNumbers: checked,
-                })
+                updateTask(taskId, { subtasksShowNumbers: checked })
               }}
               data-testid="switch-show-numbers"
             />
@@ -197,7 +194,7 @@ const SubtasksSettingsMenu = ({
         label="Auto-complete main task when all subtasks are complete"
         checked={inheritCompletionState}
         onCheckedChange={(checked) =>
-          updateTask({ id: taskId, inheritCompletionState: checked })
+          updateTask(taskId, { inheritCompletionState: checked })
         }
         data-testid="switch-inherit-completion-state"
       />
@@ -206,7 +203,7 @@ const SubtasksSettingsMenu = ({
         label="Auto-hide completed subtasks"
         checked={autoHideCompleted}
         onCheckedChange={(checked) =>
-          updateTask({ id: taskId, autoHideCompleted: checked })
+          updateTask(taskId, { autoHideCompleted: checked })
         }
         data-testid="switch-auto-hide-completed"
       />

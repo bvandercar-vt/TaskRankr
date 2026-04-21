@@ -21,14 +21,16 @@ import {
 } from '@dnd-kit/sortable'
 import { Link, Plus } from 'lucide-react'
 
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
   getById,
   getDirectSubtasks,
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
+import {
+  type DeleteTaskArgs,
+  useLocalState,
+} from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
@@ -54,8 +56,7 @@ export const SubtasksCard = ({
   onAssignSubtask,
   disableAddSubtask = false,
 }: SubtasksCardProps) => {
-  const { data: allTasks } = useTasks({ includeDrafts: true })
-  const { reorderSubtasks } = useTaskActions()
+  const { tasksWithDrafts: allTasks, reorderSubtasks } = useLocalState()
 
   const task = getById(allTasks, taskProp.id) ?? taskProp
 

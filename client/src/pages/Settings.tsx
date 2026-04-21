@@ -3,6 +3,7 @@
  */
 
 import { useRef, useState } from 'react'
+import { toMerged } from 'es-toolkit'
 import { isStandalonePWA } from 'is-standalone-pwa'
 import {
   ChevronRight,
@@ -35,8 +36,6 @@ import {
 } from '@/components/primitives/overlays/AlertDialog'
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { useAuth } from '@/hooks/useAuth'
-import { useSettings } from '@/hooks/useSettings'
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
 import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
@@ -45,6 +44,7 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, type FieldFlags, TaskStatus } from '~/shared/schema'
@@ -136,7 +136,10 @@ const AttributeCheckboxRow = ({
 }: FieldFlags & {
   name: keyof FieldConfig
   label: string
-  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
+  updateFieldFlags: (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) => void
   className?: string
 }) => (
   <tr className={className}>
@@ -169,7 +172,10 @@ const AttributeSettingsCard = ({
   updateFieldFlags,
 }: {
   fieldConfig: FieldConfig
-  updateFieldFlags: ReturnType<typeof useSettings>['updateFieldFlags']
+  updateFieldFlags: (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) => void
 }) => (
   <Card className="mt-4">
     <h3 className="font-semibold text-foreground mb-4">Attribute Settings</h3>
@@ -220,7 +226,7 @@ const AttributeSettingsCard = ({
 )
 
 const ExportButton = () => {
-  const { data: tasks } = useTasks()
+  const { tasks } = useLocalState()
   const hasNoTasks = tasks.length === 0
 
   return (
@@ -425,11 +431,22 @@ const ChangelogCard = () => {
 }
 
 const Settings = () => {
-  const { settings, updateSettings, updateFieldFlags } = useSettings()
+  const {
+    settings,
+    updateSettings,
+    tasks: allTasks,
+    setTaskStatus,
+  } = useLocalState()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
-  const { data: allTasks } = useTasks()
-  const { setTaskStatus } = useTaskActions()
+
+  const updateFieldFlags = (
+    field: keyof FieldConfig,
+    flags: Partial<FieldFlags>,
+  ) =>
+    updateSettings({
+      fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
+    })
 
   return (
     <ScrollablePage>
