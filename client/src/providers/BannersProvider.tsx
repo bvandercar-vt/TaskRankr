@@ -1,14 +1,12 @@
 /**
  * @fileoverview Cross-cutting banner-suppression state.
+ *
+ * Seeded once on mount from a `?hide=key1,key2` URL param so any deep link
+ * (guest entry, marketing link, etc.) can pre-suppress noise. The set lives
+ * for the session — there are no external writers today.
  */
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { intersection } from 'es-toolkit'
 import type { EmptyObject } from 'type-fest'
 
@@ -19,66 +17,41 @@ export enum BannerKey {
   INSTALL = 'install',
 }
 
-interface BannersContextValue {
-  hiddenBanners: Set<BannerKey>
-  hideBanners: (keys: BannerKey[]) => void
-  clearHiddenBanners: () => void
+const readHideParam = (): BannerKey[] => {
+  const hideParam = new URLSearchParams(window.location.search).get('hide')
+  if (!hideParam) return []
+  return intersection<BannerKey>(
+    hideParam.split(',') as BannerKey[],
+    Object.values(BannerKey),
+  )
 }
 
-const BannersContext = createContext<BannersContextValue | null>(null)
+const BannersContext = createContext<Set<BannerKey> | null>(null)
 
 export const BannersProvider = ({
   children,
 }: React.PropsWithChildren<EmptyObject>) => {
-  const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(new Set())
-
-  const hideBanners = useCallback((keys: BannerKey[]) => {
-    setHiddenBanners(new Set(keys))
-  }, [])
-
-  const clearHiddenBanners = useCallback(() => {
-    setHiddenBanners(new Set())
-  }, [])
-
-  const value = useMemo(
-    () => ({ hiddenBanners, hideBanners, clearHiddenBanners }),
-    [hiddenBanners, hideBanners, clearHiddenBanners],
+  const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(
+    () => new Set(readHideParam()),
   )
+
+  useEffect(() => {
+    const fromUrl = readHideParam()
+    if (fromUrl.length > 0) setHiddenBanners(new Set(fromUrl))
+  }, [])
 
   return (
-    <BannersContext.Provider value={value}>{children}</BannersContext.Provider>
+    <BannersContext.Provider value={hiddenBanners}>
+      {children}
+    </BannersContext.Provider>
   )
 }
 
-const useBanners = () => {
-  const context = useContext(BannersContext)
-  if (!context) {
-    throw new Error('useBanners must be used within a BannersProvider')
+/** Whether `key` is currently suppressed. */
+export const useIsBannerHidden = (key: BannerKey): boolean => {
+  const hidden = useContext(BannersContext)
+  if (!hidden) {
+    throw new Error('useIsBannerHidden must be used within a BannersProvider')
   }
-  return context
-}
-
-/** Whether `key` is currently suppressed. Stable selector for banner components. */
-export const useIsBannerHidden = (key: BannerKey): boolean =>
-  useBanners().hiddenBanners.has(key)
-
-/** Mutators for code that needs to seed or clear the suppression set. */
-export const useBannersMutations = () => {
-  const { hideBanners, clearHiddenBanners } = useBanners()
-
-  const hideBannersByUrlParam = useCallback(() => {
-    const params = new URLSearchParams(window.location.search)
-    const hideParam = params.get('hide')
-
-    if (hideParam) {
-      hideBanners(
-        intersection<BannerKey>(
-          hideParam.split(',') as BannerKey[],
-          Object.values(BannerKey),
-        ),
-      )
-    }
-  }, [hideBanners])
-
-  return { hideBanners, clearHiddenBanners, hideBannersByUrlParam }
+  return hidden.has(key)
 }

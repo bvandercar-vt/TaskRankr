@@ -1,8 +1,6 @@
 /**
- * @fileoverview Guest-mode flag for trying the app without authentication.
- *
- * Manages guest mode state for trying the app without authentication (local
- * only, no API sync).
+ * @fileoverview Guest-mode flag for trying the app without authentication
+ * (local only, no API sync).
  */
 
 import {
@@ -13,8 +11,6 @@ import {
   useState,
 } from 'react'
 import type { EmptyObject } from 'type-fest'
-
-import { useBannersMutations } from '@/providers/BannersProvider'
 
 interface GuestModeContextValue {
   isGuestMode: boolean
@@ -28,17 +24,9 @@ export const GuestModeProvider = ({
   children,
 }: React.PropsWithChildren<EmptyObject>) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
-  const { hideBannersByUrlParam, clearHiddenBanners } = useBannersMutations()
 
-  const enterGuestMode = useCallback(() => {
-    setIsGuestMode(true)
-    hideBannersByUrlParam()
-  }, [hideBannersByUrlParam])
-
-  const exitGuestMode = useCallback(() => {
-    setIsGuestMode(false)
-    clearHiddenBanners()
-  }, [clearHiddenBanners])
+  const enterGuestMode = useCallback(() => setIsGuestMode(true), [])
+  const exitGuestMode = useCallback(() => setIsGuestMode(false), [])
 
   const value = useMemo(
     () => ({ isGuestMode, enterGuestMode, exitGuestMode }),
