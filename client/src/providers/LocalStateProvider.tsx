@@ -432,11 +432,11 @@ export const LocalStateProvider = ({
   // Draft session state
   //
   // Drafts are in-memory-only Task records used by the TaskForm dialog so that
-  // newly-added subtasks render through `useTasks()` exactly like persisted
-  // subtasks (drag/edit/delete/sort all work uniformly), without writing
-  // anything to localStorage or the sync queue until the user commits the
-  // root form. On commit, drafts are promoted to real tasks via the regular
-  // create/update path. On discard, drafts are simply dropped.
+  // newly-added subtasks render through `useLocalState()` exactly like
+  // persisted subtasks (drag/edit/delete/sort all work uniformly), without
+  // writing anything to localStorage or the sync queue until the user commits
+  // the root form. On commit, drafts are promoted to real tasks via the
+  // regular create/update path. On discard, drafts are simply dropped.
   // ---------------------------------------------------------------------------
   const [draftTasks, setDraftTasks] = useState<Task[]>([])
   // realTaskId -> draft parent id for the duration of the session.

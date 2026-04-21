@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskParentChain } from '@/hooks/useTasks'
+import { useTaskParentChain } from '@/hooks/useTaskParentChain'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import {

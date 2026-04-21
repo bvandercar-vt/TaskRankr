@@ -1,14 +1,14 @@
 /**
- * @fileoverview Task CRUD operations hooks. All mutations go through
- * LocalStateProvider which applies changes instantly; SyncProvider
- * handles background server sync.
+ * @fileoverview Hook that walks a task's `parentId` chain to produce a
+ * breadcrumb-style ancestor list. Reads from `LocalStateProvider`, optionally
+ * including in-flight draft tasks from an active TaskForm session.
  */
 
 import { getById } from '@/lib/task-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
 import type { Task } from '~/shared/schema'
 
-interface UseTasksOptions {
+interface UseTaskParentChainOptions {
   /** Include in-memory draft tasks from an active TaskForm session.
    *  Defaults to false so app-wide views never see drafts. Form components
    *  opt in. */
@@ -17,7 +17,7 @@ interface UseTasksOptions {
 
 export const useTaskParentChain = (
   parentId?: number,
-  options?: UseTasksOptions,
+  options?: UseTaskParentChainOptions,
 ) => {
   const localState = useLocalState()
   const tasks = options?.includeDrafts
