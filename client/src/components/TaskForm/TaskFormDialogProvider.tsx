@@ -58,6 +58,11 @@ interface NavEntry {
   isNewDraft: boolean
 }
 
+export enum TaskFormDialogMode {
+  CREATE = 'create',
+  EDIT = 'edit',
+}
+
 interface TaskFormDialogProps
   extends Pick<
     TaskFormProps,
@@ -70,7 +75,7 @@ interface TaskFormDialogProps
   > {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
-  mode: 'create' | 'edit'
+  mode: TaskFormDialogMode
   parentId?: number
   activeTask?: Task
   formKey: string | number
@@ -102,14 +107,14 @@ const DesktopDialog = ({
         <DialogHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <div className="flex-1">
             <DialogTitle className="text-2xl font-display tracking-tight">
-              {mode === 'create'
+              {mode === TaskFormDialogMode.CREATE
                 ? parentId
                   ? 'New Subtask'
                   : 'New Task'
                 : 'Edit Task'}
             </DialogTitle>
             <DialogDescription className="sr-only">
-              {mode === 'create'
+              {mode === TaskFormDialogMode.CREATE
                 ? 'Add a new item to your list.'
                 : 'Update task details and properties.'}
             </DialogDescription>
@@ -216,15 +221,15 @@ export const TaskFormDialogProvider = ({
       : (currentTask?.parentId ?? undefined)
 
   // Submit button label: 'Create' for fresh-create / new draft entries.
-  const dialogMode: 'create' | 'edit' =
+  const dialogMode: TaskFormDialogMode =
     !currentEntry ||
     currentEntry.taskId === null ||
     currentEntry.isNewDraft ||
     (navStack.length === 1 &&
       currentEntry.taskId != null &&
       isDraftId(currentEntry.taskId))
-      ? 'create'
-      : 'edit'
+      ? TaskFormDialogMode.CREATE
+      : TaskFormDialogMode.EDIT
 
   // Pass undefined initialData for fresh-create so the form starts blank.
   // For new drafts (just added via "Add Subtask"), pass the draft task so
