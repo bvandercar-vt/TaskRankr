@@ -34,6 +34,7 @@ import {
 import { LocalStateProvider } from '@/providers/LocalStateProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
+import { SyncQueueProvider } from '@/providers/SyncQueueProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
 import { WhatsNewDialog } from './components/appInfo/WhatsNewDialog'
 import { Routes } from './lib/constants'
@@ -116,19 +117,33 @@ const AuthenticatedApp = () => {
 
   return (
     <SettingsProvider shouldSync={shouldSync} storageMode={storageMode}>
-      <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
-        <SyncProvider isAuthenticated={shouldSync}>
-          <ExpandedTasksProvider>
-            <TaskFormDialogProvider>
-              <div className="h-dvh flex flex-col overflow-hidden">
-                <StatusBanner />
-                <Router />
-                <WhatsNewDialog />
-              </div>
-            </TaskFormDialogProvider>
-          </ExpandedTasksProvider>
-        </SyncProvider>
-      </LocalStateProvider>
+      {/*
+        `key={storageMode}` forces a fresh mount of the SyncQueue + LocalState
+        subtree on guest↔auth transitions. Both providers load their initial
+        state from localStorage synchronously in a `useState` initializer
+        (SyncQueue) / useEffect (LocalState) keyed on `storageMode`; remounting
+        is the simplest way to guarantee they see the new mode's storage in
+        sync without a stale-snapshot race between them.
+      */}
+      <SyncQueueProvider
+        key={storageMode}
+        shouldSync={shouldSync}
+        storageMode={storageMode}
+      >
+        <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
+          <SyncProvider isAuthenticated={shouldSync}>
+            <ExpandedTasksProvider>
+              <TaskFormDialogProvider>
+                <div className="h-dvh flex flex-col overflow-hidden">
+                  <StatusBanner />
+                  <Router />
+                  <WhatsNewDialog />
+                </div>
+              </TaskFormDialogProvider>
+            </ExpandedTasksProvider>
+          </SyncProvider>
+        </LocalStateProvider>
+      </SyncQueueProvider>
     </SettingsProvider>
   )
 }
