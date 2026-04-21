@@ -9,11 +9,7 @@ export const HowToUseBanner = () => {
   if (useIsBannerHidden(BannerKey.HOW_TO_USE)) return null
 
   return (
-    <NotificationBanner
-      storageKey={`taskrankr-${BannerKey.HOW_TO_USE}-dismissed`}
-      icon={HelpCircle}
-      data-testid={`banner-${BannerKey.HOW_TO_USE}`}
-    >
+    <NotificationBanner storageKey={BannerKey.HOW_TO_USE} icon={HelpCircle}>
       New here?{' '}
       <InlineLink
         href={Routes.HOW_TO_USE}

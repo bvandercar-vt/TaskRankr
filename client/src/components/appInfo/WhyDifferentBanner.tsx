@@ -14,11 +14,7 @@ export const WhyDifferentBanner = () => {
 
   return (
     <>
-      <NotificationBanner
-        storageKey={`taskrankr-${BannerKey.WHY_DIFFERENT}-dismissed`}
-        icon={Sparkles}
-        data-testid={`banner-${BannerKey.WHY_DIFFERENT}`}
-      >
+      <NotificationBanner storageKey={BannerKey.WHY_DIFFERENT} icon={Sparkles}>
         Curious?{' '}
         <InlineLink onClick={() => setShowDialog(true)}>
           See what makes this app different

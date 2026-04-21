@@ -12,12 +12,13 @@ type NotificationBannerProps = React.PropsWithChildren<{
 }>
 
 export const NotificationBanner = ({
-  storageKey,
+  storageKey: storageKeyId,
   icon: Icon,
   children,
   hidden = false,
-  'data-testid': testId,
+  'data-testid': testId = `banner-${storageKeyId}`,
 }: NotificationBannerProps) => {
+  const storageKey = `taskrankr-${storageKeyId}-dismissed`
   const [isDismissed, setIsDismissed] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
 

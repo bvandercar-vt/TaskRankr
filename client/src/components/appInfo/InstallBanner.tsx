@@ -11,10 +11,9 @@ export const InstallBanner = () => {
 
   return (
     <NotificationBanner
-      storageKey={`taskrankr-${BannerKey.INSTALL}-dismissed`}
+      storageKey={BannerKey.INSTALL}
       icon={Download}
       hidden={isStandalonePWA()}
-      data-testid={`banner-${BannerKey.INSTALL}`}
     >
       Install the app!{' '}
       <InlineLink
