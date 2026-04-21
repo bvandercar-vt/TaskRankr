@@ -8,7 +8,7 @@ import { pick } from 'es-toolkit'
 
 import { getById } from '@/lib/task-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
-import type { Task, UpdateTask } from '~/shared/schema'
+import type { Task } from '~/shared/schema'
 
 interface UseTasksOptions {
   /** Include in-memory draft tasks from an active TaskForm session.
@@ -53,14 +53,11 @@ export const useTaskParentChain = (
 export const useTaskActions = () => {
   const localState = useLocalState()
 
-  return {
-    ...pick(localState, [
-      'createTask',
-      'setTaskStatus',
-      'deleteTask',
-      'reorderSubtasks',
-    ]),
-    updateTask: ({ id, ...updates }: UpdateTask): Task =>
-      localState.updateTask(id, updates),
-  }
+  return pick(localState, [
+    'createTask',
+    'setTaskStatus',
+    'deleteTask',
+    'reorderSubtasks',
+    'updateTask',
+  ])
 }

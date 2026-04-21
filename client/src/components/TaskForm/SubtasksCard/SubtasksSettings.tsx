@@ -35,7 +35,7 @@ const SortingMethodSwitch = ({
       reorderSubtasks(taskId, directChildIds)
     }
 
-    updateTask({ id: taskId, subtaskSortMode: newMode })
+    updateTask(taskId, { subtaskSortMode: newMode })
   }
 
   return (
@@ -182,10 +182,7 @@ const SubtasksSettingsMenu = ({
               checked={showNumbers}
               onCheckedChange={(checked) => {
                 onShowNumbersChange(checked)
-                updateTask({
-                  id: taskId,
-                  subtasksShowNumbers: checked,
-                })
+                updateTask(taskId, { subtasksShowNumbers: checked })
               }}
               data-testid="switch-show-numbers"
             />
@@ -197,7 +194,7 @@ const SubtasksSettingsMenu = ({
         label="Auto-complete main task when all subtasks are complete"
         checked={inheritCompletionState}
         onCheckedChange={(checked) =>
-          updateTask({ id: taskId, inheritCompletionState: checked })
+          updateTask(taskId, { inheritCompletionState: checked })
         }
         data-testid="switch-inherit-completion-state"
       />
@@ -206,7 +203,7 @@ const SubtasksSettingsMenu = ({
         label="Auto-hide completed subtasks"
         checked={autoHideCompleted}
         onCheckedChange={(checked) =>
-          updateTask({ id: taskId, autoHideCompleted: checked })
+          updateTask(taskId, { autoHideCompleted: checked })
         }
         data-testid="switch-auto-hide-completed"
       />

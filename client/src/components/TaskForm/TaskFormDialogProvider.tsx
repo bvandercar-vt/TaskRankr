@@ -319,7 +319,7 @@ export const TaskFormDialogProvider = ({
     if (!top) return null
     if (top.taskId === null) return promoteFreshToDraft(formData)
     if (isDraftId(top.taskId)) {
-      updateTask({ id: top.taskId, ...formData })
+      updateTask(top.taskId, formData)
       return top.taskId
     }
     return top.taskId
@@ -343,7 +343,7 @@ export const TaskFormDialogProvider = ({
     }
 
     // Save form data to current entity. updateTask routes drafts internally.
-    updateTask({ id: top.taskId, ...data })
+    updateTask(top.taskId, data)
 
     if (isRoot) {
       if (hasDraftSession) commitDraftSession()
@@ -384,11 +384,10 @@ export const TaskFormDialogProvider = ({
       assignDraftSubtask(selectedId, assignTargetParentId)
     } else {
       // Real parent (editing an existing task): immediate update.
-      updateTask({ id: selectedId, parentId: assignTargetParentId })
+      updateTask(selectedId, { parentId: assignTargetParentId })
       const parent = getById(tasksWithDrafts, assignTargetParentId)
       if (parent && parent.subtaskSortMode === SubtaskSortMode.MANUAL) {
-        updateTask({
-          id: assignTargetParentId,
+        updateTask(assignTargetParentId, {
           subtaskOrder: [...parent.subtaskOrder, selectedId],
         })
       }
@@ -444,8 +443,7 @@ export const TaskFormDialogProvider = ({
         onDelete={() => setShowDeleteConfirm(true)}
         onRemoveAsSubtask={() => {
           if (subtaskToDelete) {
-            updateTask({
-              id: subtaskToDelete.id,
+            updateTask(subtaskToDelete.id, {
               parentId: null,
               hidden: false,
             })
@@ -453,8 +451,7 @@ export const TaskFormDialogProvider = ({
             if (top != null) {
               const parent = getById(tasksWithDrafts, top)
               if (parent) {
-                updateTask({
-                  id: top,
+                updateTask(top, {
                   subtaskOrder: without(
                     parent.subtaskOrder,
                     subtaskToDelete.id,

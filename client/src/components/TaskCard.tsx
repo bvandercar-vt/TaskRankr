@@ -420,11 +420,9 @@ export const TaskCard = ({
         isHidden={task.hidden}
         hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
-        onUpdateTime={(timeMs) =>
-          updateTask({ id: task.id, timeSpent: timeMs })
-        }
+        onUpdateTime={(timeMs) => updateTask(task.id, { timeSpent: timeMs })}
         onDelete={() => deleteTask(task.id)}
-        onToggleHidden={() => updateTask({ id: task.id, hidden: !task.hidden })}
+        onToggleHidden={() => updateTask(task.id, { hidden: !task.hidden })}
       />
     </div>
   )
