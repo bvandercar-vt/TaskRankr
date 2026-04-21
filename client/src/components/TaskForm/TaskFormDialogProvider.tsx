@@ -510,8 +510,7 @@ const TaskFormDialogProviderInner = ({
 /**
  * Mounts the draft session context (scoped to this dialog subtree) and then
  * the dialog provider that consumes it. Draft state lives here because its
- * only purpose is the TaskForm dialog chain — hoisting it higher would cause
- * unrelated top-level consumers to re-render on every keystroke.
+ * only purpose is the TaskForm dialog chain.
  */
 export const TaskFormDialogProvider = ({
   children,
