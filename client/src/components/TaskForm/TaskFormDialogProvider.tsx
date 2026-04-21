@@ -15,6 +15,7 @@ import { getById } from '@/lib/task-tree-utils'
 import {
   DraftSessionProvider,
   useDraftSession,
+  useDraftSessionMutations,
 } from '@/providers/DraftSessionProvider'
 import {
   type CreateTaskContent,
@@ -192,16 +193,18 @@ const TaskFormDialogProviderInner = ({
   const { createTask, subscribeToIdReplacement } = useTaskMutations()
   const {
     tasksWithDrafts,
+    hasDraftSession,
+    draftTaskIds,
+    draftAssignmentCount,
+  } = useDraftSession()
+  const {
     updateTask,
     deleteTask,
     createDraftTask,
     assignDraftSubtask,
     commitDraftSession,
     discardDraftSession,
-    hasDraftSession,
-    draftTaskIds,
-    draftAssignmentCount,
-  } = useDraftSession()
+  } = useDraftSessionMutations()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {

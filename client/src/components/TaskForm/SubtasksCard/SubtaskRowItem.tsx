@@ -4,7 +4,10 @@ import { Check, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
 import { getHasIncompleteSubtasks } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
-import { useDraftSession } from '@/providers/DraftSessionProvider'
+import {
+  useDraftSession,
+  useDraftSessionMutations,
+} from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
@@ -19,7 +22,7 @@ const CompletedCheckbox = ({
   task: Subtask
   disabled: boolean
 }) => {
-  const { setTaskStatus } = useDraftSession()
+  const { setTaskStatus } = useDraftSessionMutations()
   const isCompleted = task.status === TaskStatus.COMPLETED
   return (
     <SubtaskBlockedTooltip blocked={disabled}>
