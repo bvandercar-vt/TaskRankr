@@ -15,7 +15,7 @@ import {
   StopCircle,
 } from 'lucide-react'
 
-import { useSettings } from '@/hooks/useSettings'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { cn } from '@/lib/utils'
 import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
@@ -155,7 +155,7 @@ export const ChangeStatusDialog = ({
         timeSpent: { visible: showTimeSpentInput, required: timeSpentRequired },
       },
     },
-  } = useSettings()
+  } = useLocalState()
 
   const [timeSpent, setTimeSpent] = useState(initialTimeSpent)
 

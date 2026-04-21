@@ -38,8 +38,16 @@ import {
   TaskStatus,
   taskSchema,
   type UpdateTask,
+  sanitizeSettings,
   type UserSettings,
 } from '~/shared/schema'
+
+/** Normalize incoming settings: fill missing fields from defaults and enforce
+ *  the fieldConfig invariant (`required` is false whenever `visible` is
+ *  false). Applied at every write boundary (initial load, server push,
+ *  user updates) so consumers can trust `settings` without re-checking. */
+const normalizeSettings = (raw: Partial<UserSettings>): UserSettings =>
+  sanitizeSettings(toMerged(DEFAULT_SETTINGS, raw))
 
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
@@ -304,8 +312,7 @@ export const LocalStateProvider = ({
   )
 
   useEffect(() => {
-    const loadedSettings: UserSettings = toMerged(
-      DEFAULT_SETTINGS,
+    const loadedSettings: UserSettings = normalizeSettings(
       loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
     )
     const loadedTasks: Task[] = loadFromStorage<Task[]>(storageKeys.tasks, [])
@@ -1264,9 +1271,10 @@ export const LocalStateProvider = ({
 
   const updateSettings = useCallback(
     (updates: Partial<UserSettings>) => {
-      setSettings((prev) => ({ ...prev, ...updates }))
-      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: updates })
-      debugLog.log('settings', 'update', updates)
+      const sanitized = sanitizeSettings(updates)
+      setSettings((prev) => normalizeSettings({ ...prev, ...sanitized }))
+      enqueue({ type: SyncOperationType.UPDATE_SETTINGS, data: sanitized })
+      debugLog.log('settings', 'update', sanitized)
     },
     [enqueue],
   )
@@ -1319,8 +1327,9 @@ export const LocalStateProvider = ({
   )
 
   const setSettingsFromServer = useCallback((serverSettings: UserSettings) => {
-    setSettings(serverSettings)
-    debugLog.log('sync', 'setSettingsFromServer', serverSettings)
+    const normalized = normalizeSettings(serverSettings)
+    setSettings(normalized)
+    debugLog.log('sync', 'setSettingsFromServer', normalized)
   }, [])
 
   useEffect(() => {

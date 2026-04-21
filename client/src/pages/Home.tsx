@@ -18,7 +18,6 @@ import {
   TaskListPageWrapper,
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
-import { useSettings } from '@/hooks/useSettings'
 import {
   filterAndSortTree,
   getTaskStatuses,
@@ -122,9 +121,10 @@ const Home = () => {
     isInitialized,
     hasDemoData,
     deleteDemoData,
+    settings,
+    updateSettings,
   } = useLocalState()
   const { openCreateDialog } = useTaskDialog()
-  const { settings, updateSettings } = useSettings()
   const [search, setSearch] = useState('')
 
   const sortBy = settings.sortBy

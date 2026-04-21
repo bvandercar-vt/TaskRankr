@@ -10,7 +10,6 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
-import { useSettings } from '@/hooks/useSettings'
 import { useTaskParentChain } from '@/hooks/useTaskParentChain'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
@@ -147,8 +146,7 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
   })
-  const { tasksWithDrafts: allTasks } = useLocalState()
-  const { settings } = useSettings()
+  const { tasksWithDrafts: allTasks, settings } = useLocalState()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
     : false

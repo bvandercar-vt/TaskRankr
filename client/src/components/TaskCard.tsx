@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
-import { useSettings } from '@/hooks/useSettings'
 import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
@@ -211,7 +210,7 @@ const CompletedTimeDisplay = ({
 const TimeSpentDisplay = (
   task: Parameters<typeof getTotalAccumulatedTime>[0],
 ) => {
-  const { settings } = useSettings()
+  const { settings } = useLocalState()
   const totalTime = getTotalAccumulatedTime(task)
 
   if (!settings.fieldConfig.timeSpent.visible || totalTime <= 0) return null
@@ -244,8 +243,7 @@ export const TaskCard = ({
   const holdStartY = useRef<number | null>(null)
   const SCROLL_THRESHOLD = 10
 
-  const { setTaskStatus, deleteTask, updateTask } = useLocalState()
-  const { settings } = useSettings()
+  const { setTaskStatus, deleteTask, updateTask, settings } = useLocalState()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()
 
