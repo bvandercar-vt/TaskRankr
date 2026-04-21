@@ -10,6 +10,7 @@ Multi-user, offline-first task manager with hierarchical tasks, a status workflo
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
 - Icon Sizing: Use `size-X` tailwind class instead of `w-X h-X`
+- es-toolkit: Use `es-toolkit` helper functions when we can greatly simplify something. For example, when copying many same-named properties from one object to another, use `omit` or `pick` from `es-toolkit` instead of enumerating every field by hand. Example: `createTask({ ...omit(draft, ['id', 'userId']), parentId: resolved })` rather than listing all 14 fields explicitly.
 - Formatting: Run `npm run format` (biome) before every commit/checkpoint so the code in checkpoints is always formatted.
 - Documentation: Keep `replit.md` focused on cross-cutting architecture and conventions. File-level mechanics, function signatures, and internal helpers belong in the relevant file's docstring, not here.
 
@@ -122,8 +123,6 @@ Load-bearing facts that span multiple files. Anything more specific lives in the
 
 ## Coding Conventions
 
-### Object copying
-When copying many same-named properties from one object to another, use `omit` or `pick` from `es-toolkit` instead of enumerating every field by hand. Example: `createTask({ ...omit(draft, ['id', 'userId']), parentId: resolved })` rather than listing all 14 fields explicitly. Only enumerate when the field set is small (≤3) or every field needs a transformation.
 
 ### Shared task utilities
 Tree-walking, sort/filter, and id-list helpers live in `shared/utils/task-utils.ts` (re-exported from `client/src/lib/task-tree-utils.ts`). Always prefer these over inline implementations. Read the file directly for the available helpers and their JSDoc.
