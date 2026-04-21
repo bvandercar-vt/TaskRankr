@@ -12,7 +12,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
 import { getById } from '@/lib/task-utils'
-import { useDraftSession } from '@/providers/DraftSessionProvider'
+import {
+  DraftSessionProvider,
+  useDraftSession,
+} from '@/providers/DraftSessionProvider'
 import {
   type CreateTaskContent,
   type DeleteTaskArgs,
@@ -165,7 +168,7 @@ const MobileDialog = ({
   </AnimatePresence>
 )
 
-export const TaskFormDialogProvider = ({
+const TaskFormDialogProviderInner = ({
   children,
   // biome-ignore lint/complexity/noBannedTypes: is fine
 }: React.PropsWithChildren<{}>) => {
@@ -503,3 +506,18 @@ export const TaskFormDialogProvider = ({
     </TaskFormDialogContext.Provider>
   )
 }
+
+/**
+ * Mounts the draft session context (scoped to this dialog subtree) and then
+ * the dialog provider that consumes it. Draft state lives here because its
+ * only purpose is the TaskForm dialog chain — hoisting it higher would cause
+ * unrelated top-level consumers to re-render on every keystroke.
+ */
+export const TaskFormDialogProvider = ({
+  children,
+  // biome-ignore lint/complexity/noBannedTypes: is fine
+}: React.PropsWithChildren<{}>) => (
+  <DraftSessionProvider>
+    <TaskFormDialogProviderInner>{children}</TaskFormDialogProviderInner>
+  </DraftSessionProvider>
+)
