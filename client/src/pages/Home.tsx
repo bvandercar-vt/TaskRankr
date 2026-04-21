@@ -18,12 +18,12 @@ import {
   TaskListPageWrapper,
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
+import { RANK_FIELDS_COLUMNS } from '@/lib/columns'
 import {
   filterAndSortTree,
   getTaskStatuses,
-  RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
-} from '@/lib/task-utils'
+} from '@/lib/task-tree-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import type { TaskWithSubtasks } from '@/types'

@@ -8,13 +8,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
+import { RANK_FIELDS_COLUMNS } from '@/lib/columns'
 import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
-import {
-  getHasIncomplete,
-  getTaskStatuses,
-  RANK_FIELDS_COLUMNS,
-} from '@/lib/task-utils'
+import { getHasIncomplete, getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'

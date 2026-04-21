@@ -46,9 +46,9 @@ export const SyncProvider = ({
   const hasLoadedServerData = useRef(false)
 
   const {
+    isInitialized: tasksInitialized,
     replaceTaskId,
     setTasksFromServer,
-    isInitialized: tasksInitialized,
   } = useLocalState()
 
   const { syncQueue, removeProcessedOperations } = useTaskSyncQueue()
