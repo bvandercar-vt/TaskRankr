@@ -21,7 +21,8 @@ export const useSettings = () => {
   const localState = useLocalState()
 
   const settings: UserSettings = useMemo(
-    () => sanitizeSettings(toMerged(DEFAULT_SETTINGS, localState.settings ?? {})),
+    () =>
+      sanitizeSettings(toMerged(DEFAULT_SETTINGS, localState.settings ?? {})),
     [localState.settings],
   )
 
@@ -36,10 +37,9 @@ export const useSettings = () => {
       fieldConfig: toMerged(settings.fieldConfig, { [field]: flags }),
     })
 
-
   return {
     settings,
-    isLoading:!localState.isInitialized,
+    isLoading: !localState.isInitialized,
     updateSettings,
     updateFieldFlags,
   }
