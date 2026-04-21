@@ -336,15 +336,14 @@ export const LocalStateProvider = ({
           .map((op) => (op as { tempId: number }).tempId),
       )
       const taskById = new Map(loadedTasks.map((t) => [t.id, t]))
-      const orphaned: Task[] = []
-      for (const t of loadedTasks) {
-        if (t.id >= 0) continue
-        if (queuedTempIds.has(t.id)) continue
-        // "Parent exists" means either no parent, parent is a real task, or
-        // parent is another negative-id task we'll also be re-enqueuing.
-        if (t.parentId != null && !taskById.has(t.parentId)) continue
-        orphaned.push(t)
-      }
+      const orphaned: Task[] = loadedTasks.filter(
+        (t) =>
+          t.id < 0 &&
+          !queuedTempIds.has(t.id) &&
+          // "Parent exists" means either no parent, parent is a real task, or
+          // parent is another negative-id task we'll also be re-enqueuing.
+          !(t.parentId != null && !taskById.has(t.parentId)),
+      )
       if (orphaned.length > 0) {
         // Topo-sort: a task must appear after its (negative-id) parent, but
         // only traverse to parents that are themselves in the recoverable
