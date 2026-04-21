@@ -23,11 +23,12 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
+  getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
-  getTaskById,
-  updateTaskInList,
+  removeIds,
+  updateItem,
 } from '@/lib/task-utils'
 import {
   allRankFieldsNull,
@@ -113,6 +114,7 @@ interface LocalStateContextValue {
   syncQueue: SyncOperation[]
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
+  removeProcessedOperations: (count: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: Task[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
@@ -190,10 +192,10 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
         const shouldHide = parent.parentId
-          ? (getTaskById(updated, parent.parentId)?.autoHideCompleted ?? false)
+          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
           : false
 
-        updated = updateTaskInList(updated, parent.id, (t) => ({
+        updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
@@ -231,7 +233,7 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         !allChildrenCompleted &&
         parent.status === TaskStatus.COMPLETED
       ) {
-        updated = updateTaskInList(updated, parent.id, (t) => ({
+        updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.OPEN,
           completedAt: null,
@@ -319,8 +321,64 @@ export const LocalStateProvider = ({
 
     setSettings(loadedSettings)
     nextIdRef.current = loadedNextId
-    setSyncQueue(loadedQueue)
     setDemoTaskIds(loadedDemoIds)
+
+    // Recovery: any persisted task with a negative id is an unsynced create
+    // (drafts are never persisted). If its CREATE_TASK op is missing from the
+    // queue (e.g. dropped by a previous version of the sync code), re-enqueue
+    // it so the server assigns a real id. Enqueue parents before children so
+    // the in-flight idMap can resolve parentId references in order.
+    let recoveredQueue = loadedQueue
+    if (shouldSync && loadedTasks.length > 0) {
+      const queuedTempIds = new Set(
+        loadedQueue
+          .filter((op) => op.type === SyncOperationType.CREATE_TASK)
+          .map((op) => (op as { tempId: number }).tempId),
+      )
+      const taskById = new Map(loadedTasks.map((t) => [t.id, t]))
+      const orphaned: Task[] = loadedTasks.filter(
+        (t) =>
+          t.id < 0 &&
+          !queuedTempIds.has(t.id) &&
+          // "Parent exists" means either no parent, parent is a real task, or
+          // parent is another negative-id task we'll also be re-enqueuing.
+          !(t.parentId != null && !taskById.has(t.parentId)),
+      )
+      if (orphaned.length > 0) {
+        // Topo-sort: a task must appear after its (negative-id) parent, but
+        // only traverse to parents that are themselves in the recoverable
+        // set — never re-add a parent that already has a queued CREATE op.
+        const recoverableIds = new Set(orphaned.map((t) => t.id))
+        const sorted: Task[] = []
+        const visited = new Set<number>()
+        const visit = (t: Task) => {
+          if (visited.has(t.id)) return
+          visited.add(t.id)
+          if (
+            t.parentId != null &&
+            t.parentId < 0 &&
+            recoverableIds.has(t.parentId)
+          ) {
+            const parent = taskById.get(t.parentId)
+            if (parent) visit(parent)
+          }
+          sorted.push(t)
+        }
+        for (const t of orphaned) visit(t)
+
+        const recoveryOps: SyncOperation[] = sorted.map((t) => ({
+          type: SyncOperationType.CREATE_TASK,
+          tempId: t.id,
+          data: omit(t, ['id', 'userId']),
+        }))
+        recoveredQueue = [...loadedQueue, ...recoveryOps]
+        debugLog.log('sync', 'recoverOrphanedTasks', {
+          count: recoveryOps.length,
+          tempIds: sorted.map((t) => t.id),
+        })
+      }
+    }
+    setSyncQueue(recoveredQueue)
 
     if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
@@ -337,7 +395,7 @@ export const LocalStateProvider = ({
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, reconcileAndSetTasks])
+  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync])
 
   useEffect(() => {
     if (isInitialized) {
@@ -539,7 +597,7 @@ export const LocalStateProvider = ({
             changed = true
             return
           }
-          const filtered = order.filter((sid: number) => !idsToDelete.has(sid))
+          const filtered = order.filter((sid) => !idsToDelete.has(sid))
           if (filtered.length !== order.length) {
             next.set(pid, filtered)
             changed = true
@@ -548,12 +606,10 @@ export const LocalStateProvider = ({
         return changed ? next : prevOverrides
       })
 
-      return prev
-        .filter((t) => !idsToDelete.has(t.id))
-        .map((t) => ({
-          ...t,
-          subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
-        }))
+      return removeIds(prev, idsToDelete).map((t) => ({
+        ...t,
+        subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
+      }))
     })
     debugLog.log('task', 'deleteDraft', { id })
   }, [])
@@ -607,6 +663,11 @@ export const LocalStateProvider = ({
 
   const removeSyncOperation = useCallback((index: number) => {
     setSyncQueue((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const removeProcessedOperations = useCallback((count: number) => {
+    if (count <= 0) return
+    setSyncQueue((prev) => prev.slice(count))
   }, [])
 
   // Helper to update a task by ID
@@ -696,9 +757,7 @@ export const LocalStateProvider = ({
       } satisfies z.input<typeof taskSchema>)
 
       setTasks((prev) => {
-        const parent = data.parentId
-          ? getTaskById(prev, data.parentId)
-          : undefined
+        const parent = data.parentId ? getById(prev, data.parentId) : undefined
         if (
           parent?.autoHideCompleted &&
           newTask.status === TaskStatus.COMPLETED
@@ -803,7 +862,7 @@ export const LocalStateProvider = ({
       }
 
       if (updates.parentId != null && updatedTask) {
-        const parent = getTaskById(tasksRef.current, updates.parentId)
+        const parent = getById(tasksRef.current, updates.parentId)
         if (
           parent?.inheritCompletionState &&
           parent.status === TaskStatus.COMPLETED &&
@@ -849,7 +908,7 @@ export const LocalStateProvider = ({
             description: 'All subtasks must be completed first.',
             variant: 'destructive',
           })
-          const existing = getTaskById(tasksRef.current, id)
+          const existing = getById(tasksRef.current, id)
           if (existing) return existing
         }
       }
@@ -879,7 +938,7 @@ export const LocalStateProvider = ({
           })()
 
           if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = getTaskById(tasksRef.current, task.parentId)
+            const parent = getById(tasksRef.current, task.parentId)
             if (parent?.autoHideCompleted) {
               return { ...base, hidden: true }
             }
@@ -935,7 +994,7 @@ export const LocalStateProvider = ({
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
-            const parent = getTaskById(updated, currentParentId)
+            const parent = getById(updated, currentParentId)
             if (
               !parent?.inheritCompletionState ||
               parent.status === TaskStatus.COMPLETED
@@ -955,13 +1014,13 @@ export const LocalStateProvider = ({
             }
 
             if (parent.parentId) {
-              const grandparent = getTaskById(updated, parent.parentId)
+              const grandparent = getById(updated, parent.parentId)
               if (grandparent?.autoHideCompleted) {
                 parentUpdate.hidden = true
               }
             }
 
-            updated = updateTaskInList(updated, parent.id, (t) => ({
+            updated = updateItem(updated, parent.id, (t) => ({
               ...t,
               ...parentUpdate,
             }))
@@ -991,11 +1050,11 @@ export const LocalStateProvider = ({
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
-            const parent = getTaskById(updated, currentParentId)
+            const parent = getById(updated, currentParentId)
             if (!parent?.inheritCompletionState) break
             if (parent.status !== TaskStatus.COMPLETED) break
 
-            updated = updateTaskInList(updated, parent.id, (t) => ({
+            updated = updateItem(updated, parent.id, (t) => ({
               ...t,
               status: TaskStatus.OPEN,
               completedAt: null,
@@ -1040,7 +1099,7 @@ export const LocalStateProvider = ({
         return next
       })
       setTasks((prev) => {
-        const taskToDelete = getTaskById(prev, id)
+        const taskToDelete = getById(prev, id)
         if (!taskToDelete) return prev
 
         const idsToDelete = new Set<number>()
@@ -1057,10 +1116,10 @@ export const LocalStateProvider = ({
           if (idsToDelete.has(t.id)) totalTime += t.timeSpent
         }
 
-        let updated = prev.filter((t) => !idsToDelete.has(t.id))
+        let updated = removeIds(prev, idsToDelete)
 
         if (taskToDelete.parentId) {
-          updated = updateTaskInList(updated, taskToDelete.parentId, (t) => ({
+          updated = updateItem(updated, taskToDelete.parentId, (t) => ({
             ...t,
             ...(totalTime > 0
               ? { timeSpent: (t.timeSpent ?? 0) + totalTime }
@@ -1271,8 +1330,7 @@ export const LocalStateProvider = ({
   }, [demoTaskIds, isInitialized, storageKeys])
 
   const deleteDemoData = useCallback(() => {
-    const idsToDelete = new Set(demoTaskIds)
-    setTasks((prev) => prev.filter((task) => !idsToDelete.has(task.id)))
+    setTasks((prev) => removeIds(prev, demoTaskIds))
     setDemoTaskIds([])
   }, [demoTaskIds])
 
@@ -1304,6 +1362,7 @@ export const LocalStateProvider = ({
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
+      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
       setSettingsFromServer,
@@ -1332,6 +1391,7 @@ export const LocalStateProvider = ({
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
+      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
       setSettingsFromServer,

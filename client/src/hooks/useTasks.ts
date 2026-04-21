@@ -4,7 +4,7 @@
  * handles background server sync.
  */
 
-import { getTaskById } from '@/lib/task-utils'
+import { getById } from '@/lib/task-utils'
 import {
   type CreateTaskContent,
   useLocalStateSafe,
@@ -45,7 +45,7 @@ export const useTaskParentChain = (
   let currentId: number | null | undefined = parentId
 
   while (currentId) {
-    const parent = getTaskById(tasks, currentId)
+    const parent: Task | undefined = getById(tasks, currentId)
     if (parent) {
       chain.unshift({ id: parent.id, name: parent.name })
       currentId = parent.parentId

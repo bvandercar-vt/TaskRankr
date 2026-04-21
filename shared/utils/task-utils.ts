@@ -1,16 +1,9 @@
 import { type Task, TaskStatus } from '../schema'
 
-export const getTaskById = (allTasks: Task[], id: number): Task | undefined =>
-  allTasks.find((task) => task.id === id)
+export * from './id-list-utils'
 
 export const getDirectSubtasks = (allTasks: Task[], id: number): Task[] =>
   allTasks.filter((task) => task.parentId === id)
-
-export const updateTaskInList = (
-  allTasks: Task[],
-  taskId: number,
-  updater: (task: Task) => Task,
-): Task[] => allTasks.map((task) => (task.id === taskId ? updater(task) : task))
 
 export const getAllDescendantIds = (
   allTasks: Task[],
