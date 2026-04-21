@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Loads and validates `CHANGELOG.json` (newest entry first) and
+ * tracks which version the user has already seen via localStorage so the
+ * "what's new" badge can light up after a release.
+ */
+
 import { z } from 'zod'
 
 import changelogData from '../../../CHANGELOG.json' with { type: 'json' }
@@ -27,6 +33,11 @@ export function setLastSeenVersion(version: string) {
   localStorage.setItem(LAST_SEEN_VERSION_KEY, version)
 }
 
+/**
+ * Entries newer than the last-seen version. Returns `[]` for first-time users
+ * (nothing recorded yet) and the full list if the recorded version no longer
+ * exists in the changelog.
+ */
 export function getUnseenEntries(): ChangelogEntry[] {
   const lastSeen = getLastSeenVersion()
   if (!lastSeen) return []

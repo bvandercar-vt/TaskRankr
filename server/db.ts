@@ -1,9 +1,4 @@
-/**
- * @fileoverview PostgreSQL database connection and Drizzle ORM initialization.
- *
- * Creates a connection pool using the DATABASE_URL environment variable
- * and exports the configured Drizzle database instance with schema.
- */
+/** @fileoverview Drizzle PG pool + db instance, wired to DATABASE_URL. */
 
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'

@@ -1,9 +1,8 @@
 /**
- * @fileoverview Database access layer implementing the IStorage interface.
- *
- * Provides CRUD operations for tasks and user settings using Drizzle ORM.
- * Handles task status transitions including in-progress time tracking,
- * cascading status changes to subtasks, and recursive task deletion.
+ * @fileoverview Drizzle-backed `IStorage`. Beyond plain CRUD, owns the
+ * non-trivial task lifecycle: in-progress timer accounting, status cascades
+ * across the parent/child tree, the `inheritCompletionState` parent rollup,
+ * and time-accumulation on delete.
  */
 
 import { and, eq } from 'drizzle-orm'
@@ -48,6 +47,12 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  /**
+   * Loads all tasks for `userId`, opportunistically self-healing two
+   * inconsistencies that older data may carry: orphan `parentId` references
+   * are nulled out, and missing entries in `parent.subtaskOrder` are appended.
+   * Repairs are persisted in a single fan-out write before returning.
+   */
   async getTasks(userId: string): Promise<Task[]> {
     const result = await db
       .select()
@@ -101,6 +106,11 @@ export class DatabaseStorage implements IStorage {
     return task
   }
 
+  /**
+   * Inserts a task. If the new task is non-completed and lands under a parent
+   * that was previously rolled up via `inheritCompletionState`, the parent is
+   * reopened.
+   */
   async createTask(insertTask: InsertTask): Promise<Task> {
     const [task] = await db.insert(tasks).values(insertTask).returning()
     const created = task
@@ -115,6 +125,20 @@ export class DatabaseStorage implements IStorage {
     return created
   }
 
+  /**
+   * Transitions a task to `newStatus`, applying every side effect that flows
+   * from the change in one place:
+   *  - Entering IN_PROGRESS demotes any other in-progress task to PINNED and
+   *    flushes its accumulated time.
+   *  - Leaving IN_PROGRESS folds elapsed time into `timeSpent`.
+   *  - COMPLETED requires all direct subtasks to already be completed, sets
+   *    `completedAt`, may auto-hide under a parent with `autoHideCompleted`,
+   *    and cascades COMPLETED down the subtree.
+   *  - Restoring from COMPLETED to OPEN cascades OPEN down the subtree and
+   *    clears `completedAt`.
+   *  - On completion, walks up via `checkInheritCompletionState` to roll the
+   *    parent up if it opted in.
+   */
   async setTaskStatus(
     id: number,
     userId: string,
@@ -228,6 +252,12 @@ export class DatabaseStorage implements IStorage {
     return task
   }
 
+  /**
+   * If `parentId` opts into `inheritCompletionState` and every other child is
+   * already completed, mark the parent completed too — and recurse upward.
+   * `justCompletedChildId` lets the caller skip a stale read of the child it
+   * just wrote.
+   */
   private async checkInheritCompletionState(
     parentId: number,
     userId: string,
@@ -279,6 +309,10 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  /**
+   * Counterpart to `checkInheritCompletionState`: if a previously-rolled-up
+   * parent gains a non-completed child (via create or reparent), reopen it.
+   */
   private async revertParentIfInheritCompletionState(
     parentId: number,
     userId: string,
@@ -302,6 +336,18 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.id, parentId))
   }
 
+  /**
+   * Patches `updates` onto a task. Beyond the write itself, it reconciles a
+   * few derived bits:
+   *  - Reparenting to root clears `hidden` (auto-hide only applies under a
+   *    parent).
+   *  - Toggling `autoHideCompleted` propagates `hidden` to all already-
+   *    completed direct children.
+   *  - Turning on `inheritCompletionState` while completed but with
+   *    incomplete children rolls the task back to OPEN.
+   *  - Reparenting a non-completed task may reopen the new parent (see
+   *    `revertParentIfInheritCompletionState`).
+   */
   async updateTask(
     id: number,
     userId: string,
@@ -368,6 +414,7 @@ export class DatabaseStorage implements IStorage {
     return updated
   }
 
+  /** Sum of `timeSpent` across `id` and its full descendant subtree. */
   private async getTotalTimeForTask(
     id: number,
     userId: string,
@@ -389,6 +436,12 @@ export class DatabaseStorage implements IStorage {
     return total
   }
 
+  /**
+   * Deletes a task and its entire subtree. Before the cascade, the subtree's
+   * total `timeSpent` is rolled up into the surviving parent (if any) so
+   * tracked work is never silently lost. Descendants delete via the
+   * non-rollup path.
+   */
   async deleteTask(id: number, userId: string): Promise<void> {
     const taskToDelete = await this.getTask(id, userId)
     if (!taskToDelete) return
@@ -425,6 +478,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
   }
 
+  /** Recursive subtree delete used inside `deleteTask` (rollup already done). */
   private async deleteTaskWithoutTimeAccumulation(
     id: number,
     userId: string,
@@ -453,6 +507,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(tasks.id, parentId), eq(tasks.userId, userId)))
   }
 
+  /** Fetches settings; lazily inserts the row with defaults on first access. */
   async getSettings(userId: string): Promise<UserSettings> {
     const [settings] = await db
       .select()

@@ -1,6 +1,10 @@
 /**
- * @fileoverview Guest task migration utilities.
- * Migrates guest mode tasks to authenticated storage on login.
+ * @fileoverview Migrates user-created guest tasks into the auth localStorage
+ * bucket on login. Demo tasks are skipped. New temp ids are minted (negative,
+ * to match TasksProvider's optimistic-id scheme), the parent/child graph is
+ * rewritten in two passes (roots, then children with the remapped parentId),
+ * and a matching CREATE_TASK op per task is appended to the auth sync queue
+ * so the next sync flush pushes them to the server.
  */
 
 import { omit } from 'es-toolkit'
@@ -58,6 +62,7 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       data: Omit<Task, 'id' | 'userId'>
     }> = []
 
+    // Pass 1: roots. Recorded in idMapping so pass 2 can rewrite parentId.
     for (const task of userCreatedTasks) {
       if (task.parentId !== null) continue
 
@@ -78,6 +83,9 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
       })
     }
 
+    // Pass 2: children. parentId is remapped via the table built in pass 1
+    // (falls back to the original id only for orphan rows, which the server
+    // self-heals on next read — see DatabaseStorage.getTasks).
     for (const task of userCreatedTasks) {
       if (task.parentId === null) continue
 

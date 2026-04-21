@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Tasks table + status/rank enums, with a Zod-refined insert
+ * schema (`insertTaskSchemaRefined`) that enforces user-configured required
+ * fields and the "time spent required to complete" rule.
+ */
+
 import { relations, sql } from 'drizzle-orm'
 import {
   boolean,

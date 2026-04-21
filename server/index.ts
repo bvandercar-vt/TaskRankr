@@ -1,9 +1,7 @@
 /**
- * @fileoverview Express server entry point and HTTP server configuration.
- *
- * Sets up the Express application with JSON/URL-encoded body parsing,
- * request logging middleware, error handling, and route registration.
- * Configures Vite dev server in development or static file serving in production.
+ * @fileoverview Express entry point. Mounts JSON body parsing (with raw-body
+ * capture), API request logging, error handler, then registers routes and
+ * either Vite middleware (dev) or the static build (prod).
  */
 
 import { createServer } from 'node:http'

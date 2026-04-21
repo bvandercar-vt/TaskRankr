@@ -1,8 +1,7 @@
 /**
- * @fileoverview Replit OpenID Connect authentication implementation.
- *
- * Configures Passport.js with OIDC strategy for Replit authentication.
- * Handles session management, token refresh, and user upsert on login.
+ * @fileoverview Replit OIDC auth via Passport: pg-backed session store, login
+ * /callback/logout routes, and an `isAuthenticated` middleware that
+ * transparently refreshes expired access tokens.
  */
 
 /** biome-ignore-all lint/style/noNonNullAssertion: added by Replit */

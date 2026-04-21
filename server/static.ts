@@ -1,9 +1,4 @@
-/**
- * @fileoverview Static file serving for production builds.
- *
- * Serves the compiled frontend assets from the build directory.
- * Includes SPA fallback routing to index.html for client-side routing.
- */
+/** @fileoverview Production-only: serve built client assets with SPA fallback. */
 
 import fs from 'node:fs'
 import path from 'node:path'
