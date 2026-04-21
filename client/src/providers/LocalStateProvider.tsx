@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { omit, toMerged } from 'es-toolkit'
+import { omit, toMerged, uniq, without } from 'es-toolkit'
 import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
@@ -23,11 +23,12 @@ import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import {
+  getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
-  getTaskById,
-  updateTaskInList,
+  removeIds,
+  updateItem,
 } from '@/lib/task-utils'
 import {
   allRankFieldsNull,
@@ -191,10 +192,10 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
         const shouldHide = parent.parentId
-          ? (getTaskById(updated, parent.parentId)?.autoHideCompleted ?? false)
+          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
           : false
 
-        updated = updateTaskInList(updated, parent.id, (t) => ({
+        updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
@@ -232,7 +233,7 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         !allChildrenCompleted &&
         parent.status === TaskStatus.COMPLETED
       ) {
-        updated = updateTaskInList(updated, parent.id, (t) => ({
+        updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.OPEN,
           completedAt: null,
@@ -597,7 +598,7 @@ export const LocalStateProvider = ({
             changed = true
             return
           }
-          const filtered = order.filter((sid: number) => !idsToDelete.has(sid))
+          const filtered = without(order, ...Array.from(idsToDelete))
           if (filtered.length !== order.length) {
             next.set(pid, filtered)
             changed = true
@@ -606,12 +607,10 @@ export const LocalStateProvider = ({
         return changed ? next : prevOverrides
       })
 
-      return prev
-        .filter((t) => !idsToDelete.has(t.id))
-        .map((t) => ({
-          ...t,
-          subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
-        }))
+      return removeIds(prev, Array.from(idsToDelete)).map((t) => ({
+        ...t,
+        subtaskOrder: without(t.subtaskOrder, ...Array.from(idsToDelete)),
+      }))
     })
     debugLog.log('task', 'deleteDraft', { id })
   }, [])
@@ -759,9 +758,7 @@ export const LocalStateProvider = ({
       } satisfies z.input<typeof taskSchema>)
 
       setTasks((prev) => {
-        const parent = data.parentId
-          ? getTaskById(prev, data.parentId)
-          : undefined
+        const parent = data.parentId ? getById(prev, data.parentId) : undefined
         if (
           parent?.autoHideCompleted &&
           newTask.status === TaskStatus.COMPLETED
@@ -866,7 +863,7 @@ export const LocalStateProvider = ({
       }
 
       if (updates.parentId != null && updatedTask) {
-        const parent = getTaskById(tasksRef.current, updates.parentId)
+        const parent = getById(tasksRef.current, updates.parentId)
         if (
           parent?.inheritCompletionState &&
           parent.status === TaskStatus.COMPLETED &&
@@ -912,7 +909,7 @@ export const LocalStateProvider = ({
             description: 'All subtasks must be completed first.',
             variant: 'destructive',
           })
-          const existing = getTaskById(tasksRef.current, id)
+          const existing = getById(tasksRef.current, id)
           if (existing) return existing
         }
       }
@@ -942,7 +939,7 @@ export const LocalStateProvider = ({
           })()
 
           if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = getTaskById(tasksRef.current, task.parentId)
+            const parent = getById(tasksRef.current, task.parentId)
             if (parent?.autoHideCompleted) {
               return { ...base, hidden: true }
             }
@@ -998,7 +995,7 @@ export const LocalStateProvider = ({
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
-            const parent = getTaskById(updated, currentParentId)
+            const parent = getById(updated, currentParentId)
             if (
               !parent?.inheritCompletionState ||
               parent.status === TaskStatus.COMPLETED
@@ -1018,13 +1015,13 @@ export const LocalStateProvider = ({
             }
 
             if (parent.parentId) {
-              const grandparent = getTaskById(updated, parent.parentId)
+              const grandparent = getById(updated, parent.parentId)
               if (grandparent?.autoHideCompleted) {
                 parentUpdate.hidden = true
               }
             }
 
-            updated = updateTaskInList(updated, parent.id, (t) => ({
+            updated = updateItem(updated, parent.id, (t) => ({
               ...t,
               ...parentUpdate,
             }))
@@ -1054,11 +1051,11 @@ export const LocalStateProvider = ({
           let currentParentId: number | null = updatedTask.parentId
 
           while (currentParentId !== null) {
-            const parent = getTaskById(updated, currentParentId)
+            const parent = getById(updated, currentParentId)
             if (!parent?.inheritCompletionState) break
             if (parent.status !== TaskStatus.COMPLETED) break
 
-            updated = updateTaskInList(updated, parent.id, (t) => ({
+            updated = updateItem(updated, parent.id, (t) => ({
               ...t,
               status: TaskStatus.OPEN,
               completedAt: null,
@@ -1103,7 +1100,7 @@ export const LocalStateProvider = ({
         return next
       })
       setTasks((prev) => {
-        const taskToDelete = getTaskById(prev, id)
+        const taskToDelete = getById(prev, id)
         if (!taskToDelete) return prev
 
         const idsToDelete = new Set<number>()
@@ -1120,15 +1117,15 @@ export const LocalStateProvider = ({
           if (idsToDelete.has(t.id)) totalTime += t.timeSpent
         }
 
-        let updated = prev.filter((t) => !idsToDelete.has(t.id))
+        let updated = removeIds(prev, Array.from(idsToDelete))
 
         if (taskToDelete.parentId) {
-          updated = updateTaskInList(updated, taskToDelete.parentId, (t) => ({
+          updated = updateItem(updated, taskToDelete.parentId, (t) => ({
             ...t,
             ...(totalTime > 0
               ? { timeSpent: (t.timeSpent ?? 0) + totalTime }
               : {}),
-            subtaskOrder: t.subtaskOrder.filter((sid) => !idsToDelete.has(sid)),
+            subtaskOrder: without(t.subtaskOrder, ...Array.from(idsToDelete)),
           }))
         }
 
@@ -1334,8 +1331,7 @@ export const LocalStateProvider = ({
   }, [demoTaskIds, isInitialized, storageKeys])
 
   const deleteDemoData = useCallback(() => {
-    const idsToDelete = new Set(demoTaskIds)
-    setTasks((prev) => prev.filter((task) => !idsToDelete.has(task.id)))
+    setTasks((prev) => removeIds(prev, uniq(demoTaskIds)))
     setDemoTaskIds([])
   }, [demoTaskIds])
 

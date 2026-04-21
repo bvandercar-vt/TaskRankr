@@ -23,8 +23,8 @@ import { Link, Plus } from 'lucide-react'
 
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import {
+  getById,
   getDirectSubtasks,
-  getTaskById,
   sortTasksByIdOrder,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
@@ -57,7 +57,7 @@ export const SubtasksCard = ({
   const { data: allTasks } = useTasks({ includeDrafts: true })
   const { reorderSubtasks } = useTaskActions()
 
-  const task = getTaskById(allTasks, taskProp.id) ?? taskProp
+  const task = getById(allTasks, taskProp.id) ?? taskProp
 
   const [sortMode, setSortMode] = useState<SubtaskSortMode>(
     task.subtaskSortMode,
@@ -99,7 +99,7 @@ export const SubtasksCard = ({
         const order =
           depth === 0 && localSubtaskOrder
             ? localSubtaskOrder
-            : (getTaskById(allTasks, parentId_)?.subtaskOrder ?? [])
+            : (getById(allTasks, parentId_)?.subtaskOrder ?? [])
         children = sortTasksByIdOrder(children, order)
       } else {
         children = [...children].sort((a, b) => {

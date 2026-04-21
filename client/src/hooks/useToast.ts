@@ -8,6 +8,7 @@ import type {
   ToastActionElement,
   ToastProps,
 } from '@/components/primitives/overlays/Toast'
+import { removeIds } from '~/shared/utils/id-list-utils'
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1500
@@ -109,7 +110,7 @@ export const reducer = (state: State, action: ToastAction): State => {
       }
       return {
         ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+        toasts: removeIds(state.toasts, [action.toastId]),
       }
   }
 }

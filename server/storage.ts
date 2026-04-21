@@ -7,6 +7,7 @@
  */
 
 import { and, eq } from 'drizzle-orm'
+import { without } from 'es-toolkit'
 
 import {
   type InsertTask,
@@ -397,7 +398,7 @@ export class DatabaseStorage implements IStorage {
       if (parent) {
         const timeToAccumulate = await this.getTotalTimeForTask(id, userId)
         const updates: Partial<InsertTask> = {
-          subtaskOrder: parent.subtaskOrder.filter((sid: number) => sid !== id),
+          subtaskOrder: without(parent.subtaskOrder, id),
         }
         if (timeToAccumulate > 0) {
           updates.timeSpent = parent.timeSpent + timeToAccumulate
