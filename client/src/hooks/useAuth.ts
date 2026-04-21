@@ -1,5 +1,5 @@
 /**
- * @fileoverview `useAuth`: react-query-backed session state + logout.
+ * @fileoverview react-query-backed session state + logout.
  *
  * Caches the last user in localStorage so offline / network-error reloads can
  * still surface an authenticated UI instead of bouncing through the login
