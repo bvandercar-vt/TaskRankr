@@ -5,19 +5,38 @@ export * from './id-list-utils'
 export const getDirectSubtasks = (allTasks: Task[], id: number): Task[] =>
   allTasks.filter((task) => task.parentId === id)
 
-export const getAllDescendantIds = (
-  allTasks: Task[],
-  taskId: number,
+/**
+ * Collects every descendant of `rootIds` through the `parentId` graph. Pass
+ * `includeRoots: true` to also include the roots themselves.
+ */
+export const collectSubtreeIds = (
+  tasks: Task[],
+  rootIds: Iterable<number>,
+  opts: { includeRoots?: boolean } = {},
 ): Set<number> => {
-  const ids = new Set<number>()
-  const walk = (id: number) => {
-    ids.add(id)
-    for (const t of allTasks) {
-      if (t.parentId === id) walk(t.id)
-    }
+  const result = new Set<number>()
+  const rootSet = new Set(rootIds)
+  if (opts.includeRoots) {
+    rootSet.forEach((id) => {
+      result.add(id)
+    })
   }
-  walk(taskId)
-  return ids
+  let frontier: Set<number> = rootSet
+  while (frontier.size > 0) {
+    const next = new Set<number>()
+    for (const t of tasks) {
+      if (
+        t.parentId !== null &&
+        frontier.has(t.parentId) &&
+        !result.has(t.id)
+      ) {
+        result.add(t.id)
+        next.add(t.id)
+      }
+    }
+    frontier = next
+  }
+  return result
 }
 
 export const getTaskStatuses = (task: Task) => ({
