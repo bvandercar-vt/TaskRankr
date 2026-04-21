@@ -13,10 +13,10 @@ import type { z } from 'zod'
 import { useTaskParentChain } from '@/hooks/useTaskParentChain'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import {
-  type DeleteTaskArgs,
-  type MutateTaskContent,
-  useLocalState,
+import { useDraftSession } from '@/providers/DraftSessionProvider'
+import type {
+  DeleteTaskArgs,
+  MutateTaskContent,
 } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import {
@@ -147,7 +147,7 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
   })
-  const { tasksWithDrafts: allTasks } = useLocalState()
+  const { tasksWithDrafts: allTasks } = useDraftSession()
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)

@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
 import { getById } from '@/lib/task-utils'
+import { useDraftSession } from '@/providers/DraftSessionProvider'
 import {
   type CreateTaskContent,
   type DeleteTaskArgs,
@@ -185,12 +186,11 @@ export const TaskFormDialogProvider = ({
     number | null
   >(null)
 
+  const { createTask, subscribeToIdReplacement } = useLocalState()
   const {
     tasksWithDrafts,
-    createTask,
     updateTask,
     deleteTask,
-    subscribeToIdReplacement,
     createDraftTask,
     assignDraftSubtask,
     commitDraftSession,
@@ -198,7 +198,7 @@ export const TaskFormDialogProvider = ({
     hasDraftSession,
     draftTaskIds,
     draftAssignmentCount,
-  } = useLocalState()
+  } = useDraftSession()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {

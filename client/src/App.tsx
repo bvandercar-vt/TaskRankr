@@ -25,6 +25,7 @@ import HowToUse from '@/pages/HowToUse'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
+import { DraftSessionProvider } from '@/providers/DraftSessionProvider'
 import { ExpandedTasksProvider } from '@/providers/ExpandedTasksProvider'
 import {
   BannerKey,
@@ -119,13 +120,15 @@ const AuthenticatedApp = () => {
       <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
         <SyncProvider isAuthenticated={shouldSync}>
           <ExpandedTasksProvider>
-            <TaskFormDialogProvider>
-              <div className="h-dvh flex flex-col overflow-hidden">
-                <StatusBanner />
-                <Router />
-                <WhatsNewDialog />
-              </div>
-            </TaskFormDialogProvider>
+            <DraftSessionProvider>
+              <TaskFormDialogProvider>
+                <div className="h-dvh flex flex-col overflow-hidden">
+                  <StatusBanner />
+                  <Router />
+                  <WhatsNewDialog />
+                </div>
+              </TaskFormDialogProvider>
+            </DraftSessionProvider>
           </ExpandedTasksProvider>
         </SyncProvider>
       </LocalStateProvider>
