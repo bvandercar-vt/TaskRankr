@@ -67,7 +67,7 @@ const useBanners = () => {
 }
 
 /** Whether `key` is currently suppressed. Stable selector for banner components. */
-export const useHiddenBanner = (key: BannerKey): boolean =>
+export const useIsBannerHidden = (key: BannerKey): boolean =>
   useBanners().hiddenBanners.has(key)
 
 /** Mutators for code that needs to seed or clear the suppression set. */

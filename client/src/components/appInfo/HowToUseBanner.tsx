@@ -1,12 +1,12 @@
 import { HelpCircle } from 'lucide-react'
 
 import { Routes } from '@/lib/constants'
-import { BannerKey, useHiddenBanner } from '@/providers/BannersProvider'
+import { BannerKey, useIsBannerHidden } from '@/providers/BannersProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const HowToUseBanner = () => {
-  if (useHiddenBanner(BannerKey.HOW_TO_USE)) return null
+  if (useIsBannerHidden(BannerKey.HOW_TO_USE)) return null
 
   return (
     <NotificationBanner

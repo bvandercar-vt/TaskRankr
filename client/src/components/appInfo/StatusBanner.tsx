@@ -2,7 +2,7 @@ import { useLocation } from 'wouter'
 
 import { Routes } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { BannerKey, useHiddenBanner } from '@/providers/BannersProvider'
+import { BannerKey, useIsBannerHidden } from '@/providers/BannersProvider'
 import { useGuestMode } from '@/providers/GuestModeProvider'
 import { useSyncSafe } from '@/providers/SyncProvider'
 import { AuthPaths } from '~/shared/constants'
@@ -26,7 +26,7 @@ const TopBanner = ({
 
 export const StatusBanner = () => {
   const { isGuestMode, exitGuestMode } = useGuestMode()
-  const logInHidden = useHiddenBanner(BannerKey.LOG_IN)
+  const logInHidden = useIsBannerHidden(BannerKey.LOG_IN)
   const sync = useSyncSafe()
   const [location] = useLocation()
 
