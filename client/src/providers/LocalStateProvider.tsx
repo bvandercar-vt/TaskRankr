@@ -1347,7 +1347,7 @@ export const LocalStateProvider = ({
 
 export const useLocalStateSafe = () => useContext(LocalStateContext)
 export const useLocalState = () => {
-  const ctx = useContext(LocalStateContext)
+  const ctx = useLocalStateSafe()
   if (!ctx)
     throw new Error('useLocalState must be used within a LocalStateProvider')
   return ctx

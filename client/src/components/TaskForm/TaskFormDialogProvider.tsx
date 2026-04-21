@@ -7,6 +7,7 @@
  */
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { without } from 'es-toolkit'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
@@ -454,8 +455,9 @@ export const TaskFormDialogProvider = ({
               if (parent) {
                 updateTask({
                   id: top,
-                  subtaskOrder: parent.subtaskOrder.filter(
-                    (sid) => sid !== subtaskToDelete.id,
+                  subtaskOrder: without(
+                    parent.subtaskOrder,
+                    subtaskToDelete.id,
                   ),
                 })
               }
