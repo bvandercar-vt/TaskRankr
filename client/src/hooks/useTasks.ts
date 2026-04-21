@@ -6,9 +6,10 @@
 
 import { getById } from '@/lib/task-utils'
 import {
-  type CreateTaskContent,
+  useLocalState,
   useLocalStateSafe,
 } from '@/providers/LocalStateProvider'
+import { pick } from 'es-toolkit'
 import type { Task, UpdateTask } from '~/shared/schema'
 
 interface UseTasksOptions {
@@ -19,16 +20,13 @@ interface UseTasksOptions {
 }
 
 export const useTasks = ({ includeDrafts = false }: UseTasksOptions = {}) => {
-  const localState = useLocalStateSafe()
-  const tasks = localState
-    ? includeDrafts
-      ? localState.tasksWithDrafts
-      : localState.tasks
-    : []
-  const isLoading = localState ? !localState.isInitialized : true
+  const localState = useLocalState()
+
   return {
-    data: tasks,
-    isLoading,
+    data:  includeDrafts
+      ? localState.tasksWithDrafts
+      : localState.tasks,
+    isLoading:!localState.isInitialized,
     refetch: () => Promise.resolve(),
   }
 }
@@ -57,34 +55,12 @@ export const useTaskParentChain = (
   return chain
 }
 
-export const useTaskActions = (): {
-  createTask: (data: CreateTaskContent) => Task
-  updateTask: (update: UpdateTask) => Task
-  setTaskStatus: (id: number, status: Task['status']) => Task
-  deleteTask: (id: number) => void
-  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-} => {
-  const localState = useLocalStateSafe()
-
-  if (!localState) {
-    const noop = () => {
-      throw new Error('Local state not initialized')
-    }
-    return {
-      createTask: noop,
-      updateTask: noop,
-      setTaskStatus: noop,
-      deleteTask: noop,
-      reorderSubtasks: noop,
-    }
-  }
+export const useTaskActions = () => {
+  const localState = useLocalState()
 
   return {
-    createTask: (data) => localState.createTask(data),
-    updateTask: ({ id, ...updates }) => localState.updateTask(id, updates),
-    setTaskStatus: (id, status) => localState.setTaskStatus(id, status),
-    deleteTask: (id) => localState.deleteTask(id),
-    reorderSubtasks: (parentId, orderedIds) =>
-      localState.reorderSubtasks(parentId, orderedIds),
+    ...pick(localState, ['createTask', 'setTaskStatus', 'deleteTask', 'reorderSubtasks']),
+    updateTask: ({ id, ...updates }: UpdateTask): Task =>
+      localState.updateTask(id, updates),
   }
 }
