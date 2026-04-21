@@ -7,8 +7,7 @@
 import { getTaskById } from '@/lib/task-utils'
 import {
   type CreateTaskContent,
-  useTaskActionsContextSafe,
-  useTasksContext,
+  useLocalStateSafe,
 } from '@/providers/LocalStateProvider'
 import type { Task, UpdateTask } from '~/shared/schema'
 
@@ -20,7 +19,7 @@ interface UseTasksOptions {
 }
 
 export const useTasks = ({ includeDrafts = false }: UseTasksOptions = {}) => {
-  const ctx = useTasksContext()
+  const ctx = useLocalStateSafe()
   const tasks = ctx ? (includeDrafts ? ctx.tasksWithDrafts : ctx.tasks) : []
   const isLoading = ctx ? !ctx.isInitialized : true
   return {
@@ -54,15 +53,6 @@ export const useTaskParentChain = (
   return chain
 }
 
-export const useTask = (id: number) => {
-  const { data: tasks, isLoading } = useTasks()
-  return {
-    data: getTaskById(tasks, id),
-    isLoading,
-    error: null,
-  }
-}
-
 export const useTaskActions = (): {
   createTask: (data: CreateTaskContent) => Task
   updateTask: (update: UpdateTask) => Task
@@ -70,7 +60,7 @@ export const useTaskActions = (): {
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
 } => {
-  const ctx = useTaskActionsContextSafe()
+  const ctx = useLocalStateSafe()
 
   if (!ctx) {
     const noop = () => {

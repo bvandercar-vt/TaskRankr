@@ -26,7 +26,7 @@ import {
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/task-utils'
-import { useTasksContextRequired } from '@/providers/LocalStateProvider'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
 
@@ -121,7 +121,7 @@ const Home = () => {
   const { data: allTasks, isLoading } = useTasks()
   const { openCreateDialog } = useTaskDialog()
   const { settings, updateSettings } = useSettings()
-  const { hasDemoData, deleteDemoData } = useTasksContextRequired()
+  const { hasDemoData, deleteDemoData } = useLocalState()
   const [search, setSearch] = useState('')
 
   const sortBy = settings.sortBy

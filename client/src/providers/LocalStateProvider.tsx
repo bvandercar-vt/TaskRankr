@@ -1,14 +1,9 @@
 /**
  * @fileoverview Local-first state provider for tasks and settings.
  * Manages localStorage persistence with sync queue for server synchronization.
- *
- * The single underlying store is exposed via several narrow contexts so
- * consumers only re-render on the slice they actually use:
- *   - TasksContext            : tasks, tasksWithDrafts, isInitialized, demo flags
- *   - TaskActionsContext      : create/update/delete/reorder/setStatus + id-replace subscription
- *   - SettingsContext         : settings + updateSettings
- *   - DraftSessionContext     : in-memory draft session for the TaskForm dialog
- *   - ServerSyncBridgeContext : sync queue + setTasksFromServer (for SyncProvider only)
+ * Includes an in-memory draft session used by the TaskForm dialog so that
+ * subtasks added/assigned mid-edit are committed atomically on Submit and
+ * dropped on Cancel.
  */
 
 import {
@@ -75,11 +70,8 @@ export type SyncOperation =
       orderedIds: number[]
     }
 
-// ---------------------------------------------------------------------------
-// Context value shapes
-// ---------------------------------------------------------------------------
-
-interface TasksContextValue {
+interface LocalStateContextValue {
+  // Tasks
   tasks: Task[]
   /** `tasks` merged with the in-memory draft session overlay. Drafts have
    *  negative IDs and are NOT persisted to localStorage or enqueued for sync. */
@@ -87,9 +79,8 @@ interface TasksContextValue {
   isInitialized: boolean
   hasDemoData: boolean
   deleteDemoData: () => void
-}
 
-interface TaskActionsContextValue {
+  // Task mutations
   createTask: (data: CreateTaskContent) => Task
   updateTask: (id: number, updates: UpdateTaskContent) => Task
   setTaskStatus: (id: number, status: TaskStatus) => Task
@@ -98,14 +89,12 @@ interface TaskActionsContextValue {
   subscribeToIdReplacement: (
     cb: (tempId: number, realId: number) => void,
   ) => () => void
-}
 
-interface SettingsContextValue {
+  // Settings
   settings: UserSettings
   updateSettings: (updates: Partial<UserSettings>) => void
-}
 
-interface DraftSessionContextValue {
+  // Draft session (used by TaskFormDialogProvider)
   /** Set of task IDs currently in the draft session. */
   draftTaskIds: Set<number>
   /** Number of real tasks reassigned to a draft parent during the session. */
@@ -119,9 +108,8 @@ interface DraftSessionContextValue {
   commitDraftSession: () => void
   /** Drop all drafts; nothing was ever persisted. */
   discardDraftSession: () => void
-}
 
-interface ServerSyncBridgeContextValue {
+  // Server sync bridge (used by SyncProvider)
   syncQueue: SyncOperation[]
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
@@ -130,12 +118,7 @@ interface ServerSyncBridgeContextValue {
   setSettingsFromServer: (settings: UserSettings) => void
 }
 
-const TasksContext = createContext<TasksContextValue | null>(null)
-const TaskActionsContext = createContext<TaskActionsContextValue | null>(null)
-const SettingsContext = createContext<SettingsContextValue | null>(null)
-const DraftSessionContext = createContext<DraftSessionContextValue | null>(null)
-const ServerSyncBridgeContext =
-  createContext<ServerSyncBridgeContextValue | null>(null)
+const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 
 export enum StorageMode {
   AUTH = 'auth',
@@ -1311,47 +1294,21 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
-  // ---------------------------------------------------------------------------
-  // Memoized per-context values
-  // ---------------------------------------------------------------------------
-
-  const tasksValue = useMemo<TasksContextValue>(
+  const value = useMemo<LocalStateContextValue>(
     () => ({
       tasks,
       tasksWithDrafts,
       isInitialized,
       hasDemoData,
       deleteDemoData,
-    }),
-    [tasks, tasksWithDrafts, isInitialized, hasDemoData, deleteDemoData],
-  )
-
-  const taskActionsValue = useMemo<TaskActionsContextValue>(
-    () => ({
       createTask,
       updateTask,
       setTaskStatus,
       deleteTask,
       reorderSubtasks,
       subscribeToIdReplacement,
-    }),
-    [
-      createTask,
-      updateTask,
-      setTaskStatus,
-      deleteTask,
-      reorderSubtasks,
-      subscribeToIdReplacement,
-    ],
-  )
-
-  const settingsValue = useMemo<SettingsContextValue>(
-    () => ({ settings, updateSettings }),
-    [settings, updateSettings],
-  )
-
-  const draftValue = useMemo<DraftSessionContextValue>(
-    () => ({
+      settings,
+      updateSettings,
       draftTaskIds,
       draftAssignmentCount: draftAssignedParents.size,
       hasDraftSession,
@@ -1359,20 +1316,6 @@ export const LocalStateProvider = ({
       assignDraftSubtask,
       commitDraftSession,
       discardDraftSession,
-    }),
-    [
-      draftTaskIds,
-      draftAssignedParents.size,
-      hasDraftSession,
-      createDraftTask,
-      assignDraftSubtask,
-      commitDraftSession,
-      discardDraftSession,
-    ],
-  )
-
-  const syncBridgeValue = useMemo<ServerSyncBridgeContextValue>(
-    () => ({
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
@@ -1381,6 +1324,26 @@ export const LocalStateProvider = ({
       setSettingsFromServer,
     }),
     [
+      tasks,
+      tasksWithDrafts,
+      isInitialized,
+      hasDemoData,
+      deleteDemoData,
+      createTask,
+      updateTask,
+      setTaskStatus,
+      deleteTask,
+      reorderSubtasks,
+      subscribeToIdReplacement,
+      settings,
+      updateSettings,
+      draftTaskIds,
+      draftAssignedParents.size,
+      hasDraftSession,
+      createDraftTask,
+      assignDraftSubtask,
+      commitDraftSession,
+      discardDraftSession,
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
@@ -1391,56 +1354,16 @@ export const LocalStateProvider = ({
   )
 
   return (
-    <TasksContext.Provider value={tasksValue}>
-      <TaskActionsContext.Provider value={taskActionsValue}>
-        <SettingsContext.Provider value={settingsValue}>
-          <DraftSessionContext.Provider value={draftValue}>
-            <ServerSyncBridgeContext.Provider value={syncBridgeValue}>
-              {children}
-            </ServerSyncBridgeContext.Provider>
-          </DraftSessionContext.Provider>
-        </SettingsContext.Provider>
-      </TaskActionsContext.Provider>
-    </TasksContext.Provider>
+    <LocalStateContext.Provider value={value}>
+      {children}
+    </LocalStateContext.Provider>
   )
 }
 
-// ---------------------------------------------------------------------------
-// Hooks
-// ---------------------------------------------------------------------------
-
-export const useTasksContext = () => useContext(TasksContext)
-export const useTasksContextRequired = () => {
-  const ctx = useContext(TasksContext)
+export const useLocalStateSafe = () => useContext(LocalStateContext)
+export const useLocalState = () => {
+  const ctx = useContext(LocalStateContext)
   if (!ctx)
-    throw new Error('useTasksContext must be used within LocalStateProvider')
-  return ctx
-}
-
-export const useTaskActionsContext = () => {
-  const ctx = useContext(TaskActionsContext)
-  if (!ctx)
-    throw new Error(
-      'useTaskActionsContext must be used within LocalStateProvider',
-    )
-  return ctx
-}
-export const useTaskActionsContextSafe = () => useContext(TaskActionsContext)
-
-export const useSettingsContext = () => useContext(SettingsContext)
-
-export const useDraftSession = () => {
-  const ctx = useContext(DraftSessionContext)
-  if (!ctx)
-    throw new Error('useDraftSession must be used within LocalStateProvider')
-  return ctx
-}
-
-export const useServerSyncBridge = () => {
-  const ctx = useContext(ServerSyncBridgeContext)
-  if (!ctx)
-    throw new Error(
-      'useServerSyncBridge must be used within LocalStateProvider',
-    )
+    throw new Error('useLocalState must be used within a LocalStateProvider')
   return ctx
 }

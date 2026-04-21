@@ -16,8 +16,7 @@ import {
   type CreateTaskContent,
   type DeleteTaskArgs,
   type MutateTaskContent,
-  useDraftSession,
-  useTaskActionsContext,
+  useLocalState,
 } from '@/providers/LocalStateProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { SubtaskSortMode } from '~/shared/schema'
@@ -187,9 +186,9 @@ export const TaskFormDialogProvider = ({
   >(null)
 
   const { createTask, updateTask, deleteTask } = useTaskActions()
-  const { subscribeToIdReplacement } = useTaskActionsContext()
   const { data: tasksWithDrafts } = useTasks({ includeDrafts: true })
   const {
+    subscribeToIdReplacement,
     createDraftTask,
     assignDraftSubtask,
     commitDraftSession,
@@ -197,7 +196,7 @@ export const TaskFormDialogProvider = ({
     hasDraftSession,
     draftTaskIds,
     draftAssignmentCount,
-  } = useDraftSession()
+  } = useLocalState()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {
