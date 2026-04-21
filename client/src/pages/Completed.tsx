@@ -18,10 +18,7 @@ import {
   getDirectSubtasks,
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
-import {
-  useTaskMutations,
-  useTasks,
-} from '@/providers/LocalStateProvider'
+import { useTaskMutations, useTasks } from '@/providers/LocalStateProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { TaskStatus } from '~/shared/schema'
 

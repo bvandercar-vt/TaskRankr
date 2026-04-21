@@ -24,10 +24,7 @@ import {
   RANK_FIELDS_COLUMNS,
   SORT_ORDER_MAP,
 } from '@/lib/task-utils'
-import {
-  useTaskMutations,
-  useTasks,
-} from '@/providers/LocalStateProvider'
+import { useTaskMutations, useTasks } from '@/providers/LocalStateProvider'
 import { useSettings } from '@/providers/SettingsProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
