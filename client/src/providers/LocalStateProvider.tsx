@@ -32,6 +32,11 @@ import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
+  collectSubtreeIds,
+  reconcileInheritCompletionState,
+  topoSortForRecovery,
+} from '@/lib/task-cascades'
+import {
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
@@ -132,87 +137,6 @@ interface LocalStateProviderProps {
   storageMode: StorageMode
 }
 
-interface ReconcileResult {
-  tasks: Task[]
-  corrections: { id: number; status: TaskStatus }[]
-}
-
-function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
-  const corrections: { id: number; status: TaskStatus }[] = []
-  let updated = tasks
-  let changed = true
-
-  while (changed) {
-    changed = false
-    const parents = updated.filter((t) => t.inheritCompletionState)
-    for (const parent of parents) {
-      const children = getDirectSubtasks(updated, parent.id)
-      if (children.length === 0) continue
-
-      const allChildrenCompleted = children.every(
-        (c) => c.status === TaskStatus.COMPLETED,
-      )
-
-      if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
-        const latestCompletedAt = getChildrenLatestCompletedAt(children)
-
-        const shouldHide = parent.parentId
-          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
-          : false
-
-        updated = updateItem(updated, parent.id, (t) => ({
-          ...t,
-          status: TaskStatus.COMPLETED,
-          completedAt: latestCompletedAt ?? new Date(),
-          inProgressStartedAt: null,
-          ...(shouldHide ? { hidden: true } : {}),
-        }))
-
-        if (shouldHide) {
-          const toHide = new Set<number>()
-          let currentLevel = new Set<number>([parent.id])
-          while (currentLevel.size > 0) {
-            const nextLevel = new Set<number>()
-            for (const t of updated) {
-              if (
-                t.parentId !== null &&
-                currentLevel.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-                nextLevel.add(t.id)
-              }
-            }
-            currentLevel = nextLevel
-          }
-          if (toHide.size > 0) {
-            updated = updated.map((t) =>
-              toHide.has(t.id) ? { ...t, hidden: true } : t,
-            )
-          }
-        }
-
-        corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
-        changed = true
-      } else if (
-        !allChildrenCompleted &&
-        parent.status === TaskStatus.COMPLETED
-      ) {
-        updated = updateItem(updated, parent.id, (t) => ({
-          ...t,
-          status: TaskStatus.OPEN,
-          completedAt: null,
-          inProgressStartedAt: null,
-        }))
-        corrections.push({ id: parent.id, status: TaskStatus.OPEN })
-        changed = true
-      }
-    }
-  }
-
-  return { tasks: updated, corrections }
-}
-
 export const LocalStateProvider = ({
   children,
   shouldSync,
@@ -302,26 +226,8 @@ export const LocalStateProvider = ({
           !(t.parentId != null && !taskById.has(t.parentId)),
       )
       if (orphaned.length > 0) {
-        // Topo-sort: a task must appear after its (negative-id) parent, but
-        // only traverse to parents that are themselves in the recoverable
-        // set — never re-add a parent that already has a queued CREATE op.
         const recoverableIds = new Set(orphaned.map((t) => t.id))
-        const sorted: Task[] = []
-        const visited = new Set<number>()
-        const visit = (t: Task) => {
-          if (visited.has(t.id)) return
-          visited.add(t.id)
-          if (
-            t.parentId != null &&
-            t.parentId < 0 &&
-            recoverableIds.has(t.parentId)
-          ) {
-            const parent = taskById.get(t.parentId)
-            if (parent) visit(parent)
-          }
-          sorted.push(t)
-        }
-        for (const t of orphaned) visit(t)
+        const sorted = topoSortForRecovery(orphaned, taskById, recoverableIds)
 
         const recoveryOps: SyncOperation[] = sorted.map((t) => ({
           type: SyncOperationType.CREATE_TASK,
@@ -479,28 +385,13 @@ export const LocalStateProvider = ({
       if (updates.autoHideCompleted !== undefined) {
         const hide = updates.autoHideCompleted
         setTasks((prev) => {
-          const completedDirectIds = new Set(
-            getDirectSubtasks(prev, id)
-              .filter((t) => t.status === TaskStatus.COMPLETED)
-              .map((t) => t.id),
-          )
-          const toHide = new Set<number>(completedDirectIds)
-          const collectDescendants = (parentIds: Set<number>) => {
-            for (const t of prev) {
-              if (
-                t.parentId !== null &&
-                parentIds.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-              }
-            }
-          }
-          let prevSize = 0
-          while (toHide.size > prevSize) {
-            prevSize = toHide.size
-            collectDescendants(toHide)
-          }
+          const completedDirectIds = getDirectSubtasks(prev, id)
+            .filter((t) => t.status === TaskStatus.COMPLETED)
+            .map((t) => t.id)
+          if (completedDirectIds.length === 0) return prev
+          const toHide = collectSubtreeIds(prev, completedDirectIds, {
+            includeRoots: true,
+          })
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: hide } : t,
           )
@@ -614,22 +505,7 @@ export const LocalStateProvider = ({
 
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
         setTasks((prev) => {
-          const toHide = new Set<number>()
-          let currentLevel = new Set<number>([id])
-          while (currentLevel.size > 0) {
-            const nextLevel = new Set<number>()
-            for (const t of prev) {
-              if (
-                t.parentId !== null &&
-                currentLevel.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-                nextLevel.add(t.id)
-              }
-            }
-            currentLevel = nextLevel
-          }
+          const toHide = collectSubtreeIds(prev, [id])
           if (toHide.size === 0) return prev
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: true } : t,
