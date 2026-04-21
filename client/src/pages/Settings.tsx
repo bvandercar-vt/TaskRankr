@@ -36,7 +36,6 @@ import {
 import { ScrollablePage } from '@/components/primitives/ScrollablePage'
 import { useAuth } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { useToast } from '@/hooks/useToast'
 import { APP_VERSION } from '@/lib/changelog'
 import { Routes } from '@/lib/constants'
@@ -45,6 +44,7 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { QueryKeys, tsr } from '@/lib/ts-rest'
 import { cn } from '@/lib/utils'
 import { useGuestMode } from '@/providers/GuestModeProvider'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import { AuthPaths } from '~/shared/constants'
 import { contract } from '~/shared/contract'
 import { type FieldConfig, type FieldFlags, TaskStatus } from '~/shared/schema'
@@ -220,7 +220,7 @@ const AttributeSettingsCard = ({
 )
 
 const ExportButton = () => {
-  const { data: tasks } = useTasks()
+  const { tasks } = useLocalState()
   const hasNoTasks = tasks.length === 0
 
   return (
@@ -428,8 +428,7 @@ const Settings = () => {
   const { settings, updateSettings, updateFieldFlags } = useSettings()
   const { isGuestMode } = useGuestMode()
   const isStandalone = isStandalonePWA()
-  const { data: allTasks } = useTasks()
-  const { setTaskStatus } = useTaskActions()
+  const { tasks: allTasks, setTaskStatus } = useLocalState()
 
   return (
     <ScrollablePage>

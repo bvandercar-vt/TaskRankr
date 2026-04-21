@@ -2,10 +2,12 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { getHasIncompleteSubtasks } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import type { DeleteTaskArgs } from '@/providers/LocalStateProvider'
+import {
+  type DeleteTaskArgs,
+  useLocalState,
+} from '@/providers/LocalStateProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { SubtaskBlockedTooltip } from '../../SubtaskBlockedTooltip'
@@ -19,7 +21,7 @@ const CompletedCheckbox = ({
   task: Subtask
   disabled: boolean
 }) => {
-  const { setTaskStatus } = useTaskActions()
+  const { setTaskStatus } = useLocalState()
   const isCompleted = task.status === TaskStatus.COMPLETED
   return (
     <SubtaskBlockedTooltip blocked={disabled}>
@@ -63,7 +65,7 @@ export const SubtaskRowItem = ({
   isDragDisabled,
   isHiddenItem,
 }: SubtaskRowItemProps) => {
-  const { data: allTasks } = useTasks({ includeDrafts: true })
+  const { tasksWithDrafts: allTasks } = useLocalState()
   const {
     attributes,
     listeners,

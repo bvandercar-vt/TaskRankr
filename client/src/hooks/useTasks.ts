@@ -4,8 +4,6 @@
  * handles background server sync.
  */
 
-import { pick } from 'es-toolkit'
-
 import { getById } from '@/lib/task-utils'
 import { useLocalState } from '@/providers/LocalStateProvider'
 import type { Task } from '~/shared/schema'
@@ -17,20 +15,14 @@ interface UseTasksOptions {
   includeDrafts?: boolean
 }
 
-export const useTasks = ({ includeDrafts = false }: UseTasksOptions = {}) => {
-  const localState = useLocalState()
-
-  return {
-    data: includeDrafts ? localState.tasksWithDrafts : localState.tasks,
-    isLoading: !localState.isInitialized,
-  }
-}
-
 export const useTaskParentChain = (
   parentId?: number,
   options?: UseTasksOptions,
 ) => {
-  const { data: tasks } = useTasks(options)
+  const localState = useLocalState()
+  const tasks = options?.includeDrafts
+    ? localState.tasksWithDrafts
+    : localState.tasks
 
   if (!parentId) return []
 
@@ -48,16 +40,4 @@ export const useTaskParentChain = (
   }
 
   return chain
-}
-
-export const useTaskActions = () => {
-  const localState = useLocalState()
-
-  return pick(localState, [
-    'createTask',
-    'setTaskStatus',
-    'deleteTask',
-    'reorderSubtasks',
-    'updateTask',
-  ])
 }

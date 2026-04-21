@@ -13,12 +13,12 @@ import {
   TaskListPageWrapper,
   TaskListTreeLayout,
 } from '@/components/TaskListPage'
-import { useTasks } from '@/hooks/useTasks'
 import {
   filterAndSortTree,
   getDirectSubtasks,
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { TaskStatus } from '~/shared/schema'
 
@@ -53,7 +53,7 @@ const EmptyState = ({ search }: { search: string | undefined }) => (
 )
 
 const Completed = () => {
-  const { data: allTasks, isLoading } = useTasks()
+  const { tasks: allTasks, isInitialized } = useLocalState()
   const [search, setSearch] = useState('')
 
   const completedTasks = useMemo(() => {
@@ -88,7 +88,7 @@ const Completed = () => {
   )
 
   return (
-    <TaskListPageWrapper isLoading={isLoading}>
+    <TaskListPageWrapper isLoading={!isInitialized}>
       <TaskListPageHeader
         title="Completed Tasks"
         ColumnHeaders={displayedTasks.length > 0 && <ColumnHeaders />}

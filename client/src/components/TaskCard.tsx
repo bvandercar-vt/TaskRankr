@@ -9,7 +9,6 @@ import { ChevronDown, ChevronRight, Pin } from 'lucide-react'
 
 import { useExpandedTasks } from '@/hooks/useExpandedTasks'
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskActions } from '@/hooks/useTasks'
 import { STANDARD_DATE_FORMAT } from '@/lib/constants'
 import { getRankFieldStyle } from '@/lib/rank-field-styles'
 import {
@@ -18,6 +17,7 @@ import {
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
+import { useLocalState } from '@/providers/LocalStateProvider'
 import type { TaskWithSubtasks } from '@/types'
 import {
   type FieldConfig,
@@ -244,7 +244,7 @@ export const TaskCard = ({
   const holdStartY = useRef<number | null>(null)
   const SCROLL_THRESHOLD = 10
 
-  const { setTaskStatus, deleteTask, updateTask } = useTaskActions()
+  const { setTaskStatus, deleteTask, updateTask } = useLocalState()
   const { settings } = useSettings()
   const { openEditDialog } = useTaskDialog()
   const { isExpanded: checkExpanded, toggleExpanded } = useExpandedTasks()

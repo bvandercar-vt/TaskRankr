@@ -11,7 +11,6 @@ import { without } from 'es-toolkit'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
-import { useTaskActions, useTasks } from '@/hooks/useTasks'
 import { getById } from '@/lib/task-utils'
 import {
   type CreateTaskContent,
@@ -186,9 +185,11 @@ export const TaskFormDialogProvider = ({
     number | null
   >(null)
 
-  const { createTask, updateTask, deleteTask } = useTaskActions()
-  const { data: tasksWithDrafts } = useTasks({ includeDrafts: true })
   const {
+    tasksWithDrafts,
+    createTask,
+    updateTask,
+    deleteTask,
     subscribeToIdReplacement,
     createDraftTask,
     assignDraftSubtask,

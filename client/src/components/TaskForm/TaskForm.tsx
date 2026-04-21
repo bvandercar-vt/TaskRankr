@@ -11,12 +11,13 @@ import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
 import { useSettings } from '@/hooks/useSettings'
-import { useTaskParentChain, useTasks } from '@/hooks/useTasks'
+import { useTaskParentChain } from '@/hooks/useTasks'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import type {
-  DeleteTaskArgs,
-  MutateTaskContent,
+import {
+  type DeleteTaskArgs,
+  type MutateTaskContent,
+  useLocalState,
 } from '@/providers/LocalStateProvider'
 import {
   allRankFieldsNull,
@@ -146,7 +147,7 @@ export const TaskForm = ({
   const parentChain = useTaskParentChain(parentId ?? undefined, {
     includeDrafts: true,
   })
-  const { data: allTasks } = useTasks({ includeDrafts: true })
+  const { tasksWithDrafts: allTasks } = useLocalState()
   const { settings } = useSettings()
   const hasIncompleteSubtasks = initialData
     ? getHasIncompleteSubtasks(allTasks, initialData.id)
