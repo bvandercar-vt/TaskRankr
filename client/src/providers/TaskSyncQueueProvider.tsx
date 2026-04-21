@@ -57,7 +57,9 @@ interface TaskSyncQueueContextValue {
   replaceTempIdInQueue: (tempId: number, realId: number) => void
 }
 
-const TaskSyncQueueContext = createContext<TaskSyncQueueContextValue | null>(null)
+const TaskSyncQueueContext = createContext<TaskSyncQueueContextValue | null>(
+  null,
+)
 
 interface TaskSyncQueueProviderProps {
   children: React.ReactNode
@@ -162,6 +164,8 @@ export const TaskSyncQueueProvider = ({
 export const useTaskSyncQueue = () => {
   const ctx = useContext(TaskSyncQueueContext)
   if (!ctx)
-    throw new Error('useTaskSyncQueue must be used within a TaskSyncQueueProvider')
+    throw new Error(
+      'useTaskSyncQueue must be used within a TaskSyncQueueProvider',
+    )
   return ctx
 }
