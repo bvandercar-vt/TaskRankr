@@ -17,6 +17,7 @@ import {
   clearGuestStorage,
   migrateGuestTasksToAuth,
 } from '@/lib/migrate-guest-tasks'
+import { StorageMode } from '@/lib/storage'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
 import HowToInstall from '@/pages/HowToInstall'
@@ -30,7 +31,8 @@ import {
   GuestModeProvider,
   useGuestMode,
 } from '@/providers/GuestModeProvider'
-import { LocalStateProvider, StorageMode } from '@/providers/LocalStateProvider'
+import { LocalStateProvider } from '@/providers/LocalStateProvider'
+import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
 import { WhatsNewDialog } from './components/appInfo/WhatsNewDialog'
@@ -113,19 +115,21 @@ const AuthenticatedApp = () => {
   const storageMode = isGuestMode ? StorageMode.GUEST : StorageMode.AUTH
 
   return (
-    <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
-      <SyncProvider isAuthenticated={shouldSync}>
-        <ExpandedTasksProvider>
-          <TaskFormDialogProvider>
-            <div className="h-dvh flex flex-col overflow-hidden">
-              <StatusBanner />
-              <Router />
-              <WhatsNewDialog />
-            </div>
-          </TaskFormDialogProvider>
-        </ExpandedTasksProvider>
-      </SyncProvider>
-    </LocalStateProvider>
+    <SettingsProvider shouldSync={shouldSync} storageMode={storageMode}>
+      <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
+        <SyncProvider isAuthenticated={shouldSync}>
+          <ExpandedTasksProvider>
+            <TaskFormDialogProvider>
+              <div className="h-dvh flex flex-col overflow-hidden">
+                <StatusBanner />
+                <Router />
+                <WhatsNewDialog />
+              </div>
+            </TaskFormDialogProvider>
+          </ExpandedTasksProvider>
+        </SyncProvider>
+      </LocalStateProvider>
+    </SettingsProvider>
   )
 }
 

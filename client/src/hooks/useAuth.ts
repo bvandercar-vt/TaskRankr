@@ -5,26 +5,18 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { storage } from '@/lib/storage'
 import { AuthPaths } from '~/shared/constants'
 import type { User } from '~/shared/models/auth'
 
 const CACHED_USER_KEY = 'taskrankr-cached-user'
 
-function getCachedUser(): User | null {
-  try {
-    const cached = localStorage.getItem(CACHED_USER_KEY)
-    return cached ? JSON.parse(cached) : null
-  } catch {
-    return null
-  }
-}
-
 function setCachedUser(user: User | null): void {
   try {
     if (user) {
-      localStorage.setItem(CACHED_USER_KEY, JSON.stringify(user))
+      storage.set(CACHED_USER_KEY, user)
     } else {
-      localStorage.removeItem(CACHED_USER_KEY)
+      storage.remove(CACHED_USER_KEY)
     }
   } catch {
     // localStorage may be unavailable
@@ -51,7 +43,7 @@ async function fetchUser(): Promise<User | null> {
     return user
   } catch (error) {
     if (error instanceof TypeError || !navigator.onLine) {
-      const cached = getCachedUser()
+      const cached = storage.get<User | null>(CACHED_USER_KEY, null)
       if (cached) {
         return cached
       }

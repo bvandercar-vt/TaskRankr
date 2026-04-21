@@ -11,8 +11,8 @@ import {
   useState,
 } from 'react'
 
+import { getStorageKeys, StorageMode, storage } from '@/lib/storage'
 import { useGuestMode } from '@/providers/GuestModeProvider'
-import { getStorageKeys, StorageMode } from '@/providers/LocalStateProvider'
 
 interface ExpandedTasksContextValue {
   expandedIds: Set<number>
@@ -39,41 +39,31 @@ export const useExpandedTasksState = () => {
     isGuestMode ? StorageMode.GUEST : StorageMode.AUTH,
   ).expanded
 
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(() => {
-    if (typeof window === 'undefined') return new Set()
-    try {
-      const stored = localStorage.getItem(storageKey)
-      if (stored) {
-        const parsed = JSON.parse(stored) as number[]
-        return new Set(parsed)
-      }
-    } catch {
-      // Ignore parse errors
-    }
-    return new Set()
-  })
+  const getIdsFromStorage = useCallback(
+    (): Set<number> =>
+      new Set(
+        typeof window === 'undefined'
+          ? []
+          : storage.get<number[]>(storageKey, []),
+      ),
+    [storageKey],
+  )
+
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(() =>
+    getIdsFromStorage(),
+  )
 
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(Array.from(expandedIds)))
+      storage.set(storageKey, Array.from(expandedIds))
     } catch {
       // Ignore storage errors
     }
   }, [expandedIds, storageKey])
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey)
-      if (stored) {
-        const parsed = JSON.parse(stored) as number[]
-        setExpandedIds(new Set(parsed))
-      } else {
-        setExpandedIds(new Set())
-      }
-    } catch {
-      setExpandedIds(new Set())
-    }
-  }, [storageKey])
+    setExpandedIds(getIdsFromStorage())
+  }, [getIdsFromStorage])
 
   const toggleExpanded = useCallback((taskId: number) => {
     setExpandedIds((prev) => {
