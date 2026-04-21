@@ -1,12 +1,6 @@
 /**
  * @fileoverview Tree-walking helpers + sorting/filtering logic for task
- * lists. Houses the sort-chain definitions (`SORT_ORDER_MAP`,
- * `SORT_DIRECTIONS`), the "best" value derivation used by `SortInfo`, and
- * primitives like `getById`, `getDirectSubtasks`, `collectSubtreeIds`,
- * `filterAndSortTree`, etc. Re-exports `~/shared/utils/task-utils` so
- * callers have a single import surface for tree helpers. UI display
- * metadata for rank columns lives in `./columns.ts`; rank-field enum maps
- * live in `./constants.ts`.
+ * lists.
  */
 
 import type { ValueOf } from 'type-fest'

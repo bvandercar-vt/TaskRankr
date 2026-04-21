@@ -11,7 +11,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
 - Icon Sizing: Use `size-X` tailwind class instead of `w-X h-X`
-- Formatting: Run `npm run format` (biome) before every commit/checkpoint so the code in checkpoints is always formatted. Biome config in `biome.jsonc` excludes `.cache`, `.config`, `.local`, `node_modules`, `coverage`, `dist`, and `dev-dist`.
+- Formatting: Run `npm run format` (biome) before every commit/checkpoint so the code in checkpoints is always formatted.
 
 ## System Architecture
 
@@ -115,7 +115,7 @@ TaskRankr is a multi-user task management application designed for tracking task
 │       │   ├── GuestModeProvider.tsx  # Guest mode flag (isGuestMode)
 │       │   └── ExpandedTasksProvider.tsx  # Task expansion state persistence
 │       ├── lib/
-│       │   ├── task-tree-utils.ts # Tree-walking helpers (getById, collectSubtreeIds, ...) + sort/filter logic, SORT_ORDER_MAP
+│       │   ├── task-tree-utils.ts # Tree-walking helpers, tree sort/filter logic
 │       │   ├── columns.ts        # Rank-column UI metadata: SORT_LABELS, RANK_FIELDS_COLUMNS
 │       │   ├── rank-field-styles.ts  # Rank field color mappings
 │       │   ├── ts-rest.ts        # ts-rest client + QueryKeys
