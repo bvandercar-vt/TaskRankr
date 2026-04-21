@@ -15,7 +15,7 @@ import {
 } from '@/components/TaskListPage'
 import { RANK_FIELDS_COLUMNS } from '@/lib/columns'
 import { filterAndSortTree, getDirectSubtasks } from '@/lib/task-tree-utils'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import { useTaskMutations, useTasks } from '@/providers/TasksProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { TaskStatus } from '~/shared/schema'
 
@@ -50,7 +50,8 @@ const EmptyState = ({ search }: { search: string | undefined }) => (
 )
 
 const Completed = () => {
-  const { tasks: allTasks, isInitialized } = useLocalState()
+  const { tasks: allTasks } = useTasks()
+  const { isInitialized } = useTaskMutations()
   const [search, setSearch] = useState('')
 
   const completedTasks = useMemo(() => {

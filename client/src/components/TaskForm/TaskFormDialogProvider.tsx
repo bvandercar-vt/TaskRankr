@@ -2,7 +2,7 @@
  * @fileoverview Context provider for task create/edit dialog with
  * desktop/mobile variants. Builds a navigation stack of tasks (real or draft)
  * being edited. All in-flight subtask additions and assignments live in
- * LocalStateProvider's draft session and are committed atomically on Submit
+ * TasksProvider's draft session and are committed atomically on Submit
  * or discarded on Cancel.
  */
 
@@ -15,13 +15,14 @@ import { getById } from '@/lib/task-tree-utils'
 import {
   DraftSessionProvider,
   useDraftSession,
+  useDraftSessionMutations,
 } from '@/providers/DraftSessionProvider'
 import {
   type CreateTaskContent,
   type DeleteTaskArgs,
   type MutateTaskContent,
-  useLocalState,
-} from '@/providers/LocalStateProvider'
+  useTaskMutations,
+} from '@/providers/TasksProvider'
 import type { CreateTask, Task } from '~/shared/schema'
 import { SubtaskSortMode } from '~/shared/schema'
 import { ConfirmDeleteDialog } from '../ConfirmDeleteDialog'
@@ -189,19 +190,21 @@ const TaskFormDialogProviderInner = ({
     number | null
   >(null)
 
-  const { createTask, subscribeToIdReplacement } = useLocalState()
+  const { createTask, subscribeToIdReplacement } = useTaskMutations()
   const {
     tasksWithDrafts,
+    hasDraftSession,
+    draftTaskIds,
+    draftAssignmentCount,
+  } = useDraftSession()
+  const {
     updateTask,
     deleteTask,
     createDraftTask,
     assignDraftSubtask,
     commitDraftSession,
     discardDraftSession,
-    hasDraftSession,
-    draftTaskIds,
-    draftAssignmentCount,
-  } = useDraftSession()
+  } = useDraftSessionMutations()
 
   // Keep nav stack ids in sync when temp ids get replaced after server sync.
   useEffect(() => {

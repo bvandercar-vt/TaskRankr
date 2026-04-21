@@ -14,11 +14,11 @@ import { RANK_FIELDS_COLUMNS } from '@/lib/columns'
 import { getHasIncompleteSubtasks } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
+import { useSettings } from '@/providers/SettingsProvider'
 import type {
   DeleteTaskArgs,
   MutateTaskContent,
-} from '@/providers/LocalStateProvider'
-import { useSettings } from '@/providers/SettingsProvider'
+} from '@/providers/TasksProvider'
 import {
   allRankFieldsNull,
   insertTaskSchemaRefined,

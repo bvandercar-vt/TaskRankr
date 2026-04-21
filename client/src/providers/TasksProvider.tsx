@@ -5,14 +5,26 @@
  * must wrap this provider); `SyncProvider` drains that queue in the
  * background.
  *
+ * Exposes two contexts for re-render isolation:
+ *   - `useTasks()` returns the reactive view (`tasks`, `hasDemoData`).
+ *     Consumers re-render on every task mutation.
+ *   - `useTaskMutations()` returns the stable mutator/server-bridge callbacks
+ *     plus `isInitialized` (`createTask`, `updateTask`, `setTaskStatus`,
+ *     `deleteTask`, `reorderSubtasks`, `deleteDemoData`, `replaceTaskId`,
+ *     `setTasksFromServer`, `subscribeToIdReplacement`). Components that only
+ *     fire mutations subscribe here and never re-render on task list changes.
+ * `isInitialized` lives on the mutations context so consumers that only need
+ * the init flag (like `SyncProvider`) don't subscribe to the task array.
+ *
  * Settings live in `SettingsProvider` — independent context, independent sync
  * pointer. SyncProvider drains both.
  *
  * The TaskForm dialog's in-memory draft session (drafts, parent reassignments,
  * order overrides, and `tasksWithDrafts` overlay) lives in
- * `DraftSessionProvider`, which wraps this provider. Mutators here are
- * draft-unaware; the dialog subtree consumes draft-aware mutators from
- * `useDraftSession()` instead.
+ * `DraftSessionProvider`, which is mounted inside `TaskFormDialogProvider`
+ * below this provider in the tree. Mutators here are draft-unaware; the
+ * dialog subtree consumes draft-aware mutators from
+ * `useDraftSessionMutations()` instead.
  */
 
 import {
@@ -32,6 +44,7 @@ import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
+  collectDescendantIds,
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
@@ -60,64 +73,18 @@ export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 
-interface LocalStateContextValue {
-  // Tasks
-  tasks: Task[]
-  isInitialized: boolean
-  hasDemoData: boolean
-  deleteDemoData: () => void
-
-  // Task mutations
-  createTask: (data: CreateTaskContent) => Task
-  updateTask: (id: number, updates: UpdateTaskContent) => Task
-  setTaskStatus: (id: number, status: TaskStatus) => Task
-  deleteTask: (id: number) => void
-  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-  subscribeToIdReplacement: (
-    cb: (tempId: number, realId: number) => void,
-  ) => () => void
-
-  // Server sync bridge (used by SyncProvider). The task sync queue itself
-  // lives in TaskSyncQueueProvider — these are the tasks-side bridge methods.
-  replaceTaskId: (tempId: number, realId: number) => void
-  setTasksFromServer: (tasks: Task[]) => void
-}
-
-const LocalStateContext = createContext<LocalStateContextValue | null>(null)
-
-// TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
-const loadTasksFromStorage = (key: string): Task[] => {
-  type TasksInStorage = (Task & { subtasks?: Task[] })[]
-  try {
-    const parsed = storage.get<TasksInStorage>(key, [])
-    const flatten = (tasks: TasksInStorage): Task[] => {
-      const result: Task[] = []
-      for (const t of tasks) {
-        result.push(taskSchema.parse(t))
-        if (t.subtasks?.length) {
-          result.push(...flatten(t.subtasks))
-        }
-      }
-      return result
-    }
-    return flatten(parsed)
-  } catch {
-    return []
-  }
-}
-
-interface LocalStateProviderProps {
-  children: React.ReactNode
-  shouldSync: boolean
-  storageMode: StorageMode
-}
-
-interface ReconcileResult {
+/**
+ * Walks the tree until fixed point, auto-completing parents with
+ * `inheritCompletionState` once all their children are completed and
+ * auto-reverting them when any child is not completed. When a parent is
+ * auto-completed and its grandparent has `autoHideCompleted`, cascades
+ * `hidden: true` down the parent's subtree. Returns the reconciled tasks
+ * plus the list of status corrections so callers can enqueue sync ops.
+ */
+function reconcileInheritCompletionState(tasks: Task[]): {
   tasks: Task[]
   corrections: { id: number; status: TaskStatus }[]
-}
-
-function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
+} {
   const corrections: { id: number; status: TaskStatus }[] = []
   let updated = tasks
   let changed = true
@@ -149,22 +116,7 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
         }))
 
         if (shouldHide) {
-          const toHide = new Set<number>()
-          let currentLevel = new Set<number>([parent.id])
-          while (currentLevel.size > 0) {
-            const nextLevel = new Set<number>()
-            for (const t of updated) {
-              if (
-                t.parentId !== null &&
-                currentLevel.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-                nextLevel.add(t.id)
-              }
-            }
-            currentLevel = nextLevel
-          }
+          const toHide = collectDescendantIds(updated, [parent.id])
           if (toHide.size > 0) {
             updated = updated.map((t) =>
               toHide.has(t.id) ? { ...t, hidden: true } : t,
@@ -193,11 +145,114 @@ function reconcileInheritCompletionState(tasks: Task[]): ReconcileResult {
   return { tasks: updated, corrections }
 }
 
-export const LocalStateProvider = ({
+/**
+ * Topologically orders a set of tasks so that any task with a parent in the
+ * same recoverable set appears after that parent. Only traverses to parents
+ * that are themselves in `recoverableIds` — never to parents that already
+ * have a queued CREATE op (those resolve via the queue's own idMap at flush
+ * time). Used when re-enqueuing orphaned negative-id creates.
+ */
+function topoSortForRecovery(
+  orphaned: Task[],
+  taskById: Map<number, Task>,
+  recoverableIds: Set<number>,
+): Task[] {
+  const sorted: Task[] = []
+  const visited = new Set<number>()
+  const visit = (t: Task) => {
+    if (visited.has(t.id)) return
+    visited.add(t.id)
+    if (
+      t.parentId != null &&
+      t.parentId < 0 &&
+      recoverableIds.has(t.parentId)
+    ) {
+      const parent = taskById.get(t.parentId)
+      if (parent) visit(parent)
+    }
+    sorted.push(t)
+  }
+  for (const t of orphaned) visit(t)
+  return sorted
+}
+
+/**
+ * Tasks state — the pieces that change whenever the task list mutates.
+ * Consumers of `useTasks()` re-render on every task change. Use this only
+ * from components that actually render task data.
+ *
+ * NOTE: `isInitialized` lives on the mutations context instead of here so
+ * consumers that only need the init flag (e.g. `SyncProvider`) don't
+ * subscribe to the task array.
+ */
+interface TasksContextValue {
+  tasks: Task[]
+  hasDemoData: boolean
+}
+
+/**
+ * Task mutations + server bridge — stable values whose identity changes at
+ * most once (when `isInitialized` flips false→true at boot). Consumers of
+ * `useTaskMutations()` do NOT re-render on task list changes, so click
+ * handlers / dialog submitters / list-item buttons / the sync orchestrator
+ * can subscribe here without paying the re-render cost of `useTasks()`.
+ */
+interface TaskMutationsContextValue {
+  isInitialized: boolean
+  // Task mutations
+  createTask: (data: CreateTaskContent) => Task
+  updateTask: (id: number, updates: UpdateTaskContent) => Task
+  setTaskStatus: (id: number, status: TaskStatus) => Task
+  deleteTask: (id: number) => void
+  reorderSubtasks: (parentId: number, orderedIds: number[]) => void
+  deleteDemoData: () => void
+  subscribeToIdReplacement: (
+    cb: (tempId: number, realId: number) => void,
+  ) => () => void
+
+  // Server sync bridge (used by SyncProvider). The task sync queue itself
+  // lives in TaskSyncQueueProvider — these are the tasks-side bridge methods.
+  replaceTaskId: (tempId: number, realId: number) => void
+  setTasksFromServer: (tasks: Task[]) => void
+}
+
+const TasksContext = createContext<TasksContextValue | null>(null)
+const TaskMutationsContext = createContext<TaskMutationsContextValue | null>(
+  null,
+)
+
+// TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
+const loadTasksFromStorage = (key: string): Task[] => {
+  type TasksInStorage = (Task & { subtasks?: Task[] })[]
+  try {
+    const parsed = storage.get<TasksInStorage>(key, [])
+    const flatten = (tasks: TasksInStorage): Task[] => {
+      const result: Task[] = []
+      for (const t of tasks) {
+        result.push(taskSchema.parse(t))
+        if (t.subtasks?.length) {
+          result.push(...flatten(t.subtasks))
+        }
+      }
+      return result
+    }
+    return flatten(parsed)
+  } catch {
+    return []
+  }
+}
+
+interface TasksProviderProps {
+  children: React.ReactNode
+  shouldSync: boolean
+  storageMode: StorageMode
+}
+
+export const TasksProvider = ({
   children,
   shouldSync,
   storageMode,
-}: LocalStateProviderProps) => {
+}: TasksProviderProps) => {
   const { settings } = useSettings()
   const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
     useTaskSyncQueue()
@@ -282,26 +337,8 @@ export const LocalStateProvider = ({
           !(t.parentId != null && !taskById.has(t.parentId)),
       )
       if (orphaned.length > 0) {
-        // Topo-sort: a task must appear after its (negative-id) parent, but
-        // only traverse to parents that are themselves in the recoverable
-        // set — never re-add a parent that already has a queued CREATE op.
         const recoverableIds = new Set(orphaned.map((t) => t.id))
-        const sorted: Task[] = []
-        const visited = new Set<number>()
-        const visit = (t: Task) => {
-          if (visited.has(t.id)) return
-          visited.add(t.id)
-          if (
-            t.parentId != null &&
-            t.parentId < 0 &&
-            recoverableIds.has(t.parentId)
-          ) {
-            const parent = taskById.get(t.parentId)
-            if (parent) visit(parent)
-          }
-          sorted.push(t)
-        }
-        for (const t of orphaned) visit(t)
+        const sorted = topoSortForRecovery(orphaned, taskById, recoverableIds)
 
         const recoveryOps: SyncOperation[] = sorted.map((t) => ({
           type: SyncOperationType.CREATE_TASK,
@@ -459,28 +496,13 @@ export const LocalStateProvider = ({
       if (updates.autoHideCompleted !== undefined) {
         const hide = updates.autoHideCompleted
         setTasks((prev) => {
-          const completedDirectIds = new Set(
-            getDirectSubtasks(prev, id)
-              .filter((t) => t.status === TaskStatus.COMPLETED)
-              .map((t) => t.id),
-          )
-          const toHide = new Set<number>(completedDirectIds)
-          const collectDescendants = (parentIds: Set<number>) => {
-            for (const t of prev) {
-              if (
-                t.parentId !== null &&
-                parentIds.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-              }
-            }
-          }
-          let prevSize = 0
-          while (toHide.size > prevSize) {
-            prevSize = toHide.size
-            collectDescendants(toHide)
-          }
+          const completedDirectIds = getDirectSubtasks(prev, id)
+            .filter((t) => t.status === TaskStatus.COMPLETED)
+            .map((t) => t.id)
+          if (completedDirectIds.length === 0) return prev
+          const toHide = collectDescendantIds(prev, completedDirectIds, {
+            includeRoots: true,
+          })
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: hide } : t,
           )
@@ -594,22 +616,7 @@ export const LocalStateProvider = ({
 
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
         setTasks((prev) => {
-          const toHide = new Set<number>()
-          let currentLevel = new Set<number>([id])
-          while (currentLevel.size > 0) {
-            const nextLevel = new Set<number>()
-            for (const t of prev) {
-              if (
-                t.parentId !== null &&
-                currentLevel.has(t.parentId) &&
-                !toHide.has(t.id)
-              ) {
-                toHide.add(t.id)
-                nextLevel.add(t.id)
-              }
-            }
-            currentLevel = nextLevel
-          }
+          const toHide = collectDescendantIds(prev, [id])
           if (toHide.size === 0) return prev
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: true } : t,
@@ -828,31 +835,32 @@ export const LocalStateProvider = ({
   const hasDemoData =
     demoTaskIds.length > 0 && tasks.some((t) => demoTaskIds.includes(t.id))
 
-  const value = useMemo<LocalStateContextValue>(
+  const tasksValue = useMemo<TasksContextValue>(
+    () => ({ tasks, hasDemoData }),
+    [tasks, hasDemoData],
+  )
+
+  const mutationsValue = useMemo<TaskMutationsContextValue>(
     () => ({
-      tasks,
       isInitialized,
-      hasDemoData,
-      deleteDemoData,
       createTask,
       updateTask,
       setTaskStatus,
       deleteTask,
       reorderSubtasks,
+      deleteDemoData,
       subscribeToIdReplacement,
       replaceTaskId,
       setTasksFromServer,
     }),
     [
-      tasks,
       isInitialized,
-      hasDemoData,
-      deleteDemoData,
       createTask,
       updateTask,
       setTaskStatus,
       deleteTask,
       reorderSubtasks,
+      deleteDemoData,
       subscribeToIdReplacement,
       replaceTaskId,
       setTasksFromServer,
@@ -860,15 +868,23 @@ export const LocalStateProvider = ({
   )
 
   return (
-    <LocalStateContext.Provider value={value}>
-      {children}
-    </LocalStateContext.Provider>
+    <TaskMutationsContext.Provider value={mutationsValue}>
+      <TasksContext.Provider value={tasksValue}>
+        {children}
+      </TasksContext.Provider>
+    </TaskMutationsContext.Provider>
   )
 }
 
-export const useLocalState = () => {
-  const ctx = useContext(LocalStateContext)
+export const useTasks = () => {
+  const ctx = useContext(TasksContext)
+  if (!ctx) throw new Error('useTasks must be used within a TasksProvider')
+  return ctx
+}
+
+export const useTaskMutations = () => {
+  const ctx = useContext(TaskMutationsContext)
   if (!ctx)
-    throw new Error('useLocalState must be used within a LocalStateProvider')
+    throw new Error('useTaskMutations must be used within a TasksProvider')
   return ctx
 }

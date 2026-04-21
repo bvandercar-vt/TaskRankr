@@ -1,6 +1,6 @@
 /**
  * @fileoverview Background sync provider for server synchronization.
- * Drains the task sync queue from LocalStateProvider and the coalesced
+ * Drains the task sync queue from TasksProvider and the coalesced
  * settings update from SettingsProvider when online and authenticated.
  */
 
@@ -16,9 +16,9 @@ import {
 
 import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
-import { useLocalState } from './LocalStateProvider'
 import { useSettings } from './SettingsProvider'
 import { SyncOperationType, useTaskSyncQueue } from './TaskSyncQueueProvider'
+import { useTaskMutations } from './TasksProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
@@ -49,7 +49,7 @@ export const SyncProvider = ({
     isInitialized: tasksInitialized,
     replaceTaskId,
     setTasksFromServer,
-  } = useLocalState()
+  } = useTaskMutations()
 
   const { syncQueue, removeProcessedOperations } = useTaskSyncQueue()
 

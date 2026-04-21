@@ -31,10 +31,10 @@ import {
   GuestModeProvider,
   useGuestMode,
 } from '@/providers/GuestModeProvider'
-import { LocalStateProvider } from '@/providers/LocalStateProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { TaskSyncQueueProvider } from '@/providers/TaskSyncQueueProvider'
+import { TasksProvider } from '@/providers/TasksProvider'
 import { StatusBanner } from './components/appInfo/StatusBanner'
 import { WhatsNewDialog } from './components/appInfo/WhatsNewDialog'
 import { Routes } from './lib/constants'
@@ -122,7 +122,7 @@ const AuthenticatedApp = () => {
         shouldSync={shouldSync}
         storageMode={storageMode}
       >
-        <LocalStateProvider shouldSync={shouldSync} storageMode={storageMode}>
+        <TasksProvider shouldSync={shouldSync} storageMode={storageMode}>
           <SyncProvider isAuthenticated={shouldSync}>
             <ExpandedTasksProvider>
               <TaskFormDialogProvider>
@@ -134,7 +134,7 @@ const AuthenticatedApp = () => {
               </TaskFormDialogProvider>
             </ExpandedTasksProvider>
           </SyncProvider>
-        </LocalStateProvider>
+        </TasksProvider>
       </TaskSyncQueueProvider>
     </SettingsProvider>
   )

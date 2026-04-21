@@ -13,19 +13,31 @@
  *     that contains draft ids, parked until commit so nothing stale leaks
  *     into the sync queue.
  *
- * `tasksWithDrafts` overlays these on top of `LocalStateProvider.tasks` so
+ * `tasksWithDrafts` overlays these on top of `TasksProvider.tasks` so
  * the dialog subtree renders the in-progress tree exactly like real tasks.
  *
- * This provider also exposes draft-aware mutators (`updateTask`,
- * `deleteTask`, `reorderSubtasks`, `setTaskStatus`) that route to either the
- * draft layer or the underlying `LocalStateProvider` mutators based on
- * `isDraftId(id)`. Only consumers inside the TaskForm dialog subtree see the
- * draft-aware versions; the rest of the app reads real mutators directly
- * from `useLocalState()` and stays oblivious to draft state.
+ * This provider exposes two contexts for re-render isolation, mirroring
+ * the `TasksProvider` split:
+ *   - `useDraftSession()` returns the reactive view (`tasksWithDrafts`,
+ *     `draftTaskIds`, `draftAssignmentCount`, `hasDraftSession`,
+ *     `isDraftId`). Consumers re-render whenever drafts change.
+ *   - `useDraftSessionMutations()` returns stable draft-aware callbacks
+ *     (`updateTask`, `deleteTask`, `reorderSubtasks`, `setTaskStatus`,
+ *     `createDraftTask`, `assignDraftSubtask`, `commitDraftSession`,
+ *     `discardDraftSession`). All callbacks have empty deps and read
+ *     the latest draft state through refs, so consumers that only fire
+ *     mutations (like `SubtaskRowItem`'s checkbox) never re-render on
+ *     keystrokes that mutate `tasksWithDrafts`.
+ *
+ * The draft-aware mutators route to either the draft layer or the
+ * underlying `TasksProvider` mutators based on whether the id is a draft.
+ * Only consumers inside the TaskForm dialog subtree see the draft-aware
+ * versions; the rest of the app reads real mutators directly from
+ * `useTaskMutations()` and stays oblivious to draft state.
  *
  * `commitDraftSession` promotes drafts in dependency order, building an
  * idMap from temp draft ids to freshly minted real ids, then applies parent
- * reassignments and manual reorders against the *real* LocalState mutators
+ * reassignments and manual reorders against the *real* TasksProvider mutators
  * (which, after the draft split, are draft-unaware and won't re-park).
  */
 
@@ -45,8 +57,9 @@ import { removeIds } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
   type UpdateTaskContent,
-  useLocalState,
-} from '@/providers/LocalStateProvider'
+  useTaskMutations,
+  useTasks,
+} from '@/providers/TasksProvider'
 import {
   allRankFieldsNull,
   SubtaskSortMode,
@@ -55,17 +68,19 @@ import {
   taskSchema,
 } from '~/shared/schema'
 
-interface DraftSessionContextValue {
-  /** `LocalStateProvider.tasks` merged with the in-memory draft overlay. */
+interface DraftSessionStateValue {
+  /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
   tasksWithDrafts: Task[]
   draftTaskIds: Set<number>
   /** Number of real tasks reassigned to a draft parent during the session. */
   draftAssignmentCount: number
   hasDraftSession: boolean
   isDraftId: (id: number) => boolean
+}
 
+interface DraftSessionMutationsValue {
   // Draft-aware mutators: route to the draft layer if the id is a draft,
-  // otherwise fall through to the real LocalStateProvider mutator.
+  // otherwise fall through to the real TasksProvider mutator.
   updateTask: (id: number, updates: UpdateTaskContent) => Task
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
@@ -78,23 +93,28 @@ interface DraftSessionContextValue {
   discardDraftSession: () => void
 }
 
-const DraftSessionContext = createContext<DraftSessionContextValue | null>(null)
+const DraftSessionStateContext = createContext<DraftSessionStateValue | null>(
+  null,
+)
+const DraftSessionMutationsContext =
+  createContext<DraftSessionMutationsValue | null>(null)
 
 export const DraftSessionProvider = ({
   children,
 }: {
   children: React.ReactNode
 }) => {
+  const { tasks } = useTasks()
   const {
-    tasks,
     createTask,
     updateTask: realUpdateTask,
     deleteTask: realDeleteTask,
     reorderSubtasks: realReorderSubtasks,
     setTaskStatus: realSetTaskStatus,
-  } = useLocalState()
-  // Keep a ref so callbacks can read the latest tasks without invalidating on
-  // every tasks change (mirrors LocalStateProvider's tasksRef pattern).
+  } = useTaskMutations()
+  // Keep refs to all reactive state read inside mutator callbacks so the
+  // callbacks themselves can have empty deps and stay referentially stable
+  // across draft churn. Mirrors `TasksProvider`'s tasksRef pattern.
   const tasksRef = useRef(tasks)
   tasksRef.current = tasks
 
@@ -111,10 +131,25 @@ export const DraftSessionProvider = ({
   // Drafts use very-negative IDs to avoid colliding with sync-pending temp ids.
   const draftIdRef = useRef(-100_000_000)
 
+  const draftTasksRef = useRef(draftTasks)
+  draftTasksRef.current = draftTasks
+  const draftAssignedParentsRef = useRef(draftAssignedParents)
+  draftAssignedParentsRef.current = draftAssignedParents
+  const draftSubtaskOrderOverridesRef = useRef(draftSubtaskOrderOverrides)
+  draftSubtaskOrderOverridesRef.current = draftSubtaskOrderOverrides
+
   const draftTaskIds = useMemo(
     () => new Set(draftTasks.map((t) => t.id)),
     [draftTasks],
   )
+  const draftTaskIdsRef = useRef(draftTaskIds)
+  draftTaskIdsRef.current = draftTaskIds
+  /** Stable predicate that always reads the latest draft id set via ref. */
+  const isDraftIdStable = useCallback(
+    (id: number) => draftTaskIdsRef.current.has(id),
+    [],
+  )
+  /** Reactive predicate exposed to state consumers (re-renders with set). */
   const isDraftId = useCallback(
     (id: number) => draftTaskIds.has(id),
     [draftTaskIds],
@@ -172,7 +207,9 @@ export const DraftSessionProvider = ({
   ])
 
   // ---------------------------------------------------------------------------
-  // Draft-layer primitives
+  // Draft-layer primitives. All callbacks below have empty / stable-only deps
+  // and read reactive draft state through refs, so the mutations context
+  // value is stable across draft churn.
   // ---------------------------------------------------------------------------
 
   const createDraftTask = useCallback((data: CreateTaskContent): Task => {
@@ -324,20 +361,21 @@ export const DraftSessionProvider = ({
   // ---------------------------------------------------------------------------
   // Draft-aware mutators exposed to dialog consumers. Route to the draft
   // layer if `id` is a draft, otherwise fall through to the underlying
-  // LocalStateProvider mutator.
+  // TasksProvider mutator. All callbacks read draft state via refs so they
+  // remain referentially stable across draft churn.
   // ---------------------------------------------------------------------------
 
   const updateTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
-      if (isDraftId(id)) return updateDraftTask(id, updates)
+      if (isDraftIdStable(id)) return updateDraftTask(id, updates)
       return realUpdateTask(id, updates)
     },
-    [isDraftId, updateDraftTask, realUpdateTask],
+    [isDraftIdStable, updateDraftTask, realUpdateTask],
   )
 
   const deleteTask = useCallback(
     (id: number) => {
-      if (isDraftId(id)) {
+      if (isDraftIdStable(id)) {
         deleteDraftTask(id)
         return
       }
@@ -389,12 +427,12 @@ export const DraftSessionProvider = ({
 
       realDeleteTask(id)
     },
-    [isDraftId, deleteDraftTask, realDeleteTask],
+    [isDraftIdStable, deleteDraftTask, realDeleteTask],
   )
 
   const reorderSubtasks = useCallback(
     (parentId: number, orderedIds: number[]) => {
-      if (isDraftId(parentId)) {
+      if (isDraftIdStable(parentId)) {
         reorderDraftSubtasks(parentId, orderedIds)
         return
       }
@@ -402,9 +440,14 @@ export const DraftSessionProvider = ({
       // are inside a draft session), park the new order in the override map
       // so it is not persisted/synced until commit. Otherwise, reorder
       // normally via the real mutator.
+      const assigned = draftAssignedParentsRef.current
+      const overrides = draftSubtaskOrderOverridesRef.current
+      const drafts = draftTasksRef.current
+      const inSession =
+        drafts.length > 0 || assigned.size > 0 || overrides.size > 0
       if (
-        hasDraftSession &&
-        orderedIds.some((id) => isDraftId(id) || draftAssignedParents.has(id))
+        inSession &&
+        orderedIds.some((id) => isDraftIdStable(id) || assigned.has(id))
       ) {
         setDraftSubtaskOrderOverrides((prev) => {
           const next = new Map(prev)
@@ -419,18 +462,12 @@ export const DraftSessionProvider = ({
       }
       realReorderSubtasks(parentId, orderedIds)
     },
-    [
-      isDraftId,
-      reorderDraftSubtasks,
-      hasDraftSession,
-      draftAssignedParents,
-      realReorderSubtasks,
-    ],
+    [isDraftIdStable, reorderDraftSubtasks, realReorderSubtasks],
   )
 
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
-      if (isDraftId(id)) {
+      if (isDraftIdStable(id)) {
         const next: Partial<Task> =
           status === TaskStatus.IN_PROGRESS
             ? { status, inProgressStartedAt: new Date() }
@@ -445,7 +482,7 @@ export const DraftSessionProvider = ({
       }
       return realSetTaskStatus(id, status)
     },
-    [isDraftId, updateDraftTask, realSetTaskStatus],
+    [isDraftIdStable, updateDraftTask, realSetTaskStatus],
   )
 
   // ---------------------------------------------------------------------------
@@ -456,29 +493,32 @@ export const DraftSessionProvider = ({
   // navigate into the parent draft to add a subtask). We replay through
   // `createTask`, mapping draft.id -> real.id so children resolve their
   // parentId from the freshly minted real id. Reorders and assignments then
-  // go through the *real* mutators from LocalStateProvider — which are now
+  // go through the *real* mutators from TasksProvider — which are now
   // draft-unaware after the draft split — so no re-parking into the draft
   // layer is possible.
+  //
+  // Reads draft state via refs so the callback stays stable across draft
+  // churn (consumers of `useDraftSessionMutations` don't re-render).
   // ---------------------------------------------------------------------------
   const commitDraftSession = useCallback(() => {
-    if (
-      draftTasks.length === 0 &&
-      draftAssignedParents.size === 0 &&
-      draftSubtaskOrderOverrides.size === 0
-    ) {
+    const drafts = draftTasksRef.current
+    const assignments = draftAssignedParentsRef.current
+    const overrides = draftSubtaskOrderOverridesRef.current
+
+    if (drafts.length === 0 && assignments.size === 0 && overrides.size === 0) {
       return
     }
 
     debugLog.log('task', 'commitDraftSession:start', {
-      draftCount: draftTasks.length,
-      assignmentCount: draftAssignedParents.size,
-      overrideCount: draftSubtaskOrderOverrides.size,
+      draftCount: drafts.length,
+      assignmentCount: assignments.size,
+      overrideCount: overrides.size,
     })
 
     const idMap = new Map<number, number>()
     const resolve = (id: number) => idMap.get(id) ?? id
 
-    for (const draft of draftTasks) {
+    for (const draft of drafts) {
       const created = createTask({
         ...omit(draft, ['id', 'userId']),
         parentId: draft.parentId != null ? resolve(draft.parentId) : null,
@@ -488,7 +528,7 @@ export const DraftSessionProvider = ({
 
     // For MANUAL draft parents whose user-defined order differs from the
     // append-order produced by sequential createTask calls, lock in the order.
-    for (const draft of draftTasks) {
+    for (const draft of drafts) {
       if (draft.subtaskSortMode !== SubtaskSortMode.MANUAL) continue
       if (draft.subtaskOrder.length === 0) continue
       const realId = resolve(draft.id)
@@ -497,34 +537,38 @@ export const DraftSessionProvider = ({
     }
 
     // Apply assignments: real task -> resolved (draft) parent.
-    draftAssignedParents.forEach((newParentId, realTaskId) => {
+    assignments.forEach((newParentId, realTaskId) => {
       realUpdateTask(realTaskId, { parentId: resolve(newParentId) })
     })
 
     // Apply real-parent subtaskOrder overrides (resolving any draft ids).
-    draftSubtaskOrderOverrides.forEach((order, realParentId) => {
+    overrides.forEach((order, realParentId) => {
       realReorderSubtasks(realParentId, order.map(resolve))
     })
 
     discardDraftSession()
     debugLog.log('task', 'commitDraftSession:complete', { mapped: idMap.size })
-  }, [
-    draftTasks,
-    draftAssignedParents,
-    draftSubtaskOrderOverrides,
-    createTask,
-    realUpdateTask,
-    realReorderSubtasks,
-    discardDraftSession,
-  ])
+  }, [createTask, realUpdateTask, realReorderSubtasks, discardDraftSession])
 
-  const value = useMemo<DraftSessionContextValue>(
+  const stateValue = useMemo<DraftSessionStateValue>(
     () => ({
       tasksWithDrafts,
       draftTaskIds,
       draftAssignmentCount: draftAssignedParents.size,
       hasDraftSession,
       isDraftId,
+    }),
+    [
+      tasksWithDrafts,
+      draftTaskIds,
+      draftAssignedParents.size,
+      hasDraftSession,
+      isDraftId,
+    ],
+  )
+
+  const mutationsValue = useMemo<DraftSessionMutationsValue>(
+    () => ({
       updateTask,
       deleteTask,
       reorderSubtasks,
@@ -535,11 +579,6 @@ export const DraftSessionProvider = ({
       discardDraftSession,
     }),
     [
-      tasksWithDrafts,
-      draftTaskIds,
-      draftAssignedParents.size,
-      hasDraftSession,
-      isDraftId,
       updateTask,
       deleteTask,
       reorderSubtasks,
@@ -552,17 +591,28 @@ export const DraftSessionProvider = ({
   )
 
   return (
-    <DraftSessionContext.Provider value={value}>
-      {children}
-    </DraftSessionContext.Provider>
+    <DraftSessionMutationsContext.Provider value={mutationsValue}>
+      <DraftSessionStateContext.Provider value={stateValue}>
+        {children}
+      </DraftSessionStateContext.Provider>
+    </DraftSessionMutationsContext.Provider>
   )
 }
 
 export const useDraftSession = () => {
-  const ctx = useContext(DraftSessionContext)
+  const ctx = useContext(DraftSessionStateContext)
   if (!ctx)
     throw new Error(
       'useDraftSession must be used within a DraftSessionProvider',
+    )
+  return ctx
+}
+
+export const useDraftSessionMutations = () => {
+  const ctx = useContext(DraftSessionMutationsContext)
+  if (!ctx)
+    throw new Error(
+      'useDraftSessionMutations must be used within a DraftSessionProvider',
     )
   return ctx
 }

@@ -5,12 +5,12 @@
 import { useMemo, useState } from 'react'
 
 import {
+  collectDescendantIds,
   filterRootTasks,
-  getAllDescendantIds,
   getById,
 } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
-import { useLocalState } from '@/providers/LocalStateProvider'
+import { useTasks } from '@/providers/TasksProvider'
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Checkbox } from '../../primitives/forms/Checkbox'
@@ -38,7 +38,7 @@ export const AssignSubtaskDialog = ({
   parentTaskId,
   onConfirm,
 }: AssignSubtaskDialogProps) => {
-  const { tasks: allTasks } = useLocalState()
+  const { tasks: allTasks } = useTasks()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [search, setSearch] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)
@@ -46,7 +46,7 @@ export const AssignSubtaskDialog = ({
   const orphanTasks = useMemo(() => {
     const descendantIds =
       parentTaskId !== null
-        ? getAllDescendantIds(allTasks, parentTaskId)
+        ? collectDescendantIds(allTasks, [parentTaskId], { includeRoots: true })
         : new Set<number>()
     return allTasks.filter(
       (t) =>
