@@ -113,6 +113,7 @@ interface LocalStateContextValue {
   syncQueue: SyncOperation[]
   clearSyncQueue: () => void
   removeSyncOperation: (index: number) => void
+  removeProcessedOperations: (count: number) => void
   replaceTaskId: (tempId: number, realId: number) => void
   setTasksFromServer: (tasks: Task[]) => void
   setSettingsFromServer: (settings: UserSettings) => void
@@ -607,6 +608,11 @@ export const LocalStateProvider = ({
 
   const removeSyncOperation = useCallback((index: number) => {
     setSyncQueue((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const removeProcessedOperations = useCallback((count: number) => {
+    if (count <= 0) return
+    setSyncQueue((prev) => prev.slice(count))
   }, [])
 
   // Helper to update a task by ID
@@ -1304,6 +1310,7 @@ export const LocalStateProvider = ({
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
+      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
       setSettingsFromServer,
@@ -1332,6 +1339,7 @@ export const LocalStateProvider = ({
       syncQueue,
       clearSyncQueue,
       removeSyncOperation,
+      removeProcessedOperations,
       replaceTaskId,
       setTasksFromServer,
       setSettingsFromServer,

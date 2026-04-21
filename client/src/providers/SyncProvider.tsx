@@ -44,8 +44,7 @@ export const SyncProvider = ({
 
   const {
     syncQueue,
-    removeSyncOperation,
-    clearSyncQueue,
+    removeProcessedOperations,
     replaceTaskId,
     setTasksFromServer,
     setSettingsFromServer,
@@ -239,13 +238,11 @@ export const SyncProvider = ({
         successCount,
         total: queueSnapshot.length,
       })
-      if (successCount === queueSnapshot.length) {
-        clearSyncQueue()
-      } else if (successCount > 0) {
-        for (let i = 0; i < successCount; i++) {
-          removeSyncOperation(0)
-        }
-      }
+      // Only remove the operations we actually processed from the front of
+      // the queue. Do NOT clear the entire queue — operations may have been
+      // appended by the user during the in-flight sync, and clearing would
+      // silently drop them.
+      removeProcessedOperations(successCount)
     } catch (err) {
       debugLog.log('sync', 'flushQueue:error', { error: String(err) })
       console.error('Sync failed:', err)
@@ -259,8 +256,7 @@ export const SyncProvider = ({
     isOnline,
     isAuthenticated,
     replaceTaskId,
-    removeSyncOperation,
-    clearSyncQueue,
+    removeProcessedOperations,
   ])
 
   useEffect(() => {
