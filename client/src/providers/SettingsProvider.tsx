@@ -59,11 +59,10 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null)
 
-interface SettingsProviderProps {
-  children: React.ReactNode
+type SettingsProviderProps = React.PropsWithChildren<{
   shouldSync: boolean
   storageMode: StorageMode
-}
+}>
 
 export const SettingsProvider = ({
   children,

@@ -229,11 +229,10 @@ const loadTasksFromStorage = (key: string): Task[] => {
   }
 }
 
-interface TasksProviderProps {
-  children: React.ReactNode
+type TasksProviderProps = React.PropsWithChildren<{
   shouldSync: boolean
   storageMode: StorageMode
-}
+}>
 
 export const TasksProvider = ({
   children,

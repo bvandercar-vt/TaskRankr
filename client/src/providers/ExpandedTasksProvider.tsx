@@ -2,14 +2,14 @@
  * @fileoverview Provider for task expansion state management.
  */
 
+import type { EmptyObject } from 'type-fest'
+
 import {
   ExpandedTasksContext,
   useExpandedTasksState,
 } from '@/hooks/useExpandedTasks'
 
-interface ExpandedTasksProviderProps {
-  children: React.ReactNode
-}
+type ExpandedTasksProviderProps = React.PropsWithChildren<EmptyObject>
 
 export const ExpandedTasksProvider = ({
   children,

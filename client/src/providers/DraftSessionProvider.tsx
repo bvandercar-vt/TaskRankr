@@ -40,6 +40,7 @@ import {
   useState,
 } from 'react'
 import { omit } from 'es-toolkit'
+import type { EmptyObject } from 'type-fest'
 import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
@@ -91,9 +92,7 @@ const DraftSessionMutationsContext =
 
 export const DraftSessionProvider = ({
   children,
-}: {
-  children: React.ReactNode
-}) => {
+}: React.PropsWithChildren<EmptyObject>) => {
   const { tasks } = useTasks()
   const {
     createTask,

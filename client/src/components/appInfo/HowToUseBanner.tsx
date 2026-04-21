@@ -1,23 +1,20 @@
 import { HelpCircle } from 'lucide-react'
 
 import { Routes } from '@/lib/constants'
-import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useIsBannerHidden } from '@/providers/BannersProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const HowToUseBanner = () => {
-  const { hiddenBanners } = useGuestMode()
-
-  if (hiddenBanners.has(BannerKey.HOW_TO_USE)) return null
+  if (useIsBannerHidden(BannerKey.HOW_TO_USE)) return null
 
   return (
-    <NotificationBanner
-      storageKey="taskrankr-how-to-use-dismissed"
-      icon={HelpCircle}
-      data-testid="banner-how-to-use"
-    >
+    <NotificationBanner id={BannerKey.HOW_TO_USE} icon={HelpCircle}>
       New here?{' '}
-      <InlineLink href={Routes.HOW_TO_USE} data-testid="link-how-to-use-banner">
+      <InlineLink
+        href={Routes.HOW_TO_USE}
+        data-testid={`link-${BannerKey.HOW_TO_USE}-banner`}
+      >
         Learn how to use the app
       </InlineLink>
     </NotificationBanner>

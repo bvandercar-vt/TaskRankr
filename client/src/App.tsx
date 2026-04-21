@@ -4,7 +4,6 @@
 
 import { useEffect, useRef } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { intersection } from 'es-toolkit'
 import { Route, Switch, useLocation } from 'wouter'
 
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -25,12 +24,9 @@ import HowToUse from '@/pages/HowToUse'
 import Landing from '@/pages/Landing'
 import NotFound from '@/pages/NotFound'
 import Settings from '@/pages/Settings'
+import { BannersProvider } from '@/providers/BannersProvider'
 import { ExpandedTasksProvider } from '@/providers/ExpandedTasksProvider'
-import {
-  BannerKey,
-  GuestModeProvider,
-  useGuestMode,
-} from '@/providers/GuestModeProvider'
+import { GuestModeProvider, useGuestMode } from '@/providers/GuestModeProvider'
 import { SettingsProvider } from '@/providers/SettingsProvider'
 import { SyncProvider } from '@/providers/SyncProvider'
 import { TaskSyncQueueProvider } from '@/providers/TaskSyncQueueProvider'
@@ -58,15 +54,7 @@ const GuestRedirect = () => {
   const [, setLocation] = useLocation()
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const hideParam = params.get('hide')
-    const hideBanners = hideParam
-      ? intersection<BannerKey>(
-          hideParam.split(',') as BannerKey[],
-          Object.values(BannerKey),
-        )
-      : undefined
-    enterGuestMode(hideBanners)
+    enterGuestMode()
     setLocation(Routes.HOME)
   }, [enterGuestMode, setLocation])
 
@@ -144,10 +132,12 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <GuestModeProvider>
-          <Toaster />
-          <AuthenticatedApp />
-        </GuestModeProvider>
+        <BannersProvider>
+          <GuestModeProvider>
+            <Toaster />
+            <AuthenticatedApp />
+          </GuestModeProvider>
+        </BannersProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>

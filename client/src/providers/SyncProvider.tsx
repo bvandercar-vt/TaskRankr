@@ -30,10 +30,9 @@ interface SyncContextValue {
 
 const SyncContext = createContext<SyncContextValue | null>(null)
 
-interface SyncProviderProps {
-  children: React.ReactNode
+type SyncProviderProps = React.PropsWithChildren<{
   isAuthenticated: boolean
-}
+}>
 
 export const SyncProvider = ({
   children,

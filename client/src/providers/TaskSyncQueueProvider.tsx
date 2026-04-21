@@ -59,11 +59,10 @@ const TaskSyncQueueContext = createContext<TaskSyncQueueContextValue | null>(
   null,
 )
 
-interface TaskSyncQueueProviderProps {
-  children: React.ReactNode
+type TaskSyncQueueProviderProps = React.PropsWithChildren<{
   shouldSync: boolean
   storageMode: StorageMode
-}
+}>
 
 export const TaskSyncQueueProvider = ({
   children,

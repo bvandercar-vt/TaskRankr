@@ -4,10 +4,9 @@ import {
   TooltipTrigger,
 } from './primitives/overlays/Tooltip'
 
-interface SubtaskBlockedTooltipProps {
+type SubtaskBlockedTooltipProps = React.PropsWithChildren<{
   blocked: boolean
-  children: React.ReactNode
-}
+}>
 
 export const SubtaskBlockedTooltip = ({
   blocked,

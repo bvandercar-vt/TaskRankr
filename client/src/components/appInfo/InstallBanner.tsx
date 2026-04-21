@@ -2,26 +2,23 @@ import { isStandalonePWA } from 'is-standalone-pwa'
 import { Download } from 'lucide-react'
 
 import { Routes } from '@/lib/constants'
-import { BannerKey, useGuestMode } from '@/providers/GuestModeProvider'
+import { BannerKey, useIsBannerHidden } from '@/providers/BannersProvider'
 import { InlineLink } from '../primitives/InlineText'
 import { NotificationBanner } from '../primitives/NotificationBanner'
 
 export const InstallBanner = () => {
-  const { hiddenBanners } = useGuestMode()
-
-  if (hiddenBanners.has(BannerKey.INSTALL)) return null
+  if (useIsBannerHidden(BannerKey.INSTALL)) return null
 
   return (
     <NotificationBanner
-      storageKey="taskrankr-install-dismissed"
+      id={BannerKey.INSTALL}
       icon={Download}
       hidden={isStandalonePWA()}
-      data-testid="banner-install"
     >
       Install the app!{' '}
       <InlineLink
         href={Routes.HOW_TO_INSTALL}
-        data-testid="link-install-banner"
+        data-testid={`link-${BannerKey.INSTALL}-banner`}
       >
         Learn how to install
       </InlineLink>

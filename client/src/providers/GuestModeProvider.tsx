@@ -1,7 +1,6 @@
 /**
- * @fileoverview Guest mode context provider.
- * Manages guest mode state for trying the app without authentication (local
- * only, no API sync).
+ * @fileoverview Guest-mode flag for trying the app without authentication
+ * (local only, no API sync).
  */
 
 import {
@@ -11,18 +10,11 @@ import {
   useMemo,
   useState,
 } from 'react'
-
-export enum BannerKey {
-  LOG_IN = 'log-in',
-  WHY_DIFFERENT = 'why-different',
-  HOW_TO_USE = 'how-to-use',
-  INSTALL = 'install',
-}
+import type { EmptyObject } from 'type-fest'
 
 interface GuestModeContextValue {
   isGuestMode: boolean
-  hiddenBanners: Set<BannerKey>
-  enterGuestMode: (hideBanners?: BannerKey[]) => void
+  enterGuestMode: () => void
   exitGuestMode: () => void
 }
 
@@ -30,29 +22,15 @@ const GuestModeContext = createContext<GuestModeContextValue | null>(null)
 
 export const GuestModeProvider = ({
   children,
-}: {
-  children: React.ReactNode
-}) => {
+}: React.PropsWithChildren<EmptyObject>) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
-  const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(new Set())
 
-  const enterGuestMode = useCallback((hideBanners?: BannerKey[]) => {
-    setIsGuestMode(true)
-    setHiddenBanners(new Set(Array.isArray(hideBanners) ? hideBanners : []))
-  }, [])
-  const exitGuestMode = useCallback(() => {
-    setIsGuestMode(false)
-    setHiddenBanners(new Set())
-  }, [])
+  const enterGuestMode = useCallback(() => setIsGuestMode(true), [])
+  const exitGuestMode = useCallback(() => setIsGuestMode(false), [])
 
   const value = useMemo(
-    () => ({
-      isGuestMode,
-      hiddenBanners,
-      enterGuestMode,
-      exitGuestMode,
-    }),
-    [isGuestMode, hiddenBanners, enterGuestMode, exitGuestMode],
+    () => ({ isGuestMode, enterGuestMode, exitGuestMode }),
+    [isGuestMode, enterGuestMode, exitGuestMode],
   )
 
   return (
