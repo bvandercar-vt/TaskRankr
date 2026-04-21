@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 import { useIsMobile } from '@/hooks/useMobile'
 import { useTaskActions, useTasks } from '@/hooks/useTasks'
+import { getTaskById } from '@/lib/task-utils'
 import type {
   CreateTaskContent,
   DeleteTaskArgs,
@@ -204,7 +205,7 @@ export const TaskFormDialogProvider = ({
   const rootEntry: NavEntry | null = navStack[0] ?? null
   const currentTask =
     currentEntry?.taskId != null
-      ? tasksWithDrafts.find((t) => t.id === currentEntry.taskId)
+      ? getTaskById(tasksWithDrafts, currentEntry.taskId)
       : undefined
   const isDraftId = (id: number) => draftTaskIds.has(id)
 
@@ -395,7 +396,7 @@ export const TaskFormDialogProvider = ({
     } else {
       // Real parent (editing an existing task): immediate update.
       updateTask({ id: selectedId, parentId: assignTargetParentId })
-      const parent = tasksWithDrafts.find((t) => t.id === assignTargetParentId)
+      const parent = getTaskById(tasksWithDrafts, assignTargetParentId)
       if (parent && parent.subtaskSortMode === SubtaskSortMode.MANUAL) {
         updateTask({
           id: assignTargetParentId,
@@ -468,7 +469,7 @@ export const TaskFormDialogProvider = ({
             })
             const top = currentEntry?.taskId
             if (top != null) {
-              const parent = tasksWithDrafts.find((t) => t.id === top)
+              const parent = getTaskById(tasksWithDrafts, top)
               if (parent) {
                 updateTask({
                   id: top,

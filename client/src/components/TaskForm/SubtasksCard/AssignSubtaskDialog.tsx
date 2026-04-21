@@ -5,7 +5,11 @@
 import { useMemo, useState } from 'react'
 
 import { useTasks } from '@/hooks/useTasks'
-import { filterRootTasks, getAllDescendantIds } from '@/lib/task-utils'
+import {
+  filterRootTasks,
+  getAllDescendantIds,
+  getTaskById,
+} from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
@@ -65,9 +69,10 @@ export const AssignSubtaskDialog = ({
   }
 
   const handleConfirm = () => {
-    const selected = filteredTasks.find((t) => t.id === selectedId)
+    if (selectedId == null) return
+    const selected = getTaskById(filteredTasks, selectedId)
     if (!selected) return
-    onConfirm({ id: selected.id, name: selected.name })
+    onConfirm(selected)
     reset()
     onOpenChange(false)
   }

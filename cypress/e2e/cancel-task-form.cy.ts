@@ -111,7 +111,7 @@ describe('Task Form Cancellation', () => {
 
         cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
           .should('be.visible')
-          .should('contain.text', '1 subtask')
+          .should('contain.text', '1 unsaved subtask')
         cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
       })
 
@@ -143,7 +143,7 @@ describe('Task Form Cancellation', () => {
 
         cy.get(TaskForm.CANCEL_CONFIRM_DIALOG)
           .should('be.visible')
-          .should('contain.text', '2 subtasks')
+          .should('contain.text', '2 unsaved subtasks')
           .should('be.visible ')
         cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
       })
