@@ -16,8 +16,8 @@ import {
   RANK_FIELDS_COLUMNS,
 } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
-import { useTaskMutations } from '@/providers/TasksProvider'
 import { useSettings } from '@/providers/SettingsProvider'
+import { useTaskMutations } from '@/providers/TasksProvider'
 import type { TaskWithSubtasks } from '@/types'
 import {
   type FieldConfig,

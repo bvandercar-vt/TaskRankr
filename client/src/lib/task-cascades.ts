@@ -29,7 +29,9 @@ export function collectSubtreeIds(
   const result = new Set<number>()
   const rootSet = new Set(rootIds)
   if (opts.includeRoots) {
-    rootSet.forEach((id) => result.add(id))
+    rootSet.forEach((id) => {
+      result.add(id)
+    })
   }
   let frontier: Set<number> = rootSet
   while (frontier.size > 0) {

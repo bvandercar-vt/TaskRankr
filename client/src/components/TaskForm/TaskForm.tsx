@@ -13,11 +13,11 @@ import type { z } from 'zod'
 import { getHasIncompleteSubtasks, RANK_FIELDS_COLUMNS } from '@/lib/task-utils'
 import { cn } from '@/lib/utils'
 import { useDraftSession } from '@/providers/DraftSessionProvider'
+import { useSettings } from '@/providers/SettingsProvider'
 import type {
   DeleteTaskArgs,
   MutateTaskContent,
 } from '@/providers/TasksProvider'
-import { useSettings } from '@/providers/SettingsProvider'
 import {
   allRankFieldsNull,
   insertTaskSchemaRefined,

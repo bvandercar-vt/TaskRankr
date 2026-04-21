@@ -16,9 +16,9 @@ import {
 
 import { debugLog } from '@/lib/debug-logger'
 import { tsr } from '@/lib/ts-rest'
-import { useTaskMutations } from './TasksProvider'
 import { useSettings } from './SettingsProvider'
 import { SyncOperationType, useTaskSyncQueue } from './TaskSyncQueueProvider'
+import { useTaskMutations } from './TasksProvider'
 
 interface SyncContextValue {
   isSyncing: boolean
