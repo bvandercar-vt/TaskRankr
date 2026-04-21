@@ -14,14 +14,11 @@ import {
 } from 'react'
 import type { EmptyObject } from 'type-fest'
 
-import {
-  type BannerKey,
-  useBannersMutations,
-} from '@/providers/BannersProvider'
+import { useBannersMutations } from '@/providers/BannersProvider'
 
 interface GuestModeContextValue {
   isGuestMode: boolean
-  enterGuestMode: (hideBanners?: BannerKey[]) => void
+  enterGuestMode: () => void
   exitGuestMode: () => void
 }
 
@@ -31,15 +28,12 @@ export const GuestModeProvider = ({
   children,
 }: React.PropsWithChildren<EmptyObject>) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
-  const { hideBanners, clearHiddenBanners } = useBannersMutations()
+  const { clearHiddenBanners } = useBannersMutations()
 
-  const enterGuestMode = useCallback(
-    (toHide?: BannerKey[]) => {
-      setIsGuestMode(true)
-      hideBanners(toHide ?? [])
-    },
-    [hideBanners],
-  )
+  const enterGuestMode = useCallback(() => {
+    setIsGuestMode(true)
+  }, [])
+
   const exitGuestMode = useCallback(() => {
     setIsGuestMode(false)
     clearHiddenBanners()
