@@ -2,21 +2,6 @@
  * @fileoverview Application-wide constants and configuration values
  */
 
-import {
-  DEFAULT_FIELD_CONFIG,
-  SortOption,
-  type UserSettings,
-} from '~/shared/schema'
-
-export const DEFAULT_SETTINGS = {
-  userId: '',
-  autoPinNewTasks: true,
-  enableInProgressStatus: true,
-  alwaysSortPinnedByPriority: true,
-  sortBy: SortOption.PRIORITY,
-  fieldConfig: DEFAULT_FIELD_CONFIG,
-} as const satisfies UserSettings
-
 export const STANDARD_DATE_FORMAT = {
   month: 'short',
   day: 'numeric',

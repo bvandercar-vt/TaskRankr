@@ -15,14 +15,23 @@ import {
 } from 'react'
 import { toMerged } from 'es-toolkit'
 
-import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { debugLog } from '@/lib/debug-logger'
+import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
-  getStorageKeys,
-  loadFromStorage,
-  type StorageMode,
-} from '@/lib/storage-keys'
-import { sanitizeSettings, type UserSettings } from '~/shared/schema'
+  DEFAULT_FIELD_CONFIG,
+  SortOption,
+  sanitizeSettings,
+  type UserSettings,
+} from '~/shared/schema'
+
+const DEFAULT_SETTINGS = {
+  userId: '',
+  autoPinNewTasks: true,
+  enableInProgressStatus: true,
+  alwaysSortPinnedByPriority: true,
+  sortBy: SortOption.PRIORITY,
+  fieldConfig: DEFAULT_FIELD_CONFIG,
+} as const satisfies UserSettings
 
 /** Normalize incoming settings: fill missing fields from defaults and enforce
  *  the fieldConfig invariant (`required` is false whenever `visible` is
@@ -71,33 +80,27 @@ export const SettingsProvider = ({
 
   useEffect(() => {
     const loaded = normalizeSettings(
-      loadFromStorage<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
+      storage.get<UserSettings>(storageKeys.settings, DEFAULT_SETTINGS),
     )
     setSettings(loaded)
     setPendingSettingsSync(
-      loadFromStorage<Partial<UserSettings> | null>(
-        pendingSyncStorageKey,
-        null,
-      ),
+      storage.get<Partial<UserSettings> | null>(pendingSyncStorageKey, null),
     )
     setIsInitialized(true)
   }, [storageKeys, pendingSyncStorageKey])
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem(storageKeys.settings, JSON.stringify(settings))
+      storage.set(storageKeys.settings, settings)
     }
   }, [settings, isInitialized, storageKeys])
 
   useEffect(() => {
     if (!isInitialized) return
     if (pendingSettingsSync === null) {
-      localStorage.removeItem(pendingSyncStorageKey)
+      storage.remove(pendingSyncStorageKey)
     } else {
-      localStorage.setItem(
-        pendingSyncStorageKey,
-        JSON.stringify(pendingSettingsSync),
-      )
+      storage.set(pendingSyncStorageKey, pendingSettingsSync)
     }
   }, [pendingSettingsSync, isInitialized, pendingSyncStorageKey])
 

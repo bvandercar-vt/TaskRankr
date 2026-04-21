@@ -8,6 +8,7 @@ import { omit } from 'es-toolkit'
 import { removeIds } from '@/lib/task-utils'
 import { SyncOperationType } from '@/providers/LocalStateProvider'
 import type { Task } from '~/shared/schema'
+import { storage } from './storage'
 
 const GUEST_STORAGE_KEYS = {
   tasks: 'taskrankr-guest-tasks',
@@ -33,16 +34,8 @@ const isStorageError = (err: unknown): boolean =>
 
 export const getGuestTasksToMigrate = (): MigrationResult => {
   try {
-    const guestTasksRaw = localStorage.getItem(GUEST_STORAGE_KEYS.tasks)
-    const demoIdsRaw = localStorage.getItem(GUEST_STORAGE_KEYS.demoTaskIds)
-
-    if (!guestTasksRaw) {
-      return { migratedCount: 0, tasks: [] }
-    }
-
-    const guestTasks: Task[] = JSON.parse(guestTasksRaw)
-    const demoIds: number[] = demoIdsRaw ? JSON.parse(demoIdsRaw) : []
-
+    const guestTasks = storage.get<Task[]>(GUEST_STORAGE_KEYS.tasks, [])
+    const demoIds = storage.get<number[]>(GUEST_STORAGE_KEYS.demoTaskIds, [])
     const userCreatedTasks = removeIds(guestTasks, demoIds)
 
     return {
@@ -63,20 +56,10 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
   }
 
   try {
-    const existingAuthTasksRaw = localStorage.getItem(AUTH_STORAGE_KEYS.tasks)
-    const existingAuthTasks: Task[] = existingAuthTasksRaw
-      ? JSON.parse(existingAuthTasksRaw)
-      : []
-
-    const existingSyncQueueRaw = localStorage.getItem(
-      AUTH_STORAGE_KEYS.syncQueue,
-    )
-    const existingSyncQueue = existingSyncQueueRaw
-      ? JSON.parse(existingSyncQueueRaw)
-      : []
-
-    const existingNextIdRaw = localStorage.getItem(AUTH_STORAGE_KEYS.nextId)
-    let nextId = existingNextIdRaw ? JSON.parse(existingNextIdRaw) : -1
+    const existingAuthTasks = storage.get<Task[]>(AUTH_STORAGE_KEYS.tasks, [])
+    const existingSyncQueue = storage.get(AUTH_STORAGE_KEYS.syncQueue, [])
+    const existingNextId = storage.get(AUTH_STORAGE_KEYS.nextId, -1)
+    let nextId = existingNextId
 
     const idMapping = new Map<number, number>()
     const migratedTasks: Task[] = []
@@ -132,12 +115,9 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
     const allTasks = [...existingAuthTasks, ...migratedTasks]
     const allSyncOps = [...existingSyncQueue, ...newSyncOps]
 
-    localStorage.setItem(AUTH_STORAGE_KEYS.tasks, JSON.stringify(allTasks))
-    localStorage.setItem(
-      AUTH_STORAGE_KEYS.syncQueue,
-      JSON.stringify(allSyncOps),
-    )
-    localStorage.setItem(AUTH_STORAGE_KEYS.nextId, JSON.stringify(nextId))
+    storage.set(AUTH_STORAGE_KEYS.tasks, allTasks)
+    storage.set(AUTH_STORAGE_KEYS.syncQueue, allSyncOps)
+    storage.set(AUTH_STORAGE_KEYS.nextId, nextId)
 
     return { migratedCount, tasks: migratedTasks }
   } catch (err) {
@@ -150,11 +130,11 @@ export const migrateGuestTasksToAuth = (): MigrationResult => {
 }
 
 export const clearGuestStorage = () => {
-  localStorage.removeItem(GUEST_STORAGE_KEYS.tasks)
-  localStorage.removeItem(GUEST_STORAGE_KEYS.demoTaskIds)
-  localStorage.removeItem(GUEST_STORAGE_KEYS.settings)
-  localStorage.removeItem(GUEST_STORAGE_KEYS.nextId)
-  localStorage.removeItem(GUEST_STORAGE_KEYS.syncQueue)
+  storage.remove(GUEST_STORAGE_KEYS.tasks)
+  storage.remove(GUEST_STORAGE_KEYS.demoTaskIds)
+  storage.remove(GUEST_STORAGE_KEYS.settings)
+  storage.remove(GUEST_STORAGE_KEYS.nextId)
+  storage.remove(GUEST_STORAGE_KEYS.syncQueue)
 }
 
 export const hasGuestTasksToMigrate = (): boolean => {

@@ -17,7 +17,7 @@ import {
   clearGuestStorage,
   migrateGuestTasksToAuth,
 } from '@/lib/migrate-guest-tasks'
-import { StorageMode } from '@/lib/storage-keys'
+import { StorageMode } from '@/lib/storage'
 import Completed from '@/pages/Completed'
 import Home from '@/pages/Home'
 import HowToInstall from '@/pages/HowToInstall'

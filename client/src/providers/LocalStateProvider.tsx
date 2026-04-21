@@ -24,11 +24,7 @@ import type { z } from 'zod'
 import { toast } from '@/hooks/useToast'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
-import {
-  getStorageKeys,
-  loadFromStorage,
-  type StorageMode,
-} from '@/lib/storage-keys'
+import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
   getById,
   getChildrenLatestCompletedAt,
@@ -126,7 +122,7 @@ const LocalStateContext = createContext<LocalStateContextValue | null>(null)
 const loadTasksFromStorage = (key: string): Task[] => {
   type TasksInStorage = (Task & { subtasks?: Task[] })[]
   try {
-    const parsed = loadFromStorage<TasksInStorage>(key, [])
+    const parsed = storage.get<TasksInStorage>(key, [])
     const flatten = (tasks: TasksInStorage): Task[] => {
       const result: Task[] = []
       for (const t of tasks) {
@@ -287,12 +283,12 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
-    const loadedNextId: number = loadFromStorage<number>(storageKeys.nextId, -1)
-    const loadedQueue: SyncOperation[] = loadFromStorage<SyncOperation[]>(
+    const loadedNextId: number = storage.get<number>(storageKeys.nextId, -1)
+    const loadedQueue: SyncOperation[] = storage.get<SyncOperation[]>(
       storageKeys.syncQueue,
       [],
     )
-    const loadedDemoIds: number[] = loadFromStorage<number[]>(
+    const loadedDemoIds: number[] = storage.get<number[]>(
       storageKeys.demoTaskIds,
       [],
     )
@@ -359,12 +355,8 @@ export const LocalStateProvider = ({
 
     if (loadedTasks.length === 0) {
       const demoTasks = createDemoTasks(nextIdRef)
-      localStorage.setItem(
-        storageKeys.nextId,
-        JSON.stringify(nextIdRef.current),
-      )
-
-      localStorage.removeItem(getStorageKeys(storageMode).expanded)
+      storage.set(storageKeys.nextId, nextIdRef.current)
+      storage.remove(getStorageKeys(storageMode).expanded)
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
@@ -376,7 +368,7 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem(storageKeys.tasks, JSON.stringify(tasks))
+      storage.set(storageKeys.tasks, tasks)
     }
   }, [tasks, isInitialized, storageKeys])
 
@@ -386,7 +378,7 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem(storageKeys.syncQueue, JSON.stringify(syncQueue))
+      storage.set(storageKeys.syncQueue, syncQueue)
     }
   }, [syncQueue, isInitialized, storageKeys])
 
@@ -708,10 +700,7 @@ export const LocalStateProvider = ({
   const createTask = useCallback(
     (data: CreateTaskContent): Task => {
       const tempId = nextIdRef.current--
-      localStorage.setItem(
-        storageKeys.nextId,
-        JSON.stringify(nextIdRef.current),
-      )
+      storage.set(storageKeys.nextId, nextIdRef.current)
 
       const newStatus = (() => {
         if (data.status && data.status !== TaskStatus.OPEN) return data.status
@@ -1274,7 +1263,7 @@ export const LocalStateProvider = ({
 
       reconcileAndSetTasks(sanitized, 'fromServer')
       nextIdRef.current = -1
-      localStorage.setItem(storageKeys.nextId, JSON.stringify(-1))
+      storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
     [storageKeys, demoTaskIds, reconcileAndSetTasks],
@@ -1282,7 +1271,7 @@ export const LocalStateProvider = ({
 
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem(storageKeys.demoTaskIds, JSON.stringify(demoTaskIds))
+      storage.set(storageKeys.demoTaskIds, demoTaskIds)
     }
   }, [demoTaskIds, isInitialized, storageKeys])
 
