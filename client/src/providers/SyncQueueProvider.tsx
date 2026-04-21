@@ -23,10 +23,7 @@ import {
 
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import type { TaskStatus } from '~/shared/schema'
-import type {
-  CreateTaskContent,
-  UpdateTaskContent,
-} from './LocalStateProvider'
+import type { CreateTaskContent, UpdateTaskContent } from './LocalStateProvider'
 
 export enum SyncOperationType {
   CREATE_TASK = 'create_task',
@@ -110,34 +107,31 @@ export const SyncQueueProvider = ({
     setSyncQueue((prev) => prev.slice(count))
   }, [])
 
-  const replaceTempIdInQueue = useCallback(
-    (tempId: number, realId: number) => {
-      setSyncQueue((prev) =>
-        prev.map((op) => {
-          if (op.type === SyncOperationType.CREATE_TASK) {
-            if (op.tempId === tempId) return { ...op, tempId: realId }
-            if (op.data.parentId === tempId)
-              return { ...op, data: { ...op.data, parentId: realId } }
-            return op
-          }
-          if (op.type === SyncOperationType.REORDER_SUBTASKS) {
-            return {
-              ...op,
-              parentId: op.parentId === tempId ? realId : op.parentId,
-              orderedIds: op.orderedIds.map((oid) =>
-                oid === tempId ? realId : oid,
-              ),
-            }
-          }
-          if ('id' in op && op.id === tempId) {
-            return { ...op, id: realId }
-          }
+  const replaceTempIdInQueue = useCallback((tempId: number, realId: number) => {
+    setSyncQueue((prev) =>
+      prev.map((op) => {
+        if (op.type === SyncOperationType.CREATE_TASK) {
+          if (op.tempId === tempId) return { ...op, tempId: realId }
+          if (op.data.parentId === tempId)
+            return { ...op, data: { ...op.data, parentId: realId } }
           return op
-        }),
-      )
-    },
-    [],
-  )
+        }
+        if (op.type === SyncOperationType.REORDER_SUBTASKS) {
+          return {
+            ...op,
+            parentId: op.parentId === tempId ? realId : op.parentId,
+            orderedIds: op.orderedIds.map((oid) =>
+              oid === tempId ? realId : oid,
+            ),
+          }
+        }
+        if ('id' in op && op.id === tempId) {
+          return { ...op, id: realId }
+        }
+        return op
+      }),
+    )
+  }, [])
 
   const value = useMemo<SyncQueueContextValue>(
     () => ({
