@@ -9,6 +9,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { without } from 'es-toolkit'
 import { AnimatePresence, motion } from 'framer-motion'
+import type { EmptyObject } from 'type-fest'
 
 import { useIsMobile } from '@/hooks/useMobile'
 import { getById } from '@/lib/task-tree-utils'
@@ -171,8 +172,7 @@ const MobileDialog = ({
 
 const TaskFormDialogProviderInner = ({
   children,
-  // biome-ignore lint/complexity/noBannedTypes: is fine
-}: React.PropsWithChildren<{}>) => {
+}: React.PropsWithChildren<EmptyObject>) => {
   const isMobile = useIsMobile()
   const [isOpen, setIsOpen] = useState(false)
   const [navStack, setNavStack] = useState<NavEntry[]>([])
@@ -517,8 +517,7 @@ const TaskFormDialogProviderInner = ({
  */
 export const TaskFormDialogProvider = ({
   children,
-  // biome-ignore lint/complexity/noBannedTypes: is fine
-}: React.PropsWithChildren<{}>) => (
+}: React.PropsWithChildren<EmptyObject>) => (
   <DraftSessionProvider>
     <TaskFormDialogProviderInner>{children}</TaskFormDialogProviderInner>
   </DraftSessionProvider>

@@ -15,9 +15,9 @@ export const WhyDifferentBanner = () => {
   return (
     <>
       <NotificationBanner
-        storageKey="taskrankr-why-different-dismissed"
+        storageKey={`taskrankr-${BannerKey.WHY_DIFFERENT}-dismissed`}
         icon={Sparkles}
-        data-testid="banner-why-different"
+        data-testid={`banner-${BannerKey.WHY_DIFFERENT}`}
       >
         Curious?{' '}
         <InlineLink onClick={() => setShowDialog(true)}>

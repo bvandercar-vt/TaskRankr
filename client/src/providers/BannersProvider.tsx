@@ -1,13 +1,5 @@
 /**
  * @fileoverview Cross-cutting banner-suppression state.
- *
- * Owns `hiddenBanners` — the set of banners that should not render right now.
- * Today the only writer is `GuestModeProvider.enterGuestMode`, which seeds the
- * set from a URL param so a "try as guest" deep link can pre-suppress noise
- * (e.g. the log-in nag). The set is cleared on `exitGuestMode`. Decoupled
- * from `GuestModeProvider` so banner components don't have to depend on
- * guest-mode state, and so future writers (e.g. a settings-driven "hide
- * helper banners" toggle) have a natural home.
  */
 
 import {
@@ -17,6 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import type { EmptyObject } from 'type-fest'
 
 export enum BannerKey {
   LOG_IN = 'log-in',
@@ -35,9 +28,7 @@ const BannersContext = createContext<BannersContextValue | null>(null)
 
 export const BannersProvider = ({
   children,
-}: {
-  children: React.ReactNode
-}) => {
+}: React.PropsWithChildren<EmptyObject>) => {
   const [hiddenBanners, setHiddenBanners] = useState<Set<BannerKey>>(new Set())
 
   const hideBanners = useCallback((keys: BannerKey[]) => {

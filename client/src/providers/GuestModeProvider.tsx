@@ -13,6 +13,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import type { EmptyObject } from 'type-fest'
 
 import {
   type BannerKey,
@@ -29,9 +30,7 @@ const GuestModeContext = createContext<GuestModeContextValue | null>(null)
 
 export const GuestModeProvider = ({
   children,
-}: {
-  children: React.ReactNode
-}) => {
+}: React.PropsWithChildren<EmptyObject>) => {
   const [isGuestMode, setIsGuestMode] = useState(false)
   const { hideBanners, clearHiddenBanners } = useBannersMutations()
 

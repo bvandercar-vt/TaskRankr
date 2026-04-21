@@ -11,15 +11,15 @@ export const InstallBanner = () => {
 
   return (
     <NotificationBanner
-      storageKey="taskrankr-install-dismissed"
+      storageKey={`taskrankr-${BannerKey.INSTALL}-dismissed`}
       icon={Download}
       hidden={isStandalonePWA()}
-      data-testid="banner-install"
+      data-testid={`banner-${BannerKey.INSTALL}`}
     >
       Install the app!{' '}
       <InlineLink
         href={Routes.HOW_TO_INSTALL}
-        data-testid="link-install-banner"
+        data-testid={`link-${BannerKey.INSTALL}-banner`}
       >
         Learn how to install
       </InlineLink>

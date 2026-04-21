@@ -4,13 +4,12 @@ import { X } from 'lucide-react'
 
 import { Button } from './Button'
 
-interface NotificationBannerProps {
+type NotificationBannerProps = React.PropsWithChildren<{
   storageKey: string
   icon: LucideIcon
-  children: React.ReactNode
   hidden?: boolean
   'data-testid'?: string
-}
+}>
 
 export const NotificationBanner = ({
   storageKey,

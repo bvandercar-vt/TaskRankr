@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import type { EmptyObject } from 'type-fest'
 
 import { debugLog } from '@/lib/debug-logger'
 import { ContactCardStandalone } from './appInfo/ContactCard'
@@ -54,9 +55,7 @@ const ErrorDialog = ({ errorText }: { errorText: string }) => (
   </div>
 )
 
-interface Props {
-  children: React.ReactNode
-}
+type Props = React.PropsWithChildren<EmptyObject>
 
 interface State {
   hasError: boolean
