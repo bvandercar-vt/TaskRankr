@@ -117,16 +117,8 @@ const AuthenticatedApp = () => {
 
   return (
     <SettingsProvider shouldSync={shouldSync} storageMode={storageMode}>
-      {/*
-        `key={storageMode}` forces a fresh mount of the SyncQueue + LocalState
-        subtree on guest↔auth transitions. Both providers load their initial
-        state from localStorage synchronously in a `useState` initializer
-        (SyncQueue) / useEffect (LocalState) keyed on `storageMode`; remounting
-        is the simplest way to guarantee they see the new mode's storage in
-        sync without a stale-snapshot race between them.
-      */}
       <SyncQueueProvider
-        key={storageMode}
+        key={storageMode} // necessary to reset the queue when switching between guest/auth modes
         shouldSync={shouldSync}
         storageMode={storageMode}
       >
