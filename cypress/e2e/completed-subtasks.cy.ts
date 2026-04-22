@@ -15,8 +15,8 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
+  changeStatusViaStatusChangeDialog,
   checkTaskInTree,
-  openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -108,9 +108,7 @@ describe('Completed Subtasks', () => {
       markSubtaskComplete: () => {
         createUncompletedSubtask()
         cy.wait(500)
-        openStatusChangeDialog(subtask)
-        cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
-        waitForUpdate({ ...subtask, status: TaskStatus.COMPLETED })
+        changeStatusViaStatusChangeDialog(subtask, TaskStatus.COMPLETED)
         checkNumCalls({ create: 2, update: 1 })
       },
     },

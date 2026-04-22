@@ -1,5 +1,6 @@
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Selectors } from '../constants'
+import { type CreatedTask, waitForUpdate } from './intercepts'
 
 const { TaskCard } = Selectors
 
@@ -62,4 +63,13 @@ export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
   getTaskCardTitle(task).trigger('mousedown')
   cy.tick(900)
   cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
+}
+
+export const changeStatusViaStatusChangeDialog = (
+  task: Omit<CreatedTask, 'status'>,
+  newStatus: TaskStatus.COMPLETED,
+) => {
+  openStatusChangeDialog(task)
+  cy.get(Selectors.ChangeStatusDialog.COMPLETE_BTN).click()
+  waitForUpdate({ ...task, status: newStatus })
 }
