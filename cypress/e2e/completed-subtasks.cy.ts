@@ -107,7 +107,7 @@ describe('Completed Subtasks', () => {
       testTitle: 'complete subtask via Change Status Dialog',
       markSubtaskComplete: () => {
         createUncompletedSubtask()
-        cy.wait(100)
+        cy.wait(500)
         openStatusChangeDialog(subtask)
         cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
         waitForUpdate({ ...subtask, status: TaskStatus.COMPLETED })
