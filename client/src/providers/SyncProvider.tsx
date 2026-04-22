@@ -187,19 +187,6 @@ export const SyncProvider = ({
             success = result.status === 200
             break
           }
-          case SyncOperationType.SET_STATUS: {
-            const realId = resolveId(op.id)
-            if (realId < 0) {
-              success = true
-              break
-            }
-            const result = await tsr.tasks.setStatus.mutate({
-              params: { id: realId },
-              body: { status: op.status },
-            })
-            success = result.status === 200
-            break
-          }
           case SyncOperationType.DELETE_TASK: {
             const realId = resolveId(op.id)
             if (realId < 0) {

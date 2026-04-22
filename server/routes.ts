@@ -84,10 +84,12 @@ const router = s.router(contract, {
           return { status: 404, body: { message: 'Task not found' } }
         }
         if (body.status === TaskStatus.COMPLETED) {
-          const err = await checkTimeSpentRequired(
-            userId,
-            body.timeSpent ?? existing.timeSpent ?? 0,
-          )
+          const accumulatedTime =
+            (body.timeSpent ?? existing.timeSpent ?? 0) +
+            (existing.inProgressStartedAt
+              ? Date.now() - existing.inProgressStartedAt.getTime()
+              : 0)
+          const err = await checkTimeSpentRequired(userId, accumulatedTime)
           if (err) return err
         }
         const task = await storage.updateTask(params.id, userId, body)
@@ -104,27 +106,6 @@ const router = s.router(contract, {
         }
         await storage.deleteTask(params.id, userId)
         return { status: 204, body: undefined }
-      },
-    },
-    setStatus: {
-      middleware: [isAuthenticated],
-      handler: async ({ params, body, req }) => {
-        const userId = getUserId(req)
-        const existing = await storage.getTask(params.id, userId)
-        if (!existing) {
-          return { status: 404, body: { message: 'Task not found' } }
-        }
-        if (body.status === TaskStatus.COMPLETED) {
-          const accumulatedTime =
-            (existing.timeSpent ?? 0) +
-            (existing.inProgressStartedAt
-              ? Date.now() - existing.inProgressStartedAt.getTime()
-              : 0)
-          const err = await checkTimeSpentRequired(userId, accumulatedTime)
-          if (err) return err
-        }
-        const task = await storage.setTaskStatus(params.id, userId, body.status)
-        return { status: 200, body: task }
       },
     },
     export: {

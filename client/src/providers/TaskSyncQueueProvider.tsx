@@ -20,13 +20,11 @@ import {
 } from 'react'
 
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
-import type { TaskStatus } from '~/shared/schema'
 import type { CreateTaskContent, UpdateTaskContent } from './TasksProvider'
 
 export enum SyncOperationType {
   CREATE_TASK = 'create_task',
   UPDATE_TASK = 'update_task',
-  SET_STATUS = 'set_status',
   DELETE_TASK = 'delete_task',
   REORDER_SUBTASKS = 'reorder_subtasks',
 }
@@ -38,7 +36,6 @@ export type SyncOperation =
       data: CreateTaskContent
     }
   | { type: SyncOperationType.UPDATE_TASK; id: number; data: UpdateTaskContent }
-  | { type: SyncOperationType.SET_STATUS; id: number; status: TaskStatus }
   | { type: SyncOperationType.DELETE_TASK; id: number }
   | {
       type: SyncOperationType.REORDER_SUBTASKS
