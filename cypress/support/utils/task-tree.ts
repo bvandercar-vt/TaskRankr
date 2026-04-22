@@ -40,6 +40,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
   })
 
   // expanding changes the render, so we need to get the card again
+  // TODO: invesigate, can we make it so it doesn't re-render?
   getTaskCard().within(() => checkSubtasksInCard(task))
 }
 
@@ -49,7 +50,7 @@ const checkSubtasksInCard = (task: TaskTreeNode) => {
   })
 }
 
-export const checkTaskInTree = (task: TaskTreeNode) =>
+export const expandAndCheckTree = (task: TaskTreeNode) =>
   checkTitleAndSubtasks(task, false)
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {

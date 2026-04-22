@@ -16,13 +16,13 @@ import {
 } from '@cypress/support/utils/task-form'
 import {
   changeStatusViaStatusChangeDialog,
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm, ChangeStatusDialog } = Selectors
+const { TaskForm } = Selectors
 
 describe('Completed Subtasks', () => {
   const rootTask = {
@@ -59,7 +59,6 @@ describe('Completed Subtasks', () => {
       clickSubmitBtnCreate({ newTasks: [rootTask, subtask] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
   }
 
@@ -96,6 +95,8 @@ describe('Completed Subtasks', () => {
       testTitle: 'complete subtask via Edit Form',
       markSubtaskComplete: () => {
         createUncompletedSubtask()
+        expandAndCheckTree({ ...rootTask, subtasks: [subtask] }) // expands the tree
+
         openTaskEditForm(subtask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnUpdate()
@@ -107,7 +108,8 @@ describe('Completed Subtasks', () => {
       testTitle: 'complete subtask via Change Status Dialog',
       markSubtaskComplete: () => {
         createUncompletedSubtask()
-        cy.wait(500)
+        cy.wait(500) // wait for render to complete for dialog to work TODO: investigate
+        expandAndCheckTree({ ...rootTask, subtasks: [subtask] }) // expands the tree
         changeStatusViaStatusChangeDialog(subtask, TaskStatus.COMPLETED)
         checkNumCalls({ create: 2, update: 1 })
       },
@@ -115,7 +117,7 @@ describe('Completed Subtasks', () => {
   ] as const) {
     it(`${testTitle} - present in main tree as crossed out, not in completed page`, () => {
       markSubtaskComplete()
-      checkTaskInTree({ ...rootTask, subtasks: [completedSubtask] })
+      expandAndCheckTree({ ...rootTask, subtasks: [completedSubtask] })
       checkTasksExistBackend([completedSubtask])
 
       goToCompletedPage()

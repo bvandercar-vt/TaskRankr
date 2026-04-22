@@ -14,7 +14,7 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -91,7 +91,7 @@ describe('Assign Subtasks', () => {
       clickSubmitBtnCreate()
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
+    expandAndCheckTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
     checkNumCalls({ create: 4, update: 1 })
 
     // test EDIT
@@ -103,7 +103,7 @@ describe('Assign Subtasks', () => {
       clickSubmitBtnUpdate()
     })
 
-    checkTaskInTree({
+    expandAndCheckTree({
       ...rootTask,
       subtasks: [orphanTask, newSubtask, orphanTask2],
     })

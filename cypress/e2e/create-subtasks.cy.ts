@@ -13,7 +13,7 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -69,7 +69,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnCreate({ newTasks: [rootTask, subtask] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
@@ -90,7 +90,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnUpdate()
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 1 })
   })
 
@@ -119,7 +119,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
@@ -140,7 +140,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnUpdate()
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
     checkNumCalls({ create: 4, update: 1 })
   })
 
@@ -181,7 +181,7 @@ describe('Create Subtasks', () => {
       })
     })
 
-    checkTaskInTree({
+    expandAndCheckTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
     })

@@ -14,7 +14,7 @@ import {
   clickSubmitBtnCreate,
   fillTaskForm,
 } from '@cypress/support/utils/task-form'
-import { checkTaskInTree } from '@cypress/support/utils/task-tree'
+import { expandAndCheckTree } from '@cypress/support/utils/task-tree'
 
 import { type FieldConfig, TaskStatus } from '~/shared/schema'
 
@@ -36,7 +36,7 @@ describe('Task Creation', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(task)
     clickSubmitBtnCreate({ newTasks: [task] })
-    checkTaskInTree(task)
+    expandAndCheckTree(task)
     checkNumCalls({ create: 1 })
   })
 
@@ -63,7 +63,7 @@ describe('Task Creation', () => {
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(newTask, fieldConfig)
     clickSubmitBtnCreate({ newTasks: [newTask] })
-    checkTaskInTree(newTask)
+    expandAndCheckTree(newTask)
     checkNumCalls({ create: 1 })
   })
 

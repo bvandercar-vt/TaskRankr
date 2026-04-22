@@ -14,13 +14,13 @@ import {
 } from '@cypress/support/utils/task-form'
 import {
   changeStatusViaStatusChangeDialog,
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm, ChangeStatusDialog } = Selectors
+const { TaskForm } = Selectors
 
 describe('Completed Tasks', () => {
   beforeEach(() => {
@@ -81,7 +81,7 @@ describe('Completed Tasks', () => {
 
       cy.log('Check task is in completed page tree')
       goToCompletedPage()
-      checkTaskInTree(completedTask)
+      expandAndCheckTree(completedTask)
       checkTasksExistBackend([completedTask])
     })
   }
