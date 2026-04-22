@@ -5,7 +5,7 @@ import {
   checkTasksExistBackend,
   isLoggedIn,
 } from '@cypress/support/utils'
-import { checkNumCalls } from '@cypress/support/utils/intercepts'
+import { checkNumCalls, waitForUpdate } from '@cypress/support/utils/intercepts'
 import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
   clickSubmitBtnCreate,
@@ -70,6 +70,7 @@ describe('Completed Tasks', () => {
 
         openStatusChangeDialog(DefaultTask)
         cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
+        waitForUpdate({ ...DefaultTask, status: TaskStatus.COMPLETED })
         checkNumCalls({ create: 1, update: 1 })
       },
     },
