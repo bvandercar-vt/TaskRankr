@@ -229,11 +229,8 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Entering IN_PROGRESS: start timer, demote any existing in-progress task
-      if (
-        newStatus === TaskStatus.IN_PROGRESS &&
-        oldStatus !== TaskStatus.IN_PROGRESS
-      ) {
+      if (newStatus === TaskStatus.IN_PROGRESS) {
+        // Entering IN_PROGRESS: start timer, demote any existing in-progress task
         const allTasks = await this.getTasks(userId)
         const currentInProgress = allTasks.find(
           (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
@@ -252,22 +249,16 @@ export class DatabaseStorage implements IStorage {
             .where(eq(tasks.id, currentInProgress.id))
         }
         dbUpdates.inProgressStartedAt = new Date()
-      }
-
-      // Leaving IN_PROGRESS: flush accumulated time into timeSpent
-      if (
-        oldStatus === TaskStatus.IN_PROGRESS &&
-        newStatus !== TaskStatus.IN_PROGRESS &&
-        currentTask.inProgressStartedAt
-      ) {
-        const elapsed =
-          Date.now() - currentTask.inProgressStartedAt.getTime()
-        dbUpdates.timeSpent = (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
+      } else if (currentTask.inProgressStartedAt) {
+        // Leaving IN_PROGRESS: flush accumulated time into timeSpent
+        const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
+        dbUpdates.timeSpent =
+          (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
         dbUpdates.inProgressStartedAt = null
       }
 
-      // Completing: stamp completedAt and auto-hide under parent if needed
       if (newStatus === TaskStatus.COMPLETED) {
+        // Completing: stamp completedAt and auto-hide under parent if needed
         dbUpdates.completedAt = new Date()
         if (currentTask.parentId) {
           const parent = await this.getTask(currentTask.parentId, userId)
@@ -275,13 +266,8 @@ export class DatabaseStorage implements IStorage {
             dbUpdates.hidden = true
           }
         }
-      }
-
-      // Restoring from completed: clear completedAt
-      if (
-        oldStatus === TaskStatus.COMPLETED &&
-        newStatus !== TaskStatus.COMPLETED
-      ) {
+      } else {
+        // Restoring from completed: clear completedAt
         dbUpdates.completedAt = null
       }
     }
