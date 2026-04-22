@@ -1,12 +1,13 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
 } from '@cypress/support/utils/intercepts'
 import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
+  checkTaskFormSubtasks,
   clickSubmitBtnCreate,
   clickSubmitBtnUpdate,
   fillTaskForm,
@@ -14,7 +15,6 @@ import {
 } from '@cypress/support/utils/task-form'
 import {
   checkTaskInTree,
-  getTaskCardTitle,
   openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
@@ -41,41 +41,8 @@ describe('Completed Subtasks', () => {
     status: TaskStatus.COMPLETED,
   } as const satisfies CreatedTask
 
-  beforeEach(() => {
-    const loggedIn = isLoggedIn()
-    cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
-  })
-
-  it('create a completed subtask — crossed out in form and tree, not on completed page', () => {
-    cy.get(Selectors.CREATE_TASK_BTN).click()
-    getTaskForm(0).within(() => {
-      fillTaskForm(rootTask)
-      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-    })
-
-    getTaskForm(1).within(() => {
-      fillTaskForm(subtask)
-      cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-      clickSubmitBtnCreate()
-    })
-
-    getTaskForm(0).within(() => {
-      cy.contains(`${TaskForm.SUBTASK_ROW} span`, subtask.name).should(
-        'have.class',
-        'line-through',
-      )
-      clickSubmitBtnCreate({ newTasks: [rootTask, completedSubtask] })
-    })
-
-    checkTaskInTree({ ...rootTask, subtasks: [completedSubtask] })
-    getTaskCardTitle(completedSubtask).should('have.class', 'line-through')
-    checkNumCalls({ create: 2, update: 0 })
-
-    goToCompletedPage()
-    cy.contains(subtask.name).should('not.exist')
-  })
-
-  const setupRootWithSubtask = () => {
+  const createUncompletedSubtask = () => {
+    cy.log('Create root task with uncompleted subtask')
     cy.get(Selectors.CREATE_TASK_BTN).click()
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
@@ -95,10 +62,39 @@ describe('Completed Subtasks', () => {
     checkNumCalls({ create: 2, update: 0 })
   }
 
-  for (const { contextName, markSubtaskComplete } of [
+  beforeEach(() => {
+    const loggedIn = isLoggedIn()
+    cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+  })
+
+  for (const { testTitle, markSubtaskComplete } of [
     {
-      contextName: 'Edit via Form',
+      testTitle: 'complete subtask via New Task Form',
       markSubtaskComplete: () => {
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+        getTaskForm(0).within(() => {
+          fillTaskForm(rootTask)
+          cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+        })
+
+        getTaskForm(1).within(() => {
+          fillTaskForm(subtask)
+          cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+          clickSubmitBtnCreate()
+        })
+
+        getTaskForm(0).within(() => {
+          checkTaskFormSubtasks([completedSubtask])
+          clickSubmitBtnCreate({ newTasks: [rootTask, completedSubtask] })
+        })
+
+        checkNumCalls({ create: 2, update: 0 })
+      },
+    },
+    {
+      testTitle: 'complete subtask via Edit Form',
+      markSubtaskComplete: () => {
+        createUncompletedSubtask()
         openTaskEditForm(subtask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnUpdate()
@@ -106,22 +102,23 @@ describe('Completed Subtasks', () => {
       },
     },
     {
-      contextName: 'Edit via Status Dialog',
+      testTitle: 'complete subtask via Change Status Dialog',
       markSubtaskComplete: () => {
+        createUncompletedSubtask()
         openStatusChangeDialog(subtask)
         cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
         checkNumCalls({ create: 2, update: 1 })
       },
     },
   ] as const) {
-    context(contextName, () => {
-      it('create uncompleted subtask, mark completed — crossed out in tree', () => {
-        setupRootWithSubtask()
-        markSubtaskComplete()
+    it(`${testTitle} - present in main tree as crossed out, not in completed page`, () => {
+      markSubtaskComplete()
+      checkTaskInTree({ ...rootTask, subtasks: [completedSubtask] })
+      checkTasksExistBackend([completedSubtask], true)
 
-        checkTaskInTree({ ...rootTask, subtasks: [completedSubtask] })
-        getTaskCardTitle(completedSubtask).should('have.class', 'line-through')
-      })
+      goToCompletedPage()
+      cy.contains(subtask.name).should('not.exist')
+      cy.contains(rootTask.name).should('not.exist')
     })
   }
 })

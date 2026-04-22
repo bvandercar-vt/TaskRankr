@@ -1,10 +1,7 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { isLoggedIn } from '@cypress/support/utils'
-import {
-  type CreatedTask,
-  checkNumCalls,
-} from '@cypress/support/utils/intercepts'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { checkNumCalls } from '@cypress/support/utils/intercepts'
 import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
   clickSubmitBtnCreate,
@@ -22,74 +19,68 @@ import { TaskStatus } from '~/shared/schema'
 const { TaskForm, ChangeStatusDialog } = Selectors
 
 describe('Completed Tasks', () => {
-  const taskCompleted = {
-    ...DefaultTask,
-    name: 'E2E Completed Task',
-    status: TaskStatus.COMPLETED,
-  } as const satisfies CreatedTask
-
-  const taskOpen = {
-    ...DefaultTask,
-    name: 'E2E Task To Complete',
-    status: TaskStatus.PINNED,
-  } as const satisfies CreatedTask
-
   beforeEach(() => {
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
+    checkTasksExistBackend([DefaultTask], false)
   })
 
-  for (const { contextName, setupTask, createTask } of [
+  for (const { testTitle, setupTask } of [
     {
-      contextName: 'New Task',
+      testTitle: 'complete task via New Task Form',
       setupTask: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(taskCompleted)
+        fillTaskForm(DefaultTask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnCreate({ newTasks: [taskCompleted] })
+        clickSubmitBtnCreate({
+          newTasks: [{ ...DefaultTask, status: TaskStatus.COMPLETED }],
+        })
         checkNumCalls({ create: 1, update: 0 })
       },
-      createTask: taskCompleted,
     },
     {
-      contextName: 'Edit Task via Form',
+      testTitle: 'complete task via Edit Form',
       setupTask: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(taskOpen)
-        clickSubmitBtnCreate({ newTasks: [taskOpen] })
+        fillTaskForm(DefaultTask)
+        clickSubmitBtnCreate({
+          newTasks: [{ ...DefaultTask, status: TaskStatus.PINNED }],
+        })
         checkNumCalls({ create: 1, update: 0 })
 
-        openTaskEditForm(taskOpen)
+        openTaskEditForm(DefaultTask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnUpdate()
         checkNumCalls({ create: 1, update: 1 })
       },
-      createTask: taskOpen,
     },
     {
-      contextName: 'Edit Task via Status Dialog',
+      testTitle: 'complete task via Change Status Dialog',
       setupTask: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(taskOpen)
-        clickSubmitBtnCreate({ newTasks: [taskOpen] })
+        fillTaskForm(DefaultTask)
+        clickSubmitBtnCreate({
+          newTasks: [{ ...DefaultTask, status: TaskStatus.PINNED }],
+        })
         checkNumCalls({ create: 1, update: 0 })
 
-        openStatusChangeDialog(taskOpen)
+        openStatusChangeDialog(DefaultTask)
         cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
         checkNumCalls({ create: 1, update: 1 })
       },
-      createTask: taskOpen,
     },
   ] as const) {
-    context(contextName, () => {
-      it('mark task as completed — not in main tree, visible on completed page', () => {
-        setupTask()
+    it(`${testTitle} — not in main tree, is on completed page`, () => {
+      setupTask()
+      const completedTask = { ...DefaultTask, status: TaskStatus.COMPLETED }
 
-        cy.contains(createTask.name).should('not.exist')
+      cy.log('Check task is not in main tree')
+      cy.contains(completedTask.name).should('not.exist')
 
-        goToCompletedPage()
-        checkTaskInTree({ name: createTask.name })
-      })
+      cy.log('Check task is in completed page tree')
+      goToCompletedPage()
+      checkTaskInTree(completedTask)
+      checkTasksExistBackend([completedTask], true)
     })
   }
 })

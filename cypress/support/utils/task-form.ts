@@ -3,8 +3,10 @@ import {
   type FieldConfig,
   RankField,
   type Task,
+  TaskStatus,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
+import { getElementArrayText } from '.'
 import { checkTasksExistBackend } from './api'
 import { type CreatedTask, waitForCreate } from './intercepts'
 
@@ -115,13 +117,24 @@ export const assignSubtask = (
     })
 }
 
-export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
+export const checkTaskFormSubtasks = (
+  subtasks: Pick<Task, 'name' | 'status'>[],
+) =>
   // TODO: test how they are nested
   cy
     .get(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
-    .getElementArrayText()
-    .should(
-      'deep.equal',
-      subtasks.map((subtask) => subtask.name),
+    .should(($rows) =>
+      expect(getElementArrayText($rows)).to.deep.equal(
+        subtasks.map((subtask) => subtask.name),
+        'Task form should list all subtasks',
+      ),
+    )
+    .should(($rows) =>
+      expect(getElementArrayText($rows.filter('line-through'))).to.deep.equal(
+        subtasks
+          .filter((subtask) => subtask.status === TaskStatus.COMPLETED)
+          .map((subtask) => subtask.name),
+        'Completed subtasks should be crossed out',
+      ),
     )

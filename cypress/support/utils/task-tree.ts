@@ -1,9 +1,11 @@
-import type { Task } from '~/shared/schema'
+import { type Task, TaskStatus } from '~/shared/schema'
 import { Selectors } from '../constants'
 
 const { TaskCard } = Selectors
 
-type TaskTreeNode = Pick<Task, 'name'> & { subtasks?: TaskTreeNode[] }
+type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
+  subtasks?: TaskTreeNode[]
+}
 
 export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
   cy
@@ -14,8 +16,16 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('exist')
     .should('have.length', 1)
 
-const checkTitleAndSubtasks = (task: TaskTreeNode) => {
-  const getTaskCard = () => getTaskCardTitle(task).closest(TaskCard.CARD)
+const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
+  const getTaskCard = () =>
+    getTaskCardTitle(task)
+      .should(
+        isSubtask && task.status === TaskStatus.COMPLETED
+          ? 'have.class'
+          : 'not.have.class',
+        'line-through',
+      )
+      .closest(TaskCard.CARD)
 
   const thisTaskCard = getTaskCard().should('exist')
 
@@ -34,11 +44,12 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
 
 const checkSubtasksInCard = (task: TaskTreeNode) => {
   task.subtasks?.forEach((subtask) => {
-    checkTitleAndSubtasks(subtask)
+    checkTitleAndSubtasks(subtask, true)
   })
 }
 
-export const checkTaskInTree = checkTitleAndSubtasks
+export const checkTaskInTree = (task: TaskTreeNode) =>
+  checkTitleAndSubtasks(task, false)
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
