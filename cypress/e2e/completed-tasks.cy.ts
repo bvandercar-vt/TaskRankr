@@ -80,9 +80,9 @@ describe('Completed Tasks', () => {
       cy.contains(completedTask.name).should('not.exist')
 
       cy.log('Check task is in completed page tree')
+      checkTasksExistBackend([completedTask])
       goToCompletedPage()
       expandAndCheckTree(completedTask)
-      checkTasksExistBackend([completedTask])
     })
   }
 })

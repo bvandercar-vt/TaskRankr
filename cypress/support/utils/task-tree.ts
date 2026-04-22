@@ -64,6 +64,7 @@ export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
   getTaskCardTitle(task).trigger('mousedown')
   cy.tick(900)
   cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
+  cy.clock().invoke('restore')
 }
 
 export const changeStatusViaStatusChangeDialog = (
@@ -73,4 +74,5 @@ export const changeStatusViaStatusChangeDialog = (
   openStatusChangeDialog(task)
   cy.get(Selectors.ChangeStatusDialog.COMPLETE_BTN).click()
   waitForUpdate({ ...task, status: newStatus })
+  cy.get(Selectors.ChangeStatusDialog.DIALOG).should('not.exist')
 }
