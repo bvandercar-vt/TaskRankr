@@ -4,6 +4,7 @@ import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
+  waitForUpdate,
 } from '@cypress/support/utils/intercepts'
 import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
@@ -98,6 +99,7 @@ describe('Completed Subtasks', () => {
         openTaskEditForm(subtask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnUpdate()
+        waitForUpdate({ ...subtask, status: TaskStatus.COMPLETED })
         checkNumCalls({ create: 2, update: 1 })
       },
     },
@@ -108,6 +110,7 @@ describe('Completed Subtasks', () => {
         cy.wait(100)
         openStatusChangeDialog(subtask)
         cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
+        waitForUpdate({ ...subtask, status: TaskStatus.COMPLETED })
         checkNumCalls({ create: 2, update: 1 })
       },
     },
