@@ -14,8 +14,9 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
     )
-    .should('be.visible')
     .should('have.length', 1)
+    .scrollIntoView()
+    .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
   const getTaskCard = () =>
