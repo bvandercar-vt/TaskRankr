@@ -136,7 +136,7 @@ Resolved via `vite-tsconfig-paths` from `tsconfig.json`. `@/` → `client/src/`,
 
 ## Cypress E2E Tests
 
-Tests live in `cypress/e2e/`. Support code is in `cypress/support/`:
+- Tests live in `cypress/e2e/`. Support code is in `cypress/support/`:
 
 ```
 cypress/
@@ -156,7 +156,8 @@ cypress/
     └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)
 ```
 
-Must manually add tests to `cypress.config.ts`.
+- Must manually add new test files to `cypress.config.ts`.
+- When asked to run E2E tests, run `cy:run:user` by default unless asked to do `cy:run:guest`.
 
 ### Selectors
 All `data-testid` (and other) selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` or other selector strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
