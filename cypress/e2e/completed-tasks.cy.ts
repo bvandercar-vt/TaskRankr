@@ -22,8 +22,9 @@ import { TaskStatus } from '~/shared/schema'
 const { TaskForm, TaskCard, Menu, ChangeStatusDialog } = Selectors
 
 const openStatusChangeDialog = (task: { name: string }) => {
+  cy.clock()
   cy.contains(TaskCard.TITLE, new RegExp(`^${task.name}$`)).trigger('mousedown')
-  cy.wait(900)
+  cy.tick(900)
   cy.get(ChangeStatusDialog.COMPLETE_BTN).should('be.visible')
 }
 

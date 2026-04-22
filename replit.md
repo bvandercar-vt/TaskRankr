@@ -158,7 +158,7 @@ All `data-testid` selectors live in `cypress/support/constants/selectors.ts` und
 When a feature works the same way from both a create form and an edit form, use a `for...of` loop over an array of `{ contextName, ...hooks }` objects and call `context(contextName, () => { ... })` inside. See `cancel-task-form.cy.ts` and `completed-tasks.cy.ts` for examples.
 
 ### Press-and-hold (status change dialog)
-The `ChangeStatusDialog` opens after an 800 ms mousedown hold on a task card. Simulate it by triggering `mousedown` on the task title element (events bubble to the card handler) and waiting 900 ms. Use `Selectors.ChangeStatusDialog.COMPLETE_BTN` for the confirm button.
+The `ChangeStatusDialog` opens after an 800 ms mousedown hold on a task card. Simulate it by calling `cy.clock()` to take control of timers, triggering `mousedown` on the task title element (events bubble to the card handler), then advancing time instantly with `cy.tick(900)`. Use `Selectors.ChangeStatusDialog.COMPLETE_BTN` for the confirm button.
 
 ## PWA / Service Worker
 `vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
