@@ -3,10 +3,15 @@ import { pgEnum as pgEnumBase, type TableConfig } from 'drizzle-orm/pg-core'
 import type { BuildSchema } from 'drizzle-zod'
 import type { z } from 'zod'
 
+export const createPgEnum = <T extends string>(
+  name: string,
+  strEnum: Record<string, T>,
+) => pgEnumBase(name, Object.values(strEnum) as [T, ...T[]])
+
 export const pgNativeEnum = <T extends string>(
   name: string,
   strEnum: Record<string, T>,
-) => pgEnumBase(name, Object.values(strEnum) as [T, ...T[]])(name)
+) => createPgEnum(name, strEnum)(name)
 
 type ColumnHasDefault<TCol extends Column> =
   TCol['_']['hasDefault'] extends true
