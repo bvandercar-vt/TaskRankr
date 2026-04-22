@@ -14,6 +14,7 @@ import {
 } from '@cypress/support/utils/task-form'
 import {
   checkTaskInTree,
+  openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -62,7 +63,7 @@ describe('Completed Tasks', () => {
       createTask: task,
     },
     {
-      contextName: 'Edit Task',
+      contextName: 'Edit Task via Form',
       setupTask: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
         fillTaskForm(taskOpen)
@@ -72,6 +73,20 @@ describe('Completed Tasks', () => {
         openTaskEditForm(taskOpen)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnUpdate()
+        checkNumCalls({ create: 1, update: 1 })
+      },
+      createTask: taskOpen,
+    },
+    {
+      contextName: 'Edit Task via Status Dialog',
+      setupTask: () => {
+        cy.get(Selectors.CREATE_TASK_BTN).click()
+        fillTaskForm(taskOpen)
+        clickSubmitBtnCreate({ newTasks: [taskOpen] })
+        checkNumCalls({ create: 1, update: 0 })
+
+        openStatusChangeDialog(taskOpen)
+        cy.get('[data-testid="button-complete-task"]').click()
         checkNumCalls({ create: 1, update: 1 })
       },
       createTask: taskOpen,

@@ -45,3 +45,9 @@ export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
+
+export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
+  getTaskCardTitle(task).trigger('mousedown')
+  cy.wait(900)
+  cy.get('[data-testid="button-complete-task"]').should('be.visible')
+}
