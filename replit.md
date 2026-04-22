@@ -156,6 +156,8 @@ cypress/
     └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)
 ```
 
+Must manually add tests to `cypress.config.ts`.
+
 ### Selectors
 All `data-testid` (and other) selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` or other selector strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
 

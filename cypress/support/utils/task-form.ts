@@ -131,7 +131,7 @@ export const checkTaskFormSubtasks = (
       ),
     )
     .should(($rows) =>
-      expect(getElementArrayText($rows.filter('line-through'))).to.deep.equal(
+      expect(getElementArrayText($rows.filter('.line-through'))).to.deep.equal(
         subtasks
           .filter((subtask) => subtask.status === TaskStatus.COMPLETED)
           .map((subtask) => subtask.name),
