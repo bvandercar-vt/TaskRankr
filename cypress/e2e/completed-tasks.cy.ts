@@ -1,6 +1,10 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import {
+  checkTasksDontExistBackend,
+  checkTasksExistBackend,
+  isLoggedIn,
+} from '@cypress/support/utils'
 import { checkNumCalls } from '@cypress/support/utils/intercepts'
 import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
@@ -22,7 +26,7 @@ describe('Completed Tasks', () => {
   beforeEach(() => {
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
-    checkTasksExistBackend([DefaultTask], false)
+    checkTasksDontExistBackend([DefaultTask])
   })
 
   for (const { testTitle, setupTask } of [
@@ -80,7 +84,7 @@ describe('Completed Tasks', () => {
       cy.log('Check task is in completed page tree')
       goToCompletedPage()
       checkTaskInTree(completedTask)
-      checkTasksExistBackend([completedTask], true)
+      checkTasksExistBackend([completedTask])
     })
   }
 })

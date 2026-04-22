@@ -114,7 +114,7 @@ describe('Completed Subtasks', () => {
     it(`${testTitle} - present in main tree as crossed out, not in completed page`, () => {
       markSubtaskComplete()
       checkTaskInTree({ ...rootTask, subtasks: [completedSubtask] })
-      checkTasksExistBackend([completedSubtask], true)
+      checkTasksExistBackend([completedSubtask])
 
       goToCompletedPage()
       cy.contains(subtask.name).should('not.exist')

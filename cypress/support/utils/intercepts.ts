@@ -1,6 +1,6 @@
 import type { RankField, Task } from '~/shared/schema'
 import { ApiPaths } from '../constants'
-import { checkTasksExistBackend } from './api'
+import { checkTasksDontExistBackend, checkTasksExistBackend } from './api'
 import { isLoggedIn } from './test-runner'
 
 export const interceptCreate = () => {
@@ -12,7 +12,7 @@ export type CreatedTask = Pick<Task, 'name' | 'status' | RankField>
 export function waitForCreate(tasks: CreatedTask[]): void {
   const loggedIn = isLoggedIn()
   loggedIn && cy.wait(Array(tasks.length).fill('@createTask'))
-  checkTasksExistBackend(tasks, true)
+  checkTasksExistBackend(tasks)
 }
 
 export const interceptDelete = () => {
@@ -22,7 +22,7 @@ export const interceptDelete = () => {
 export const waitForDelete = (task: Pick<Task, 'name'>) => {
   const loggedIn = isLoggedIn()
   loggedIn && cy.wait('@deleteTask')
-  checkTasksExistBackend([task], false)
+  checkTasksDontExistBackend([task])
 }
 
 export const interceptUpdate = () => {
@@ -32,7 +32,7 @@ export const interceptUpdate = () => {
 export const waitForUpdate = (task: CreatedTask) => {
   const loggedIn = isLoggedIn()
   loggedIn && cy.wait('@updateTask')
-  checkTasksExistBackend([task], true)
+  checkTasksExistBackend([task])
 }
 
 export const checkNumCalls = ({

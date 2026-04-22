@@ -7,7 +7,7 @@ import {
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { getElementArrayText } from '.'
-import { checkTasksExistBackend } from './api'
+import { checkTasksDontExistBackend } from './api'
 import { type CreatedTask, waitForCreate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
@@ -58,7 +58,7 @@ export const fillTaskForm = (
   settings: FieldConfig = DEFAULT_FIELD_CONFIG,
 ) => {
   cy.log(`**filling task form... (task: ${task.name})**`)
-  checkTasksExistBackend([task], false)
+  checkTasksDontExistBackend([task])
 
   cy.get(TaskForm.SUBMIT_BTN).should('be.disabled')
 
@@ -94,7 +94,7 @@ export const clickSubmitBtnCreate = ({
   newTasks?: CreatedTask[]
 } = {}) => {
   if (newTasks) {
-    checkTasksExistBackend(newTasks, false)
+    checkTasksDontExistBackend(newTasks)
   }
   clickSubmitBtn('Create', newTasks ? () => waitForCreate(newTasks) : undefined)
 }
@@ -124,14 +124,15 @@ export const checkTaskFormSubtasks = (
   cy
     .get(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
-    .should(($rows) =>
-      expect(getElementArrayText($rows)).to.deep.equal(
+    .find(TaskForm.SUBTASK_NAME)
+    .should(($names) =>
+      expect(getElementArrayText($names)).to.deep.equal(
         subtasks.map((subtask) => subtask.name),
         'Task form should list all subtasks',
       ),
     )
-    .should(($rows) =>
-      expect(getElementArrayText($rows.filter('.line-through'))).to.deep.equal(
+    .should(($names) =>
+      expect(getElementArrayText($names.filter('.line-through'))).to.deep.equal(
         subtasks
           .filter((subtask) => subtask.status === TaskStatus.COMPLETED)
           .map((subtask) => subtask.name),

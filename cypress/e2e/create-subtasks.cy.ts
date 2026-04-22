@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { checkTasksDontExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -86,7 +86,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      checkTasksExistBackend([subtask2], false)
+      checkTasksDontExistBackend([subtask2])
       clickSubmitBtnUpdate()
     })
 
@@ -136,7 +136,7 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      checkTasksExistBackend([subtask3], false)
+      checkTasksDontExistBackend([subtask3])
       clickSubmitBtnUpdate()
     })
 
