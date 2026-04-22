@@ -19,19 +19,17 @@ import {
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm } = Selectors
-
-const MENU_ITEM_COMPLETED = '[data-testid="menu-item-completed"]'
+const { TaskForm, TaskCard, Menu, ChangeStatusDialog } = Selectors
 
 const openStatusChangeDialog = (task: { name: string }) => {
-  cy.contains('[data-testid="task-title"]', new RegExp(`^${task.name}$`)).trigger('mousedown')
+  cy.contains(TaskCard.TITLE, new RegExp(`^${task.name}$`)).trigger('mousedown')
   cy.wait(900)
-  cy.get('[data-testid="button-complete-task"]').should('be.visible')
+  cy.get(ChangeStatusDialog.COMPLETE_BTN).should('be.visible')
 }
 
 const goToCompletedPage = () => {
   cy.get(Selectors.MENU_BTN).click()
-  cy.get(MENU_ITEM_COMPLETED).click()
+  cy.get(Menu.COMPLETED).click()
 }
 
 describe('Completed Tasks', () => {
@@ -91,7 +89,7 @@ describe('Completed Tasks', () => {
         checkNumCalls({ create: 1, update: 0 })
 
         openStatusChangeDialog(taskOpen)
-        cy.get('[data-testid="button-complete-task"]').click()
+        cy.get(ChangeStatusDialog.COMPLETE_BTN).click()
         checkNumCalls({ create: 1, update: 1 })
       },
       createTask: taskOpen,

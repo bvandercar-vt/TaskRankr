@@ -130,5 +130,35 @@ Tree-walking, sort/filter, and id-list helpers live in `shared/utils/task-utils.
 ### Path aliases
 Resolved via `vite-tsconfig-paths` from `tsconfig.json`. `@/` → `client/src/`, `~/shared/` → `shared/`.
 
+## Cypress E2E Tests
+
+Tests live in `cypress/e2e/`. Support code is in `cypress/support/`:
+
+```
+cypress/
+├── e2e/                        # Test files (*.cy.ts)
+└── support/
+    ├── constants/
+    │   ├── index.ts            # DefaultTask, FieldConfig presets, re-exports selectors
+    │   └── selectors.ts        # All CSS selector strings — always add new ones here
+    ├── utils/
+    │   ├── api.ts              # checkTasksExistBackend (checks local state + backend)
+    │   ├── intercepts.ts       # interceptCreate/Update/Delete, waitForCreate, checkNumCalls
+    │   ├── task-form.ts        # fillTaskForm, clickSubmitBtnCreate/Update, getTaskForm, etc.
+    │   ├── task-tree.ts        # checkTaskInTree, getTaskCardTitle, openTaskEditForm
+    │   ├── settings.ts         # setSettings helper
+    │   └── test-runner.ts      # isLoggedIn
+    └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)
+```
+
+### Selectors
+All `data-testid` selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
+
+### DRY pattern for New vs. Edit variants
+When a feature works the same way from both a create form and an edit form, use a `for...of` loop over an array of `{ contextName, ...hooks }` objects and call `context(contextName, () => { ... })` inside. See `cancel-task-form.cy.ts` and `completed-tasks.cy.ts` for examples.
+
+### Press-and-hold (status change dialog)
+The `ChangeStatusDialog` opens after an 800 ms mousedown hold on a task card. Simulate it by triggering `mousedown` on the task title element (events bubble to the card handler) and waiting 900 ms. Use `Selectors.ChangeStatusDialog.COMPLETE_BTN` for the confirm button.
+
 ## PWA / Service Worker
 `vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.

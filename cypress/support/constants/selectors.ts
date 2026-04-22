@@ -21,6 +21,7 @@ export const Selectors = {
   Menu: {
     SETTINGS: testId('menu-item-settings'),
     HOME: testId('menu-item-home'),
+    COMPLETED: testId('menu-item-completed'),
   },
   TaskCard: {
     CARD: testIdStartsWith('task-card-'),
@@ -53,6 +54,9 @@ export const Selectors = {
     TASK_OPTION: testIdStartsWith('option-assign-task-'),
     CANCEL_BTN: testId('button-cancel-assign'),
     CONFIRM_BTN: testId('button-confirm-assign'),
+  },
+  ChangeStatusDialog: {
+    COMPLETE_BTN: testId('button-complete-task'),
   },
   Settings: {
     FieldConfig: {
