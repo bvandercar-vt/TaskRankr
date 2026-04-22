@@ -144,8 +144,9 @@ cypress/
     ├── utils/
     │   ├── api.ts              # checkTasksExistBackend (checks local state + backend)
     │   ├── intercepts.ts       # interceptCreate/Update/Delete, waitForCreate, checkNumCalls
+    │   ├── navigation.ts       # goToCompletedPage and other page-navigation helpers
     │   ├── task-form.ts        # fillTaskForm, clickSubmitBtnCreate/Update, getTaskForm, etc.
-    │   ├── task-tree.ts        # checkTaskInTree, getTaskCardTitle, openTaskEditForm
+    │   ├── task-tree.ts        # checkTaskInTree, getTaskCardTitle, openTaskEditForm, openStatusChangeDialog
     │   ├── settings.ts         # setSettings helper
     │   └── test-runner.ts      # isLoggedIn
     └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)

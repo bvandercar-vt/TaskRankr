@@ -45,3 +45,12 @@ export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
+
+export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
+  cy.clock()
+  cy.contains(Selectors.TaskCard.TITLE, new RegExp(`^${task.name}$`)).trigger(
+    'mousedown',
+  )
+  cy.tick(900)
+  cy.get(Selectors.ChangeStatusDialog.COMPLETE_BTN).should('be.visible')
+}

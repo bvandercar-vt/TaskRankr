@@ -16,24 +16,14 @@ import {
 import {
   checkTaskInTree,
   getTaskCardTitle,
+  openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
+import { goToCompletedPage } from '@cypress/support/utils/navigation'
 
 import { TaskStatus } from '~/shared/schema'
 
-const { TaskForm, TaskCard, Menu, ChangeStatusDialog } = Selectors
-
-const openStatusChangeDialog = (task: { name: string }) => {
-  cy.clock()
-  cy.contains(TaskCard.TITLE, new RegExp(`^${task.name}$`)).trigger('mousedown')
-  cy.tick(900)
-  cy.get(ChangeStatusDialog.COMPLETE_BTN).should('be.visible')
-}
-
-const goToCompletedPage = () => {
-  cy.get(Selectors.MENU_BTN).click()
-  cy.get(Menu.COMPLETED).click()
-}
+const { TaskForm, ChangeStatusDialog } = Selectors
 
 describe('Completed Subtasks', () => {
   const rootTask = {
