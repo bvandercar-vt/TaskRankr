@@ -8,7 +8,6 @@ import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
 } from '@cypress/support/utils/intercepts'
 import { setSettings } from '@cypress/support/utils/settings'
 import {
@@ -29,8 +28,6 @@ describe('Task Creation', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })

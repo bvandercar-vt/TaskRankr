@@ -4,9 +4,8 @@ import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
+import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
   clickSubmitBtnCreate,
   clickSubmitBtnUpdate,
@@ -17,14 +16,13 @@ import {
   openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
-import { goToCompletedPage } from '@cypress/support/utils/navigation'
 
 import { TaskStatus } from '~/shared/schema'
 
 const { TaskForm, ChangeStatusDialog } = Selectors
 
 describe('Completed Tasks', () => {
-  const task = {
+  const taskCompleted = {
     ...DefaultTask,
     name: 'E2E Completed Task',
     status: TaskStatus.COMPLETED,
@@ -37,9 +35,6 @@ describe('Completed Tasks', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
@@ -49,12 +44,12 @@ describe('Completed Tasks', () => {
       contextName: 'New Task',
       setupTask: () => {
         cy.get(Selectors.CREATE_TASK_BTN).click()
-        fillTaskForm(task)
+        fillTaskForm(taskCompleted)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnCreate({ newTasks: [task] })
+        clickSubmitBtnCreate({ newTasks: [taskCompleted] })
         checkNumCalls({ create: 1, update: 0 })
       },
-      createTask: task,
+      createTask: taskCompleted,
     },
     {
       contextName: 'Edit Task via Form',

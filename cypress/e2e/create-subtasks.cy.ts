@@ -4,8 +4,6 @@ import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -47,9 +45,6 @@ describe('Create Subtasks', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
 

@@ -41,6 +41,7 @@ export const ConfirmDeleteDialog = ({
           'data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
           'bg-card border-white/10',
         )}
+        data-testid="confirm-delete-dialog"
       >
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Task Permanently?</AlertDialogTitle>

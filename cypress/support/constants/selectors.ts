@@ -56,6 +56,7 @@ export const Selectors = {
     CONFIRM_BTN: testId('button-confirm-assign'),
   },
   ChangeStatusDialog: {
+    DIALOG: testId('change-status-dialog'),
     COMPLETE_BTN: testId('button-complete-task'),
   },
   Settings: {

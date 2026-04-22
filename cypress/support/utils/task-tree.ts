@@ -48,9 +48,7 @@ export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
 
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
   cy.clock()
-  cy.contains(Selectors.TaskCard.TITLE, new RegExp(`^${task.name}$`)).trigger(
-    'mousedown',
-  )
+  getTaskCardTitle(task).trigger('mousedown')
   cy.tick(900)
-  cy.get(Selectors.ChangeStatusDialog.COMPLETE_BTN).should('be.visible')
+  cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
 }

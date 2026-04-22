@@ -4,9 +4,8 @@ import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
+import { goToCompletedPage } from '@cypress/support/utils/navigation'
 import {
   clickSubmitBtnCreate,
   clickSubmitBtnUpdate,
@@ -19,7 +18,6 @@ import {
   openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
-import { goToCompletedPage } from '@cypress/support/utils/navigation'
 
 import { TaskStatus } from '~/shared/schema'
 
@@ -44,9 +42,6 @@ describe('Completed Subtasks', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })

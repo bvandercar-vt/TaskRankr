@@ -122,6 +122,10 @@ Load-bearing facts that span multiple files. Anything more specific lives in the
 └── migrations/           # Database migrations
 ```
 
+## PWA / Service Worker
+`vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
+
+
 ## Coding Conventions
 
 ### Shared task utilities
@@ -142,24 +146,19 @@ cypress/
     │   ├── index.ts            # DefaultTask, FieldConfig presets, re-exports selectors
     │   └── selectors.ts        # All CSS selector strings — always add new ones here
     ├── utils/
-    │   ├── api.ts              # checkTasksExistBackend (checks local state + backend)
-    │   ├── intercepts.ts       # interceptCreate/Update/Delete, waitForCreate, checkNumCalls
-    │   ├── navigation.ts       # goToCompletedPage and other page-navigation helpers
-    │   ├── task-form.ts        # fillTaskForm, clickSubmitBtnCreate/Update, getTaskForm, etc.
-    │   ├── task-tree.ts        # checkTaskInTree, getTaskCardTitle, openTaskEditForm, openStatusChangeDialog
-    │   ├── settings.ts         # setSettings helper
+    │   ├── api.ts              # checks local state and backend
+    │   ├── intercepts.ts       # intercept helpers (cy.intercept)
+    │   ├── navigation.ts       # page navigation helpers
+    │   ├── task-form.ts        # UI actions on the Task Form
+    │   ├── task-tree.ts        # UI actions on the Task Tree
+    │   ├── settings.ts         # helpers for setting settings
     │   └── test-runner.ts      # isLoggedIn
     └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)
 ```
 
 ### Selectors
-All `data-testid` selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
+All `data-testid` (and other) selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` or other selector strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
 
 ### DRY pattern for New vs. Edit variants
 When a feature works the same way from both a create form and an edit form, use a `for...of` loop over an array of `{ contextName, ...hooks }` objects and call `context(contextName, () => { ... })` inside. See `cancel-task-form.cy.ts` and `completed-tasks.cy.ts` for examples.
 
-### Press-and-hold (status change dialog)
-The `ChangeStatusDialog` opens after an 800 ms mousedown hold on a task card. Simulate it by calling `cy.clock()` to take control of timers, triggering `mousedown` on the task title element (events bubble to the card handler), then advancing time instantly with `cy.tick(900)`. Use `Selectors.ChangeStatusDialog.COMPLETE_BTN` for the confirm button.
-
-## PWA / Service Worker
-`vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
