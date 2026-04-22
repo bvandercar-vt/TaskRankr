@@ -73,7 +73,10 @@ export enum Time {
 }
 
 export const taskStatusPgEnum = createPgEnum('status', TaskStatus)
-export const subtaskSortModePgEnum = createPgEnum('subtask_sort_mode', SubtaskSortMode)
+export const subtaskSortModePgEnum = createPgEnum(
+  'subtask_sort_mode',
+  SubtaskSortMode,
+)
 export const priorityPgEnum = createPgEnum('priority', Priority)
 export const easePgEnum = createPgEnum('ease', Ease)
 export const enjoymentPgEnum = createPgEnum('enjoyment', Enjoyment)

@@ -66,9 +66,7 @@ export const userSettings = pgTable('user_settings', {
   alwaysSortPinnedByPriority: boolean('always_sort_pinned_by_priority')
     .default(true)
     .notNull(),
-  sortBy: sortByPgEnum('sort_by')
-    .default(SortOption.DATE_CREATED)
-    .notNull(),
+  sortBy: sortByPgEnum('sort_by').default(SortOption.DATE_CREATED).notNull(),
   fieldConfig: jsonb('field_config')
     .$type<FieldConfig>()
     .default(DEFAULT_FIELD_CONFIG)
