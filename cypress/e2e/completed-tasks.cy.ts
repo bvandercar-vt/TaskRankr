@@ -14,7 +14,6 @@ import {
 } from '@cypress/support/utils/task-form'
 import {
   checkTaskInTree,
-  openStatusChangeDialog,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -23,6 +22,12 @@ import { TaskStatus } from '~/shared/schema'
 const { TaskForm } = Selectors
 
 const MENU_ITEM_COMPLETED = '[data-testid="menu-item-completed"]'
+
+const openStatusChangeDialog = (task: { name: string }) => {
+  cy.contains('[data-testid="task-title"]', new RegExp(`^${task.name}$`)).trigger('mousedown')
+  cy.wait(900)
+  cy.get('[data-testid="button-complete-task"]').should('be.visible')
+}
 
 const goToCompletedPage = () => {
   cy.get(Selectors.MENU_BTN).click()
