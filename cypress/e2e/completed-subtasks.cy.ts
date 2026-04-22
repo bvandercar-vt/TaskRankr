@@ -108,7 +108,7 @@ describe('Completed Subtasks', () => {
       testTitle: 'complete subtask via Change Status Dialog',
       markSubtaskComplete: () => {
         createUncompletedSubtask()
-        cy.wait(500) // wait for render to complete for dialog to work TODO: investigate
+        cy.wait(2000) // wait for render to complete for dialog to work TODO: investigate
         expandAndCheckTree({ ...rootTask, subtasks: [subtask] }) // expands the tree
         changeStatusViaStatusChangeDialog(subtask, TaskStatus.COMPLETED)
         checkNumCalls({ create: 2, update: 1 })
