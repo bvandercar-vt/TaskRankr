@@ -23,7 +23,9 @@
     "cy:run": "npm run cy:run:user",
     "cy:run:all": "npm run cy:run:user ; npm run cy:run:guest",
     "cy:run:user": "cypress run --env userMode=USER",
-    "cy:run:guest": "cypress run --env userMode=GUEST"
+    "cy:run:guest": "cypress run --env userMode=GUEST",
+    "cy:run:user:video": "npm run cy:run:user -- --config video=true",
+    "cy:run:guest:video": "npm run cy:run:guest -- --config video=true"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
