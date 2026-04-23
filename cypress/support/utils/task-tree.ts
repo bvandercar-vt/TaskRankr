@@ -13,8 +13,11 @@ type CardScopeGetter = () => Cypress.Chainable<JQuery<HTMLElement>>
 export const getTaskCardTitle = (
   task: Pick<Task, 'name'>,
   getScope?: CardScopeGetter,
-) =>
-  (getScope ? getScope() : cy)
+) => {
+  // TODO: debug
+  cy.wait(500)
+
+  return (getScope ? getScope() : cy)
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
@@ -22,6 +25,7 @@ export const getTaskCardTitle = (
     .should('have.length', 1)
     .scrollIntoView()
     .should('be.visible')
+}
 
 const checkTitleAndSubtasks = (
   task: TaskTreeNode,
