@@ -95,10 +95,7 @@ const clickSubmitBtn = (
       cy.wrap($btn).should('not.exist')
     })
   // API calls should only be created when root task form is submitted
-  // TODO: debug
-  // cy.get(TaskForm.FORM).should(
-  //   newTasks || updatedTasks ? 'not.exist' : 'be.visible',
-  // )
+  cy.get(TaskForm.FORM).should(newTasks || updatedTasks ? 'not.exist' : 'exist')
 }
 
 export const clickSubmitBtnCreate = (args: SubmitBtnArgs = {}) =>
