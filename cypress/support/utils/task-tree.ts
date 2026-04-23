@@ -20,16 +20,17 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   cy.wait(300) // TODO: debug
- const getTaskCard = ()=> getTaskCardTitle(task)
-    .should(
-      tier > 0 && task.status === TaskStatus.COMPLETED
-        ? 'have.class'
-        : 'not.have.class',
-      'line-through',
-    )
-    .closest(TaskCard.CARD)
+  const getTaskCard = () =>
+    getTaskCardTitle(task)
+      .should(
+        tier > 0 && task.status === TaskStatus.COMPLETED
+          ? 'have.class'
+          : 'not.have.class',
+        'line-through',
+      )
+      .closest(TaskCard.CARD)
 
-    const taskCard = getTaskCard()
+  const taskCard = getTaskCard()
 
   if (!task.subtasks?.length) return
 
@@ -72,12 +73,11 @@ export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
   cy.wait(300) // TODO: debug
   const title = getTaskCardTitle(task)
-  cy.clock().then((clock) => {
-    title.trigger('mousedown')
-    cy.tick(900)
-    cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
-    clock.restore()
-  })
+  cy.clock()
+  title.trigger('mousedown')
+  cy.tick(900)
+  cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
+  cy.clock().invoke('restore')
 }
 
 export const changeStatusViaStatusChangeDialog = (
