@@ -8,24 +8,28 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
   subtasks?: TaskTreeNode[]
 }
 
-export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
-  cy.contains(
-    `${TaskCard.CARD} ${TaskCard.TITLE}`,
-    new RegExp(`^${task.name}$`),
-  )
+type CardScopeGetter = () => Cypress.Chainable<JQuery<HTMLElement>>
+
+export const getTaskCardTitle = (
+  task: Pick<Task, 'name'>,
+  getScope?: CardScopeGetter,
+) =>
+  (getScope ? getScope() : cy)
+    .contains(
+      `${TaskCard.CARD} ${TaskCard.TITLE}`,
+      new RegExp(`^${task.name}$`),
+    )
     .should('have.length', 1)
     .scrollIntoView()
     .should('be.visible')
-  // TODO: debug
-  return cy.contains(
-    `${TaskCard.CARD} ${TaskCard.TITLE}`,
-    new RegExp(`^${task.name}$`),
-  )
-}
 
-const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
+const checkTitleAndSubtasks = (
+  task: TaskTreeNode,
+  tier: number,
+  getScope?: CardScopeGetter,
+) => {
   const getTaskCard = () =>
-    getTaskCardTitle(task)
+    getTaskCardTitle(task, getScope)
       .should(
         tier > 0 && task.status === TaskStatus.COMPLETED
           ? 'have.class'
@@ -34,24 +38,32 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       )
       .closest(TaskCard.CARD)
 
-  getTaskCard() // TODO: can reuse?
+  getTaskCard()
 
   if (!task.subtasks?.length) return
 
-  getTaskCard().then(($card) => {
-    const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
-    if (expandBtn.length > 0) {
-      cy.wrap(expandBtn).click()
-    }
-  })
-  // expanding changes the render, so we need to get the card again
-  // TODO: invesigate, can we make it so it doesn't re-render?
-  getTaskCard().within(() => checkSubtasksInCard(task, tier + 1))
+  getTaskCard()
+    .then(($card) => {
+      const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
+      if (expandBtn.length > 0) {
+        cy.wrap(expandBtn).click()
+      }
+    })
+    .then(() => {
+      // expanding changes the render, so we need to get the card again.
+      // in the children as well.
+      // TODO: invesigate, can we make it so it doesn't re-render?
+      checkSubtasksInCard(task, tier + 1, getTaskCard)
+    })
 }
 
-const checkSubtasksInCard = (task: TaskTreeNode, tier: number) => {
+const checkSubtasksInCard = (
+  task: TaskTreeNode,
+  tier: number,
+  getScope: CardScopeGetter,
+) => {
   task.subtasks?.forEach((subtask) => {
-    checkTitleAndSubtasks(subtask, tier)
+    checkTitleAndSubtasks(subtask, tier, getScope)
   })
 }
 
