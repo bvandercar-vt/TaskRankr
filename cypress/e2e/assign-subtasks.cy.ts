@@ -1,6 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksDontExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -54,8 +54,6 @@ describe('Assign Subtasks', () => {
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
 
-    checkTasksDontExistBackend([orphanTask, orphanTask2])
-
     // Create the orphan tasks
     cy.get(Selectors.CREATE_TASK_BTN).click()
     fillTaskForm(orphanTask)
@@ -88,8 +86,10 @@ describe('Assign Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
-      checkTasksDontExistBackend([rootTask, newSubtask])
-      clickSubmitBtnCreate()
+      clickSubmitBtnCreate({
+        newTasks: [rootTask, newSubtask],
+        updatedTasks: [orphanTask],
+      })
     })
 
     expandAndCheckTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
