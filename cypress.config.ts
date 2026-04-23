@@ -12,7 +12,7 @@ const processResultsDir = (resultsDir: string) =>
     : resultsDir
 
 export default defineConfig({
-  video: true,
+  video: false,
   screenshotOnRunFailure: true,
   fixturesFolder: false,
   e2e: {

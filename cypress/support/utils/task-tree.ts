@@ -38,7 +38,7 @@ const checkSubtasksInCard = (task: TaskTreeNode) => {
   })
 }
 
-export const checkTaskInTree = checkTitleAndSubtasks
+export const expandAndCheckTree = checkTitleAndSubtasks
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')

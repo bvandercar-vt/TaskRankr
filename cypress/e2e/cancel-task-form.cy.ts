@@ -1,11 +1,9 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend } from '@cypress/support/utils/api'
+import { checkTasksDontExistBackend } from '@cypress/support/utils/api'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -41,14 +39,11 @@ const checkTasksDontExist = (tasks: CreatedTask[]) => {
   tasks.forEach((task) => {
     cy.contains(task.name).should('not.exist')
   })
-  checkTasksExistBackend(tasks, false)
+  checkTasksDontExistBackend(tasks)
 }
 
 describe('Task Form Cancellation', () => {
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
