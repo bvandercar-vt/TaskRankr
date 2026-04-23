@@ -19,9 +19,7 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  if (tier > 0) {
-    cy.wait(300) // TODO: debug
-  }
+  cy.wait(300) // TODO: debug
   const taskCard = getTaskCardTitle(task)
     .should(
       tier > 0 && task.status === TaskStatus.COMPLETED
@@ -57,13 +55,13 @@ export const expandAndCheckTree = (task: TaskTreeNode) =>
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
-  cy.wait(300) // TODO: debug
+  cy.wait(100) // TODO: debug
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
 
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
-  cy.wait(300) // TODO: debug
+  cy.wait(100) // TODO: debug
   const title = getTaskCardTitle(task)
   cy.clock()
   title.trigger('mousedown')
