@@ -15,6 +15,7 @@ export default defineConfig({
   video: false,
   screenshotOnRunFailure: true,
   fixturesFolder: false,
+  animationDistanceThreshold: 3,
   e2e: {
     baseUrl: 'http://localhost:5000',
     specPattern: [
