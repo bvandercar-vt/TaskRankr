@@ -1,11 +1,9 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   assignSubtask,
@@ -16,7 +14,7 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -53,13 +51,8 @@ describe('Assign Subtasks', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
-
-    checkTasksExistBackend([orphanTask, orphanTask2], false)
 
     // Create the orphan tasks
     cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -79,6 +72,7 @@ describe('Assign Subtasks', () => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
     })
+    // task form re-renders TODO: debug?
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
@@ -92,11 +86,13 @@ describe('Assign Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
-      checkTasksExistBackend([rootTask, newSubtask], false)
-      clickSubmitBtnCreate()
+      clickSubmitBtnCreate({
+        newTasks: [rootTask, newSubtask],
+        updatedTasks: [orphanTask],
+      })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
+    expandAndCheckTree({ ...rootTask, subtasks: [orphanTask, newSubtask] })
     checkNumCalls({ create: 4, update: 1 })
 
     // test EDIT
@@ -105,10 +101,10 @@ describe('Assign Subtasks', () => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
       assignSubtask(orphanTask2)
       checkTaskFormSubtasks([orphanTask, orphanTask2, newSubtask]) // all at same level, so we don't care about orde really.
-      clickSubmitBtnUpdate()
+      clickSubmitBtnUpdate({ updatedTasks: [orphanTask2] })
     })
 
-    checkTaskInTree({
+    expandAndCheckTree({
       ...rootTask,
       subtasks: [orphanTask, newSubtask, orphanTask2],
     })

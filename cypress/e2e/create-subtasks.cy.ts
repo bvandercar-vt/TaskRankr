@@ -1,11 +1,9 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import { isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
-  interceptCreate,
-  interceptUpdate,
 } from '@cypress/support/utils/intercepts'
 import {
   checkTaskFormSubtasks,
@@ -15,7 +13,7 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import {
-  checkTaskInTree,
+  expandAndCheckTree,
   openTaskEditForm,
 } from '@cypress/support/utils/task-tree'
 
@@ -47,9 +45,6 @@ describe('Create Subtasks', () => {
   } as const satisfies CreatedTask
 
   beforeEach(() => {
-    interceptCreate()
-    interceptUpdate()
-
     const loggedIn = isLoggedIn()
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
 
@@ -74,7 +69,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnCreate({ newTasks: [rootTask, subtask] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     checkNumCalls({ create: 2, update: 0 })
 
     // test EDIT
@@ -91,11 +86,10 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
-      checkTasksExistBackend([subtask2], false)
-      clickSubmitBtnUpdate()
+      clickSubmitBtnUpdate({ updatedTasks: [rootTask], newTasks: [subtask2] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 1 })
   })
 
@@ -124,7 +118,7 @@ describe('Create Subtasks', () => {
       clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2] })
     checkNumCalls({ create: 3, update: 0 })
 
     // test EDIT
@@ -141,11 +135,10 @@ describe('Create Subtasks', () => {
 
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
-      checkTasksExistBackend([subtask3], false)
-      clickSubmitBtnUpdate()
+      clickSubmitBtnUpdate({ updatedTasks: [rootTask], newTasks: [subtask3] })
     })
 
-    checkTaskInTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
     checkNumCalls({ create: 4, update: 1 })
   })
 
@@ -186,7 +179,7 @@ describe('Create Subtasks', () => {
       })
     })
 
-    checkTaskInTree({
+    expandAndCheckTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],
     })
