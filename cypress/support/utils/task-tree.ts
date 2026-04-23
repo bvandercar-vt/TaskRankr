@@ -19,8 +19,6 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  cy.wait(500) // TODO: debug
-
   const getTaskCard = () =>
     getTaskCardTitle(task)
       .should(
@@ -31,19 +29,16 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       )
       .closest(TaskCard.CARD)
 
-  const thisTaskCard = getTaskCard()
+  getTaskCard() // TODO: can reuse?
 
   if (!task.subtasks?.length) return
 
-  thisTaskCard.then(($card) => {
-    const expandBtns = $card.find(TaskCard.EXPAND_BTN)
-    if (expandBtns.length > 0) {
-      cy.wrap(expandBtns).each(($btn) => cy.wrap($btn).click())
+  getTaskCard().then(($card) => {
+    const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
+    if (expandBtn.length > 0) {
+      cy.wrap(expandBtn).click()
     }
   })
-
-  cy.wait(500) // TODO: debug
-
   // expanding changes the render, so we need to get the card again
   // TODO: invesigate, can we make it so it doesn't re-render?
   getTaskCard().within(() => checkSubtasksInCard(task, tier + 1))
