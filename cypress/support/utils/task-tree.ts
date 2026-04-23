@@ -1,6 +1,7 @@
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { type CreatedTask, waitForUpdate } from './intercepts'
+import { waitFormFullyClosed } from './task-form'
 
 const { TaskCard } = Selectors
 
@@ -65,13 +66,13 @@ export const expandAndCheckTree = (task: TaskTreeNode) =>
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
-  cy.wait(100) // TODO: debug
+  waitFormFullyClosed()
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
 
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
-  cy.wait(100) // TODO: debug
+  waitFormFullyClosed()
   const title = getTaskCardTitle(task)
   cy.clock()
   title.trigger('mousedown')
