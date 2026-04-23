@@ -41,6 +41,12 @@ describe('Completed Subtasks', () => {
     status: TaskStatus.COMPLETED,
   } as const satisfies CreatedTask
 
+  const subtask2 = {
+    ...DefaultTask,
+    name: 'E2E Subtask 2',
+    status: TaskStatus.OPEN,
+  } as const satisfies CreatedTask
+
   const createUncompletedSubtask = () => {
     cy.log('Create root task with uncompleted subtask')
     cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -118,6 +124,39 @@ describe('Completed Subtasks', () => {
       checkTaskFormSubtasks([]) // subtask is hidden
     })
     checkNumCalls({ create: 2, update: 2 })
+  })
+
+  it('hides subtask in root task form when auto-hide is enabled and subtask is created as completed via the subtask create form', () => {
+    createUncompletedSubtask()
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
+
+    openTaskEditForm(rootTask)
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+      cy.get(TaskForm.SWITCH_AUTO_HIDE_COMPLETED).click()
+    })
+    cy.wait('@updateTask') // update #1: auto-hide setting saved
+
+    // open the new subtask form, fill it, check as completed, and submit back to tier-0
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+    })
+    getTaskForm(1).within(() => {
+      fillTaskForm(subtask2)
+      cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+      clickSubmitBtnCreate() // no args: pops back to tier-0, no API call yet (draft)
+    })
+
+    // submit the root task form to commit the draft subtask2 as completed in the DB
+    clickSubmitBtnUpdate() // no args: saves root task and commits draft session
+    cy.wait('@createTask') // subtask2 created as completed; auto-hide sets it as hidden
+
+    // re-open root task edit form: subtask2 should be hidden, only initial subtask visible
+    openTaskEditForm(rootTask)
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask]) // subtask2 is hidden, initial subtask is visible
+    })
+    checkNumCalls({ create: 3, update: 2 })
   })
 
   for (const { testTitle, markSubtaskComplete } of [
