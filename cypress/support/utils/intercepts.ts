@@ -19,20 +19,20 @@ export const interceptDelete = () => {
   cy.intercept('DELETE', ApiPaths.DELETE_TASK).as('deleteTask')
 }
 
-export const waitForDelete = (task: Pick<Task, 'name'>) => {
+export const waitForDelete = (tasks: Pick<Task, 'name'>[]) => {
   const loggedIn = isLoggedIn()
-  loggedIn && cy.wait('@deleteTask')
-  checkTasksDontExistBackend([task])
+  loggedIn && cy.wait(Array(tasks.length).fill('@deleteTask'))
+  checkTasksDontExistBackend(tasks)
 }
 
 export const interceptUpdate = () => {
   cy.intercept('PUT', ApiPaths.UPDATE_TASK).as('updateTask')
 }
 
-export const waitForUpdate = (task: CreatedTask) => {
+export const waitForUpdate = (tasks: CreatedTask[]) => {
   const loggedIn = isLoggedIn()
-  loggedIn && cy.wait('@updateTask')
-  checkTasksExistBackend([task])
+  loggedIn && cy.wait(Array(tasks.length).fill('@updateTask'))
+  checkTasksExistBackend(tasks)
 }
 
 export const checkNumCalls = ({

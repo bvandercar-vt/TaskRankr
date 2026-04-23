@@ -54,7 +54,9 @@ describe('Completed Tasks', () => {
 
         openTaskEditForm(DefaultTask)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnUpdate()
+        clickSubmitBtnUpdate({
+          updatedTasks: [{ ...DefaultTask, status: TaskStatus.COMPLETED }],
+        })
         checkNumCalls({ create: 1, update: 1 })
       },
     },

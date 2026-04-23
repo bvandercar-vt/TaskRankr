@@ -76,6 +76,6 @@ export const changeStatusViaStatusChangeDialog = (
 ) => {
   openStatusChangeDialog(task)
   cy.get(Selectors.ChangeStatusDialog.COMPLETE_BTN).click()
-  waitForUpdate({ ...task, status: newStatus })
+  waitForUpdate([{ ...task, status: newStatus }])
   cy.get(Selectors.ChangeStatusDialog.DIALOG).should('not.exist')
 }

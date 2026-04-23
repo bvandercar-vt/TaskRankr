@@ -8,7 +8,7 @@ import {
 import { Selectors } from '../constants'
 import { getElementArrayText } from '.'
 import { checkTasksDontExistBackend } from './api'
-import { type CreatedTask, waitForCreate } from './intercepts'
+import { type CreatedTask, waitForCreate, waitForUpdate } from './intercepts'
 
 const { TaskForm, AssignSubtaskDialog } = Selectors
 
@@ -97,9 +97,20 @@ export const clickSubmitBtnCreate = ({
     checkTasksDontExistBackend(newTasks)
   }
   clickSubmitBtn('Create', newTasks ? () => waitForCreate(newTasks) : undefined)
+  // new tasks should only be created when root task form is submitted
+  cy.get(TaskForm.FORM).should(newTasks ? 'not.exist' : 'be.visible')
 }
 
-export const clickSubmitBtnUpdate = () => clickSubmitBtn('Save')
+export const clickSubmitBtnUpdate = ({
+  updatedTasks,
+}: {
+  updatedTasks?: CreatedTask[]
+} = {}) =>
+  clickSubmitBtn(
+    'Save',
+    // TODO: check correct tasks were updated
+    updatedTasks ? () => waitForUpdate(updatedTasks) : undefined,
+  )
 
 export const assignSubtask = (
   /**

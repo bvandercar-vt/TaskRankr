@@ -87,7 +87,7 @@ describe('Create Subtasks', () => {
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2])
       checkTasksDontExistBackend([subtask2])
-      clickSubmitBtnUpdate()
+      clickSubmitBtnUpdate({ updatedTasks: [rootTask] })
     })
 
     expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2] })
@@ -137,7 +137,7 @@ describe('Create Subtasks', () => {
     getTaskForm(0).within(() => {
       checkTaskFormSubtasks([subtask, subtask2, subtask3])
       checkTasksDontExistBackend([subtask3])
-      clickSubmitBtnUpdate()
+      clickSubmitBtnUpdate({ updatedTasks: [rootTask] })
     })
 
     expandAndCheckTree({ ...rootTask, subtasks: [subtask, subtask2, subtask3] })
