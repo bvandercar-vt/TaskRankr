@@ -73,8 +73,6 @@ describe('Assign Subtasks', () => {
     getTaskForm(0).within(() => {
       fillTaskForm(rootTask)
       assignSubtask(orphanTask)
-    })
-    getTaskForm(0).within(() => {
       checkTaskFormSubtasks([orphanTask])
       cy.get(TaskForm.ADD_SUBTASK_BTN).click()
     })
