@@ -107,6 +107,6 @@ describe('Assign Subtasks', () => {
       ...rootTask,
       subtasks: [orphanTask, newSubtask, orphanTask2],
     })
-    checkNumCalls({ create: 4, update: 2 })
+    checkNumCalls({ create: 4, update: 3 })
   })
 })
