@@ -109,7 +109,7 @@ export const clickSubmitBtnUpdate = (args: SubmitBtnArgs = {}) =>
 
 export const waitFormFullyClosed = () => {
   cy.get<Date>('@lastFormSubmitTime').then((lastFormSubmitTime) => {
-    cy.wait(Math.max(0, 100 - (Date.now() - lastFormSubmitTime.getTime()))) // TODO: debug why we have to do this.
+    cy.wait(Math.max(0, 50 - (Date.now() - lastFormSubmitTime.getTime()))) // TODO: debug why we have to do this.
   })
 }
 
