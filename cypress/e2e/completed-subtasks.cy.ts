@@ -72,91 +72,6 @@ describe('Completed Subtasks', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
-  context('Auto-hide completed subtasks', () => {
-    beforeEach(() => {
-      cy.get(Selectors.CREATE_TASK_BTN).click()
-      getTaskForm(0).within(() => {
-        fillTaskForm(rootTask)
-        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
-        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        // task that will not be marked as completed, to verify that only completed subtasks are hidden
-        fillTaskForm(subtask)
-        clickSubmitBtnCreate()
-      })
-    })
-
-    it('via completion checkbox in subtask list', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask, subtask2])
-        cy.get(TaskForm.COMPLETE_SUBTASK_CHECKBOX).last().click()
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
-      })
-
-      checkNumCalls({ create: 3, update: 0 })
-    })
-
-    it('via completion checkbox in new subtask form', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
-      })
-
-      checkNumCalls({ create: 3, update: 0 })
-    })
-
-    it('via completion checkbox in edit subtask form', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask, subtask2])
-        cy.get(TaskForm.EDIT_SUBTASK_BTN).last().click()
-      })
-
-      getTaskForm(1).within(() => {
-        cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnUpdate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
-      })
-
-      checkNumCalls({ create: 3, update: 0 })
-    })
-  })
-
   for (const { testTitle, markSubtaskComplete } of [
     {
       testTitle: 'complete subtask via New Task Form',
@@ -215,4 +130,88 @@ describe('Completed Subtasks', () => {
       cy.contains(rootTask.name).should('not.exist')
     })
   }
+
+  context('Auto-hide completed subtasks', () => {
+    beforeEach(() => {
+      cy.get(Selectors.CREATE_TASK_BTN).click()
+      getTaskForm(0).within(() => {
+        fillTaskForm(rootTask)
+        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
+        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      })
+
+      getTaskForm(1).within(() => {
+        // task that will not be marked as completed, to verify that only completed subtasks are hidden
+        fillTaskForm(subtask)
+        clickSubmitBtnCreate()
+      })
+    })
+
+    afterEach(() => {
+      checkNumCalls({ create: 3, update: 0 })
+      expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
+    })
+
+    it('via completion checkbox in subtask list', () => {
+      getTaskForm(0).within(() => {
+        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      })
+
+      getTaskForm(1).within(() => {
+        fillTaskForm(subtask2)
+        clickSubmitBtnCreate()
+      })
+
+      getTaskForm(0).within(() => {
+        checkTaskFormSubtasks([subtask, subtask2])
+        cy.get(TaskForm.COMPLETE_SUBTASK_CHECKBOX).last().click()
+        checkTaskFormSubtasks([subtask])
+        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
+      })
+    })
+
+    it('via completion checkbox in new subtask form', () => {
+      getTaskForm(0).within(() => {
+        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      })
+
+      getTaskForm(1).within(() => {
+        fillTaskForm(subtask2)
+        cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+        clickSubmitBtnCreate()
+      })
+
+      getTaskForm(0).within(() => {
+        checkTaskFormSubtasks([subtask])
+        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
+      })
+    })
+
+    it('via completion checkbox in edit subtask form', () => {
+      getTaskForm(0).within(() => {
+        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
+      })
+
+      getTaskForm(1).within(() => {
+        fillTaskForm(subtask2)
+        clickSubmitBtnCreate()
+      })
+
+      getTaskForm(0).within(() => {
+        checkTaskFormSubtasks([subtask, subtask2])
+        cy.get(TaskForm.EDIT_SUBTASK_BTN).last().click()
+      })
+
+      getTaskForm(1).within(() => {
+        cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+        clickSubmitBtnUpdate()
+      })
+
+      getTaskForm(0).within(() => {
+        checkTaskFormSubtasks([subtask])
+        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
+      })
+    })
+  })
 })
