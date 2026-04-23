@@ -8,10 +8,8 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
   subtasks?: TaskTreeNode[]
 }
 
-export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
-  cy.wait(300) // wait to render TODO: debug
-
-  return cy
+export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
+  cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
@@ -19,7 +17,6 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
     .should('have.length', 1)
     .scrollIntoView()
     .should('be.visible')
-}
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   const taskCard = getTaskCardTitle(task)
@@ -52,16 +49,20 @@ const checkSubtasksInCard = (task: TaskTreeNode, tier: number) => {
   })
 }
 
-export const expandAndCheckTree = (task: TaskTreeNode) =>
+export const expandAndCheckTree = (task: TaskTreeNode) => {
+  cy.wait(300) // TODO: debug
   checkTitleAndSubtasks(task, 0)
+}
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
+  cy.wait(300) // TODO: debug
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
 
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
+  cy.wait(300) // TODO: debug
   const title = getTaskCardTitle(task)
   cy.clock()
   title.trigger('mousedown')
