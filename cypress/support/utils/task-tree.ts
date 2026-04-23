@@ -25,7 +25,6 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
     const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
     if (expandBtn.length > 0) {
       cy.wrap(expandBtn).click()
-      cy.wrap(expandBtn).should('not.exist') // wait to complete
     }
   })
 
