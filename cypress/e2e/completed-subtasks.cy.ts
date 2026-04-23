@@ -66,6 +66,60 @@ describe('Completed Subtasks', () => {
     cy.visit(loggedIn ? Routes.HOME : Routes.GUEST)
   })
 
+  it('hides subtask in root task form when auto-hide is enabled and subtask is checked as completed', () => {
+    createUncompletedSubtask()
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
+
+    openTaskEditForm(rootTask)
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+      cy.get(TaskForm.SWITCH_AUTO_HIDE_COMPLETED).click()
+    })
+    cy.wait('@updateTask') // update #1: auto-hide setting saved
+
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.COMPLETE_SUBTASK_CHECKBOX).click()
+    })
+    cy.wait('@updateTask') // update #2: subtask marked as completed (hidden by auto-hide)
+
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([]) // subtask is hidden, not visible
+    })
+    checkNumCalls({ create: 2, update: 2 })
+  })
+
+  it('shows uncompleted subtask in root task form with auto-hide enabled, then hides it after editing subtask to completed', () => {
+    createUncompletedSubtask()
+    expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
+
+    openTaskEditForm(rootTask)
+    getTaskForm(0).within(() => {
+      cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+      cy.get(TaskForm.SWITCH_AUTO_HIDE_COMPLETED).click()
+    })
+    cy.wait('@updateTask') // update #1: auto-hide setting saved
+
+    // subtask is uncompleted, should still be visible
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([subtask])
+      cy.get(TaskForm.EDIT_SUBTASK_BTN).click()
+    })
+
+    // tier 1: subtask edit form opened from within root task form
+    getTaskForm(1).within(() => {
+      cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
+      cy.get(TaskForm.SUBMIT_BTN).should('not.be.disabled').click()
+    })
+    cy.wait('@updateTask') // update #2: subtask marked as completed
+    getTaskForm(1).should('not.exist')
+
+    // back at tier 0: subtask should now be hidden
+    getTaskForm(0).within(() => {
+      checkTaskFormSubtasks([]) // subtask is hidden
+    })
+    checkNumCalls({ create: 2, update: 2 })
+  })
+
   for (const { testTitle, markSubtaskComplete } of [
     {
       testTitle: 'complete subtask via New Task Form',
