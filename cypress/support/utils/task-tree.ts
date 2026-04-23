@@ -22,32 +22,28 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
 }
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  const getTaskCard = () =>
-    getTaskCardTitle(task)
-      .should(
-        tier > 0 && task.status === TaskStatus.COMPLETED
-          ? 'have.class'
-          : 'not.have.class',
-        'line-through',
-      )
-      .closest(TaskCard.CARD)
-
-  const taskCard = getTaskCard()
+  const taskCard = getTaskCardTitle(task)
+    .should(
+      tier > 0 && task.status === TaskStatus.COMPLETED
+        ? 'have.class'
+        : 'not.have.class',
+      'line-through',
+    )
+    .closest(TaskCard.CARD)
 
   if (!task.subtasks?.length) return
 
-  taskCard.then(($card) => {
-    const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
-    if (expandBtn.length > 0) {
-      cy.wrap(expandBtn).click()
-    }
-  })
-
-  getTaskCard().within(() => {
-    // expanding changes the render, so we need to get the card again.
-    // TODO: invesigate, can we make it so it doesn't re-render?
-    checkSubtasksInCard(task, tier + 1)
-  })
+  taskCard
+    .then(($card) => {
+      const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
+      if (expandBtn.length > 0) {
+        cy.wrap(expandBtn).click()
+      }
+      return cy.wrap($card)
+    })
+    .within(() => {
+      checkSubtasksInCard(task, tier + 1)
+    })
 }
 
 const checkSubtasksInCard = (task: TaskTreeNode, tier: number) => {
