@@ -1,7 +1,6 @@
 import { type Task, TaskStatus } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { type CreatedTask, waitForUpdate } from './intercepts'
-import { waitFormFullyClosed } from './task-form'
 
 const { TaskCard } = Selectors
 
@@ -46,7 +45,6 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       cy.wrap($card).find(TaskCard.CARD).should('exist')
       cy.log('...done expanding collapsed card...')
     }
-    return cy.wrap($card)
   })
 
   // re-renders on expand, reduce flake by re-getting
@@ -66,13 +64,11 @@ export const expandAndCheckTree = (task: TaskTreeNode) =>
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
-  waitFormFullyClosed()
   getTaskCardTitle(task).click()
   cy.get(Selectors.TaskForm.FORM).should('be.visible')
 }
 
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
-  waitFormFullyClosed()
   const title = getTaskCardTitle(task)
   cy.clock()
   title.trigger('mousedown')

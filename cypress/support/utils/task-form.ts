@@ -89,7 +89,6 @@ const clickSubmitBtn = (
     .should('not.be.disabled')
     .click()
     .then(($btn) => {
-      cy.wrap(new Date()).as('lastFormSubmitTime')
       newTasks && waitForCreate(newTasks)
       updatedTasks && waitForUpdate(updatedTasks)
       // this form should disapper after submit
@@ -106,12 +105,6 @@ export const clickSubmitBtnCreate = (args: SubmitBtnArgs = {}) =>
 
 export const clickSubmitBtnUpdate = (args: SubmitBtnArgs = {}) =>
   clickSubmitBtn('Save', args)
-
-export const waitFormFullyClosed = () => {
-  cy.get<Date>('@lastFormSubmitTime').then((lastFormSubmitTime) => {
-    cy.wait(Math.max(0, 50 - (Date.now() - lastFormSubmitTime.getTime()))) // TODO: debug why we have to do this.
-  })
-}
 
 export const assignSubtask = (
   /**
