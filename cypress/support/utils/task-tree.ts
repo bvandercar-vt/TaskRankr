@@ -8,16 +8,11 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
   subtasks?: TaskTreeNode[]
 }
 
-type CardScopeGetter = () => Cypress.Chainable<JQuery<HTMLElement>>
-
-export const getTaskCardTitle = (
-  task: Pick<Task, 'name'>,
-  getScope?: CardScopeGetter,
-) => {
+export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
   // TODO: debug
   cy.wait(500)
 
-  return (getScope ? getScope() : cy)
+  return cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
@@ -27,13 +22,9 @@ export const getTaskCardTitle = (
     .should('be.visible')
 }
 
-const checkTitleAndSubtasks = (
-  task: TaskTreeNode,
-  tier: number,
-  getScope?: CardScopeGetter,
-) => {
+const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   const getTaskCard = () =>
-    getTaskCardTitle(task, getScope)
+    getTaskCardTitle(task)
       .should(
         tier > 0 && task.status === TaskStatus.COMPLETED
           ? 'have.class'
@@ -42,32 +33,27 @@ const checkTitleAndSubtasks = (
       )
       .closest(TaskCard.CARD)
 
-  getTaskCard()
+  getTaskCard() // TODO: can we reuse? see below comment.
 
   if (!task.subtasks?.length) return
 
-  getTaskCard()
-    .then(($card) => {
-      const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
-      if (expandBtn.length > 0) {
-        cy.wrap(expandBtn).click()
-      }
-    })
-    .then(() => {
-      // expanding changes the render, so we need to get the card again.
-      // in the children as well.
-      // TODO: invesigate, can we make it so it doesn't re-render?
-      checkSubtasksInCard(task, tier + 1, getTaskCard)
-    })
+  getTaskCard().then(($card) => {
+    const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
+    if (expandBtn.length > 0) {
+      cy.wrap(expandBtn).click()
+    }
+  })
+
+  getTaskCard().within(() => {
+    // expanding changes the render, so we need to get the card again.
+    // TODO: invesigate, can we make it so it doesn't re-render?
+    checkSubtasksInCard(task, tier + 1)
+  })
 }
 
-const checkSubtasksInCard = (
-  task: TaskTreeNode,
-  tier: number,
-  getScope: CardScopeGetter,
-) => {
+const checkSubtasksInCard = (task: TaskTreeNode, tier: number) => {
   task.subtasks?.forEach((subtask) => {
-    checkTitleAndSubtasks(subtask, tier, getScope)
+    checkTitleAndSubtasks(subtask, tier)
   })
 }
 
