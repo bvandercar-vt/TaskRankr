@@ -27,7 +27,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
           : 'not.have.class',
         'line-through',
       )
-      .closest(`${TaskCard.CARD}[data-tier="${tier}"]`)
+      .closest(TaskCard.CARD)
 
   const thisTaskCard = getTaskCard()
 
