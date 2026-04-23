@@ -17,11 +17,11 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
 const checkTitleAndSubtasks = (task: TaskTreeNode) => {
   const getTaskCard = () => getTaskCardTitle(task).closest(TaskCard.CARD)
 
-  const thisTaskCard = getTaskCard().should('exist')
+  getTaskCard().as('taskCard')
 
   if (!task.subtasks?.length) return
 
-  thisTaskCard.then(($card) => {
+  cy.get('@taskCard').then(($card) => {
     const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
     if (expandBtn.length > 0) {
       cy.log('expanding collapsed card...')
@@ -35,7 +35,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode) => {
   })
 
   // can re-render on expand, reduce flake by using a different chain
-  getTaskCard().within(() => {
+  cy.get('@taskCard').within(() => {
     checkSubtasksInCard(task)
   })
 }
