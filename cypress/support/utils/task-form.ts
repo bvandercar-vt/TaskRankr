@@ -75,6 +75,8 @@ export const fillTaskForm = (
   cy.log(`**...task form filled (task: ${task.name})**`)
 }
 
+type SubmitBtnArgs = { newTasks?: CreatedTask[]; updatedTasks?: CreatedTask[] }
+
 const clickSubmitBtn = (
   submitBtnText: string,
   { newTasks, updatedTasks }: SubmitBtnArgs = {},
@@ -98,8 +100,6 @@ const clickSubmitBtn = (
   //   newTasks || updatedTasks ? 'not.exist' : 'be.visible',
   // )
 }
-
-type SubmitBtnArgs = { newTasks?: CreatedTask[]; updatedTasks?: CreatedTask[] }
 
 export const clickSubmitBtnCreate = (args: SubmitBtnArgs = {}) =>
   clickSubmitBtn('Create', args)
