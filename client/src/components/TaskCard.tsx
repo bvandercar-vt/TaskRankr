@@ -289,7 +289,11 @@ export const TaskCard = ({
   }
 
   return (
-    <div className="group relative" data-testid={`task-card-${task.id}`}>
+    <div
+      className="group relative"
+      data-testid={`task-card-${task.id}`}
+      data-tier={`${level}`}
+    >
       <motion.div
         {...(level === 0
           ? {
@@ -310,7 +314,6 @@ export const TaskCard = ({
           isHolding && 'bg-white/[0.05] scale-[0.99] transition-transform',
         )}
         style={{ marginLeft: `${level * 16}px` }}
-        data-testid={`task-${task.status}-${task.id}`}
         onClick={() => openEditDialog(task)}
         onMouseDown={startHold}
         onMouseUp={cancelHold}

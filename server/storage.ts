@@ -30,11 +30,6 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>
   updateTask(id: number, userId: string, updates: UpdateTaskArg): Promise<Task>
   deleteTask(id: number, userId: string): Promise<void>
-  setTaskStatus(
-    id: number,
-    userId: string,
-    newStatus: TaskStatus,
-  ): Promise<Task>
   reorderSubtasks(
     parentId: number,
     userId: string,
@@ -116,119 +111,6 @@ export class DatabaseStorage implements IStorage {
     }
 
     return created
-  }
-
-  async setTaskStatus(
-    id: number,
-    userId: string,
-    newStatus: TaskStatus,
-  ): Promise<Task> {
-    const currentTask = await this.getTask(id, userId)
-    if (!currentTask) {
-      throw new Error('Task not found')
-    }
-
-    const oldStatus = currentTask.status
-    if (oldStatus === newStatus) {
-      return currentTask
-    }
-
-    if (newStatus === TaskStatus.COMPLETED) {
-      const children = await db
-        .select()
-        .from(tasks)
-        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
-      if (getHasIncomplete(children)) {
-        throw new Error('All subtasks must be completed first')
-      }
-    }
-
-    const updates: Partial<InsertTask> & { completedAt?: Date | null } = {
-      status: newStatus,
-    }
-
-    // Handle status transitions
-    if (
-      newStatus === TaskStatus.IN_PROGRESS &&
-      oldStatus !== TaskStatus.IN_PROGRESS
-    ) {
-      // Starting in-progress: demote current in_progress task to pinned
-      const allTasks = await this.getTasks(userId)
-      const currentInProgressTask = allTasks.find(
-        (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
-      )
-      if (currentInProgressTask) {
-        // Stop timer on old in-progress task and set to pinned
-        const elapsed = currentInProgressTask.inProgressStartedAt
-          ? Date.now() - currentInProgressTask.inProgressStartedAt.getTime()
-          : 0
-        await db
-          .update(tasks)
-          .set({
-            status: TaskStatus.PINNED,
-            timeSpent: currentInProgressTask.timeSpent + elapsed,
-            inProgressStartedAt: null,
-          })
-          .where(eq(tasks.id, currentInProgressTask.id))
-      }
-      // Start timer on new in-progress task
-      updates.inProgressStartedAt = new Date()
-    }
-
-    if (
-      oldStatus === TaskStatus.IN_PROGRESS &&
-      newStatus !== TaskStatus.IN_PROGRESS &&
-      currentTask.inProgressStartedAt
-    ) {
-      // Leaving in-progress: accumulate time
-      const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
-      updates.timeSpent = currentTask.timeSpent + elapsed
-      updates.inProgressStartedAt = null
-    }
-
-    if (newStatus === TaskStatus.COMPLETED) {
-      updates.completedAt = new Date()
-
-      if (currentTask.parentId) {
-        const parent = await this.getTask(currentTask.parentId, userId)
-        if (parent?.autoHideCompleted) {
-          updates.hidden = true
-        }
-      }
-    }
-
-    if (
-      oldStatus === TaskStatus.COMPLETED &&
-      newStatus !== TaskStatus.COMPLETED
-    ) {
-      updates.completedAt = null
-    }
-
-    const [task] = await db
-      .update(tasks)
-      .set(updates)
-      .where(eq(tasks.id, id))
-      .returning()
-
-    // Cascade status to children for completed/restored
-    if (
-      newStatus === TaskStatus.COMPLETED ||
-      (oldStatus === TaskStatus.COMPLETED && newStatus === TaskStatus.OPEN)
-    ) {
-      const childTasks = await db
-        .select()
-        .from(tasks)
-        .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
-      for (const child of childTasks) {
-        await this.setTaskStatus(child.id, userId, newStatus)
-      }
-    }
-
-    if (newStatus === TaskStatus.COMPLETED && currentTask.parentId) {
-      await this.checkInheritCompletionState(currentTask.parentId, userId, id)
-    }
-
-    return task
   }
 
   /**
@@ -318,23 +200,91 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     updates: UpdateTaskArg,
   ): Promise<Task> {
-    const finalUpdates = { ...updates }
-    if (finalUpdates.parentId === null) {
-      finalUpdates.hidden = false
+    const currentTask = await this.getTask(id, userId)
+    if (!currentTask) {
+      throw new Error('Task not found')
+    }
+
+    const oldStatus = currentTask.status
+    const newStatus = updates.status
+    const isStatusChange = newStatus !== undefined && newStatus !== oldStatus
+
+    const dbUpdates: Partial<InsertTask> & { completedAt?: Date | null } = {
+      ...updates,
+    }
+
+    if (dbUpdates.parentId === null) {
+      dbUpdates.hidden = false
+    }
+
+    if (isStatusChange) {
+      // Guard: cannot complete a task with incomplete subtasks
+      if (newStatus === TaskStatus.COMPLETED) {
+        const children = await db
+          .select()
+          .from(tasks)
+          .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+        if (getHasIncomplete(children)) {
+          throw new Error('All subtasks must be completed first')
+        }
+      }
+
+      if (newStatus === TaskStatus.IN_PROGRESS) {
+        // Entering IN_PROGRESS: start timer, demote any existing in-progress task
+        const allTasks = await this.getTasks(userId)
+        const currentInProgress = allTasks.find(
+          (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
+        )
+        if (currentInProgress) {
+          const elapsed = currentInProgress.inProgressStartedAt
+            ? Date.now() - currentInProgress.inProgressStartedAt.getTime()
+            : 0
+          await db
+            .update(tasks)
+            .set({
+              status: TaskStatus.PINNED,
+              timeSpent: currentInProgress.timeSpent + elapsed,
+              inProgressStartedAt: null,
+            })
+            .where(eq(tasks.id, currentInProgress.id))
+        }
+        dbUpdates.inProgressStartedAt = new Date()
+      } else if (currentTask.inProgressStartedAt) {
+        // Leaving IN_PROGRESS: flush accumulated time into timeSpent
+        const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
+        dbUpdates.timeSpent =
+          (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
+        dbUpdates.inProgressStartedAt = null
+      }
+
+      if (newStatus === TaskStatus.COMPLETED) {
+        // Completing: stamp completedAt and auto-hide under parent if needed
+        dbUpdates.completedAt = new Date()
+        if (currentTask.parentId) {
+          const parent = await this.getTask(currentTask.parentId, userId)
+          if (parent?.autoHideCompleted) {
+            dbUpdates.hidden = true
+          }
+        }
+      } else {
+        // Restoring from completed: clear completedAt
+        dbUpdates.completedAt = null
+      }
     }
 
     const [task] = await db
       .update(tasks)
-      .set(finalUpdates)
+      .set(dbUpdates)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning()
 
     const updated = task
 
-    if (finalUpdates.autoHideCompleted !== undefined) {
+    // autoHideCompleted toggled: update visibility of existing completed children
+    if (dbUpdates.autoHideCompleted !== undefined) {
       await db
         .update(tasks)
-        .set({ hidden: finalUpdates.autoHideCompleted })
+        .set({ hidden: dbUpdates.autoHideCompleted })
         .where(
           and(
             eq(tasks.parentId, id),
@@ -344,8 +294,10 @@ export class DatabaseStorage implements IStorage {
         )
     }
 
+    // inheritCompletionState turned on while task is already completed:
+    // revert if it still has incomplete children
     if (
-      finalUpdates.inheritCompletionState === true &&
+      dbUpdates.inheritCompletionState === true &&
       updated.status === TaskStatus.COMPLETED
     ) {
       const children = await db
@@ -366,14 +318,33 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    if (
-      finalUpdates.parentId != null &&
-      updated.status !== TaskStatus.COMPLETED
-    ) {
+    // Reparenting to a non-null parent: revert parent if it was auto-completed
+    if (dbUpdates.parentId != null && updated.status !== TaskStatus.COMPLETED) {
       await this.revertParentIfInheritCompletionState(
-        finalUpdates.parentId,
+        dbUpdates.parentId,
         userId,
       )
+    }
+
+    if (isStatusChange) {
+      // Cascade status to children for completed/restored
+      if (
+        newStatus === TaskStatus.COMPLETED ||
+        (oldStatus === TaskStatus.COMPLETED && newStatus === TaskStatus.OPEN)
+      ) {
+        const childTasks = await db
+          .select()
+          .from(tasks)
+          .where(and(eq(tasks.parentId, id), eq(tasks.userId, userId)))
+        for (const child of childTasks) {
+          await this.updateTask(child.id, userId, { status: newStatus })
+        }
+      }
+
+      // Auto-complete parent if all siblings are now done
+      if (newStatus === TaskStatus.COMPLETED && currentTask.parentId) {
+        await this.checkInheritCompletionState(currentTask.parentId, userId, id)
+      }
     }
 
     return updated

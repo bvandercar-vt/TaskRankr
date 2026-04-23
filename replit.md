@@ -122,6 +122,10 @@ Load-bearing facts that span multiple files. Anything more specific lives in the
 └── migrations/           # Database migrations
 ```
 
+## PWA / Service Worker
+`vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
+
+
 ## Coding Conventions
 
 ### Shared task utilities
@@ -130,5 +134,34 @@ Tree-walking, sort/filter, and id-list helpers live in `shared/utils/task-utils.
 ### Path aliases
 Resolved via `vite-tsconfig-paths` from `tsconfig.json`. `@/` → `client/src/`, `~/shared/` → `shared/`.
 
-## PWA / Service Worker
-`vite-plugin-pwa` generates a Workbox-powered service worker that precaches the app shell and provides runtime caching for Google Fonts. Configured in `vite.config.ts` with `generateSW` strategy. Registration happens in `client/src/main.tsx` via `virtual:pwa-register`. The service worker checks for updates hourly. Type declarations for the virtual module are in `client/src/vite-env.d.ts`.
+## Cypress E2E Tests
+
+- Tests live in `cypress/e2e/`. Support code is in `cypress/support/`:
+
+```
+cypress/
+├── e2e/                        # Test files (*.cy.ts)
+└── support/
+    ├── constants/
+    │   ├── index.ts            # DefaultTask, FieldConfig presets, re-exports selectors
+    │   └── selectors.ts        # All CSS selector strings — always add new ones here
+    ├── utils/
+    │   ├── api.ts              # checks local state and backend
+    │   ├── intercepts.ts       # intercept helpers (cy.intercept)
+    │   ├── navigation.ts       # page navigation helpers
+    │   ├── task-form.ts        # UI actions on the Task Form
+    │   ├── task-tree.ts        # UI actions on the Task Tree
+    │   ├── settings.ts         # helpers for setting settings
+    │   └── test-runner.ts      # isLoggedIn
+    └── commands.ts             # Custom Cypress commands (cy.selectOption, cy.escapeWithin, etc.)
+```
+
+- Must manually add new test files to `cypress.config.ts`.
+- When asked to run E2E tests, run `cy:run:user` by default unless asked to do `cy:run:guest`.
+
+### Selectors
+All `data-testid` (and other) selectors live in `cypress/support/constants/selectors.ts` under the `Selectors` object. Never use raw `[data-testid="..."]` or other selector strings in test files — always add to `Selectors` first and import from there. Groups mirror the component that owns the testids (e.g. `Selectors.Menu`, `Selectors.TaskForm`, `Selectors.ChangeStatusDialog`).
+
+### DRY pattern for New vs. Edit variants
+When a feature works the same way from both a create form and an edit form, use a `for...of` loop over an array of `{ contextName, ...hooks }` objects and call `context(contextName, () => { ... })` inside. See `cancel-task-form.cy.ts` and `completed-tasks.cy.ts` for examples.
+

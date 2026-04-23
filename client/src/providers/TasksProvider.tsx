@@ -279,9 +279,9 @@ export const TasksProvider = ({
           corrections.map(
             (c) =>
               ({
-                type: SyncOperationType.SET_STATUS,
+                type: SyncOperationType.UPDATE_TASK,
                 id: c.id,
-                status: c.status,
+                data: { status: c.status },
               }) as const,
           ),
         )
@@ -507,9 +507,9 @@ export const TasksProvider = ({
           inProgressStartedAt: null,
         }))
         enqueue({
-          type: SyncOperationType.SET_STATUS,
+          type: SyncOperationType.UPDATE_TASK,
           id,
-          status: TaskStatus.OPEN,
+          data: { status: TaskStatus.OPEN },
         })
       }
 
@@ -597,7 +597,7 @@ export const TasksProvider = ({
           : undefined,
       )
 
-      enqueue({ type: SyncOperationType.SET_STATUS, id, status })
+      enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: { status } })
       debugLog.log('task', 'setStatus', { id, status })
 
       if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
@@ -658,9 +658,9 @@ export const TasksProvider = ({
 
         for (const parentId of autoCompletedParents) {
           enqueue({
-            type: SyncOperationType.SET_STATUS,
+            type: SyncOperationType.UPDATE_TASK,
             id: parentId,
-            status: TaskStatus.COMPLETED,
+            data: { status: TaskStatus.COMPLETED },
           })
           debugLog.log('task', 'inheritCompletion', { parentId })
         }
@@ -694,9 +694,9 @@ export const TasksProvider = ({
 
         for (const parentId of autoRevertedParents) {
           enqueue({
-            type: SyncOperationType.SET_STATUS,
+            type: SyncOperationType.UPDATE_TASK,
             id: parentId,
-            status: TaskStatus.OPEN,
+            data: { status: TaskStatus.OPEN },
           })
           debugLog.log('task', 'inheritCompletion:revert', { parentId })
         }

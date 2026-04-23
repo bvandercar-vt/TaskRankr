@@ -177,7 +177,10 @@ export const ChangeStatusDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-card border-white/10 pt-10">
+      <AlertDialogContent
+        className="bg-card border-white/10 pt-10"
+        data-testid="change-status-dialog"
+      >
         <AlertDialogCloseButton
           onClose={() => onOpenChange(false)}
           data-testid="button-close-status-dialog"

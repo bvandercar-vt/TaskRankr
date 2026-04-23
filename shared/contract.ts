@@ -86,20 +86,6 @@ const tasksContract = c.router({
     },
     summary: 'Delete a task',
   },
-  setStatus: {
-    method: 'PUT',
-    path: '/api/tasks/:id/status',
-    pathParams: z.object({
-      id: z.coerce.number(),
-    }),
-    body: taskSchema.pick({ status: true }),
-    responses: {
-      200: taskSchema,
-      400: errorSchemas.validation,
-      404: errorSchemas.notFound,
-    },
-    summary: 'Set task status',
-  },
   export: {
     method: 'GET',
     path: '/api/tasks/export',

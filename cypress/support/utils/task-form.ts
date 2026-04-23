@@ -3,6 +3,7 @@ import {
   type FieldConfig,
   RankField,
   type Task,
+  TaskStatus,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
 import { getElementArrayText } from '.'
@@ -13,10 +14,8 @@ const { TaskForm, AssignSubtaskDialog } = Selectors
 
 type TaskFormData = Pick<Task, 'name' | RankField>
 
-export const getTaskForm = (tier = 0) => {
-  cy.wait(50) // Re-renders. TODO: debug and fix src so this doesn't happen.
-  return cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
-}
+export const getTaskForm = (tier = 0) =>
+  cy.get(`${TaskForm.FORM}[data-tier="${tier}"]`).should('be.visible')
 
 export const fillTaskFormRankFields = (
   task: TaskFormData,
@@ -96,10 +95,9 @@ const clickSubmitBtn = (
       cy.wrap($btn).should('not.exist')
     })
   // API calls should only be created when root task form is submitted
-  // TODO: debug
-  // cy.get(TaskForm.FORM).should(
-  //   newTasks || updatedTasks ? 'not.exist' : 'be.visible',
-  // )
+  if (newTasks || updatedTasks) {
+    cy.get(Selectors.TaskForm.FORM).should('not.exist')
+  }
 }
 
 export const clickSubmitBtnCreate = (args: SubmitBtnArgs = {}) =>
@@ -124,7 +122,9 @@ export const assignSubtask = (
     })
 }
 
-export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
+export const checkTaskFormSubtasks = (
+  subtasks: Pick<Task, 'name' | 'status'>[],
+) =>
   // TODO: test how they are nested
   cy
     .get(TaskForm.SUBTASK_ROW)
@@ -134,5 +134,13 @@ export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
       expect(getElementArrayText($names)).to.deep.equal(
         subtasks.map((subtask) => subtask.name),
         'Task form should list all subtasks',
+      ),
+    )
+    .should(($names) =>
+      expect(getElementArrayText($names.filter('.line-through'))).to.deep.equal(
+        subtasks
+          .filter((subtask) => subtask.status === TaskStatus.COMPLETED)
+          .map((subtask) => subtask.name),
+        'Completed subtasks should be crossed out',
       ),
     )
