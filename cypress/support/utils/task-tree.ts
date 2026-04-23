@@ -9,7 +9,7 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
 }
 
 export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
-  cy.wait(200) // wait to render TODO: debug
+  cy.wait(300) // wait to render TODO: debug
 
   return cy
     .contains(
@@ -32,11 +32,11 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       )
       .closest(TaskCard.CARD)
 
-  getTaskCard() // TODO: can we reuse? see below comment.
+  const taskCard = getTaskCard()
 
   if (!task.subtasks?.length) return
 
-  getTaskCard().then(($card) => {
+  taskCard.then(($card) => {
     const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
     if (expandBtn.length > 0) {
       cy.wrap(expandBtn).click()
