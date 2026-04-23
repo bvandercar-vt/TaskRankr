@@ -35,6 +35,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
       if (expandBtn.length > 0) {
         cy.wrap(expandBtn).click()
+        cy.wait(300) // TODO: debug
       }
       return cy.wrap($card)
     })
