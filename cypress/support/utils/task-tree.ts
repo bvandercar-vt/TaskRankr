@@ -64,11 +64,12 @@ export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
 export const openStatusChangeDialog = (task: Pick<Task, 'name'>) => {
   cy.wait(300) // TODO: debug
   const title = getTaskCardTitle(task)
-  cy.clock()
-  title.trigger('mousedown')
-  cy.tick(900)
-  cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
-  cy.clock().invoke('restore')
+  cy.clock().then((clock) => {
+    title.trigger('mousedown')
+    cy.tick(900)
+    cy.get(Selectors.ChangeStatusDialog.DIALOG).should('be.visible')
+    clock.restore()
+  })
 }
 
 export const changeStatusViaStatusChangeDialog = (
