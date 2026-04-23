@@ -102,7 +102,7 @@ jobs:
           exit 1
 
       - name: Run Cypress tests (${{ matrix.suite }})
-        run: npm run cy:run:${{ matrix.suite }}
+        run: npm run cy:run:${{ matrix.suite }}:video
 
       - name: Upload results and screenshots on failure
         uses: actions/upload-artifact@v4
