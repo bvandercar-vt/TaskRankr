@@ -9,7 +9,7 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
 }
 
 export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
-  cy.wait(100) // wait to render TODO: debug
+  cy.wait(300) // wait to render TODO: debug
 
   return cy
     .contains(
