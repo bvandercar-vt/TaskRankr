@@ -5,6 +5,7 @@ import {
   type Task,
 } from '~/shared/schema'
 import { Selectors } from '../constants'
+import { getElementArrayText } from '.'
 import { checkTasksDontExistBackend } from './api'
 import { type CreatedTask, waitForCreate, waitForUpdate } from './intercepts'
 
@@ -128,8 +129,10 @@ export const checkTaskFormSubtasks = (subtasks: Pick<Task, 'name'>[]) =>
   cy
     .get(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
-    .getElementArrayText()
-    .should(
-      'deep.equal',
-      subtasks.map((subtask) => subtask.name),
+    .find(TaskForm.SUBTASK_NAME)
+    .should(($names) =>
+      expect(getElementArrayText($names)).to.deep.equal(
+        subtasks.map((subtask) => subtask.name),
+        'Task form should list all subtasks',
+      ),
     )

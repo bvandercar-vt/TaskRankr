@@ -44,6 +44,7 @@ export const Selectors = {
     ADD_SUBTASK_BTN: testId('button-add-subtask'),
     ASSIGN_SUBTASK_BTN: testId('button-assign-subtask'),
     SUBTASK_ROW: testIdStartsWith('subtask-row-'),
+    SUBTASK_NAME: testIdStartsWith('subtask-name-'),
   },
   AssignSubtaskDialog: {
     DIALOG: testId('assign-subtask-dialog'),

@@ -17,19 +17,27 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
 const checkTitleAndSubtasks = (task: TaskTreeNode) => {
   const getTaskCard = () => getTaskCardTitle(task).closest(TaskCard.CARD)
 
-  const thisTaskCard = getTaskCard().should('exist')
+  const taskCard = getTaskCard()
 
   if (!task.subtasks?.length) return
 
-  thisTaskCard.then(($card) => {
-    const expandBtns = $card.find(TaskCard.EXPAND_BTN)
-    if (expandBtns.length > 0) {
-      cy.wrap(expandBtns).each(($btn) => cy.wrap($btn).click())
+  taskCard.then(($card) => {
+    const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
+    if (expandBtn.length > 0) {
+      cy.log('expanding collapsed card...')
+      cy.wrap($card).find(TaskCard.COLLAPSE_BTN).should('not.exist')
+      cy.wrap($card).find(TaskCard.CARD).should('not.exist')
+      cy.wrap(expandBtn).click()
+      cy.wrap($card).find(TaskCard.COLLAPSE_BTN).should('exist')
+      cy.wrap($card).find(TaskCard.CARD).should('exist')
+      cy.log('...done expanding collapsed card...')
     }
   })
 
-  // expanding changes the render, so we need to get the card again
-  getTaskCard().within(() => checkSubtasksInCard(task))
+  // re-renders on expand, reduce flake by re-getting
+  getTaskCard().within(() => {
+    checkSubtasksInCard(task)
+  })
 }
 
 const checkSubtasksInCard = (task: TaskTreeNode) => {

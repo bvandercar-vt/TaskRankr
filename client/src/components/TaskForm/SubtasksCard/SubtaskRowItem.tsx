@@ -124,6 +124,7 @@ export const SubtaskRowItem = ({
             'text-sm break-words',
             isCompleted && 'line-through text-muted-foreground',
           )}
+          data-testid={`subtask-name-${task.id}`}
         >
           {task.subtaskIndex !== undefined && (
             <span className="text-muted-foreground mr-1">

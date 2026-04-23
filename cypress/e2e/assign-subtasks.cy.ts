@@ -101,13 +101,13 @@ describe('Assign Subtasks', () => {
       checkTaskFormSubtasks([orphanTask, newSubtask])
       assignSubtask(orphanTask2)
       checkTaskFormSubtasks([orphanTask, orphanTask2, newSubtask]) // all at same level, so we don't care about orde really.
-      clickSubmitBtnUpdate({ updatedTasks: [orphanTask2] })
+      clickSubmitBtnUpdate({ updatedTasks: [rootTask, orphanTask2] })
     })
 
     expandAndCheckTree({
       ...rootTask,
       subtasks: [orphanTask, newSubtask, orphanTask2],
     })
-    checkNumCalls({ create: 4, update: 2 })
+    checkNumCalls({ create: 4, update: 3 })
   })
 })
