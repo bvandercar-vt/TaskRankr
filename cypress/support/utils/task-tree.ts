@@ -19,6 +19,7 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
+  cy.wait(300) // TODO: debug
   const taskCard = getTaskCardTitle(task)
     .should(
       tier > 0 && task.status === TaskStatus.COMPLETED
@@ -35,7 +36,6 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
       if (expandBtn.length > 0) {
         cy.wrap(expandBtn).click()
-        cy.wait(300) // TODO: debug
       }
       return cy.wrap($card)
     })
