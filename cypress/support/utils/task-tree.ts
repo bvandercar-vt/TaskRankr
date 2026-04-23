@@ -19,7 +19,7 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  cy.wait(tier === 0 ? 300 : 100) // TODO: debug
+  cy.wait(300) // TODO: debug
   const taskCard = getTaskCardTitle(task)
     .should(
       tier > 0 && task.status === TaskStatus.COMPLETED
