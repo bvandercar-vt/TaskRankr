@@ -19,7 +19,9 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  cy.wait(300) // TODO: debug
+  if (tier > 0) {
+    cy.wait(300) // TODO: debug
+  }
   const taskCard = getTaskCardTitle(task)
     .should(
       tier > 0 && task.status === TaskStatus.COMPLETED
@@ -50,10 +52,8 @@ const checkSubtasksInCard = (task: TaskTreeNode, tier: number) => {
   })
 }
 
-export const expandAndCheckTree = (task: TaskTreeNode) => {
-  cy.wait(300) // TODO: debug
+export const expandAndCheckTree = (task: TaskTreeNode) =>
   checkTitleAndSubtasks(task, 0)
-}
 
 export const openTaskEditForm = (task: Pick<Task, 'name'>) => {
   cy.get(Selectors.TaskForm.FORM).should('not.exist')
