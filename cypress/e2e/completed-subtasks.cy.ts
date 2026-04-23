@@ -136,8 +136,6 @@ describe('Completed Subtasks', () => {
       cy.get(Selectors.CREATE_TASK_BTN).click()
       getTaskForm(0).within(() => {
         fillTaskForm(rootTask)
-        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
-        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
         cy.get(TaskForm.ADD_SUBTASK_BTN).click()
       })
 
@@ -145,6 +143,11 @@ describe('Completed Subtasks', () => {
         // task that will not be marked as completed, to verify that only completed subtasks are hidden
         fillTaskForm(subtask)
         clickSubmitBtnCreate()
+      })
+
+      getTaskForm(0).within(() => {
+        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
       })
     })
 
