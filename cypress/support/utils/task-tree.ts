@@ -19,6 +19,8 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
+  cy.wait(500) // TODO: debug
+
   const getTaskCard = () =>
     getTaskCardTitle(task)
       .should(
@@ -40,7 +42,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
     }
   })
 
-  cy.wait(300) // TODO: debug
+  cy.wait(500) // TODO: debug
 
   // expanding changes the render, so we need to get the card again
   // TODO: invesigate, can we make it so it doesn't re-render?
