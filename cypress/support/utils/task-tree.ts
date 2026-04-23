@@ -8,11 +8,8 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
   subtasks?: TaskTreeNode[]
 }
 
-export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
-  // TODO: debug
-  cy.wait(500)
-
-  return cy
+export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
+  cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
@@ -20,7 +17,6 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) => {
     .should('have.length', 1)
     .scrollIntoView()
     .should('be.visible')
-}
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   const getTaskCard = () =>
