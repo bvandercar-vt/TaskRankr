@@ -181,7 +181,6 @@ describe('Create Subtasks', () => {
       })
     })
 
-    cy.wait(500) // TODO: debug
     expandAndCheckTree({
       ...rootTask,
       subtasks: [{ ...subtask, subtasks: [subtask2, subtask3] }],

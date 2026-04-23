@@ -8,26 +8,19 @@ type TaskTreeNode = Pick<Task, 'name' | 'status'> & {
   subtasks?: TaskTreeNode[]
 }
 
-export const getTaskCardTitle = (
-  task: Pick<Task, 'name'>,
-  scrollIntoView = true,
-) =>
+export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
   cy
     .contains(
       `${TaskCard.CARD} ${TaskCard.TITLE}`,
       new RegExp(`^${task.name}$`),
     )
     .should('have.length', 1)
-    .then(($el) => {
-      if (scrollIntoView) {
-        cy.wrap($el).scrollIntoView()
-      }
-    })
+    .scrollIntoView()
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
   const getTaskCard = () =>
-    getTaskCardTitle(task, !isSubtask)
+    getTaskCardTitle(task)
       .should(
         isSubtask && task.status === TaskStatus.COMPLETED
           ? 'have.class'
@@ -36,7 +29,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
       )
       .closest(TaskCard.CARD)
 
-  const thisTaskCard = getTaskCard().should('exist')
+  const thisTaskCard = getTaskCard()
 
   if (!task.subtasks?.length) return
 
@@ -46,6 +39,8 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, isSubtask: boolean) => {
       cy.wrap(expandBtns).each(($btn) => cy.wrap($btn).click())
     }
   })
+
+  cy.wait(300) // TODO: debug
 
   // expanding changes the render, so we need to get the card again
   // TODO: invesigate, can we make it so it doesn't re-render?
