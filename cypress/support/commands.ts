@@ -16,7 +16,11 @@ declare global {
        */
       escapeWithin(): Chainable<JQuery<HTMLElement>>
       getElementArrayText(): Chainable<(string | null)[]>
-      selectOption(trigger: string, value: string): Chainable<void>
+      selectOption(value: string): Chainable<void>
+      checkSwitchState(
+        selector: string,
+        expectedState: boolean,
+      ): Chainable<JQuery<HTMLElement>>
       getCheckedState(): Chainable<boolean>
     }
   }
@@ -44,13 +48,17 @@ Cypress.Commands.addQuery(
   () => (subject: JQuery<HTMLElement>) => getElementArrayText(subject),
 )
 
-Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
-  cy.get(trigger).click()
-  cy.escapeWithin()
-    .find('[role="listbox"]')
-    .contains(new RegExp(`^${value}$`))
-    .click()
-})
+Cypress.Commands.add(
+  'selectOption',
+  { prevSubject: 'element' },
+  (subject, value) => {
+    cy.wrap(subject).click()
+    cy.escapeWithin()
+      .find('[role="listbox"]')
+      .contains(new RegExp(`^${value}$`))
+      .click()
+  },
+)
 
 Cypress.Commands.add(
   'getCheckedState',

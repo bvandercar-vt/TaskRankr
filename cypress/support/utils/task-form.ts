@@ -36,7 +36,7 @@ export const fillTaskFormRankFields = (
     if (config.visible) {
       cy.get(RankSelect).should('be.visible')
       if (value !== null) {
-        cy.selectOption(RankSelect, value)
+        cy.get(RankSelect).selectOption(value)
         filled.add(field)
       }
       const allRequiredFilled = requiredFields.every((f) => filled.has(f))
@@ -121,15 +121,6 @@ export const assignSubtask = (
       cy.get(AssignSubtaskDialog.CONFIRM_BTN).click()
     })
 }
-
-export const checkAutoHideCompletedSwitch = (expectedOn: boolean) =>
-  cy
-    .get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
-    .should(
-      'have.attr',
-      'data-state',
-      expectedOn ? 'checked' : 'unchecked',
-    )
 
 export const checkTaskFormSubtasks = (
   subtasks: Pick<Task, 'name' | 'status'>[],

@@ -152,10 +152,22 @@ describe('Completed Subtasks', () => {
       getTaskForm(0).within(() => {
         cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
         cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
+        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
+          .getCheckedState()
+          .should('be.true')
       })
     })
 
     afterEachSkipIfFailed(() => {
+      getTaskForm(0).within(() => {
+        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
+        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
+          .getCheckedState()
+          .should('be.true')
+        checkTaskFormSubtasks([subtask])
+        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
+      })
+
       checkNumCalls({ create: 3, update: 0 })
       expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     })
@@ -169,12 +181,6 @@ describe('Completed Subtasks', () => {
         fillTaskForm(subtask2)
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
       })
     })
 
@@ -196,12 +202,6 @@ describe('Completed Subtasks', () => {
       getTaskForm(1).within(() => {
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
         clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
       })
     })
   })
