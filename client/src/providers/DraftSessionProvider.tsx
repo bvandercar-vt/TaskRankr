@@ -44,7 +44,11 @@ import type { EmptyObject } from 'type-fest'
 import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
-import { removeIds } from '@/lib/task-tree-utils'
+import {
+  collectDescendantIds,
+  getDirectSubtasks,
+  removeIds,
+} from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
   type UpdateTaskContent,
@@ -201,6 +205,11 @@ export const DraftSessionProvider = ({
   // value is stable across draft churn.
   // ---------------------------------------------------------------------------
 
+  /** Find a task by id across the real and draft layers. */
+  const findTaskAcrossLayers = (id: number): Task | undefined =>
+    draftTasksRef.current.find((t) => t.id === id) ??
+    tasksRef.current.find((t) => t.id === id)
+
   const createDraftTask = useCallback((data: CreateTaskContent): Task => {
     const tempId = draftIdRef.current--
     const newTask: Task = taskSchema.parse({
@@ -210,6 +219,15 @@ export const DraftSessionProvider = ({
       userId: 'local',
       status: data.status ?? TaskStatus.OPEN,
     } satisfies z.input<typeof taskSchema>)
+
+    // Auto-hide on create: if parent has `autoHideCompleted` and the new task
+    // is already COMPLETED, mark it hidden. Mirrors `TasksProvider.createTask`.
+    if (data.parentId != null && newTask.status === TaskStatus.COMPLETED) {
+      const parent = findTaskAcrossLayers(data.parentId)
+      if (parent?.autoHideCompleted) {
+        newTask.hidden = true
+      }
+    }
 
     setDraftTasks((prev) => {
       let updated = [...prev, newTask]
@@ -236,13 +254,47 @@ export const DraftSessionProvider = ({
   const updateDraftTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
       let updated: Task | undefined
-      setDraftTasks((prev) =>
-        prev.map((t) => {
+      setDraftTasks((prev) => {
+        // Auto-hide on completion: if status is changing to COMPLETED and the
+        // task's parent has `autoHideCompleted`, mark it hidden. Mirrors
+        // `TasksProvider.setTaskStatus`.
+        const completionHide = (t: Task): Partial<Task> => {
+          if (
+            updates.status !== TaskStatus.COMPLETED ||
+            t.parentId == null
+          ) {
+            return {}
+          }
+          const parent =
+            prev.find((p) => p.id === t.parentId) ??
+            tasksRef.current.find((p) => p.id === t.parentId)
+          return parent?.autoHideCompleted ? { hidden: true } : {}
+        }
+
+        const next = prev.map((t) => {
           if (t.id !== id) return t
-          updated = { ...t, ...updates }
+          updated = { ...t, ...updates, ...completionHide(t) }
           return updated
-        }),
-      )
+        })
+
+        // Cascade `autoHideCompleted` toggle to direct draft children (and
+        // their descendants). Mirrors `TasksProvider.updateTask`.
+        if (updates.autoHideCompleted !== undefined) {
+          const hide = updates.autoHideCompleted
+          const completedDirectIds = getDirectSubtasks(next, id)
+            .filter((t) => t.status === TaskStatus.COMPLETED)
+            .map((t) => t.id)
+          if (completedDirectIds.length > 0) {
+            const toHide = collectDescendantIds(next, completedDirectIds, {
+              includeRoots: true,
+            })
+            return next.map((t) =>
+              toHide.has(t.id) ? { ...t, hidden: hide } : t,
+            )
+          }
+        }
+        return next
+      })
       // biome-ignore lint/style/noNonNullAssertion: id was verified by caller as a draft
       return updated!
     },
