@@ -1,10 +1,6 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import {
-  afterEachSkipIfFailed,
-  checkTasksExistBackend,
-  isLoggedIn,
-} from '@cypress/support/utils'
+import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -156,7 +152,8 @@ describe('Completed Subtasks', () => {
         })
       })
 
-      afterEachSkipIfFailed(() => {
+      // after each, but we don't want failure to prevent other tests from running.
+      const rootSubmitAndCheck = () => {
         getTaskForm(0).within(() => {
           cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
           cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
@@ -168,7 +165,7 @@ describe('Completed Subtasks', () => {
 
         checkNumCalls({ create: 3, update: 0 })
         expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
-      })
+      }
 
       it('via completion checkbox in new subtask form', () => {
         getTaskForm(0).within(() => {
@@ -180,6 +177,8 @@ describe('Completed Subtasks', () => {
           cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
           clickSubmitBtnCreate()
         })
+
+        rootSubmitAndCheck()
       })
 
       it('via completion checkbox in edit subtask form', () => {
@@ -201,6 +200,8 @@ describe('Completed Subtasks', () => {
           cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
           clickSubmitBtnCreate()
         })
+
+        rootSubmitAndCheck()
       })
     })
 
