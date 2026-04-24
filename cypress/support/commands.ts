@@ -22,6 +22,7 @@ declare global {
         expectedState: boolean,
       ): Chainable<JQuery<HTMLElement>>
       getCheckedState(): Chainable<boolean>
+      toggleState(newState: boolean): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -68,5 +69,15 @@ Cypress.Commands.add(
     if (state === 'checked') return cy.wrap(true)
     if (state === 'unchecked') return cy.wrap(false)
     throw new Error('Element does not have a data-state attribute')
+  },
+)
+
+Cypress.Commands.add(
+  'toggleState',
+  { prevSubject: 'element' },
+  (subject, newState) => {
+    cy.wrap(subject).getCheckedState().should('eq', !newState)
+    cy.wrap(subject).click()
+    cy.wrap(subject).getCheckedState().should('eq', newState)
   },
 )

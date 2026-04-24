@@ -33,7 +33,8 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .getCheckedState()
       .then((isChecked) => {
         if (isChecked !== visible) {
-          cy.get(Settings.FieldConfig.visibleCheckbox(field)).click()
+          cy.get(Settings.FieldConfig.visibleCheckbox(field)) //
+            .toggleState(visible)
           loggedIn && cy.wait('@settingsPut')
         }
       })
@@ -42,7 +43,8 @@ const setFieldConfig = (targetConfig: FieldConfig) => {
       .getCheckedState()
       .then((isChecked) => {
         if (isChecked !== required) {
-          cy.get(Settings.FieldConfig.requiredCheckbox(field)).click()
+          cy.get(Settings.FieldConfig.requiredCheckbox(field)) //
+            .toggleState(required)
           loggedIn && cy.wait('@settingsPut')
         }
       })
