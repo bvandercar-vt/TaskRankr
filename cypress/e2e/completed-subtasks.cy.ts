@@ -151,6 +151,9 @@ describe('Completed Subtasks', () => {
 
       getTaskForm(0).within(() => {
         cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
+        cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
+          .getCheckedState()
+          .should('be.false')
         cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).click()
         cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
           .getCheckedState()
