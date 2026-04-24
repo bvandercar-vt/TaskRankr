@@ -1,53 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Check, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
+import { EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
-import { getHasIncompleteSubtasks } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
-import {
-  useDraftSession,
-  useDraftSessionMutations,
-} from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
-import { SubtaskBlockedTooltip } from '../../SubtaskBlockedTooltip'
 
 export type Subtask = Task & { depth: number; subtaskIndex?: number }
-
-const CompletedCheckbox = ({
-  task,
-  disabled,
-}: {
-  task: Subtask
-  disabled: boolean
-}) => {
-  const { setTaskStatus } = useDraftSessionMutations()
-  const isCompleted = task.status === TaskStatus.COMPLETED
-  return (
-    <SubtaskBlockedTooltip blocked={disabled}>
-      <button
-        type="button"
-        onClick={() => {
-          if (disabled) return
-          const newStatus = isCompleted ? TaskStatus.OPEN : TaskStatus.COMPLETED
-          setTaskStatus(task.id, newStatus)
-        }}
-        className={cn(
-          'shrink-0 h-4 w-4 rounded-sm border transition-colors',
-          disabled
-            ? 'border-muted-foreground/20 opacity-50 cursor-not-allowed'
-            : isCompleted
-              ? 'bg-muted-foreground/60 border-muted-foreground/60 text-white'
-              : 'border-muted-foreground/40 hover:border-muted-foreground',
-        )}
-        data-testid={`checkbox-complete-subtask-${task.id}`}
-      >
-        {isCompleted && <Check className="size-3 mx-auto" />}
-      </button>
-    </SubtaskBlockedTooltip>
-  )
-}
 
 export interface SubtaskRowItemProps {
   task: Subtask
@@ -66,7 +26,6 @@ export const SubtaskRowItem = ({
   isDragDisabled,
   isHiddenItem,
 }: SubtaskRowItemProps) => {
-  const { tasksWithDrafts: allTasks } = useDraftSession()
   const {
     attributes,
     listeners,
@@ -87,8 +46,6 @@ export const SubtaskRowItem = ({
   const isDirect = task.depth === 0
   const showDragHandle = isManualSortMode && isDirect
   const isCompleted = task.status === TaskStatus.COMPLETED
-  const disableComplete =
-    !isCompleted && getHasIncompleteSubtasks(allTasks, task.id)
 
   return (
     <div
@@ -118,7 +75,6 @@ export const SubtaskRowItem = ({
             className="text-muted-foreground/50 text-xs leading-none select-none before:content-['└']"
           />
         )}
-        <CompletedCheckbox task={task} disabled={disableComplete} />
         <span
           className={cn(
             'text-sm break-words',

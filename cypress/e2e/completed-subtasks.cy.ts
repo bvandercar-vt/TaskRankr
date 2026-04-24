@@ -156,24 +156,6 @@ describe('Completed Subtasks', () => {
       expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     })
 
-    it('via completion checkbox in subtask list', () => {
-      getTaskForm(0).within(() => {
-        cy.get(TaskForm.ADD_SUBTASK_BTN).click()
-      })
-
-      getTaskForm(1).within(() => {
-        fillTaskForm(subtask2)
-        clickSubmitBtnCreate()
-      })
-
-      getTaskForm(0).within(() => {
-        checkTaskFormSubtasks([subtask, subtask2])
-        cy.get(TaskForm.COMPLETE_SUBTASK_CHECKBOX).last().click()
-        checkTaskFormSubtasks([subtask])
-        clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
-      })
-    })
-
     it('via completion checkbox in new subtask form', () => {
       getTaskForm(0).within(() => {
         cy.get(TaskForm.ADD_SUBTASK_BTN).click()
