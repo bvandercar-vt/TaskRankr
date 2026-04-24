@@ -612,7 +612,9 @@ export const TasksProvider = ({
 
             if (parent.parentId) {
               const grandparent = getById(updated, parent.parentId)
-              if (shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)) {
+              if (
+                shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)
+              ) {
                 parentUpdate.hidden = true
               }
             }

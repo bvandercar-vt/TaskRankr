@@ -2,9 +2,10 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 
+import { getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
-import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { SubtaskSortMode, type Task } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 
 export type Subtask = Task & { depth: number; subtaskIndex?: number }
@@ -45,7 +46,7 @@ export const SubtaskRowItem = ({
 
   const isDirect = task.depth === 0
   const showDragHandle = isManualSortMode && isDirect
-  const isCompleted = task.status === TaskStatus.COMPLETED
+  const { isCompleted } = getTaskStatuses(task)
 
   return (
     <div

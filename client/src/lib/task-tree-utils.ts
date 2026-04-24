@@ -15,9 +15,9 @@ import {
   SortOption,
   SubtaskSortMode,
   type Task,
-  taskSchema,
   TaskStatus,
   type Time,
+  taskSchema,
 } from '~/shared/schema'
 import {
   collectDescendantIds,

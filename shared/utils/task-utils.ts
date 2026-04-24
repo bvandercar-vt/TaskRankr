@@ -39,7 +39,7 @@ export const collectDescendantIds = (
   return result
 }
 
-export const getTaskStatuses = (task: Task) => ({
+export const getTaskStatuses = (task: Pick<Task, 'status'>) => ({
   isInProgress: task.status === TaskStatus.IN_PROGRESS,
   isPinned: task.status === TaskStatus.PINNED,
   isCompleted: task.status === TaskStatus.COMPLETED,
