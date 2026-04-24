@@ -46,16 +46,27 @@ export const getTaskStatuses = (task: Pick<Task, 'status'>) => ({
 })
 
 /**
- * Predicate for the "auto-hide completed" rule: a task should be hidden
- * when it transitions to (or is created as) COMPLETED and its parent has
- * `autoHideCompleted` enabled. Pass `undefined` for `parent` when the task
- * has no parent.
+ * Derived predicate: true iff `task` is hidden purely because its parent has
+ * `autoHideCompleted` enabled and the task is COMPLETED. Pass `undefined`
+ * for `parent` when the task has no parent. The task's own `hidden` flag is
+ * intentionally ignored here — this predicate isolates the parent-driven
+ * auto-hide signal, e.g. so the UI can disable the per-task hide toggle.
  */
-export const shouldAutoHideUnderParent = (
+export const isAutoHiddenByParent = (
+  task: Pick<Task, 'status'>,
   parent: Pick<Task, 'autoHideCompleted'> | undefined,
-  status: TaskStatus,
 ): boolean =>
-  parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
+  parent?.autoHideCompleted === true && task.status === TaskStatus.COMPLETED
+
+/**
+ * Derived predicate: true iff `task` should be considered hidden in the UI,
+ * accounting for both the user-set `hidden` flag and parent-driven auto-hide.
+ * Pass `undefined` for `parent` when the task has no parent.
+ */
+export const isEffectivelyHidden = (
+  task: Pick<Task, 'hidden' | 'status'>,
+  parent: Pick<Task, 'autoHideCompleted'> | undefined,
+): boolean => task.hidden || isAutoHiddenByParent(task, parent)
 
 /**
  * Translates a target `TaskStatus` into the timestamp side-effects that

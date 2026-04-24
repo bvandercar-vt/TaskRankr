@@ -23,6 +23,7 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
+import { isAutoHiddenByParent } from '~/shared/utils/task-utils'
 import { ChangeStatusDialog } from './ChangeStatusDialog'
 import { Badge } from './primitives/Badge'
 import { Icon } from './primitives/LucideIcon'
@@ -222,6 +223,13 @@ const TimeSpentDisplay = (
 
 interface TaskCardProps {
   task: TaskWithSubtasks
+  /**
+   * Immediate parent task — passed by recursive subtask rendering. Used to
+   * derive whether `task` is auto-hidden by parent's `autoHideCompleted`,
+   * so the hide/unhide toggle in the status dialog can disable itself with
+   * an explanatory tooltip. Top-level callers leave undefined.
+   */
+  parent?: Task
   level?: number
   showRestore?: boolean
   showCompletedDate?: boolean
@@ -230,6 +238,7 @@ interface TaskCardProps {
 
 export const TaskCard = ({
   task,
+  parent,
   level = 0,
   showRestore = false,
   showCompletedDate = false,
@@ -394,6 +403,7 @@ export const TaskCard = ({
                 <TaskCard
                   key={subtask.id}
                   task={subtask}
+                  parent={task}
                   level={level + 1}
                   showRestore={showRestore}
                   showCompletedDate={showCompletedDate}
@@ -418,6 +428,7 @@ export const TaskCard = ({
         timeSpent={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
+        autoHiddenByParent={isAutoHiddenByParent(task, parent)}
         hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => updateTask(task.id, { timeSpent: timeMs })}

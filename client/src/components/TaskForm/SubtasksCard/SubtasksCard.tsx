@@ -33,6 +33,7 @@ import {
 } from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import { isEffectivelyHidden } from '~/shared/utils/task-utils'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
 import { SubtasksSettings } from './SubtasksSettings'
@@ -138,17 +139,26 @@ export const SubtasksCard = ({
     return collectDescendants(task.id, 0, sortMode, showNumbers)
   }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
 
-  const hiddenSubtaskIds = useMemo(
-    () => new Set(allSubtasks.filter((s) => s.hidden).map((s) => s.id)),
-    [allSubtasks],
-  )
+  const hiddenSubtaskIds = useMemo(() => {
+    const taskById = new Map(allTasks.map((t) => [t.id, t]))
+    return new Set(
+      allSubtasks
+        .filter((s) =>
+          isEffectivelyHidden(
+            s,
+            s.parentId != null ? taskById.get(s.parentId) : undefined,
+          ),
+        )
+        .map((s) => s.id),
+    )
+  }, [allSubtasks, allTasks])
 
   const hiddenCount = hiddenSubtaskIds.size
 
   const visibleSubtasks = useMemo(() => {
     if (showHidden) return allSubtasks
-    return allSubtasks.filter((s) => !s.hidden)
-  }, [allSubtasks, showHidden])
+    return allSubtasks.filter((s) => !hiddenSubtaskIds.has(s.id))
+  }, [allSubtasks, showHidden, hiddenSubtaskIds])
 
   const totalCount = allSubtasks.length
 

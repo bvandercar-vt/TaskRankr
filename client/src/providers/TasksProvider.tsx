@@ -29,12 +29,7 @@ import { toast } from '@/hooks/useToast'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
-import {
-  buildLocalTask,
-  getAutoHideCascadeIds,
-  shouldAutoHideUnderParent,
-  statusToStatusPatch,
-} from '@/lib/task-provider-utils'
+import { buildLocalTask, statusToStatusPatch } from '@/lib/task-provider-utils'
 import {
   collectDescendantIds,
   getById,
@@ -67,10 +62,9 @@ export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 /**
  * Walks the tree until fixed point, auto-completing parents with
  * `inheritCompletionState` once all their children are completed and
- * auto-reverting them when any child is not completed. When a parent is
- * auto-completed and its grandparent has `autoHideCompleted`, cascades
- * `hidden: true` down the parent's subtree. Returns the reconciled tasks
- * plus the list of status corrections so callers can enqueue sync ops.
+ * auto-reverting them when any child is not completed. Returns the
+ * reconciled tasks plus the list of status corrections so callers can
+ * enqueue sync ops.
  */
 function reconcileInheritCompletionState(tasks: Task[]): {
   tasks: Task[]
@@ -94,30 +88,12 @@ function reconcileInheritCompletionState(tasks: Task[]): {
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
-        const grandparent = parent.parentId
-          ? getById(updated, parent.parentId)
-          : undefined
-        const shouldHide = shouldAutoHideUnderParent(
-          grandparent,
-          TaskStatus.COMPLETED,
-        )
-
         updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
           inProgressStartedAt: null,
-          ...(shouldHide ? { hidden: true } : {}),
         }))
-
-        if (shouldHide) {
-          const toHide = collectDescendantIds(updated, [parent.id])
-          if (toHide.size > 0) {
-            updated = updated.map((t) =>
-              toHide.has(t.id) ? { ...t, hidden: true } : t,
-            )
-          }
-        }
 
         corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
         changed = true
@@ -274,6 +250,59 @@ export const TasksProvider = ({
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
+  /**
+   * One-shot migration for the autoHideCompleted-cascade → derived-model
+   * transition. Previously, completing a task whose parent had
+   * `autoHideCompleted=true` set the task's `hidden` flag in storage
+   * (cascade write); the toggle on the parent also wrote `hidden` on
+   * existing completed children. Visibility is now derived from
+   * `hidden || (parent.autoHideCompleted && completed)`, so those
+   * persisted flags are now redundant — and since `hidden` only flips on
+   * explicit user action, leaving them set would make completed children
+   * stay hidden even after the parent toggle is turned off.
+   *
+   * Idempotent via `${storageKeys.tasks}.autoHideMigrated_v2`. Called
+   * both at boot from local storage and on the first server pull, so
+   * fresh devices that fetch legacy server data also get cleaned up.
+   *
+   * Caveat: tasks the user genuinely hid by hand under an auto-hiding
+   * parent are indistinguishable from cascade writes and will be
+   * un-hidden too. Acceptable: under the new model, manually hiding a
+   * task that is already auto-hidden is a no-op anyway.
+   */
+  const applyAutoHideCascadeMigration = useCallback(
+    (input: Task[]): Task[] => {
+      const migrationFlag = `${storageKeys.tasks}.autoHideMigrated_v2`
+      if (storage.get<boolean>(migrationFlag, false)) return input
+
+      const taskById = new Map(input.map((t) => [t.id, t]))
+      const migrationOps: SyncOperation[] = []
+      const migrated = input.map((t) => {
+        if (!t.hidden || t.parentId == null) return t
+        const parent = taskById.get(t.parentId)
+        if (parent?.autoHideCompleted && t.status === TaskStatus.COMPLETED) {
+          migrationOps.push({
+            type: SyncOperationType.UPDATE_TASK,
+            id: t.id,
+            data: { hidden: false },
+          })
+          return { ...t, hidden: false }
+        }
+        return t
+      })
+
+      if (migrationOps.length > 0 && shouldSync) {
+        enqueueMany(migrationOps)
+        debugLog.log('task', 'autoHideCascadeMigration', {
+          count: migrationOps.length,
+        })
+      }
+      storage.set(migrationFlag, true)
+      return migrated
+    },
+    [storageKeys, shouldSync, enqueueMany],
+  )
+
   const reconcileAndSetTasks = useCallback(
     (incomingTasks: Task[], source: string) => {
       const { tasks: reconciled, corrections } =
@@ -354,11 +383,18 @@ export const TasksProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      reconcileAndSetTasks(loadedTasks, 'init')
+      reconcileAndSetTasks(applyAutoHideCascadeMigration(loadedTasks), 'init')
     }
 
     setIsInitialized(true)
-  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync, enqueueMany])
+  }, [
+    storageKeys,
+    storageMode,
+    reconcileAndSetTasks,
+    shouldSync,
+    enqueueMany,
+    applyAutoHideCascadeMigration,
+  ])
 
   useEffect(() => {
     if (isInitialized) {
@@ -429,10 +465,6 @@ export const TasksProvider = ({
       const newTask = buildLocalTask({ ...data, id: tempId, status: newStatus })
 
       setTasks((prev) => {
-        const parent = data.parentId ? getById(prev, data.parentId) : undefined
-        if (shouldAutoHideUnderParent(parent, newTask.status)) {
-          newTask.hidden = true
-        }
         let updated = [...prev, newTask]
         if (data.parentId) {
           updated = updated.map((t) => {
@@ -455,12 +487,11 @@ export const TasksProvider = ({
         }
         return updated
       })
-      const syncData = (() => {
-        let d = { ...data, status: newStatus }
-        if (newTask.hidden && !data.hidden) d = { ...d, hidden: true }
-        return d
-      })()
-      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data: syncData })
+      enqueue({
+        type: SyncOperationType.CREATE_TASK,
+        tempId,
+        data: { ...data, status: newStatus },
+      })
       debugLog.log('task', 'create', {
         tempId,
         name: data.name,
@@ -477,17 +508,6 @@ export const TasksProvider = ({
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
-
-      if (updates.autoHideCompleted !== undefined) {
-        const hide = updates.autoHideCompleted
-        setTasks((prev) => {
-          const toHide = getAutoHideCascadeIds(prev, id)
-          if (toHide.size === 0) return prev
-          return prev.map((t) =>
-            toHide.has(t.id) ? { ...t, hidden: hide } : t,
-          )
-        })
-      }
 
       if (
         updates.inheritCompletionState === true &&
@@ -548,18 +568,7 @@ export const TasksProvider = ({
 
       const updatedTask = updateTaskById(
         id,
-        (task) => {
-          const base = statusToStatusPatch(status)
-
-          if (task.parentId) {
-            const parent = getById(tasksRef.current, task.parentId)
-            if (shouldAutoHideUnderParent(parent, status)) {
-              return { ...base, hidden: true }
-            }
-          }
-
-          return base
-        },
+        () => statusToStatusPatch(status),
         // Clear IN_PROGRESS status from other tasks when setting a new task to IN_PROGRESS
         status === TaskStatus.IN_PROGRESS
           ? (t) =>
@@ -574,16 +583,6 @@ export const TasksProvider = ({
 
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: { status } })
       debugLog.log('task', 'setStatus', { id, status })
-
-      if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
-        setTasks((prev) => {
-          const toHide = collectDescendantIds(prev, [id])
-          if (toHide.size === 0) return prev
-          return prev.map((t) =>
-            toHide.has(t.id) ? { ...t, hidden: true } : t,
-          )
-        })
-      }
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
         const autoCompletedParents: number[] = []
@@ -606,24 +605,11 @@ export const TasksProvider = ({
 
             const latestCompletedAt = getChildrenLatestCompletedAt(thisChildren)
 
-            const parentUpdate: Partial<Task> = {
+            updated = updateItem(updated, parent.id, (t) => ({
+              ...t,
               status: TaskStatus.COMPLETED,
               completedAt: latestCompletedAt ?? new Date(),
               inProgressStartedAt: null,
-            }
-
-            if (parent.parentId) {
-              const grandparent = getById(updated, parent.parentId)
-              if (
-                shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)
-              ) {
-                parentUpdate.hidden = true
-              }
-            }
-
-            updated = updateItem(updated, parent.id, (t) => ({
-              ...t,
-              ...parentUpdate,
             }))
             autoCompletedParents.push(parent.id)
 
@@ -771,12 +757,21 @@ export const TasksProvider = ({
         )
       }
 
-      reconcileAndSetTasks(sanitized, 'fromServer')
+      reconcileAndSetTasks(
+        applyAutoHideCascadeMigration(sanitized),
+        'fromServer',
+      )
       nextIdRef.current = -1
       storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
-    [storageKeys, demoTaskIds, reconcileAndSetTasks, enqueueMany],
+    [
+      storageKeys,
+      demoTaskIds,
+      reconcileAndSetTasks,
+      enqueueMany,
+      applyAutoHideCascadeMigration,
+    ],
   )
 
   useEffect(() => {

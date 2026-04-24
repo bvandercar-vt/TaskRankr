@@ -21,7 +21,6 @@ import {
 } from '~/shared/schema'
 import {
   getHasIncomplete,
-  shouldAutoHideUnderParent,
   statusToStatusPatch,
 } from '~/shared/utils/task-utils'
 import { db } from './db'
@@ -153,13 +152,6 @@ export class DatabaseStorage implements IStorage {
         inProgressStartedAt: null,
       }
 
-      if (parent.parentId) {
-        const grandparent = await this.getTask(parent.parentId, userId)
-        if (shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)) {
-          completionUpdate.hidden = true
-        }
-      }
-
       await db.update(tasks).set(completionUpdate).where(eq(tasks.id, parentId))
 
       if (parent.parentId) {
@@ -265,14 +257,6 @@ export class DatabaseStorage implements IStorage {
         dbUpdates.timeSpent =
           (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
       }
-
-      if (newStatus === TaskStatus.COMPLETED && currentTask.parentId) {
-        // Auto-hide under parent if the parent has the toggle enabled.
-        const parent = await this.getTask(currentTask.parentId, userId)
-        if (shouldAutoHideUnderParent(parent, newStatus)) {
-          dbUpdates.hidden = true
-        }
-      }
     }
 
     const [task] = await db
@@ -282,20 +266,6 @@ export class DatabaseStorage implements IStorage {
       .returning()
 
     const updated = task
-
-    // autoHideCompleted toggled: update visibility of existing completed children
-    if (dbUpdates.autoHideCompleted !== undefined) {
-      await db
-        .update(tasks)
-        .set({ hidden: dbUpdates.autoHideCompleted })
-        .where(
-          and(
-            eq(tasks.parentId, id),
-            eq(tasks.userId, userId),
-            eq(tasks.status, TaskStatus.COMPLETED),
-          ),
-        )
-    }
 
     // inheritCompletionState turned on while task is already completed:
     // revert if it still has incomplete children

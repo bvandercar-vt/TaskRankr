@@ -33,6 +33,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './primitives/overlays/AlertDialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from './primitives/overlays/Tooltip'
 import { SubtaskBlockedTooltip } from './SubtaskBlockedTooltip'
 
 const TimeSpentInput = ({
@@ -124,6 +129,13 @@ interface ChangeStatusDialogProps {
   timeSpent: number
   isSubtask?: boolean
   isHidden?: boolean
+  /**
+   * When true, the task is auto-hidden by its parent's `autoHideCompleted`
+   * setting. The Hide/Unhide toggle is rendered disabled with an explanatory
+   * tooltip — the user must turn off the parent's auto-hide setting to make
+   * it visible.
+   */
+  autoHiddenByParent?: boolean
   hasIncompleteSubtasks?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
@@ -139,6 +151,7 @@ export const ChangeStatusDialog = ({
   timeSpent: initialTimeSpent,
   isSubtask,
   isHidden,
+  autoHiddenByParent,
   hasIncompleteSubtasks,
   onSetStatus,
   onUpdateTime,
@@ -273,26 +286,45 @@ export const ChangeStatusDialog = ({
             )}
 
             <div className="flex justify-center gap-2">
-              {isSubtask && onToggleHidden && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 h-8"
-                  onClick={() => {
-                    onToggleHidden()
-                    onOpenChange(false)
-                  }}
-                  data-testid="button-toggle-hidden"
-                >
-                  <LucideIconComponent
-                    icon={isHidden ? Eye : EyeOff}
-                    className="size-3.5"
-                  />
-                  <span className="text-xs font-medium">
-                    {isHidden ? 'Unhide' : 'Hide'}
-                  </span>
-                </Button>
-              )}
+              {isSubtask &&
+                onToggleHidden &&
+                (() => {
+                  const button = (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2 h-8 disabled:opacity-50"
+                      disabled={autoHiddenByParent}
+                      onClick={() => {
+                        onToggleHidden()
+                        onOpenChange(false)
+                      }}
+                      data-testid="button-toggle-hidden"
+                    >
+                      <LucideIconComponent
+                        icon={isHidden ? Eye : EyeOff}
+                        className="size-3.5"
+                      />
+                      <span className="text-xs font-medium">
+                        {isHidden ? 'Unhide' : 'Hide'}
+                      </span>
+                    </Button>
+                  )
+                  if (!autoHiddenByParent) return button
+                  // Disabled buttons swallow pointer events, so wrap the
+                  // trigger in a span to receive hover/focus for the tooltip.
+                  return (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex">{button}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Auto-hidden — turn off the parent's auto-hide setting to
+                        show it.
+                      </TooltipContent>
+                    </Tooltip>
+                  )
+                })()}
               <DeleteButton
                 taskName={taskName}
                 onConfirm={() => {

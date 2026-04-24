@@ -43,12 +43,7 @@ import { omit } from 'es-toolkit'
 import type { EmptyObject } from 'type-fest'
 
 import { debugLog } from '@/lib/debug-logger'
-import {
-  buildLocalTask,
-  getAutoHideCascadeIds,
-  shouldAutoHideUnderParent,
-  statusToStatusPatch,
-} from '@/lib/task-provider-utils'
+import { buildLocalTask, statusToStatusPatch } from '@/lib/task-provider-utils'
 import { collectDescendantIds, removeIds } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
@@ -228,93 +223,46 @@ export const DraftSessionProvider = ({
   // value is stable across draft churn.
   // ---------------------------------------------------------------------------
 
-  /** Find a task by id across the real and draft layers. */
-  const findTaskAcrossLayers = useCallback(
-    (id: number): Task | undefined =>
-      draftTasksRef.current.find((t) => t.id === id) ??
-      tasksRef.current.find((t) => t.id === id),
-    [],
-  )
+  const createDraftTask = useCallback((data: CreateTaskContent): Task => {
+    const tempId = draftIdRef.current--
+    const newTask = buildLocalTask({
+      ...data,
+      id: tempId,
+      status: data.status ?? TaskStatus.OPEN,
+    })
 
-  const createDraftTask = useCallback(
-    (data: CreateTaskContent): Task => {
-      const tempId = draftIdRef.current--
-      const newTask = buildLocalTask({
-        ...data,
-        id: tempId,
-        status: data.status ?? TaskStatus.OPEN,
-      })
-
-      // Auto-hide on create: if parent has `autoHideCompleted` and the new
-      // task is already COMPLETED, mark it hidden.
+    setDraftTasks((prev) => {
+      let updated = [...prev, newTask]
       if (data.parentId != null) {
-        const parent = findTaskAcrossLayers(data.parentId)
-        if (shouldAutoHideUnderParent(parent, newTask.status)) {
-          newTask.hidden = true
-        }
+        // If parent is itself a draft and MANUAL, append to its
+        // subtaskOrder.
+        updated = updated.map((t) => {
+          if (t.id !== data.parentId) return t
+          if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
+            return { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
+          }
+          return t
+        })
       }
-
-      setDraftTasks((prev) => {
-        let updated = [...prev, newTask]
-        if (data.parentId != null) {
-          // If parent is itself a draft and MANUAL, append to its
-          // subtaskOrder.
-          updated = updated.map((t) => {
-            if (t.id !== data.parentId) return t
-            if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
-              return { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
-            }
-            return t
-          })
-        }
-        return updated
-      })
-      debugLog.log('task', 'createDraft', {
-        tempId,
-        name: data.name,
-        parentId: data.parentId,
-      })
-      return newTask
-    },
-    [findTaskAcrossLayers],
-  )
+      return updated
+    })
+    debugLog.log('task', 'createDraft', {
+      tempId,
+      name: data.name,
+      parentId: data.parentId,
+    })
+    return newTask
+  }, [])
 
   const updateDraftTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
       let updated: Task | undefined
       setDraftTasks((prev) => {
-        // Auto-hide on completion: if status is changing to COMPLETED and the
-        // task's parent has `autoHideCompleted`, mark it hidden in the same
-        // patch.
-        const completionHide = (t: Task): Partial<Task> => {
-          if (updates.status === undefined || t.parentId == null) return {}
-          const parent =
-            prev.find((p) => p.id === t.parentId) ??
-            tasksRef.current.find((p) => p.id === t.parentId)
-          return shouldAutoHideUnderParent(parent, updates.status)
-            ? { hidden: true }
-            : {}
-        }
-
-        const next = prev.map((t) => {
+        return prev.map((t) => {
           if (t.id !== id) return t
-          updated = { ...t, ...updates, ...completionHide(t) }
+          updated = { ...t, ...updates }
           return updated
         })
-
-        // Apply `autoHideCompleted` toggle to direct completed draft
-        // children. Their own descendants' visibility is governed by their
-        // own immediate parent's setting, so no need to cascade.
-        if (updates.autoHideCompleted !== undefined) {
-          const hide = updates.autoHideCompleted
-          const toHide = getAutoHideCascadeIds(next, id)
-          if (toHide.size > 0) {
-            return next.map((t) =>
-              toHide.has(t.id) ? { ...t, hidden: hide } : t,
-            )
-          }
-        }
-        return next
       })
       // biome-ignore lint/style/noNonNullAssertion: id was verified by caller as a draft
       return updated!
