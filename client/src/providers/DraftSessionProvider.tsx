@@ -41,13 +41,15 @@ import {
 } from 'react'
 import { omit } from 'es-toolkit'
 import type { EmptyObject } from 'type-fest'
-import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
 import {
+  buildLocalTask,
+  collectDescendantIds,
   getAutoHideCascadeIds,
   removeIds,
   shouldAutoHideUnderParent,
+  statusToStatusPatch,
 } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
@@ -55,13 +57,7 @@ import {
   useTaskMutations,
   useTasks,
 } from '@/providers/TasksProvider'
-import {
-  allRankFieldsNull,
-  SubtaskSortMode,
-  type Task,
-  TaskStatus,
-  taskSchema,
-} from '~/shared/schema'
+import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
 interface DraftSessionStateValue {
   /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
@@ -212,13 +208,7 @@ export const DraftSessionProvider = ({
 
   const createDraftTask = useCallback((data: CreateTaskContent): Task => {
     const tempId = draftIdRef.current--
-    const newTask: Task = taskSchema.parse({
-      ...allRankFieldsNull,
-      ...data,
-      id: tempId,
-      userId: 'local',
-      status: data.status ?? TaskStatus.OPEN,
-    } satisfies z.input<typeof taskSchema>)
+    const newTask = buildLocalTask(data, tempId, data.status ?? TaskStatus.OPEN)
 
     // Auto-hide on create: if parent has `autoHideCompleted` and the new task
     // is already COMPLETED, mark it hidden.
@@ -295,14 +285,9 @@ export const DraftSessionProvider = ({
 
   const deleteDraftTask = useCallback((id: number) => {
     setDraftTasks((prev) => {
-      const idsToDelete = new Set<number>()
-      const collect = (pid: number) => {
-        idsToDelete.add(pid)
-        for (const t of prev) {
-          if (t.parentId === pid) collect(t.id)
-        }
-      }
-      collect(id)
+      const idsToDelete = collectDescendantIds(prev, [id], {
+        includeRoots: true,
+      })
 
       // Drop any assignment overrides whose new parent is being deleted.
       setDraftAssignedParents((prevAssigned) => {
@@ -417,15 +402,9 @@ export const DraftSessionProvider = ({
       // order overrides for the descendants too — otherwise stale entries
       // would produce bogus UPDATE/REORDER ops against non-existent ids on
       // commit.
-      const snapshot = tasksRef.current
-      const deletedIds = new Set<number>()
-      const collect = (rootId: number) => {
-        deletedIds.add(rootId)
-        for (const t of snapshot) {
-          if (t.parentId === rootId) collect(t.id)
-        }
-      }
-      collect(id)
+      const deletedIds = collectDescendantIds(tasksRef.current, [id], {
+        includeRoots: true,
+      })
 
       setDraftAssignedParents((prev) => {
         if (prev.size === 0) return prev
@@ -501,17 +480,10 @@ export const DraftSessionProvider = ({
   const setTaskStatus = useCallback(
     (id: number, status: TaskStatus): Task => {
       if (isDraftIdStable(id)) {
-        const next: Partial<Task> =
-          status === TaskStatus.IN_PROGRESS
-            ? { status, inProgressStartedAt: new Date() }
-            : status === TaskStatus.COMPLETED
-              ? {
-                  status,
-                  completedAt: new Date(),
-                  inProgressStartedAt: null,
-                }
-              : { status, inProgressStartedAt: null }
-        return updateDraftTask(id, next as UpdateTaskContent)
+        return updateDraftTask(
+          id,
+          statusToStatusPatch(status) as UpdateTaskContent,
+        )
       }
       return realSetTaskStatus(id, status)
     },

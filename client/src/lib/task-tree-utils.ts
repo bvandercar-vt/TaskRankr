@@ -4,15 +4,18 @@
  */
 
 import type { ValueOf } from 'type-fest'
+import type { z } from 'zod'
 
 import type { TaskWithSubtasks } from '@/types'
 import {
+  allRankFieldsNull,
   type Ease,
   type Enjoyment,
   type Priority,
   SortOption,
   SubtaskSortMode,
   type Task,
+  taskSchema,
   TaskStatus,
   type Time,
 } from '~/shared/schema'
@@ -22,6 +25,58 @@ import {
 } from '~/shared/utils/task-utils'
 
 export * from '~/shared/utils/task-utils'
+
+// *****************************************************************************
+// Local-task construction (client-only — drafts and unsynced creates both
+// live in-memory with a negative id and `userId: 'local'`).
+// *****************************************************************************
+
+/**
+ * Build a local-only Task: parses through `taskSchema` after applying the
+ * caller-supplied id and status on top of `allRankFieldsNull` defaults.
+ * Used by `TasksProvider.createTask` (real but unsynced) and
+ * `DraftSessionProvider.createDraftTask` (never persisted). Any `status` on
+ * `data` is intentionally overridden by the explicit `status` arg.
+ *
+ * `data` is typed loosely (`Partial<...>`) because callers pass Drizzle
+ * insert-style content where nullable fields appear as `T | null | undefined`
+ * — looser than `z.input` accepts. The runtime parse below is the real
+ * validation.
+ */
+export const buildLocalTask = (
+  data: Partial<z.input<typeof taskSchema>>,
+  id: number,
+  status: TaskStatus,
+): Task =>
+  taskSchema.parse({
+    ...allRankFieldsNull,
+    ...data,
+    id,
+    userId: 'local',
+    status,
+  })
+
+// *****************************************************************************
+// Status transitions
+// *****************************************************************************
+
+/**
+ * Translates a target `TaskStatus` into the timestamp side-effects that
+ * accompany the transition: starting `IN_PROGRESS` stamps
+ * `inProgressStartedAt`, transitioning to `COMPLETED` stamps `completedAt`
+ * and clears the in-progress timer, and any other status just clears the
+ * in-progress timer. Used by `setTaskStatus` in both providers.
+ */
+export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
+  switch (status) {
+    case TaskStatus.IN_PROGRESS:
+      return { status, inProgressStartedAt: new Date() }
+    case TaskStatus.COMPLETED:
+      return { status, completedAt: new Date(), inProgressStartedAt: null }
+    default:
+      return { status, inProgressStartedAt: null }
+  }
+}
 
 // *****************************************************************************
 // Auto-hide-completed (client-only — server applies its own equivalent

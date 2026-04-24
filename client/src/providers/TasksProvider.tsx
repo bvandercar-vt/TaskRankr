@@ -24,13 +24,13 @@ import {
   useState,
 } from 'react'
 import { omit } from 'es-toolkit'
-import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
+  buildLocalTask,
   collectDescendantIds,
   getAutoHideCascadeIds,
   getById,
@@ -39,6 +39,7 @@ import {
   getHasIncompleteSubtasks,
   removeIds,
   shouldAutoHideUnderParent,
+  statusToStatusPatch,
   updateItem,
 } from '@/lib/task-tree-utils'
 import { useSettings } from '@/providers/SettingsProvider'
@@ -48,7 +49,6 @@ import {
   useTaskSyncQueue,
 } from '@/providers/TaskSyncQueueProvider'
 import {
-  allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
   type Task,
@@ -424,13 +424,7 @@ export const TasksProvider = ({
         return pinNew ? TaskStatus.PINNED : TaskStatus.OPEN
       })()
 
-      const newTask: Task = taskSchema.parse({
-        ...allRankFieldsNull,
-        ...data,
-        id: tempId,
-        userId: 'local',
-        status: newStatus,
-      } satisfies z.input<typeof taskSchema>)
+      const newTask = buildLocalTask(data, tempId, newStatus)
 
       setTasks((prev) => {
         const parent = data.parentId ? getById(prev, data.parentId) : undefined
@@ -553,26 +547,7 @@ export const TasksProvider = ({
       const updatedTask = updateTaskById(
         id,
         (task) => {
-          const base = (() => {
-            switch (status) {
-              case TaskStatus.IN_PROGRESS:
-                return {
-                  status: TaskStatus.IN_PROGRESS,
-                  inProgressStartedAt: new Date(),
-                }
-              case TaskStatus.COMPLETED:
-                return {
-                  status: TaskStatus.COMPLETED,
-                  completedAt: new Date(),
-                  inProgressStartedAt: null,
-                }
-              default:
-                return {
-                  status,
-                  inProgressStartedAt: null,
-                }
-            }
-          })()
+          const base = statusToStatusPatch(status)
 
           if (task.parentId) {
             const parent = getById(tasksRef.current, task.parentId)
@@ -712,14 +687,9 @@ export const TasksProvider = ({
         const taskToDelete = getById(prev, id)
         if (!taskToDelete) return prev
 
-        const idsToDelete = new Set<number>()
-        const collectDescendants = (parentId: number) => {
-          idsToDelete.add(parentId)
-          for (const t of prev) {
-            if (t.parentId === parentId) collectDescendants(t.id)
-          }
-        }
-        collectDescendants(id)
+        const idsToDelete = collectDescendantIds(prev, [id], {
+          includeRoots: true,
+        })
 
         let totalTime = 0
         for (const t of prev) {
