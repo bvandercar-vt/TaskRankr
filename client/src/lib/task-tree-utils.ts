@@ -61,11 +61,8 @@ export const buildLocalTask = (
 // *****************************************************************************
 
 /**
- * Translates a target `TaskStatus` into the timestamp side-effects that
- * accompany the transition: starting `IN_PROGRESS` stamps
- * `inProgressStartedAt`, transitioning to `COMPLETED` stamps `completedAt`
- * and clears the in-progress timer, and any other status just clears the
- * in-progress timer. Used by `setTaskStatus` in both providers.
+ * Applies the necessary field changes for a task to transition to the given
+ * status.
  */
 export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
   switch (status) {
@@ -73,8 +70,11 @@ export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
       return { status, inProgressStartedAt: new Date() }
     case TaskStatus.COMPLETED:
       return { status, completedAt: new Date(), inProgressStartedAt: null }
-    default:
+    case TaskStatus.PINNED:
+    case TaskStatus.OPEN:
       return { status, inProgressStartedAt: null }
+    default:
+      throw new Error(`Unhandled status: ${status satisfies never}`)
   }
 }
 
