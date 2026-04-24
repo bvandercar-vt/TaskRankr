@@ -31,15 +31,17 @@ import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
   buildLocalTask,
-  collectDescendantIds,
   getAutoHideCascadeIds,
+  shouldAutoHideUnderParent,
+  statusToStatusPatch,
+} from '@/lib/task-provider-utils'
+import {
+  collectDescendantIds,
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
   removeIds,
-  shouldAutoHideUnderParent,
-  statusToStatusPatch,
   updateItem,
 } from '@/lib/task-tree-utils'
 import { useSettings } from '@/providers/SettingsProvider'

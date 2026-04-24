@@ -3,12 +3,10 @@
  * lists.
  */
 
-import type { SetRequired, ValueOf } from 'type-fest'
-import type { z } from 'zod'
+import type { ValueOf } from 'type-fest'
 
 import type { TaskWithSubtasks } from '@/types'
 import {
-  allRankFieldsNull,
   type Ease,
   type Enjoyment,
   type Priority,
@@ -17,88 +15,9 @@ import {
   type Task,
   TaskStatus,
   type Time,
-  taskSchema,
 } from '~/shared/schema'
-import {
-  collectDescendantIds,
-  getDirectSubtasks,
-} from '~/shared/utils/task-utils'
 
 export * from '~/shared/utils/task-utils'
-
-// *****************************************************************************
-// Local-task construction (client-only — drafts and unsynced creates both
-// live in-memory with a negative id and `userId: 'local'`).
-// *****************************************************************************
-
-/**
- * Build a local-only Task: parses through `taskSchema` after applying the
- * caller-supplied id and status on top of `allRankFieldsNull` defaults.
- */
-export const buildLocalTask = (
-  data: SetRequired<Partial<z.input<typeof taskSchema>>, 'id' | 'status'>,
-): Task =>
-  taskSchema.parse({
-    ...allRankFieldsNull,
-    ...data,
-    userId: 'local',
-  })
-
-// *****************************************************************************
-// Status transitions
-// *****************************************************************************
-
-/**
- * Applies the necessary field changes for a task to transition to the given
- * status.
- */
-export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
-  switch (status) {
-    case TaskStatus.IN_PROGRESS:
-      return { status, inProgressStartedAt: new Date() }
-    case TaskStatus.COMPLETED:
-      return { status, completedAt: new Date(), inProgressStartedAt: null }
-    case TaskStatus.PINNED:
-    case TaskStatus.OPEN:
-      return { status, inProgressStartedAt: null }
-    default:
-      throw new Error(`Unhandled status: ${status satisfies never}`)
-  }
-}
-
-// *****************************************************************************
-// Auto-hide-completed (client-only — server applies its own equivalent
-// per-row via DB queries in `server/storage.ts`).
-// *****************************************************************************
-
-/**
- * Predicate for the "auto-hide completed" rule: a task should be hidden
- * when it transitions to (or is created as) COMPLETED and its parent has
- * `autoHideCompleted` enabled. Pass `undefined` for `parent` when the task
- * has no parent.
- */
-export const shouldAutoHideUnderParent = (
-  parent: Task | undefined,
-  status: TaskStatus,
-): boolean =>
-  parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
-
-/**
- * When a parent's `autoHideCompleted` toggle changes, returns the set of
- * descendant ids whose `hidden` flag should be flipped: every COMPLETED
- * direct child plus all of that child's descendants. Returns an empty set
- * when nothing needs to change.
- */
-export const getAutoHideCascadeIds = (
-  tasks: Task[],
-  parentId: number,
-): Set<number> => {
-  const completedDirectIds = getDirectSubtasks(tasks, parentId)
-    .filter((t) => t.status === TaskStatus.COMPLETED)
-    .map((t) => t.id)
-  if (completedDirectIds.length === 0) return new Set()
-  return collectDescendantIds(tasks, completedDirectIds, { includeRoots: true })
-}
 
 // *****************************************************************************
 // Sorting

@@ -45,12 +45,11 @@ import type { EmptyObject } from 'type-fest'
 import { debugLog } from '@/lib/debug-logger'
 import {
   buildLocalTask,
-  collectDescendantIds,
   getAutoHideCascadeIds,
-  removeIds,
   shouldAutoHideUnderParent,
   statusToStatusPatch,
-} from '@/lib/task-tree-utils'
+} from '@/lib/task-provider-utils'
+import { collectDescendantIds, removeIds } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
   type UpdateTaskContent,
