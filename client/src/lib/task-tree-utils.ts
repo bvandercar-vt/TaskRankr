@@ -16,8 +16,46 @@ import {
   TaskStatus,
   type Time,
 } from '~/shared/schema'
+import {
+  collectDescendantIds,
+  getDirectSubtasks,
+} from '~/shared/utils/task-utils'
 
 export * from '~/shared/utils/task-utils'
+
+// *****************************************************************************
+// Auto-hide-completed (client-only — server applies its own equivalent
+// per-row via DB queries in `server/storage.ts`).
+// *****************************************************************************
+
+/**
+ * Predicate for the "auto-hide completed" rule: a task should be hidden
+ * when it transitions to (or is created as) COMPLETED and its parent has
+ * `autoHideCompleted` enabled. Pass `undefined` for `parent` when the task
+ * has no parent.
+ */
+export const shouldAutoHideUnderParent = (
+  parent: Task | undefined,
+  status: TaskStatus,
+): boolean =>
+  parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
+
+/**
+ * When a parent's `autoHideCompleted` toggle changes, returns the set of
+ * descendant ids whose `hidden` flag should be flipped: every COMPLETED
+ * direct child plus all of that child's descendants. Returns an empty set
+ * when nothing needs to change.
+ */
+export const getAutoHideCascadeIds = (
+  tasks: Task[],
+  parentId: number,
+): Set<number> => {
+  const completedDirectIds = getDirectSubtasks(tasks, parentId)
+    .filter((t) => t.status === TaskStatus.COMPLETED)
+    .map((t) => t.id)
+  if (completedDirectIds.length === 0) return new Set()
+  return collectDescendantIds(tasks, completedDirectIds, { includeRoots: true })
+}
 
 // *****************************************************************************
 // Sorting
