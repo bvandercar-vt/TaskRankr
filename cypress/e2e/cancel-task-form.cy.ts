@@ -82,17 +82,20 @@ describe('Task Form Cancellation', () => {
   ] as const) {
     context(contextName, () => {
       beforeEach(beforeEachHook)
-      afterEach(() => {
+
+      // after each, but we don't want failure to prevent other tests from running.
+      const afterEachSafe = () => {
         afterEachHook()
         cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('not.exist')
         cy.get(TaskForm.FORM).should('not.exist')
-      })
+      }
 
       if (contextName === 'New Task') {
         it('cancel on create form before adding any subtask — dialog closes, no task created', () => {
           getTaskForm(0).within(() => {
             cy.get(TaskForm.CANCEL_BTN).click()
           })
+          afterEachSafe()
         })
       }
 
@@ -115,6 +118,7 @@ describe('Task Form Cancellation', () => {
           .should('be.visible')
           .should('contain.text', '1 unsaved subtask')
         cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
+        afterEachSafe()
       })
 
       it('cancel on parent form after multiple subtasks were added — confirmation shows correct count, discard removes all', () => {
@@ -159,8 +163,7 @@ describe('Task Form Cancellation', () => {
           .should('be.visible')
           .should('contain.text', '2 unsaved subtasks')
         cy.get(TaskForm.CANCEL_CONFIRM_BTN).click()
-        cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('not.exist')
-        cy.get(TaskForm.FORM).should('not.exist')
+        afterEachSafe()
       })
 
       it('cancel on subtask form navigates back to parent, then cancel on parent discards all without confirmation', () => {
@@ -177,6 +180,7 @@ describe('Task Form Cancellation', () => {
           cy.get(TaskForm.NAME_INPUT).should('have.value', rootTask.name)
           cy.get(TaskForm.CANCEL_BTN).click()
         })
+        afterEachSafe()
       })
     })
   }
