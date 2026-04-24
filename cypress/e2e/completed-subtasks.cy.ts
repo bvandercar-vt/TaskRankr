@@ -47,6 +47,11 @@ describe('Completed Subtasks', () => {
     status: TaskStatus.OPEN,
   } as const satisfies CreatedTask
 
+  const completedSubtask2 = {
+    ...subtask2,
+    status: TaskStatus.COMPLETED,
+  } as const satisfies CreatedTask
+
   const createUncompletedSubtask = () => {
     cy.log('Create root task with uncompleted subtask')
     cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -229,7 +234,7 @@ describe('Completed Subtasks', () => {
         })
 
         getTaskForm(0).within(() => {
-          checkTaskFormSubtasks([subtask, subtask2])
+          checkTaskFormSubtasks([subtask, completedSubtask2])
           clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
         })
 
@@ -237,7 +242,7 @@ describe('Completed Subtasks', () => {
 
         openTaskEditForm(rootTask)
         getTaskForm(0).within(() => {
-          checkTaskFormSubtasks([subtask, subtask2])
+          checkTaskFormSubtasks([subtask, completedSubtask2])
 
           cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click()
           cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH).toggleState(true)
