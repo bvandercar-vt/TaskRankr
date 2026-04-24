@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { useTaskMutations } from '@/providers/TasksProvider'
+import { useDraftSessionMutations } from '@/providers/DraftSessionProvider'
 import { SubtaskSortMode } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 import { Switch } from '../../primitives/forms/Switch'
@@ -20,7 +20,7 @@ const SortingMethodSwitch = ({
   sortMode: SubtaskSortMode
   onSortModeChange: (mode: SubtaskSortMode) => void
 }) => {
-  const { updateTask, reorderSubtasks } = useTaskMutations()
+  const { updateTask, reorderSubtasks } = useDraftSessionMutations()
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
@@ -156,7 +156,7 @@ const SubtasksSettingsMenu = ({
   onShowNumbersChange,
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
-  const { updateTask } = useTaskMutations()
+  const { updateTask } = useDraftSessionMutations()
 
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
