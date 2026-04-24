@@ -19,7 +19,10 @@ import {
   type UserSettings,
   userSettings,
 } from '~/shared/schema'
-import { getHasIncomplete } from '~/shared/utils/task-utils'
+import {
+  getHasIncomplete,
+  shouldAutoHideUnderParent,
+} from '~/shared/utils/task-utils'
 import { db } from './db'
 
 type UpdateTaskArg = Omit<UpdateTask, 'id'>
@@ -151,7 +154,7 @@ export class DatabaseStorage implements IStorage {
 
       if (parent.parentId) {
         const grandparent = await this.getTask(parent.parentId, userId)
-        if (grandparent?.autoHideCompleted) {
+        if (shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)) {
           completionUpdate.hidden = true
         }
       }
@@ -262,7 +265,7 @@ export class DatabaseStorage implements IStorage {
         dbUpdates.completedAt = new Date()
         if (currentTask.parentId) {
           const parent = await this.getTask(currentTask.parentId, userId)
-          if (parent?.autoHideCompleted) {
+          if (shouldAutoHideUnderParent(parent, newStatus)) {
             dbUpdates.hidden = true
           }
         }

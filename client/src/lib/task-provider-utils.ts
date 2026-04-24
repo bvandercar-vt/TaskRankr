@@ -16,6 +16,8 @@ import {
   getDirectSubtasks,
 } from '~/shared/utils/task-utils'
 
+export { shouldAutoHideUnderParent } from '~/shared/utils/task-utils'
+
 /**
  * Build a local-only Task: parses through `taskSchema` after applying the
  * caller-supplied id and status on top of `allRankFieldsNull` defaults.
@@ -46,12 +48,6 @@ export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
       throw new Error(`Unhandled status: ${status satisfies never}`)
   }
 }
-
-export const shouldAutoHideUnderParent = (
-  parent: Task | undefined,
-  status: TaskStatus,
-): boolean =>
-  parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
 
 /**
  * When a parent's `autoHideCompleted` toggle changes, returns the set of

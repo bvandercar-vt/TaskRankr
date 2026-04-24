@@ -45,6 +45,18 @@ export const getTaskStatuses = (task: Pick<Task, 'status'>) => ({
   isCompleted: task.status === TaskStatus.COMPLETED,
 })
 
+/**
+ * Predicate for the "auto-hide completed" rule: a task should be hidden
+ * when it transitions to (or is created as) COMPLETED and its parent has
+ * `autoHideCompleted` enabled. Pass `undefined` for `parent` when the task
+ * has no parent.
+ */
+export const shouldAutoHideUnderParent = (
+  parent: Pick<Task, 'autoHideCompleted'> | undefined,
+  status: TaskStatus,
+): boolean =>
+  parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
+
 export const getHasIncomplete = (tasks: Task[]): boolean =>
   tasks.some((t) => t.status !== TaskStatus.COMPLETED)
 
