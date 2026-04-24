@@ -230,44 +230,55 @@ export const DraftSessionProvider = ({
   // ---------------------------------------------------------------------------
 
   /** Find a task by id across the real and draft layers. */
-  const findTaskAcrossLayers = (id: number): Task | undefined =>
-    draftTasksRef.current.find((t) => t.id === id) ??
-    tasksRef.current.find((t) => t.id === id)
+  const findTaskAcrossLayers = useCallback(
+    (id: number): Task | undefined =>
+      draftTasksRef.current.find((t) => t.id === id) ??
+      tasksRef.current.find((t) => t.id === id),
+    [],
+  )
 
-  const createDraftTask = useCallback((data: CreateTaskContent): Task => {
-    const tempId = draftIdRef.current--
-    const newTask = buildLocalTask(data, tempId, data.status ?? TaskStatus.OPEN)
+  const createDraftTask = useCallback(
+    (data: CreateTaskContent): Task => {
+      const tempId = draftIdRef.current--
+      const newTask = buildLocalTask(
+        data,
+        tempId,
+        data.status ?? TaskStatus.OPEN,
+      )
 
-    // Auto-hide on create: if parent has `autoHideCompleted` and the new task
-    // is already COMPLETED, mark it hidden.
-    if (data.parentId != null) {
-      const parent = findTaskAcrossLayers(data.parentId)
-      if (shouldAutoHideUnderParent(parent, newTask.status)) {
-        newTask.hidden = true
-      }
-    }
-
-    setDraftTasks((prev) => {
-      let updated = [...prev, newTask]
+      // Auto-hide on create: if parent has `autoHideCompleted` and the new
+      // task is already COMPLETED, mark it hidden.
       if (data.parentId != null) {
-        // If parent is itself a draft and MANUAL, append to its subtaskOrder.
-        updated = updated.map((t) => {
-          if (t.id !== data.parentId) return t
-          if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
-            return { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
-          }
-          return t
-        })
+        const parent = findTaskAcrossLayers(data.parentId)
+        if (shouldAutoHideUnderParent(parent, newTask.status)) {
+          newTask.hidden = true
+        }
       }
-      return updated
-    })
-    debugLog.log('task', 'createDraft', {
-      tempId,
-      name: data.name,
-      parentId: data.parentId,
-    })
-    return newTask
-  }, [])
+
+      setDraftTasks((prev) => {
+        let updated = [...prev, newTask]
+        if (data.parentId != null) {
+          // If parent is itself a draft and MANUAL, append to its
+          // subtaskOrder.
+          updated = updated.map((t) => {
+            if (t.id !== data.parentId) return t
+            if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
+              return { ...t, subtaskOrder: [...t.subtaskOrder, tempId] }
+            }
+            return t
+          })
+        }
+        return updated
+      })
+      debugLog.log('task', 'createDraft', {
+        tempId,
+        name: data.name,
+        parentId: data.parentId,
+      })
+      return newTask
+    },
+    [findTaskAcrossLayers],
+  )
 
   const updateDraftTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
@@ -318,8 +329,8 @@ export const DraftSessionProvider = ({
       })
 
       // Drop any assignment overrides whose new parent is being deleted.
-      setDraftAssignedParents((prev) =>
-        rewriteMap(prev, (newParentId) =>
+      setDraftAssignedParents((prevAssigned) =>
+        rewriteMap(prevAssigned, (newParentId) =>
           idsToDelete.has(newParentId) ? null : newParentId,
         ),
       )
@@ -327,8 +338,8 @@ export const DraftSessionProvider = ({
       // Drop overrides whose key (real parent) is being deleted, AND strip
       // deleted draft ids out of any remaining overrides whose key is still
       // alive (otherwise stale negative ids leak into commit and sync).
-      setDraftSubtaskOrderOverrides((prev) =>
-        rewriteMap(prev, (order, pid) => {
+      setDraftSubtaskOrderOverrides((prevOverrides) =>
+        rewriteMap(prevOverrides, (order, pid) => {
           if (idsToDelete.has(pid)) return null
           const filtered = order.filter((sid) => !idsToDelete.has(sid))
           return filtered.length !== order.length ? filtered : order
