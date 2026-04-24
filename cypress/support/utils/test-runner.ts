@@ -10,3 +10,10 @@ export const checkUserMode = (mode: string | undefined) => {
 
 export const isLoggedIn = () =>
   checkUserMode(Cypress.env('userMode')) === 'USER'
+
+export const afterEachSkipIfFailed = (afterEachHook: () => void) => {
+  afterEach(function () {
+    if (this.currentTest?.state === 'failed') return
+    afterEachHook()
+  })
+}

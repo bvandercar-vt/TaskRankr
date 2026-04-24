@@ -12,7 +12,10 @@ import {
   getTaskForm,
 } from '@cypress/support/utils/task-form'
 import { openTaskEditForm } from '@cypress/support/utils/task-tree'
-import { isLoggedIn } from '@cypress/support/utils/test-runner'
+import {
+  afterEachSkipIfFailed,
+  isLoggedIn,
+} from '@cypress/support/utils/test-runner'
 
 import { TaskStatus } from '~/shared/schema'
 
@@ -82,8 +85,7 @@ describe('Task Form Cancellation', () => {
   ] as const) {
     context(contextName, () => {
       beforeEach(beforeEachHook)
-      afterEach(function () {
-        if (this.currentTest?.state === 'failed') return
+      afterEachSkipIfFailed(() => {
         afterEachHook()
         cy.get(TaskForm.CANCEL_CONFIRM_DIALOG).should('not.exist')
         cy.get(TaskForm.FORM).should('not.exist')

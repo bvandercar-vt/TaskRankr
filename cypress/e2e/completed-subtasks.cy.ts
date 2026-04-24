@@ -1,6 +1,10 @@
 import { Routes } from '@client/lib/constants'
 import { DefaultTask, Selectors } from '@cypress/support/constants'
-import { checkTasksExistBackend, isLoggedIn } from '@cypress/support/utils'
+import {
+  afterEachSkipIfFailed,
+  checkTasksExistBackend,
+  isLoggedIn,
+} from '@cypress/support/utils'
 import {
   type CreatedTask,
   checkNumCalls,
@@ -151,8 +155,7 @@ describe('Completed Subtasks', () => {
       })
     })
 
-    afterEach(function () {
-      if (this.currentTest?.state === 'failed') return
+    afterEachSkipIfFailed(() => {
       checkNumCalls({ create: 3, update: 0 })
       expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     })
