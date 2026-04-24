@@ -172,6 +172,7 @@ describe('Completed Subtasks', () => {
       })
 
       getTaskForm(0).within(() => {
+        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
         checkTaskFormSubtasks([subtask])
         clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
       })
@@ -198,6 +199,7 @@ describe('Completed Subtasks', () => {
       })
 
       getTaskForm(0).within(() => {
+        cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
         checkTaskFormSubtasks([subtask])
         clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
       })
