@@ -178,7 +178,10 @@ export const SubtasksCard = ({
   }
 
   return (
-    <div className="border border-white/10 rounded-lg overflow-hidden">
+    <div
+      className="border border-white/10 rounded-lg overflow-hidden"
+      data-testid="subtasks-card"
+    >
       {totalCount > 0 && (
         <CollapsibleCard
           title={

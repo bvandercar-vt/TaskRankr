@@ -15,6 +15,7 @@ import {
   StopCircle,
 } from 'lucide-react'
 
+import { getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import { useSettings } from '@/providers/SettingsProvider'
 import { TaskStatus } from '~/shared/schema'
@@ -144,9 +145,7 @@ export const ChangeStatusDialog = ({
   onDelete,
   onToggleHidden,
 }: ChangeStatusDialogProps) => {
-  const isCompleted = status === TaskStatus.COMPLETED
-  const isInProgress = status === TaskStatus.IN_PROGRESS
-  const isPinned = status === TaskStatus.PINNED
+  const { isCompleted, isInProgress, isPinned } = getTaskStatuses({ status })
 
   const {
     settings: {

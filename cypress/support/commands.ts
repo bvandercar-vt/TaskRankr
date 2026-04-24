@@ -16,8 +16,9 @@ declare global {
        */
       escapeWithin(): Chainable<JQuery<HTMLElement>>
       getElementArrayText(): Chainable<(string | null)[]>
-      selectOption(trigger: string, value: string): Chainable<void>
+      selectOption(value: string): Chainable<void>
       getCheckedState(): Chainable<boolean>
+      toggleState(newState: boolean): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -44,13 +45,17 @@ Cypress.Commands.addQuery(
   () => (subject: JQuery<HTMLElement>) => getElementArrayText(subject),
 )
 
-Cypress.Commands.add('selectOption', (trigger: string, value: string) => {
-  cy.get(trigger).click()
-  cy.escapeWithin()
-    .find('[role="listbox"]')
-    .contains(new RegExp(`^${value}$`))
-    .click()
-})
+Cypress.Commands.add(
+  'selectOption',
+  { prevSubject: 'element' },
+  (subject, value) => {
+    cy.wrap(subject).click()
+    cy.escapeWithin()
+      .find('[role="listbox"]')
+      .contains(new RegExp(`^${value}$`))
+      .click()
+  },
+)
 
 Cypress.Commands.add(
   'getCheckedState',
@@ -60,5 +65,15 @@ Cypress.Commands.add(
     if (state === 'checked') return cy.wrap(true)
     if (state === 'unchecked') return cy.wrap(false)
     throw new Error('Element does not have a data-state attribute')
+  },
+)
+
+Cypress.Commands.add(
+  'toggleState',
+  { prevSubject: 'element' },
+  (subject, newState) => {
+    cy.wrap(subject).getCheckedState().should('eq', !newState)
+    cy.wrap(subject).click()
+    cy.wrap(subject).getCheckedState().should('eq', newState)
   },
 )

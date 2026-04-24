@@ -36,7 +36,7 @@ export const fillTaskFormRankFields = (
     if (config.visible) {
       cy.get(RankSelect).should('be.visible')
       if (value !== null) {
-        cy.selectOption(RankSelect, value)
+        cy.get(RankSelect).selectOption(value)
         filled.add(field)
       }
       const allRequiredFilled = requiredFields.every((f) => filled.has(f))
@@ -124,10 +124,10 @@ export const assignSubtask = (
 
 export const checkTaskFormSubtasks = (
   subtasks: Pick<Task, 'name' | 'status'>[],
-) =>
+) => {
   // TODO: test how they are nested
-  cy
-    .get(TaskForm.SUBTASK_ROW)
+  cy.get(TaskForm.SUBTASKS_CARD).scrollIntoView()
+  cy.get(TaskForm.SUBTASK_ROW)
     .should('have.length', subtasks.length)
     .find(TaskForm.SUBTASK_NAME)
     .should(($names) =>
@@ -144,3 +144,4 @@ export const checkTaskFormSubtasks = (
         'Completed subtasks should be crossed out',
       ),
     )
+}

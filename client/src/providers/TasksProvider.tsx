@@ -714,14 +714,9 @@ export const TasksProvider = ({
         const taskToDelete = getById(prev, id)
         if (!taskToDelete) return prev
 
-        const idsToDelete = new Set<number>()
-        const collectDescendants = (parentId: number) => {
-          idsToDelete.add(parentId)
-          for (const t of prev) {
-            if (t.parentId === parentId) collectDescendants(t.id)
-          }
-        }
-        collectDescendants(id)
+        const idsToDelete = collectDescendantIds(prev, [id], {
+          includeRoots: true,
+        })
 
         let totalTime = 0
         for (const t of prev) {
