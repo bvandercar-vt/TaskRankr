@@ -302,8 +302,9 @@ export const DraftSessionProvider = ({
           return updated
         })
 
-        // Cascade `autoHideCompleted` toggle to direct draft children (and
-        // their descendants).
+        // Apply `autoHideCompleted` toggle to direct completed draft
+        // children. Their own descendants' visibility is governed by their
+        // own immediate parent's setting, so no need to cascade.
         if (updates.autoHideCompleted !== undefined) {
           const hide = updates.autoHideCompleted
           const toHide = getAutoHideCascadeIds(next, id)

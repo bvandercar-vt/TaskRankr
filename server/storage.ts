@@ -22,6 +22,7 @@ import {
 import {
   getHasIncomplete,
   shouldAutoHideUnderParent,
+  statusToStatusPatch,
 } from '~/shared/utils/task-utils'
 import { db } from './db'
 
@@ -232,8 +233,15 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
+      // Apply timestamp side-effects of the transition (sets/clears
+      // `inProgressStartedAt` and `completedAt`) consistently with the
+      // client.
+      // biome-ignore lint/style/noNonNullAssertion: isStatusChange implies newStatus is defined
+      Object.assign(dbUpdates, statusToStatusPatch(newStatus!))
+
       if (newStatus === TaskStatus.IN_PROGRESS) {
-        // Entering IN_PROGRESS: start timer, demote any existing in-progress task
+        // Entering IN_PROGRESS: demote any existing in-progress task,
+        // flushing its accumulated time into timeSpent.
         const allTasks = await this.getTasks(userId)
         const currentInProgress = allTasks.find(
           (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
@@ -251,27 +259,19 @@ export class DatabaseStorage implements IStorage {
             })
             .where(eq(tasks.id, currentInProgress.id))
         }
-        dbUpdates.inProgressStartedAt = new Date()
       } else if (currentTask.inProgressStartedAt) {
-        // Leaving IN_PROGRESS: flush accumulated time into timeSpent
+        // Leaving IN_PROGRESS: flush accumulated time into timeSpent.
         const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
         dbUpdates.timeSpent =
           (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
-        dbUpdates.inProgressStartedAt = null
       }
 
-      if (newStatus === TaskStatus.COMPLETED) {
-        // Completing: stamp completedAt and auto-hide under parent if needed
-        dbUpdates.completedAt = new Date()
-        if (currentTask.parentId) {
-          const parent = await this.getTask(currentTask.parentId, userId)
-          if (shouldAutoHideUnderParent(parent, newStatus)) {
-            dbUpdates.hidden = true
-          }
+      if (newStatus === TaskStatus.COMPLETED && currentTask.parentId) {
+        // Auto-hide under parent if the parent has the toggle enabled.
+        const parent = await this.getTask(currentTask.parentId, userId)
+        if (shouldAutoHideUnderParent(parent, newStatus)) {
+          dbUpdates.hidden = true
         }
-      } else {
-        // Restoring from completed: clear completedAt
-        dbUpdates.completedAt = null
       }
     }
 

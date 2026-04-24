@@ -11,12 +11,12 @@ import {
   TaskStatus,
   taskSchema,
 } from '~/shared/schema'
-import {
-  collectDescendantIds,
-  getDirectSubtasks,
-} from '~/shared/utils/task-utils'
+import { getDirectSubtasks } from '~/shared/utils/task-utils'
 
-export { shouldAutoHideUnderParent } from '~/shared/utils/task-utils'
+export {
+  shouldAutoHideUnderParent,
+  statusToStatusPatch,
+} from '~/shared/utils/task-utils'
 
 /**
  * Build a local-only Task: parses through `taskSchema` after applying the
@@ -32,34 +32,17 @@ export const buildLocalTask = (
   })
 
 /**
- * Applies the necessary field changes for a task to transition to the given
- * status.
- */
-export const statusToStatusPatch = (status: TaskStatus): Partial<Task> => {
-  switch (status) {
-    case TaskStatus.IN_PROGRESS:
-      return { status, inProgressStartedAt: new Date() }
-    case TaskStatus.COMPLETED:
-      return { status, completedAt: new Date(), inProgressStartedAt: null }
-    case TaskStatus.PINNED:
-    case TaskStatus.OPEN:
-      return { status, inProgressStartedAt: null }
-    default:
-      throw new Error(`Unhandled status: ${status satisfies never}`)
-  }
-}
-
-/**
  * When a parent's `autoHideCompleted` toggle changes, returns the set of
- * descendant ids whose `hidden` flag should be flipped.
+ * direct-child ids whose `hidden` flag should be flipped — only direct
+ * completed children are affected, since a completed parent's descendants
+ * have their visibility governed by their own immediate parent's setting.
  */
 export const getAutoHideCascadeIds = (
   tasks: Task[],
   parentId: number,
-): Set<number> => {
-  const completedDirectIds = getDirectSubtasks(tasks, parentId)
-    .filter((t) => t.status === TaskStatus.COMPLETED)
-    .map((t) => t.id)
-  if (completedDirectIds.length === 0) return new Set()
-  return collectDescendantIds(tasks, completedDirectIds, { includeRoots: true })
-}
+): Set<number> =>
+  new Set(
+    getDirectSubtasks(tasks, parentId)
+      .filter((t) => t.status === TaskStatus.COMPLETED)
+      .map((t) => t.id),
+  )

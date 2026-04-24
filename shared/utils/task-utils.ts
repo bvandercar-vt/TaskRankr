@@ -57,6 +57,41 @@ export const shouldAutoHideUnderParent = (
 ): boolean =>
   parent?.autoHideCompleted === true && status === TaskStatus.COMPLETED
 
+/**
+ * Translates a target `TaskStatus` into the timestamp side-effects that
+ * accompany the transition: starting `IN_PROGRESS` stamps
+ * `inProgressStartedAt` and clears any prior `completedAt`; transitioning
+ * to `COMPLETED` stamps `completedAt` and clears the in-progress timer;
+ * transitioning to any other status clears both timestamps.
+ */
+export const statusToStatusPatch = (
+  status: TaskStatus,
+): Pick<Task, 'status' | 'inProgressStartedAt' | 'completedAt'> => {
+  switch (status) {
+    case TaskStatus.IN_PROGRESS:
+      return {
+        status,
+        inProgressStartedAt: new Date(),
+        completedAt: null,
+      }
+    case TaskStatus.COMPLETED:
+      return {
+        status,
+        completedAt: new Date(),
+        inProgressStartedAt: null,
+      }
+    case TaskStatus.PINNED:
+    case TaskStatus.OPEN:
+      return {
+        status,
+        inProgressStartedAt: null,
+        completedAt: null,
+      }
+    default:
+      throw new Error(`Unhandled status: ${status satisfies never}`)
+  }
+}
+
 export const getHasIncomplete = (tasks: Task[]): boolean =>
   tasks.some((t) => t.status !== TaskStatus.COMPLETED)
 
