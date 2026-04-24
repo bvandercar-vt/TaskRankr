@@ -418,11 +418,10 @@ export const DraftSessionProvider = ({
         deleteDraftTask(id)
         return
       }
+
       // A real delete cascades to descendants. Collect the full id set from
-      // the current tasks snapshot so we can purge any draft assignments /
-      // order overrides for the descendants too — otherwise stale entries
-      // would produce bogus UPDATE/REORDER ops against non-existent ids on
-      // commit.
+      // the current task's snapshot so we can purge any draft assignments /
+      // order overrides for the descendants too.
       const deletedIds = collectDescendantIds(tasksRef.current, [id], {
         includeRoots: true,
       })

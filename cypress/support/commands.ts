@@ -17,10 +17,6 @@ declare global {
       escapeWithin(): Chainable<JQuery<HTMLElement>>
       getElementArrayText(): Chainable<(string | null)[]>
       selectOption(value: string): Chainable<void>
-      checkSwitchState(
-        selector: string,
-        expectedState: boolean,
-      ): Chainable<JQuery<HTMLElement>>
       getCheckedState(): Chainable<boolean>
       toggleState(newState: boolean): Chainable<JQuery<HTMLElement>>
     }
