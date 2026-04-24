@@ -122,6 +122,15 @@ export const assignSubtask = (
     })
 }
 
+export const checkAutoHideCompletedSwitch = (expectedOn: boolean) =>
+  cy
+    .get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
+    .should(
+      'have.attr',
+      'data-state',
+      expectedOn ? 'checked' : 'unchecked',
+    )
+
 export const checkTaskFormSubtasks = (
   subtasks: Pick<Task, 'name' | 'status'>[],
 ) => {
