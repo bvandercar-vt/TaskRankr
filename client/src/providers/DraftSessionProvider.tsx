@@ -59,6 +59,34 @@ import {
 } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
 
+/**
+ * Returns a new Map by applying `rewrite` to each entry:
+ *   - returning the same value reference keeps the entry unchanged
+ *   - returning a different value replaces it
+ *   - returning `null` drops the entry
+ * Returns the original map reference if nothing changed, so a setState call
+ * with no actual changes doesn't trigger a re-render.
+ */
+const rewriteMap = <K, V>(
+  map: Map<K, V>,
+  rewrite: (value: V, key: K) => V | null,
+): Map<K, V> => {
+  if (map.size === 0) return map
+  let changed = false
+  const next = new Map(map)
+  map.forEach((value, key) => {
+    const replaced = rewrite(value, key)
+    if (replaced === null) {
+      next.delete(key)
+      changed = true
+    } else if (replaced !== value) {
+      next.set(key, replaced)
+      changed = true
+    }
+  })
+  return changed ? next : map
+}
+
 interface DraftSessionStateValue {
   /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
   tasksWithDrafts: Task[]
@@ -290,40 +318,22 @@ export const DraftSessionProvider = ({
       })
 
       // Drop any assignment overrides whose new parent is being deleted.
-      setDraftAssignedParents((prevAssigned) => {
-        if (prevAssigned.size === 0) return prevAssigned
-        let changed = false
-        const next = new Map(prevAssigned)
-        prevAssigned.forEach((newParentId, taskId) => {
-          if (idsToDelete.has(newParentId)) {
-            next.delete(taskId)
-            changed = true
-          }
-        })
-        return changed ? next : prevAssigned
-      })
+      setDraftAssignedParents((prev) =>
+        rewriteMap(prev, (newParentId) =>
+          idsToDelete.has(newParentId) ? null : newParentId,
+        ),
+      )
 
       // Drop overrides whose key (real parent) is being deleted, AND strip
       // deleted draft ids out of any remaining overrides whose key is still
       // alive (otherwise stale negative ids leak into commit and sync).
-      setDraftSubtaskOrderOverrides((prevOverrides) => {
-        if (prevOverrides.size === 0) return prevOverrides
-        let changed = false
-        const next = new Map(prevOverrides)
-        prevOverrides.forEach((order, pid) => {
-          if (idsToDelete.has(pid)) {
-            next.delete(pid)
-            changed = true
-            return
-          }
+      setDraftSubtaskOrderOverrides((prev) =>
+        rewriteMap(prev, (order, pid) => {
+          if (idsToDelete.has(pid)) return null
           const filtered = order.filter((sid) => !idsToDelete.has(sid))
-          if (filtered.length !== order.length) {
-            next.set(pid, filtered)
-            changed = true
-          }
-        })
-        return changed ? next : prevOverrides
-      })
+          return filtered.length !== order.length ? filtered : order
+        }),
+      )
 
       return removeIds(prev, idsToDelete).map((t) => ({
         ...t,
@@ -406,36 +416,18 @@ export const DraftSessionProvider = ({
         includeRoots: true,
       })
 
-      setDraftAssignedParents((prev) => {
-        if (prev.size === 0) return prev
-        let changed = false
-        const next = new Map(prev)
-        prev.forEach((_newParentId, taskId) => {
-          if (deletedIds.has(taskId)) {
-            next.delete(taskId)
-            changed = true
-          }
-        })
-        return changed ? next : prev
-      })
-      setDraftSubtaskOrderOverrides((prev) => {
-        if (prev.size === 0) return prev
-        let changed = false
-        const next = new Map(prev)
-        prev.forEach((order, pid) => {
-          if (deletedIds.has(pid)) {
-            next.delete(pid)
-            changed = true
-            return
-          }
+      setDraftAssignedParents((prev) =>
+        rewriteMap(prev, (newParentId, taskId) =>
+          deletedIds.has(taskId) ? null : newParentId,
+        ),
+      )
+      setDraftSubtaskOrderOverrides((prev) =>
+        rewriteMap(prev, (order, pid) => {
+          if (deletedIds.has(pid)) return null
           const filtered = order.filter((sid) => !deletedIds.has(sid))
-          if (filtered.length !== order.length) {
-            next.set(pid, filtered)
-            changed = true
-          }
-        })
-        return changed ? next : prev
-      })
+          return filtered.length !== order.length ? filtered : order
+        }),
+      )
 
       realDeleteTask(id)
     },
