@@ -151,7 +151,8 @@ describe('Completed Subtasks', () => {
       })
     })
 
-    afterEach(() => {
+    afterEach(function () {
+      if (this.currentTest?.state === 'failed') return
       checkNumCalls({ create: 3, update: 0 })
       expandAndCheckTree({ ...rootTask, subtasks: [subtask] })
     })
