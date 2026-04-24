@@ -240,11 +240,11 @@ export const DraftSessionProvider = ({
   const createDraftTask = useCallback(
     (data: CreateTaskContent): Task => {
       const tempId = draftIdRef.current--
-      const newTask = buildLocalTask(
-        data,
-        tempId,
-        data.status ?? TaskStatus.OPEN,
-      )
+      const newTask = buildLocalTask({
+        ...data,
+        id: tempId,
+        status: data.status ?? TaskStatus.OPEN,
+      })
 
       // Auto-hide on create: if parent has `autoHideCompleted` and the new
       // task is already COMPLETED, mark it hidden.

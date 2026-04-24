@@ -3,7 +3,7 @@
  * lists.
  */
 
-import type { ValueOf } from 'type-fest'
+import type { SetRequired, ValueOf } from 'type-fest'
 import type { z } from 'zod'
 
 import type { TaskWithSubtasks } from '@/types'
@@ -34,26 +34,14 @@ export * from '~/shared/utils/task-utils'
 /**
  * Build a local-only Task: parses through `taskSchema` after applying the
  * caller-supplied id and status on top of `allRankFieldsNull` defaults.
- * Used by `TasksProvider.createTask` (real but unsynced) and
- * `DraftSessionProvider.createDraftTask` (never persisted). Any `status` on
- * `data` is intentionally overridden by the explicit `status` arg.
- *
- * `data` is typed loosely (`Partial<...>`) because callers pass Drizzle
- * insert-style content where nullable fields appear as `T | null | undefined`
- * — looser than `z.input` accepts. The runtime parse below is the real
- * validation.
  */
 export const buildLocalTask = (
-  data: Partial<z.input<typeof taskSchema>>,
-  id: number,
-  status: TaskStatus,
+  data: SetRequired<Partial<z.input<typeof taskSchema>>, 'id' | 'status'>,
 ): Task =>
   taskSchema.parse({
     ...allRankFieldsNull,
     ...data,
-    id,
     userId: 'local',
-    status,
   })
 
 // *****************************************************************************

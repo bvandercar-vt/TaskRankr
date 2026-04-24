@@ -424,7 +424,7 @@ export const TasksProvider = ({
         return pinNew ? TaskStatus.PINNED : TaskStatus.OPEN
       })()
 
-      const newTask = buildLocalTask(data, tempId, newStatus)
+      const newTask = buildLocalTask({ ...data, id: tempId, status: newStatus })
 
       setTasks((prev) => {
         const parent = data.parentId ? getById(prev, data.parentId) : undefined
