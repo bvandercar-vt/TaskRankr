@@ -32,11 +32,13 @@ import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
   collectDescendantIds,
+  getAutoHideCascadeIds,
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
   removeIds,
+  shouldAutoHideUnderParent,
   updateItem,
 } from '@/lib/task-tree-utils'
 import { useSettings } from '@/providers/SettingsProvider'
@@ -90,9 +92,13 @@ function reconcileInheritCompletionState(tasks: Task[]): {
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
-        const shouldHide = parent.parentId
-          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
-          : false
+        const grandparent = parent.parentId
+          ? getById(updated, parent.parentId)
+          : undefined
+        const shouldHide = shouldAutoHideUnderParent(
+          grandparent,
+          TaskStatus.COMPLETED,
+        )
 
         updated = updateItem(updated, parent.id, (t) => ({
           ...t,
@@ -428,10 +434,7 @@ export const TasksProvider = ({
 
       setTasks((prev) => {
         const parent = data.parentId ? getById(prev, data.parentId) : undefined
-        if (
-          parent?.autoHideCompleted &&
-          newTask.status === TaskStatus.COMPLETED
-        ) {
+        if (shouldAutoHideUnderParent(parent, newTask.status)) {
           newTask.hidden = true
         }
         let updated = [...prev, newTask]
@@ -482,13 +485,8 @@ export const TasksProvider = ({
       if (updates.autoHideCompleted !== undefined) {
         const hide = updates.autoHideCompleted
         setTasks((prev) => {
-          const completedDirectIds = getDirectSubtasks(prev, id)
-            .filter((t) => t.status === TaskStatus.COMPLETED)
-            .map((t) => t.id)
-          if (completedDirectIds.length === 0) return prev
-          const toHide = collectDescendantIds(prev, completedDirectIds, {
-            includeRoots: true,
-          })
+          const toHide = getAutoHideCascadeIds(prev, id)
+          if (toHide.size === 0) return prev
           return prev.map((t) =>
             toHide.has(t.id) ? { ...t, hidden: hide } : t,
           )
@@ -576,9 +574,9 @@ export const TasksProvider = ({
             }
           })()
 
-          if (status === TaskStatus.COMPLETED && task.parentId) {
+          if (task.parentId) {
             const parent = getById(tasksRef.current, task.parentId)
-            if (parent?.autoHideCompleted) {
+            if (shouldAutoHideUnderParent(parent, status)) {
               return { ...base, hidden: true }
             }
           }
@@ -639,7 +637,7 @@ export const TasksProvider = ({
 
             if (parent.parentId) {
               const grandparent = getById(updated, parent.parentId)
-              if (grandparent?.autoHideCompleted) {
+              if (shouldAutoHideUnderParent(grandparent, TaskStatus.COMPLETED)) {
                 parentUpdate.hidden = true
               }
             }

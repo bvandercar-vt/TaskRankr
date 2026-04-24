@@ -45,9 +45,9 @@ import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
 import {
-  collectDescendantIds,
-  getDirectSubtasks,
+  getAutoHideCascadeIds,
   removeIds,
+  shouldAutoHideUnderParent,
 } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
@@ -221,10 +221,10 @@ export const DraftSessionProvider = ({
     } satisfies z.input<typeof taskSchema>)
 
     // Auto-hide on create: if parent has `autoHideCompleted` and the new task
-    // is already COMPLETED, mark it hidden. Mirrors `TasksProvider.createTask`.
-    if (data.parentId != null && newTask.status === TaskStatus.COMPLETED) {
+    // is already COMPLETED, mark it hidden.
+    if (data.parentId != null) {
       const parent = findTaskAcrossLayers(data.parentId)
-      if (parent?.autoHideCompleted) {
+      if (shouldAutoHideUnderParent(parent, newTask.status)) {
         newTask.hidden = true
       }
     }
@@ -256,19 +256,16 @@ export const DraftSessionProvider = ({
       let updated: Task | undefined
       setDraftTasks((prev) => {
         // Auto-hide on completion: if status is changing to COMPLETED and the
-        // task's parent has `autoHideCompleted`, mark it hidden. Mirrors
-        // `TasksProvider.setTaskStatus`.
+        // task's parent has `autoHideCompleted`, mark it hidden in the same
+        // patch.
         const completionHide = (t: Task): Partial<Task> => {
-          if (
-            updates.status !== TaskStatus.COMPLETED ||
-            t.parentId == null
-          ) {
-            return {}
-          }
+          if (updates.status === undefined || t.parentId == null) return {}
           const parent =
             prev.find((p) => p.id === t.parentId) ??
             tasksRef.current.find((p) => p.id === t.parentId)
-          return parent?.autoHideCompleted ? { hidden: true } : {}
+          return shouldAutoHideUnderParent(parent, updates.status)
+            ? { hidden: true }
+            : {}
         }
 
         const next = prev.map((t) => {
@@ -278,16 +275,11 @@ export const DraftSessionProvider = ({
         })
 
         // Cascade `autoHideCompleted` toggle to direct draft children (and
-        // their descendants). Mirrors `TasksProvider.updateTask`.
+        // their descendants).
         if (updates.autoHideCompleted !== undefined) {
           const hide = updates.autoHideCompleted
-          const completedDirectIds = getDirectSubtasks(next, id)
-            .filter((t) => t.status === TaskStatus.COMPLETED)
-            .map((t) => t.id)
-          if (completedDirectIds.length > 0) {
-            const toHide = collectDescendantIds(next, completedDirectIds, {
-              includeRoots: true,
-            })
+          const toHide = getAutoHideCascadeIds(next, id)
+          if (toHide.size > 0) {
             return next.map((t) =>
               toHide.has(t.id) ? { ...t, hidden: hide } : t,
             )
