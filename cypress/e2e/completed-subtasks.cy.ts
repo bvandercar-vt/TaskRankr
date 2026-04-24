@@ -47,6 +47,11 @@ describe('Completed Subtasks', () => {
     status: TaskStatus.OPEN,
   } as const satisfies CreatedTask
 
+  const completedSubtask2 = {
+    ...subtask2,
+    status: TaskStatus.COMPLETED,
+  } as const satisfies CreatedTask
+
   const createUncompletedSubtask = () => {
     cy.log('Create root task with uncompleted subtask')
     cy.get(Selectors.CREATE_TASK_BTN).click()
@@ -153,14 +158,16 @@ describe('Completed Subtasks', () => {
       })
 
       // after each, but we don't want failure to prevent other tests from running.
-      const rootSubmitAndCheck = () => {
+      const afterEachSafe = () => {
         getTaskForm(0).within(() => {
           cy.get(TaskForm.SUBTASK_SETTINGS_BTN).click() // show settings for debug purposes
           cy.get(TaskForm.AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH)
             .getCheckedState()
             .should('be.true')
           checkTaskFormSubtasks([subtask])
-          clickSubmitBtnCreate({ newTasks: [rootTask, subtask, subtask2] })
+          clickSubmitBtnCreate({
+            newTasks: [rootTask, subtask, completedSubtask2],
+          })
         })
 
         checkNumCalls({ create: 3, update: 0 })
@@ -178,7 +185,7 @@ describe('Completed Subtasks', () => {
           clickSubmitBtnCreate()
         })
 
-        rootSubmitAndCheck()
+        afterEachSafe()
       })
 
       it('via completion checkbox in edit subtask form', () => {
@@ -201,7 +208,7 @@ describe('Completed Subtasks', () => {
           clickSubmitBtnCreate()
         })
 
-        rootSubmitAndCheck()
+        afterEachSafe()
       })
     })
 
@@ -228,13 +235,7 @@ describe('Completed Subtasks', () => {
           clickSubmitBtnCreate()
         })
 
-        const subtasks = [
-          subtask,
-          {
-            ...subtask2,
-            status: TaskStatus.COMPLETED,
-          } as const satisfies CreatedTask,
-        ]
+        const subtasks = [subtask, completedSubtask2]
 
         getTaskForm(0).within(() => {
           checkTaskFormSubtasks(subtasks)
