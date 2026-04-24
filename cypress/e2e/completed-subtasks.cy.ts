@@ -194,7 +194,7 @@ describe('Completed Subtasks', () => {
 
       getTaskForm(1).within(() => {
         cy.get(TaskForm.MARK_COMPLETED_CHECKBOX).click()
-        clickSubmitBtnUpdate()
+        clickSubmitBtnCreate()
       })
 
       getTaskForm(0).within(() => {

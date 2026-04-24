@@ -43,6 +43,7 @@ export const Selectors = {
     CANCEL_CONFIRM_BTN: testId('button-cancel-confirm'),
     CANCEL_DENY_BTN: testId('button-cancel-deny'),
     // subtasks
+    SUBTASKS_CARD: testId('subtasks-card'),
     ADD_SUBTASK_BTN: testId('button-add-subtask'),
     ASSIGN_SUBTASK_BTN: testId('button-assign-subtask'),
     SUBTASK_ROW: testIdStartsWith('subtask-row-'),
