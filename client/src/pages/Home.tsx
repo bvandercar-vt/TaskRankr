@@ -225,7 +225,9 @@ const Home = () => {
             onCreateClick={() => openCreateDialog()}
           />
         ) : (
-          displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
+          displayedTasks.map((task) => (
+            <TaskCard key={task.clientKey} task={task} />
+          ))
         )}
 
         {hasDemoData && displayedTasks.length > 0 && (

@@ -102,7 +102,12 @@ const Completed = () => {
           <EmptyState search={search} />
         ) : (
           displayedTasks.map((task) => (
-            <TaskCard key={task.id} task={task} showRestore showCompletedDate />
+            <TaskCard
+              key={task.clientKey}
+              task={task}
+              showRestore
+              showCompletedDate
+            />
           ))
         )}
       </TaskListTreeLayout>

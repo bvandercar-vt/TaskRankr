@@ -29,7 +29,12 @@ import { toast } from '@/hooks/useToast'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
-import { buildLocalTask, statusToStatusPatch } from '@/lib/task-provider-utils'
+import {
+  buildLocalTask,
+  clientKeyMap,
+  statusToStatusPatch,
+  withClientKeys,
+} from '@/lib/task-provider-utils'
 import {
   collectDescendantIds,
   getById,
@@ -46,6 +51,7 @@ import {
   SyncOperationType,
   useTaskSyncQueue,
 } from '@/providers/TaskSyncQueueProvider'
+import type { LocalTask } from '@/types'
 import {
   type CreateTask,
   SubtaskSortMode,
@@ -55,7 +61,10 @@ import {
   type UpdateTask,
 } from '~/shared/schema'
 
-export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
+export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'> & {
+  /** Optional client-side React-key carrier; preserved across draft → real promotion. */
+  clientKey?: string
+}
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
@@ -67,8 +76,10 @@ export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
  * reconciled tasks plus the list of status corrections so callers can
  * enqueue sync ops.
  */
-function reconcileInheritCompletionState(tasks: Task[]): {
-  tasks: Task[]
+function reconcileInheritCompletionState<T extends Task>(
+  tasks: T[],
+): {
+  tasks: T[]
   corrections: { id: number; status: TaskStatus }[]
 } {
   const corrections: { id: number; status: TaskStatus }[] = []
@@ -124,14 +135,14 @@ function reconcileInheritCompletionState(tasks: Task[]): {
  * have a queued CREATE op (those resolve via the queue's own idMap at flush
  * time). Used when re-enqueuing orphaned negative-id creates.
  */
-function topoSortForRecovery(
-  orphaned: Task[],
-  taskById: Map<number, Task>,
+function topoSortForRecovery<T extends Task>(
+  orphaned: T[],
+  taskById: Map<number, T>,
   recoverableIds: Set<number>,
-): Task[] {
-  const sorted: Task[] = []
+): T[] {
+  const sorted: T[] = []
   const visited = new Set<number>()
-  const visit = (t: Task) => {
+  const visit = (t: T) => {
     if (visited.has(t.id)) return
     visited.add(t.id)
     if (
@@ -158,7 +169,7 @@ function topoSortForRecovery(
  * subscribe to the task array.
  */
 interface TasksContextValue {
-  tasks: Task[]
+  tasks: LocalTask[]
   hasDemoData: boolean
 }
 
@@ -172,9 +183,9 @@ interface TasksContextValue {
 interface TaskMutationsContextValue {
   isInitialized: boolean
   // Task mutations
-  createTask: (data: CreateTaskContent) => Task
-  updateTask: (id: number, updates: UpdateTaskContent) => Task
-  setTaskStatus: (id: number, status: TaskStatus) => Task
+  createTask: (data: CreateTaskContent) => LocalTask
+  updateTask: (id: number, updates: UpdateTaskContent) => LocalTask
+  setTaskStatus: (id: number, status: TaskStatus) => LocalTask
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   deleteDemoData: () => void
@@ -194,14 +205,21 @@ const TaskMutationsContext = createContext<TaskMutationsContextValue | null>(
 )
 
 // TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
-const loadTasksFromStorage = (key: string): Task[] => {
-  type TasksInStorage = (Task & { subtasks?: Task[] })[]
+const loadTasksFromStorage = (key: string): LocalTask[] => {
+  type TasksInStorage = (Task & {
+    subtasks?: Task[]
+    clientKey?: string
+  })[]
   try {
     const parsed = storage.get<TasksInStorage>(key, [])
-    const flatten = (tasks: TasksInStorage): Task[] => {
-      const result: Task[] = []
+    const flatten = (tasks: TasksInStorage): LocalTask[] => {
+      const result: LocalTask[] = []
       for (const t of tasks) {
-        result.push(taskSchema.parse(t))
+        result.push({
+          ...taskSchema.parse(t),
+          clientKey:
+            typeof t.clientKey === 'string' ? t.clientKey : crypto.randomUUID(),
+        })
         if (t.subtasks?.length) {
           result.push(...flatten(t.subtasks))
         }
@@ -228,10 +246,10 @@ export const TasksProvider = ({
   const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
     useTaskSyncQueue()
   const [isInitialized, setIsInitialized] = useState(false)
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [tasks, setTasks] = useState<LocalTask[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
-  const tasksRef = useRef<Task[]>([])
+  const tasksRef = useRef<LocalTask[]>([])
   // Capture the initial sync queue once so the init effect can scan for
   // orphaned negative-id tasks without re-running when the queue changes.
   const initialQueueRef = useRef(syncQueue)
@@ -252,7 +270,7 @@ export const TasksProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   const reconcileAndSetTasks = useCallback(
-    (incomingTasks: Task[], source: string) => {
+    (incomingTasks: LocalTask[], source: string) => {
       const { tasks: reconciled, corrections } =
         reconcileInheritCompletionState(incomingTasks)
       setTasks(reconciled)
@@ -276,7 +294,7 @@ export const TasksProvider = ({
   )
 
   useEffect(() => {
-    const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
+    const loadedTasks: LocalTask[] = loadTasksFromStorage(storageKeys.tasks)
     const loadedNextId: number = storage.get<number>(storageKeys.nextId, -1)
     const loadedDemoIds: number[] = storage.get<number[]>(
       storageKeys.demoTaskIds,
@@ -329,7 +347,7 @@ export const TasksProvider = ({
       storage.set(storageKeys.nextId, nextIdRef.current)
       storage.remove(getStorageKeys(storageMode).expanded)
       setDemoTaskIds(demoTasks.map((t) => t.id))
-      setTasks(demoTasks)
+      setTasks(withClientKeys(demoTasks))
     } else {
       reconcileAndSetTasks(loadedTasks, 'init')
     }
@@ -351,12 +369,12 @@ export const TasksProvider = ({
   const updateTaskById = useCallback(
     (
       id: number,
-      updateThisTask: (task: Task) => Partial<Task>,
-      updateOtherTasks?: (task: Task) => Partial<Task>,
-    ): Task | undefined => {
-      let updatedTask: Task | undefined
+      updateThisTask: (task: LocalTask) => Partial<Task>,
+      updateOtherTasks?: (task: LocalTask) => Partial<Task>,
+    ): LocalTask | undefined => {
+      let updatedTask: LocalTask | undefined
       setTasks((prev) =>
-        prev.map((task) => {
+        prev.map((task): LocalTask => {
           if (task.id === id) {
             updatedTask = { ...task, ...updateThisTask(task) }
             return updatedTask
@@ -376,13 +394,15 @@ export const TasksProvider = ({
   const replaceTaskId = useCallback(
     (tempId: number, realId: number) => {
       setTasks((prev) =>
-        prev.map((t) => ({
-          ...(t.id === tempId ? { ...t, id: realId } : t),
-          parentId: t.parentId === tempId ? realId : t.parentId,
-          subtaskOrder: t.subtaskOrder.map((sid) =>
-            sid === tempId ? realId : sid,
-          ),
-        })),
+        prev.map(
+          (t): LocalTask => ({
+            ...(t.id === tempId ? { ...t, id: realId } : t),
+            parentId: t.parentId === tempId ? realId : t.parentId,
+            subtaskOrder: t.subtaskOrder.map((sid) =>
+              sid === tempId ? realId : sid,
+            ),
+          }),
+        ),
       )
       replaceTempIdInQueue(tempId, realId)
       idReplacedCallbacks.current.forEach((cb) => {
@@ -393,7 +413,7 @@ export const TasksProvider = ({
   )
 
   const createTask = useCallback(
-    (data: CreateTaskContent): Task => {
+    (data: CreateTaskContent): LocalTask => {
       const tempId = nextIdRef.current--
       storage.set(storageKeys.nextId, nextIdRef.current)
 
@@ -445,7 +465,7 @@ export const TasksProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
+    (id: number, updates: UpdateTaskContent): LocalTask => {
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
@@ -490,7 +510,7 @@ export const TasksProvider = ({
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): Task => {
+    (id: number, status: TaskStatus): LocalTask => {
       if (status === TaskStatus.COMPLETED) {
         const hasIncompleteSubtasks = getHasIncompleteSubtasks(
           tasksRef.current,
@@ -698,7 +718,10 @@ export const TasksProvider = ({
         )
       }
 
-      reconcileAndSetTasks(sanitized, 'fromServer')
+      // Reuse existing clientKeys so a re-fetch of the same logical task keeps
+      // its React identity (no remount of the task card).
+      const hydrated = withClientKeys(sanitized, clientKeyMap(tasksRef.current))
+      reconcileAndSetTasks(hydrated, 'fromServer')
       nextIdRef.current = -1
       storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })

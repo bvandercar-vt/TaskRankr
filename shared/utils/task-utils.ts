@@ -3,8 +3,10 @@ import { type Task, TaskStatus } from '../schema'
 export * from './id-list-utils'
 export * from './zod-utils'
 
-export const getDirectSubtasks = (allTasks: Task[], id: number): Task[] =>
-  allTasks.filter((task) => task.parentId === id)
+export const getDirectSubtasks = <T extends Pick<Task, 'parentId'>>(
+  allTasks: T[],
+  id: number,
+): T[] => allTasks.filter((task) => task.parentId === id)
 
 /**
  * Collects every descendant of `rootIds` through the `parentId` graph. Pass

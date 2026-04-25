@@ -265,7 +265,7 @@ export const SubtasksCard = ({
               <div className="divide-y divide-white/5">
                 {visibleSubtasks.map((subtask) => (
                   <SubtaskRowItem
-                    key={subtask.id}
+                    key={subtask.clientKey}
                     task={subtask}
                     onEdit={onEditSubtask}
                     onDelete={(t) => onDeleteSubtask?.(t)}

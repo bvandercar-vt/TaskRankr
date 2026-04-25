@@ -51,7 +51,8 @@ import {
   useTaskMutations,
   useTasks,
 } from '@/providers/TasksProvider'
-import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import type { LocalTask } from '@/types'
+import { SubtaskSortMode, TaskStatus } from '~/shared/schema'
 
 /**
  * Returns a new Map by applying `rewrite` to each entry:
@@ -83,7 +84,7 @@ const rewriteMap = <K, V>(
 
 interface DraftSessionStateValue {
   /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
-  tasksWithDrafts: Task[]
+  tasksWithDrafts: LocalTask[]
   draftTaskIds: Set<number>
   /** Number of real tasks reassigned to a draft parent during the session. */
   draftAssignmentCount: number
@@ -94,13 +95,13 @@ interface DraftSessionStateValue {
 interface DraftSessionMutationsValue {
   // Draft-aware mutators: route to the draft layer if the id is a draft,
   // otherwise fall through to the real TasksProvider mutator.
-  updateTask: (id: number, updates: UpdateTaskContent) => Task
+  updateTask: (id: number, updates: UpdateTaskContent) => LocalTask
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-  setTaskStatus: (id: number, status: TaskStatus) => Task
+  setTaskStatus: (id: number, status: TaskStatus) => LocalTask
 
   // Session lifecycle
-  createDraftTask: (data: CreateTaskContent) => Task
+  createDraftTask: (data: CreateTaskContent) => LocalTask
   assignDraftSubtask: (realTaskId: number, draftParentId: number) => void
   commitDraftSession: () => void
   discardDraftSession: () => void
@@ -129,7 +130,7 @@ export const DraftSessionProvider = ({
   const tasksRef = useRef(tasks)
   tasksRef.current = tasks
 
-  const [draftTasks, setDraftTasks] = useState<Task[]>([])
+  const [draftTasks, setDraftTasks] = useState<LocalTask[]>([])
   // realTaskId -> draft parent id for the duration of the session.
   const [draftAssignedParents, setDraftAssignedParents] = useState<
     Map<number, number>
@@ -170,7 +171,7 @@ export const DraftSessionProvider = ({
     draftAssignedParents.size > 0 ||
     draftSubtaskOrderOverrides.size > 0
 
-  const tasksWithDrafts = useMemo<Task[]>(() => {
+  const tasksWithDrafts = useMemo<LocalTask[]>(() => {
     if (!hasDraftSession) return tasks
 
     // Index draft children by real parent so we can append them when no
@@ -223,7 +224,7 @@ export const DraftSessionProvider = ({
   // value is stable across draft churn.
   // ---------------------------------------------------------------------------
 
-  const createDraftTask = useCallback((data: CreateTaskContent): Task => {
+  const createDraftTask = useCallback((data: CreateTaskContent): LocalTask => {
     const tempId = draftIdRef.current--
     const newTask = buildLocalTask({
       ...data,
@@ -255,10 +256,10 @@ export const DraftSessionProvider = ({
   }, [])
 
   const updateDraftTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
-      let updated: Task | undefined
+    (id: number, updates: UpdateTaskContent): LocalTask => {
+      let updated: LocalTask | undefined
       setDraftTasks((prev) =>
-        prev.map((t) => {
+        prev.map((t): LocalTask => {
           if (t.id !== id) return t
           updated = { ...t, ...updates }
           return updated
@@ -353,7 +354,7 @@ export const DraftSessionProvider = ({
   // ---------------------------------------------------------------------------
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
+    (id: number, updates: UpdateTaskContent): LocalTask => {
       if (isDraftIdStable(id)) return updateDraftTask(id, updates)
       return realUpdateTask(id, updates)
     },
@@ -428,7 +429,7 @@ export const DraftSessionProvider = ({
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): Task => {
+    (id: number, status: TaskStatus): LocalTask => {
       if (isDraftIdStable(id)) {
         return updateDraftTask(
           id,

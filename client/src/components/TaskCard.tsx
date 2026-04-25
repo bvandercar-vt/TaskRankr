@@ -395,7 +395,7 @@ export const TaskCard = ({
               />
               {task.subtasks.map((subtask, index) => (
                 <TaskCard
-                  key={subtask.id}
+                  key={subtask.clientKey}
                   task={subtask}
                   parent={task}
                   level={level + 1}
