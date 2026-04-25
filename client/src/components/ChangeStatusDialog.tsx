@@ -124,24 +124,19 @@ const ChangeStatusButton = ({
 const HideButton = ({
   taskIsHidden,
   disabled,
-  onToggleHidden,
-  onOpenChange,
+  onToggle,
 }: {
   taskIsHidden: boolean
   disabled?: boolean
-} & Required<
-  Pick<ChangeStatusDialogProps, 'onToggleHidden' | 'onOpenChange'>
->) => {
+  onToggle: () => void
+}) => {
   const button = (
     <Button
       variant="ghost"
       size="sm"
       className="gap-2 h-8 disabled:opacity-50"
       disabled={disabled}
-      onClick={() => {
-        onToggleHidden()
-        onOpenChange(false)
-      }}
+      onClick={onToggle}
       data-testid="button-toggle-hidden"
     >
       <LucideIconComponent
@@ -339,8 +334,10 @@ export const ChangeStatusDialog = ({
                 <HideButton
                   taskIsHidden={!!isHidden}
                   disabled={autoHiddenByParent}
-                  onToggleHidden={onToggleHidden}
-                  onOpenChange={onOpenChange}
+                  onToggle={() => {
+                    onToggleHidden()
+                    onOpenChange(false)
+                  }}
                 />
               )}
               <DeleteButton
