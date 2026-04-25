@@ -21,6 +21,7 @@ import {
 } from 'drizzle-zod'
 import { z } from 'zod'
 
+import { getZodSchemaDefaults } from '../utils/zod-utils'
 import { RankField } from './common'
 import { createPgEnum, type DrizzleZodDefaultRefine } from './drizzle-utils'
 import type { UserSettings } from './settings.zod'
@@ -149,6 +150,14 @@ const taskSchemaRefine = {
 export const taskSchema = createSelectSchema(tasks, taskSchemaRefine)
 
 export type Task = z.infer<typeof taskSchema>
+
+/**
+ * Resolved default values for every task column whose schema is wrapped in
+ * `.default(...)`. Single source of truth for column-level defaults across
+ * client and server (see `getZodSchemaDefaults` for the caveat about
+ * function-style defaults like `createdAt`).
+ */
+export const taskSchemaDefaults = getZodSchemaDefaults(taskSchema)
 
 export const insertTaskSchema = createInsertSchema(tasks, {
   ...taskSchemaRefine,
