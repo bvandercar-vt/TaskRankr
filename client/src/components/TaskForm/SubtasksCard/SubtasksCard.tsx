@@ -35,6 +35,7 @@ import {
   SubtaskSortMode,
   type Task,
   TaskStatus,
+  taskSchema,
 } from '~/shared/schema'
 import { isEffectivelyHiddenInTree, mapById } from '~/shared/utils/task-utils'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
@@ -43,6 +44,18 @@ import { SubtasksSettings } from './SubtasksSettings'
 
 const ADD_SUBTASK_BTN_CLASS =
   'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
+
+// Single-source the fallbacks from the schema's column defaults so any change
+// to `taskSchemaRefine` flows through here automatically.
+const SUBTASK_FORM_DEFAULTS = taskSchema
+  .pick({
+    subtaskSortMode: true,
+    subtaskOrder: true,
+    subtasksShowNumbers: true,
+    autoHideCompleted: true,
+    inheritCompletionState: true,
+  })
+  .parse({})
 
 interface SubtasksCardProps {
   task: Task
@@ -69,12 +82,18 @@ export const SubtasksCard = ({
   // All four settings flow through form state so Save commits them together
   // and Cancel discards them — preserving the form's "no backend writes until
   // Save" contract (see TaskFormDialogProvider.ensureMutableParent).
-  const sortMode = form.watch('subtaskSortMode') ?? SubtaskSortMode.INHERIT
-  const showNumbers = form.watch('subtasksShowNumbers') ?? false
-  const subtaskOrder = form.watch('subtaskOrder') ?? []
-  const formAutoHideCompleted = form.watch('autoHideCompleted') ?? false
+  const sortMode =
+    form.watch('subtaskSortMode') ?? SUBTASK_FORM_DEFAULTS.subtaskSortMode
+  const showNumbers =
+    form.watch('subtasksShowNumbers') ??
+    SUBTASK_FORM_DEFAULTS.subtasksShowNumbers
+  const subtaskOrder =
+    form.watch('subtaskOrder') ?? SUBTASK_FORM_DEFAULTS.subtaskOrder
+  const formAutoHideCompleted =
+    form.watch('autoHideCompleted') ?? SUBTASK_FORM_DEFAULTS.autoHideCompleted
   const formInheritCompletionState =
-    form.watch('inheritCompletionState') ?? false
+    form.watch('inheritCompletionState') ??
+    SUBTASK_FORM_DEFAULTS.inheritCompletionState
 
   const [showHidden, setShowHidden] = useState(false)
 
