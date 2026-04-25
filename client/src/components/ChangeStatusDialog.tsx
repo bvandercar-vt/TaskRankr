@@ -116,13 +116,7 @@ interface ChangeStatusDialogProps {
   timeSpent: number
   isSubtask?: boolean
   isHidden?: boolean
-  /**
-   * When true, the task is auto-hidden by its parent's `autoHideCompleted`
-   * setting. The Hide/Unhide toggle is rendered disabled with an explanatory
-   * tooltip — the user must turn off the parent's auto-hide setting to make
-   * it visible.
-   */
-  autoHiddenByParent?: boolean
+  showToggleHidden?: boolean
   hasIncompleteSubtasks?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
@@ -138,7 +132,7 @@ export const ChangeStatusDialog = ({
   timeSpent: initialTimeSpent,
   isSubtask,
   isHidden,
-  autoHiddenByParent,
+  showToggleHidden,
   hasIncompleteSubtasks,
   onSetStatus,
   onUpdateTime,
@@ -273,7 +267,7 @@ export const ChangeStatusDialog = ({
             )}
 
             <div className="flex justify-center gap-2">
-              {isSubtask && onToggleHidden && (
+              {showToggleHidden && isSubtask && onToggleHidden && (
                 <VisibilityToggleButton
                   action={isHidden ? 'show' : 'hide'}
                   label={
@@ -286,8 +280,6 @@ export const ChangeStatusDialog = ({
                     onOpenChange(false)
                   }}
                   className="h-8 disabled:opacity-50"
-                  disabled={autoHiddenByParent}
-                  disabledTooltip="Auto-hidden — turn off the parent's auto-hide setting to show it."
                   data-testid="button-toggle-hidden"
                 />
               )}
