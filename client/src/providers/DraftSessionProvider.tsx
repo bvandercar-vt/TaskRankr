@@ -257,13 +257,13 @@ export const DraftSessionProvider = ({
   const updateDraftTask = useCallback(
     (id: number, updates: UpdateTaskContent): Task => {
       let updated: Task | undefined
-      setDraftTasks((prev) => {
-        return prev.map((t) => {
+      setDraftTasks((prev) =>
+        prev.map((t) => {
           if (t.id !== id) return t
           updated = { ...t, ...updates }
           return updated
-        })
-      })
+        }),
+      )
       // biome-ignore lint/style/noNonNullAssertion: id was verified by caller as a draft
       return updated!
     },
