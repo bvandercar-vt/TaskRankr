@@ -23,9 +23,7 @@ export const getZodSchemaDefaults = <T extends z.AnyZodObject>(
   for (const [key, field] of Object.entries(schema.shape)) {
     if (field instanceof z.ZodDefault) mask[key] = true
   }
-  // `.pick`'s `Exactly` constraint can't be satisfied with a dynamically-built
-  // mask, so we cast at the boundary; `SchemaDefaults<T>` keeps the call site
-  // strongly typed.
+  // `.pick`'s `Exactly` constraint can't be satisfied with a dynamically-built mask.
   // biome-ignore lint/suspicious/noExplicitAny: see comment above
   return schema.pick(mask as any).parse({}) as SchemaDefaults<T>
 }
