@@ -78,11 +78,8 @@ export const isEffectivelyHiddenInTree = (
   )
 
 /**
- * Translates a target `TaskStatus` into the timestamp side-effects that
- * accompany the transition: starting `IN_PROGRESS` stamps
- * `inProgressStartedAt` and clears any prior `completedAt`; transitioning
- * to `COMPLETED` stamps `completedAt` and clears the in-progress timer;
- * transitioning to any other status clears both timestamps.
+ * Additional props to change when changing a task's status, including:
+ *  - timestamps that accompany the IN_PROGRESS and COMPLETED transitions
  */
 export const statusToStatusPatch = (
   status: TaskStatus,
