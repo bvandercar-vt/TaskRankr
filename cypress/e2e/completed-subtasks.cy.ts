@@ -243,6 +243,7 @@ describe('Completed Subtasks', () => {
         })
 
         expandAndCheckTree({ ...rootTask, subtasks })
+        checkNumCalls({ create: 3, update: 0 })
 
         openTaskEditForm(rootTask)
         getTaskForm(0).within(() => {
