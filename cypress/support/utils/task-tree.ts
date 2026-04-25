@@ -19,7 +19,7 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  cy.wait(50) // flakes without this. probably due to animation.
+  cy.wait(50) // flakes without this. probably due to animation. If problem occurs on subtasks, try basing time on # of subtasks
   const getTaskCard = () =>
     getTaskCardTitle(task)
       .should(
