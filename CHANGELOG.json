@@ -1,8 +1,8 @@
 [
   {
     "version": "0.2.3",
-    "date": "2026-04-20",
-    "title": "Less Logouts; Task Creation Cancel Fix",
+    "date": "2026-04-25",
+    "title": "Performance Improvements & Subtask Bugfixes",
     "changes": [
       "Rendering fixes",
       "Performance improvements",
