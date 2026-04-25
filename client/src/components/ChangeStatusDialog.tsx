@@ -279,7 +279,7 @@ export const ChangeStatusDialog = ({
                     onToggleHidden()
                     onOpenChange(false)
                   }}
-                  className="h-8 disabled:opacity-50"
+                  className="h-8"
                   data-testid="button-toggle-hidden"
                 />
               )}
