@@ -1,6 +1,16 @@
 [
   {
-    "version": "1.2.2",
+    "version": "0.2.3",
+    "date": "2026-04-25",
+    "title": "Performance Improvements & Subtask Bugfixes",
+    "changes": [
+      "Rendering fixes",
+      "Performance improvements",
+      "Bugfix: auto-hide completed subtasks"
+    ]
+  },
+  {
+    "version": "0.2.2",
     "date": "2026-04-20",
     "title": "Less Logouts; Task Creation Cancel Fix",
     "changes": [
@@ -10,7 +20,7 @@
     ]
   },
   {
-    "version": "1.2.1",
+    "version": "0.2.1",
     "date": "2026-04-14",
     "title": "Time Spent Settings; Subtask Fixes",
     "changes": [
@@ -19,7 +29,7 @@
     ]
   },
   {
-    "version": "1.1.0",
+    "version": "0.1.0",
     "date": "2026-03-06",
     "title": "Offline Support",
     "changes": [
@@ -28,7 +38,7 @@
     ]
   },
   {
-    "version": "1.0.0",
+    "version": "0.0.0",
     "date": "2026-02-25",
     "title": "Changelog & Version Tracking",
     "changes": [
