@@ -422,7 +422,7 @@ export const TaskCard = ({
         timeSpent={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
-        showToggleHidden={isAutoHiddenByParent(task, parent)}
+        showToggleHidden={!isAutoHiddenByParent(task, parent)}
         hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => updateTask(task.id, { timeSpent: timeMs })}
