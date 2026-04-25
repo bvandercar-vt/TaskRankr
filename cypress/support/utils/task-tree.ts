@@ -19,7 +19,6 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
     .should('be.visible')
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
-  cy.wait(50) // flakes without this. probably due to animation. If problem occurs on subtasks, try basing time on # of subtasks
   const getTaskCard = () =>
     getTaskCardTitle(task)
       .should(
@@ -43,6 +42,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
       cy.wrap(expandBtn).click()
       cy.wrap($card).find(TaskCard.COLLAPSE_BTN).should('exist')
       cy.wrap($card).find(TaskCard.CARD).should('exist')
+      cy.wait(50) // flakes without this. probably due to animation. If problem occurs on subtasks, try basing time on # of subtasks
       cy.log('...done expanding collapsed card...')
     }
   })
