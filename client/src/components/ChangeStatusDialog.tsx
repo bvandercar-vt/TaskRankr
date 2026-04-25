@@ -5,15 +5,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import {
-  Clock,
-  Eye,
-  EyeOff,
-  type LucideIcon,
-  Pin,
-  PinOff,
-  StopCircle,
-} from 'lucide-react'
+import { Clock, type LucideIcon, Pin, PinOff, StopCircle } from 'lucide-react'
 
 import { getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
@@ -22,7 +14,6 @@ import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
 import { Button } from './primitives/Button'
 import { TimeInput } from './primitives/forms/TimeInput'
-import { Icon as LucideIconComponent } from './primitives/LucideIcon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,12 +24,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './primitives/overlays/AlertDialog'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from './primitives/overlays/Tooltip'
 import { SubtaskBlockedTooltip } from './SubtaskBlockedTooltip'
+import { VisibilityToggleButton } from './VisibilityToggleButton'
 
 const TimeSpentInput = ({
   onBlur,
@@ -120,50 +107,6 @@ const ChangeStatusButton = ({
     {label}
   </Button>
 )
-
-const HideButton = ({
-  taskIsHidden,
-  onToggle,
-  disabled,
-  disabledTooltip,
-}: {
-  taskIsHidden: boolean
-  onToggle: () => void
-  disabled?: boolean
-  disabledTooltip: string
-}) => {
-  const button = (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="gap-2 h-8 disabled:opacity-50"
-      disabled={disabled}
-      onClick={onToggle}
-      data-testid="button-toggle-hidden"
-    >
-      <LucideIconComponent
-        icon={taskIsHidden ? Eye : EyeOff}
-        className="size-3.5"
-      />
-      <span className="text-xs font-medium">
-        {taskIsHidden ? 'Unhide' : 'Hide'}
-      </span>
-    </Button>
-  )
-
-  if (!disabled) return button
-
-  // Disabled buttons swallow pointer events, so wrap the
-  // trigger in a span to receive hover/focus for the tooltip.
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">{button}</span>
-      </TooltipTrigger>
-      <TooltipContent>{disabledTooltip}</TooltipContent>
-    </Tooltip>
-  )
-}
 
 interface ChangeStatusDialogProps {
   open: boolean
@@ -331,14 +274,21 @@ export const ChangeStatusDialog = ({
 
             <div className="flex justify-center gap-2">
               {isSubtask && onToggleHidden && (
-                <HideButton
-                  taskIsHidden={!!isHidden}
-                  onToggle={() => {
+                <VisibilityToggleButton
+                  action={isHidden ? 'show' : 'hide'}
+                  label={
+                    <span className="text-xs font-medium">
+                      {isHidden ? 'Unhide' : 'Hide'}
+                    </span>
+                  }
+                  onClick={() => {
                     onToggleHidden()
                     onOpenChange(false)
                   }}
+                  className="h-8 disabled:opacity-50"
                   disabled={autoHiddenByParent}
                   disabledTooltip="Auto-hidden — turn off the parent's auto-hide setting to show it."
+                  data-testid="button-toggle-hidden"
                 />
               )}
               <DeleteButton

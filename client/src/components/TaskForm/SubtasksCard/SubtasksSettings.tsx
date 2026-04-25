@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
+import { ChevronDown, Settings2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useDraftSessionMutations } from '@/providers/DraftSessionProvider'
 import { SubtaskSortMode } from '~/shared/schema'
-import { Button } from '../../primitives/Button'
 import { Switch } from '../../primitives/forms/Switch'
-import { Icon } from '../../primitives/LucideIcon'
+import { VisibilityToggleButton } from '../../VisibilityToggleButton'
 
 const SortingMethodSwitch = ({
   taskId,
@@ -137,17 +136,13 @@ const ShowHideHiddenButton = ({
   SubtaskSettingsProps,
   'onShowHiddenChange' | 'showHidden' | 'hiddenCount'
 >) => (
-  <Button
-    type="button"
-    variant="ghost"
-    size="sm"
+  <VisibilityToggleButton
+    action={showHidden ? 'hide' : 'show'}
+    label={`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
     onClick={() => onShowHiddenChange(!showHidden)}
     className="text-xs text-muted-foreground"
     data-testid="button-show-hidden"
-  >
-    <Icon icon={showHidden ? EyeOff : Eye} className="size-3.5" aria-hidden />
-    {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
-  </Button>
+  />
 )
 
 export interface SubtaskSettingsProps {
