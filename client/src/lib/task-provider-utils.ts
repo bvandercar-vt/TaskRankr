@@ -11,9 +11,9 @@ import { allRankFieldsNull, type Task, taskSchema } from '~/shared/schema'
 export { statusToStatusPatch } from '~/shared/utils/task-utils'
 
 /**
- * Build a local-only Task: parses through `taskSchema` after applying the
- * caller-supplied id and status on top of `allRankFieldsNull` defaults.
- * Assigns a fresh `clientKey` if one isn't supplied — see `LocalTask`.
+ * Parses through `taskSchema` after applying the caller-supplied id and status
+ * on top of `allRankFieldsNull` defaults. Assigns a fresh `clientKey` if one
+ * isn't supplied.
  */
 export const buildLocalTask = (
   data: SetRequired<Partial<z.input<typeof taskSchema>>, 'id' | 'status'> & {
@@ -29,10 +29,9 @@ export const buildLocalTask = (
 })
 
 /**
- * Attach `clientKey` to tasks crossing into client state (storage load,
- * server fetch, demo seed). Reuses the existing key when an id match is
- * provided so re-hydration of the same logical task keeps a stable React
- * identity.
+ * For tasks crossing into client state (storage load, server fetch, demo seed).
+ * Reuses the existing key when an id match is provided so re-hydration of the
+ * same logical task keeps a stable React identity.
  */
 export const withClientKeys = (
   tasks: Task[],

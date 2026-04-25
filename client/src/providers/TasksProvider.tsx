@@ -62,7 +62,7 @@ import {
 } from '~/shared/schema'
 
 export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'> & {
-  /** Optional client-side React-key carrier; preserved across draft → real promotion. */
+  /** Preserved across draft → real promotion. */
   clientKey?: string
 }
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
@@ -718,8 +718,6 @@ export const TasksProvider = ({
         )
       }
 
-      // Reuse existing clientKeys so a re-fetch of the same logical task keeps
-      // its React identity (no remount of the task card).
       const hydrated = withClientKeys(sanitized, clientKeyMap(tasksRef.current))
       reconcileAndSetTasks(hydrated, 'fromServer')
       nextIdRef.current = -1
