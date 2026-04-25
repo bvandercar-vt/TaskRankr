@@ -9,13 +9,8 @@ export type SchemaDefaults<T extends z.AnyZodObject> = {
 }
 
 /**
- * Walks the `schema`'s shape, picks every field whose top-level schema is a
- * `ZodDefault`, and returns the resolved default values for those fields.
- *
- * Implementation detail: zod's `.partial()` wraps each field in `ZodOptional`,
- * which short-circuits on `undefined` and never invokes the inner `.default()`.
- * `.pick(...)` keeps the `ZodDefault` wrapper intact, so parsing `{}` triggers
- * each default. This helper does the picking automatically.
+ * Returns the resolved default value of every field in `schema` whose top-level
+ * schema is a `ZodDefault`.
  *
  * Caveat: function-style defaults (e.g. `z.date().default(() => new Date())`)
  * are evaluated once when this helper is called. For values that must be

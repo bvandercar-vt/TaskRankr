@@ -6,7 +6,7 @@ Multi-user, offline-first task manager with hierarchical tasks, a status workflo
 - Preferred communication style: Simple, everyday language.
 - File naming: kebab-case for utility/helper files (e.g., `auth-utils.ts`), PascalCase for component primitives (e.g., `DropdownMenu.tsx`, `AlertDialog.tsx`), camelCase for hooks (e.g., `useAuth.ts`, `useSettings.ts`)
 - Icon helper: Use `Icon` component from `LucideIcon.tsx` only for conditional/dynamic icons (ternary cases), not for single static icons
-- JSDoc style: Docstrings are an at-a-glance summary of *what* something does, and *why* if the design is unique or non-obvious. Mechanics that are evident from reading the code itself don't belong in the docstring. Keep descriptions concise (1-2 lines for most things; longer only when there's genuine "why" to explain). Use exact package names as imported (e.g., `@radix-ui` not "Radix UI").
+- Code comments & JSDoc: Comments and docstrings describe a function/module from the perspective of its API — *what* it does for callers and *why*, when the design is unique or non-obvious. Trust the code to be self-explanatory for the *how*: do not restate the implementation, do not paste code snippets that mirror what's right below, and do not narrate steps a reader can see. Keep descriptions concise (1-2 lines for most things; longer only when there's genuine "why" to explain). Use exact package names as imported (e.g., `@radix-ui` not "Radix UI").
 - Terminology: "Rank fields" refers to the 4 sortable fields with badges: priority, ease, enjoyment, time (distinct from text fields like name/description)
 - Test IDs: Use `data-testid` as the prop name, not `testId`
 - Icon Sizing: Use `size-X` tailwind class instead of `w-X h-X`
