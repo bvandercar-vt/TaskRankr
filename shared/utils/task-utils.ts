@@ -49,11 +49,8 @@ export const getTaskStatuses = (task: Pick<Task, 'status'>) => ({
 })
 
 /**
- * Derived predicate: true iff `task` is hidden purely because its parent has
- * `autoHideCompleted` enabled and the task is COMPLETED. Pass `undefined`
- * for `parent` when the task has no parent. The task's own `hidden` flag is
- * intentionally ignored here — this predicate isolates the parent-driven
- * auto-hide signal, e.g. so the UI can disable the per-task hide toggle.
+ * true iff `task` is hidden purely because its parent has `autoHideCompleted`
+ * enabled and the task is COMPLETED. (i.e., ignore the user-set `hidden` flag)
  */
 export const isAutoHiddenByParent = (
   task: Pick<Task, 'status'>,
@@ -62,10 +59,8 @@ export const isAutoHiddenByParent = (
   parent?.autoHideCompleted === true && task.status === TaskStatus.COMPLETED
 
 /**
- * Derived predicate: true iff `task` should be considered hidden in the UI,
- * accounting for both the user-set `hidden` flag and parent-driven auto-hide.
- * The parent is resolved from `taskById` (typically built via
- * `mapById(allTasks)`) using `task.parentId`.
+ * true iff `task` should be considered hidden in the UI, accounting for both
+ * the user-set `hidden` flag and parent-driven auto-hide of COMPLETED subtasks.
  */
 export const isEffectivelyHiddenInTree = (
   task: Pick<Task, 'hidden' | 'status' | 'parentId'>,
