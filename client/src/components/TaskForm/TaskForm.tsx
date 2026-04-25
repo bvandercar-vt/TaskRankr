@@ -57,23 +57,11 @@ const STUB_TASK: Task = taskSchema.parse({
   ...allRankFieldsNull,
 } satisfies z.input<typeof taskSchema>)
 
-const taskFormDefaultsSchema = taskSchema.pick({
-  description: true,
-  name: true,
-  priority: true,
-  ease: true,
-  enjoyment: true,
-  time: true,
-  parentId: true,
-  timeSpent: true,
-  createdAt: true,
-  completedAt: true,
-  status: true,
-  subtaskSortMode: true,
-  subtaskOrder: true,
-  subtasksShowNumbers: true,
-  autoHideCompleted: true,
-  inheritCompletionState: true,
+const taskFormDefaultsSchema = taskSchema.omit({
+  id: true,
+  userId: true,
+  inProgressStartedAt: true,
+  hidden: true,
 })
 
 type TaskFormDefaults = z.infer<typeof taskFormDefaultsSchema>
