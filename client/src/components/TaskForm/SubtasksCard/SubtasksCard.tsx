@@ -190,8 +190,19 @@ export const SubtasksCard = ({
       const newIndex = visibleDirectChildIds.indexOf(over.id as number)
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(visibleDirectChildIds, oldIndex, newIndex)
-        form.setValue('subtaskOrder', newOrder, { shouldDirty: true })
+        const reorderedVisible = arrayMove(
+          visibleDirectChildIds,
+          oldIndex,
+          newIndex,
+        )
+        // Splice the reordered visible IDs back into the full order, leaving
+        // hidden siblings pinned to their original positions.
+        const visibleSet = new Set(visibleDirectChildIds)
+        let i = 0
+        const merged = allDirectChildIds.map((id) =>
+          visibleSet.has(id) ? reorderedVisible[i++] : id,
+        )
+        form.setValue('subtaskOrder', merged, { shouldDirty: true })
       }
     }
   }

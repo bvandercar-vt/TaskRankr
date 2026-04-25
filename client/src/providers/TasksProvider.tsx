@@ -317,7 +317,7 @@ export const TasksProvider = ({
           .map((op) => (op as { tempId: number }).tempId),
       )
       const taskById = mapById(loadedTasks)
-      const orphaned: Task[] = loadedTasks.filter(
+      const orphaned: LocalTask[] = loadedTasks.filter(
         (t) =>
           t.id < 0 &&
           !queuedTempIds.has(t.id) &&
@@ -332,7 +332,7 @@ export const TasksProvider = ({
         const recoveryOps: SyncOperation[] = sorted.map((t) => ({
           type: SyncOperationType.CREATE_TASK,
           tempId: t.id,
-          data: omit(t, ['id', 'userId']),
+          data: omit(t, ['id', 'userId', 'clientKey']),
         }))
         enqueueMany(recoveryOps)
         debugLog.log('sync', 'recoverOrphanedTasks', {
@@ -451,7 +451,7 @@ export const TasksProvider = ({
       enqueue({
         type: SyncOperationType.CREATE_TASK,
         tempId,
-        data: { ...data, status: newStatus },
+        data: { ...omit(data, ['clientKey']), status: newStatus },
       })
       debugLog.log('task', 'create', {
         tempId,
