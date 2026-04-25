@@ -20,21 +20,19 @@ export const getTaskCardTitle = (task: Pick<Task, 'name'>) =>
 
 const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   cy.wait(50) // flakes without this. probably due to animation. If problem occurs on subtasks, try basing time on # of subtasks
-  const getTaskCard = () =>
-    getTaskCardTitle(task)
-      .should(
-        tier > 0 && task.status === TaskStatus.COMPLETED
-          ? 'have.class'
-          : 'not.have.class',
-        'line-through',
-      )
-      .closest(TaskCard.CARD)
-
-  const taskCard = getTaskCard()
+  getTaskCardTitle(task)
+    .should(
+      tier > 0 && task.status === TaskStatus.COMPLETED
+        ? 'have.class'
+        : 'not.have.class',
+      'line-through',
+    )
+    .closest(TaskCard.CARD)
+    .as('taskCard')
 
   if (!task.subtasks?.length) return
 
-  taskCard.then(($card) => {
+  cy.get('@taskCard').then(($card) => {
     const expandBtn = $card.find(TaskCard.EXPAND_BTN).first()
     if (expandBtn.length > 0) {
       cy.log('expanding collapsed card...')
@@ -48,7 +46,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
   })
 
   // re-renders on expand, reduce flake by re-getting
-  getTaskCard().within(() => {
+  cy.get('@taskCard').within(() => {
     checkSubtasksInCard(task, tier + 1)
   })
 }
