@@ -251,47 +251,6 @@ export const TasksProvider = ({
 
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
-  /**
-   * Migration for the autoHideCompleted-cascade → derived-model
-   * transition. Previously, completing a task whose parent had
-   * `autoHideCompleted=true` set the task's `hidden` flag in storage
-   * (cascade write). Visibility is now derived from
-   * `hidden || (parent.autoHideCompleted && completed)` in the client only,
-   * so those revert those hides
-   */
-  const applyAutoHideCascadeMigration = useCallback(
-    (input: Task[]): Task[] => {
-      const migrationFlag = `${storageKeys.tasks}.autoHideMigrated_v2`
-      if (storage.get<boolean>(migrationFlag, false)) return input
-
-      const taskById = mapById(input)
-      const migrationOps: SyncOperation[] = []
-      const migrated = input.map((t) => {
-        if (!t.hidden || t.parentId == null) return t
-        const parent = taskById.get(t.parentId)
-        if (parent?.autoHideCompleted && t.status === TaskStatus.COMPLETED) {
-          migrationOps.push({
-            type: SyncOperationType.UPDATE_TASK,
-            id: t.id,
-            data: { hidden: false },
-          })
-          return { ...t, hidden: false }
-        }
-        return t
-      })
-
-      if (migrationOps.length > 0 && shouldSync) {
-        enqueueMany(migrationOps)
-        debugLog.log('task', 'autoHideCascadeMigration', {
-          count: migrationOps.length,
-        })
-      }
-      storage.set(migrationFlag, true)
-      return migrated
-    },
-    [storageKeys, shouldSync, enqueueMany],
-  )
-
   const reconcileAndSetTasks = useCallback(
     (incomingTasks: Task[], source: string) => {
       const { tasks: reconciled, corrections } =
@@ -372,18 +331,11 @@ export const TasksProvider = ({
       setDemoTaskIds(demoTasks.map((t) => t.id))
       setTasks(demoTasks)
     } else {
-      reconcileAndSetTasks(applyAutoHideCascadeMigration(loadedTasks), 'init')
+      reconcileAndSetTasks(loadedTasks, 'init')
     }
 
     setIsInitialized(true)
-  }, [
-    storageKeys,
-    storageMode,
-    reconcileAndSetTasks,
-    shouldSync,
-    enqueueMany,
-    applyAutoHideCascadeMigration,
-  ])
+  }, [storageKeys, storageMode, reconcileAndSetTasks, shouldSync, enqueueMany])
 
   useEffect(() => {
     if (isInitialized) {
@@ -746,21 +698,12 @@ export const TasksProvider = ({
         )
       }
 
-      reconcileAndSetTasks(
-        applyAutoHideCascadeMigration(sanitized),
-        'fromServer',
-      )
+      reconcileAndSetTasks(sanitized, 'fromServer')
       nextIdRef.current = -1
       storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })
     },
-    [
-      storageKeys,
-      demoTaskIds,
-      reconcileAndSetTasks,
-      enqueueMany,
-      applyAutoHideCascadeMigration,
-    ],
+    [storageKeys, demoTaskIds, reconcileAndSetTasks, enqueueMany],
   )
 
   useEffect(() => {
