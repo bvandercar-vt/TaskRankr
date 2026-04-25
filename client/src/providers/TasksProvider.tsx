@@ -252,24 +252,12 @@ export const TasksProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   /**
-   * One-shot migration for the autoHideCompleted-cascade → derived-model
+   * Migration for the autoHideCompleted-cascade → derived-model
    * transition. Previously, completing a task whose parent had
    * `autoHideCompleted=true` set the task's `hidden` flag in storage
-   * (cascade write); the toggle on the parent also wrote `hidden` on
-   * existing completed children. Visibility is now derived from
-   * `hidden || (parent.autoHideCompleted && completed)`, so those
-   * persisted flags are now redundant — and since `hidden` only flips on
-   * explicit user action, leaving them set would make completed children
-   * stay hidden even after the parent toggle is turned off.
-   *
-   * Idempotent via `${storageKeys.tasks}.autoHideMigrated_v2`. Called
-   * both at boot from local storage and on the first server pull, so
-   * fresh devices that fetch legacy server data also get cleaned up.
-   *
-   * Caveat: tasks the user genuinely hid by hand under an auto-hiding
-   * parent are indistinguishable from cascade writes and will be
-   * un-hidden too. Acceptable: under the new model, manually hiding a
-   * task that is already auto-hidden is a no-op anyway.
+   * (cascade write). Visibility is now derived from
+   * `hidden || (parent.autoHideCompleted && completed)` in the client only,
+   * so those revert those hides
    */
   const applyAutoHideCascadeMigration = useCallback(
     (input: Task[]): Task[] => {
