@@ -75,8 +75,8 @@ export const SubtasksCard = ({
     subtaskSortMode: sortMode,
     subtasksShowNumbers: showNumbers,
     subtaskOrder,
-    autoHideCompleted: formAutoHideCompleted,
-    inheritCompletionState: formInheritCompletionState,
+    autoHideCompleted,
+    inheritCompletionState,
   } = useFormFieldsWithDefaults(form, taskSchemaDefaults)
 
   const [showHidden, setShowHidden] = useState(false)
@@ -153,13 +153,10 @@ export const SubtasksCard = ({
     const map = mapById(allTasks)
     const current = map.get(task.id)
     if (current) {
-      map.set(task.id, {
-        ...current,
-        autoHideCompleted: formAutoHideCompleted,
-      })
+      map.set(task.id, { ...current, autoHideCompleted })
     }
     return map
-  }, [allTasks, task.id, formAutoHideCompleted])
+  }, [allTasks, task.id, autoHideCompleted])
 
   const hiddenSubtaskIds = useMemo(() => {
     return new Set(
@@ -243,8 +240,8 @@ export const SubtasksCard = ({
           <SubtasksSettings
             sortMode={sortMode}
             showNumbers={showNumbers}
-            autoHideCompleted={formAutoHideCompleted}
-            inheritCompletionState={formInheritCompletionState}
+            autoHideCompleted={autoHideCompleted}
+            inheritCompletionState={inheritCompletionState}
             showHidden={showHidden}
             hiddenCount={hiddenCount}
             onSortModeChange={handleSortModeChange}
