@@ -129,6 +129,27 @@ const SwitchRow = ({
   </label>
 )
 
+const ShowHideHiddenButton = ({
+  onShowHiddenChange,
+  showHidden,
+  hiddenCount,
+}: Pick<
+  SubtaskSettingsProps,
+  'onShowHiddenChange' | 'showHidden' | 'hiddenCount'
+>) => (
+  <Button
+    type="button"
+    variant="ghost"
+    size="sm"
+    onClick={() => onShowHiddenChange(!showHidden)}
+    className="text-xs text-muted-foreground"
+    data-testid="button-show-hidden"
+  >
+    <Icon icon={showHidden ? EyeOff : Eye} className="size-3.5" aria-hidden />
+    {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
+  </Button>
+)
+
 export interface SubtaskSettingsProps {
   taskId: number
   sortMode: SubtaskSortMode
@@ -210,21 +231,11 @@ const SubtasksSettingsMenu = ({
 
       {hiddenCount > 0 && (
         <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onShowHiddenChange(!showHidden)}
-            className="text-xs text-muted-foreground"
-            data-testid="button-show-hidden"
-          >
-            <Icon
-              icon={showHidden ? EyeOff : Eye}
-              className="size-3.5"
-              aria-hidden
-            />
-            {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
-          </Button>
+          <ShowHideHiddenButton
+            onShowHiddenChange={onShowHiddenChange}
+            showHidden={showHidden}
+            hiddenCount={hiddenCount}
+          />
         </div>
       )}
     </div>
