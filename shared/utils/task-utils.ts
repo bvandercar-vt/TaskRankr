@@ -61,23 +61,15 @@ export const isAutoHiddenByParent = (
 /**
  * Derived predicate: true iff `task` should be considered hidden in the UI,
  * accounting for both the user-set `hidden` flag and parent-driven auto-hide.
- * Pass `undefined` for `parent` when the task has no parent.
- */
-export const isEffectivelyHidden = (
-  task: Pick<Task, 'hidden' | 'status'>,
-  parent: Pick<Task, 'autoHideCompleted'> | undefined,
-): boolean => task.hidden || isAutoHiddenByParent(task, parent)
-
-/**
- * Convenience wrapper around `isEffectivelyHidden` that resolves the parent
- * from a `Map<id, Task>` (typically built via `mapById(allTasks)`). Use when
- * filtering a flat task list where the parent must be looked up per-task.
+ * The parent is resolved from `taskById` (typically built via
+ * `mapById(allTasks)`) using `task.parentId`.
  */
 export const isEffectivelyHiddenInTree = (
   task: Pick<Task, 'hidden' | 'status' | 'parentId'>,
   taskById: Map<number, Task>,
 ): boolean =>
-  isEffectivelyHidden(
+  task.hidden ||
+  isAutoHiddenByParent(
     task,
     task.parentId != null ? taskById.get(task.parentId) : undefined,
   )
