@@ -123,12 +123,14 @@ const ChangeStatusButton = ({
 
 const HideButton = ({
   taskIsHidden,
-  disabled,
   onToggle,
+  disabled,
+  disabledTooltip,
 }: {
   taskIsHidden: boolean
-  disabled?: boolean
   onToggle: () => void
+  disabled?: boolean
+  disabledTooltip: string
 }) => {
   const button = (
     <Button
@@ -158,9 +160,7 @@ const HideButton = ({
       <TooltipTrigger asChild>
         <span className="inline-flex">{button}</span>
       </TooltipTrigger>
-      <TooltipContent>
-        Auto-hidden — turn off the parent's auto-hide setting to show it.
-      </TooltipContent>
+      <TooltipContent>{disabledTooltip}</TooltipContent>
     </Tooltip>
   )
 }
@@ -333,11 +333,12 @@ export const ChangeStatusDialog = ({
               {isSubtask && onToggleHidden && (
                 <HideButton
                   taskIsHidden={!!isHidden}
-                  disabled={autoHiddenByParent}
                   onToggle={() => {
                     onToggleHidden()
                     onOpenChange(false)
                   }}
+                  disabled={autoHiddenByParent}
+                  disabledTooltip="Auto-hidden — turn off the parent's auto-hide setting to show it."
                 />
               )}
               <DeleteButton
