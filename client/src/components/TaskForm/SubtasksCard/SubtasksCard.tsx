@@ -46,14 +46,6 @@ import { SubtasksSettings } from './SubtasksSettings'
 const ADD_SUBTASK_BTN_CLASS =
   'flex items-center justify-center p-3 bg-secondary/5 hover:bg-secondary/15 transition-colors text-sm text-foreground hover:text-foreground'
 
-const SUBTASK_FORM_DEFAULTS = {
-  subtaskSortMode: taskSchemaDefaults.subtaskSortMode,
-  subtaskOrder: taskSchemaDefaults.subtaskOrder,
-  subtasksShowNumbers: taskSchemaDefaults.subtasksShowNumbers,
-  autoHideCompleted: taskSchemaDefaults.autoHideCompleted,
-  inheritCompletionState: taskSchemaDefaults.inheritCompletionState,
-} as const
-
 interface SubtasksCardProps {
   task: Task
   onAddSubtask: (parentId: number) => void
@@ -85,7 +77,7 @@ export const SubtasksCard = ({
     subtaskOrder,
     autoHideCompleted: formAutoHideCompleted,
     inheritCompletionState: formInheritCompletionState,
-  } = useFormFieldsWithDefaults(form, SUBTASK_FORM_DEFAULTS)
+  } = useFormFieldsWithDefaults(form, taskSchemaDefaults)
 
   const [showHidden, setShowHidden] = useState(false)
 
