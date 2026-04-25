@@ -41,9 +41,9 @@ import {
 } from 'react'
 import { omit } from 'es-toolkit'
 import type { EmptyObject } from 'type-fest'
-import type { z } from 'zod'
 
 import { debugLog } from '@/lib/debug-logger'
+import { buildLocalTask, statusToStatusPatch } from '@/lib/task-provider-utils'
 import { collectDescendantIds, removeIds } from '@/lib/task-tree-utils'
 import {
   type CreateTaskContent,
@@ -51,17 +51,40 @@ import {
   useTaskMutations,
   useTasks,
 } from '@/providers/TasksProvider'
-import {
-  allRankFieldsNull,
-  SubtaskSortMode,
-  type Task,
-  TaskStatus,
-  taskSchema,
-} from '~/shared/schema'
+import type { LocalTask } from '@/types'
+import { SubtaskSortMode, TaskStatus } from '~/shared/schema'
+
+/**
+ * Returns a new Map by applying `rewrite` to each entry:
+ *   - returning the same value reference keeps the entry unchanged
+ *   - returning a different value replaces it
+ *   - returning `null` drops the entry
+ * Returns the original map reference if nothing changed, so a setState call
+ * with no actual changes doesn't trigger a re-render.
+ */
+const rewriteMap = <K, V>(
+  map: Map<K, V>,
+  rewrite: (value: V, key: K) => V | null,
+): Map<K, V> => {
+  if (map.size === 0) return map
+  let changed = false
+  const next = new Map(map)
+  map.forEach((value, key) => {
+    const replaced = rewrite(value, key)
+    if (replaced === null) {
+      next.delete(key)
+      changed = true
+    } else if (replaced !== value) {
+      next.set(key, replaced)
+      changed = true
+    }
+  })
+  return changed ? next : map
+}
 
 interface DraftSessionStateValue {
   /** `TasksProvider.tasks` merged with the in-memory draft overlay. */
-  tasksWithDrafts: Task[]
+  tasksWithDrafts: LocalTask[]
   draftTaskIds: Set<number>
   /** Number of real tasks reassigned to a draft parent during the session. */
   draftAssignmentCount: number
@@ -72,13 +95,13 @@ interface DraftSessionStateValue {
 interface DraftSessionMutationsValue {
   // Draft-aware mutators: route to the draft layer if the id is a draft,
   // otherwise fall through to the real TasksProvider mutator.
-  updateTask: (id: number, updates: UpdateTaskContent) => Task
+  updateTask: (id: number, updates: UpdateTaskContent) => LocalTask
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
-  setTaskStatus: (id: number, status: TaskStatus) => Task
+  setTaskStatus: (id: number, status: TaskStatus) => LocalTask
 
   // Session lifecycle
-  createDraftTask: (data: CreateTaskContent) => Task
+  createDraftTask: (data: CreateTaskContent) => LocalTask
   assignDraftSubtask: (realTaskId: number, draftParentId: number) => void
   commitDraftSession: () => void
   discardDraftSession: () => void
@@ -107,7 +130,7 @@ export const DraftSessionProvider = ({
   const tasksRef = useRef(tasks)
   tasksRef.current = tasks
 
-  const [draftTasks, setDraftTasks] = useState<Task[]>([])
+  const [draftTasks, setDraftTasks] = useState<LocalTask[]>([])
   // realTaskId -> draft parent id for the duration of the session.
   const [draftAssignedParents, setDraftAssignedParents] = useState<
     Map<number, number>
@@ -148,7 +171,7 @@ export const DraftSessionProvider = ({
     draftAssignedParents.size > 0 ||
     draftSubtaskOrderOverrides.size > 0
 
-  const tasksWithDrafts = useMemo<Task[]>(() => {
+  const tasksWithDrafts = useMemo<LocalTask[]>(() => {
     if (!hasDraftSession) return tasks
 
     // Index draft children by real parent so we can append them when no
@@ -201,20 +224,19 @@ export const DraftSessionProvider = ({
   // value is stable across draft churn.
   // ---------------------------------------------------------------------------
 
-  const createDraftTask = useCallback((data: CreateTaskContent): Task => {
+  const createDraftTask = useCallback((data: CreateTaskContent): LocalTask => {
     const tempId = draftIdRef.current--
-    const newTask: Task = taskSchema.parse({
-      ...allRankFieldsNull,
+    const newTask = buildLocalTask({
       ...data,
       id: tempId,
-      userId: 'local',
       status: data.status ?? TaskStatus.OPEN,
-    } satisfies z.input<typeof taskSchema>)
+    })
 
     setDraftTasks((prev) => {
       let updated = [...prev, newTask]
       if (data.parentId != null) {
-        // If parent is itself a draft and MANUAL, append to its subtaskOrder.
+        // If parent is itself a draft and MANUAL, append to its
+        // subtaskOrder.
         updated = updated.map((t) => {
           if (t.id !== data.parentId) return t
           if (t.subtaskSortMode === SubtaskSortMode.MANUAL) {
@@ -234,10 +256,10 @@ export const DraftSessionProvider = ({
   }, [])
 
   const updateDraftTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
-      let updated: Task | undefined
+    (id: number, updates: UpdateTaskContent): LocalTask => {
+      let updated: LocalTask | undefined
       setDraftTasks((prev) =>
-        prev.map((t) => {
+        prev.map((t): LocalTask => {
           if (t.id !== id) return t
           updated = { ...t, ...updates }
           return updated
@@ -251,50 +273,27 @@ export const DraftSessionProvider = ({
 
   const deleteDraftTask = useCallback((id: number) => {
     setDraftTasks((prev) => {
-      const idsToDelete = new Set<number>()
-      const collect = (pid: number) => {
-        idsToDelete.add(pid)
-        for (const t of prev) {
-          if (t.parentId === pid) collect(t.id)
-        }
-      }
-      collect(id)
+      const idsToDelete = collectDescendantIds(prev, [id], {
+        includeRoots: true,
+      })
 
       // Drop any assignment overrides whose new parent is being deleted.
-      setDraftAssignedParents((prevAssigned) => {
-        if (prevAssigned.size === 0) return prevAssigned
-        let changed = false
-        const next = new Map(prevAssigned)
-        prevAssigned.forEach((newParentId, taskId) => {
-          if (idsToDelete.has(newParentId)) {
-            next.delete(taskId)
-            changed = true
-          }
-        })
-        return changed ? next : prevAssigned
-      })
+      setDraftAssignedParents((prevAssigned) =>
+        rewriteMap(prevAssigned, (newParentId) =>
+          idsToDelete.has(newParentId) ? null : newParentId,
+        ),
+      )
 
       // Drop overrides whose key (real parent) is being deleted, AND strip
       // deleted draft ids out of any remaining overrides whose key is still
       // alive (otherwise stale negative ids leak into commit and sync).
-      setDraftSubtaskOrderOverrides((prevOverrides) => {
-        if (prevOverrides.size === 0) return prevOverrides
-        let changed = false
-        const next = new Map(prevOverrides)
-        prevOverrides.forEach((order, pid) => {
-          if (idsToDelete.has(pid)) {
-            next.delete(pid)
-            changed = true
-            return
-          }
+      setDraftSubtaskOrderOverrides((prevOverrides) =>
+        rewriteMap(prevOverrides, (order, pid) => {
+          if (idsToDelete.has(pid)) return null
           const filtered = order.filter((sid) => !idsToDelete.has(sid))
-          if (filtered.length !== order.length) {
-            next.set(pid, filtered)
-            changed = true
-          }
-        })
-        return changed ? next : prevOverrides
-      })
+          return filtered.length !== order.length ? filtered : order
+        }),
+      )
 
       return removeIds(prev, idsToDelete).map((t) => ({
         ...t,
@@ -355,7 +354,7 @@ export const DraftSessionProvider = ({
   // ---------------------------------------------------------------------------
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
+    (id: number, updates: UpdateTaskContent): LocalTask => {
       if (isDraftIdStable(id)) return updateDraftTask(id, updates)
       return realUpdateTask(id, updates)
     },
@@ -376,36 +375,18 @@ export const DraftSessionProvider = ({
         includeRoots: true,
       })
 
-      setDraftAssignedParents((prev) => {
-        if (prev.size === 0) return prev
-        let changed = false
-        const next = new Map(prev)
-        prev.forEach((_newParentId, taskId) => {
-          if (deletedIds.has(taskId)) {
-            next.delete(taskId)
-            changed = true
-          }
-        })
-        return changed ? next : prev
-      })
-      setDraftSubtaskOrderOverrides((prev) => {
-        if (prev.size === 0) return prev
-        let changed = false
-        const next = new Map(prev)
-        prev.forEach((order, pid) => {
-          if (deletedIds.has(pid)) {
-            next.delete(pid)
-            changed = true
-            return
-          }
+      setDraftAssignedParents((prev) =>
+        rewriteMap(prev, (newParentId, taskId) =>
+          deletedIds.has(taskId) ? null : newParentId,
+        ),
+      )
+      setDraftSubtaskOrderOverrides((prev) =>
+        rewriteMap(prev, (order, pid) => {
+          if (deletedIds.has(pid)) return null
           const filtered = order.filter((sid) => !deletedIds.has(sid))
-          if (filtered.length !== order.length) {
-            next.set(pid, filtered)
-            changed = true
-          }
-        })
-        return changed ? next : prev
-      })
+          return filtered.length !== order.length ? filtered : order
+        }),
+      )
 
       realDeleteTask(id)
     },
@@ -448,19 +429,12 @@ export const DraftSessionProvider = ({
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): Task => {
+    (id: number, status: TaskStatus): LocalTask => {
       if (isDraftIdStable(id)) {
-        const next: Partial<Task> =
-          status === TaskStatus.IN_PROGRESS
-            ? { status, inProgressStartedAt: new Date() }
-            : status === TaskStatus.COMPLETED
-              ? {
-                  status,
-                  completedAt: new Date(),
-                  inProgressStartedAt: null,
-                }
-              : { status, inProgressStartedAt: null }
-        return updateDraftTask(id, next as UpdateTaskContent)
+        return updateDraftTask(
+          id,
+          statusToStatusPatch(status) as UpdateTaskContent,
+        )
       }
       return realSetTaskStatus(id, status)
     },

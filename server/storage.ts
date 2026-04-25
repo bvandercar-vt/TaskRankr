@@ -19,7 +19,11 @@ import {
   type UserSettings,
   userSettings,
 } from '~/shared/schema'
-import { getHasIncomplete } from '~/shared/utils/task-utils'
+import {
+  getHasIncomplete,
+  mapById,
+  statusToStatusPatch,
+} from '~/shared/utils/task-utils'
 import { db } from './db'
 
 type UpdateTaskArg = Omit<UpdateTask, 'id'>
@@ -53,7 +57,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.userId, userId))
       .orderBy(tasks.id)
 
-    const byId = new Map(result.map((t) => [t.id, t]))
+    const byId = mapById(result)
     const fixes: (
       | { id: number; subtaskOrder: number[] }
       | { id: number; parentId: null }
@@ -149,13 +153,6 @@ export class DatabaseStorage implements IStorage {
         inProgressStartedAt: null,
       }
 
-      if (parent.parentId) {
-        const grandparent = await this.getTask(parent.parentId, userId)
-        if (grandparent?.autoHideCompleted) {
-          completionUpdate.hidden = true
-        }
-      }
-
       await db.update(tasks).set(completionUpdate).where(eq(tasks.id, parentId))
 
       if (parent.parentId) {
@@ -229,8 +226,15 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
+      // Apply timestamp side-effects of the transition (sets/clears
+      // `inProgressStartedAt` and `completedAt`) consistently with the
+      // client.
+      // biome-ignore lint/style/noNonNullAssertion: isStatusChange implies newStatus is defined
+      Object.assign(dbUpdates, statusToStatusPatch(newStatus!))
+
       if (newStatus === TaskStatus.IN_PROGRESS) {
-        // Entering IN_PROGRESS: start timer, demote any existing in-progress task
+        // Entering IN_PROGRESS: demote any existing in-progress task,
+        // flushing its accumulated time into timeSpent.
         const allTasks = await this.getTasks(userId)
         const currentInProgress = allTasks.find(
           (t) => t.status === TaskStatus.IN_PROGRESS && t.id !== id,
@@ -248,27 +252,11 @@ export class DatabaseStorage implements IStorage {
             })
             .where(eq(tasks.id, currentInProgress.id))
         }
-        dbUpdates.inProgressStartedAt = new Date()
       } else if (currentTask.inProgressStartedAt) {
-        // Leaving IN_PROGRESS: flush accumulated time into timeSpent
+        // Leaving IN_PROGRESS: flush accumulated time into timeSpent.
         const elapsed = Date.now() - currentTask.inProgressStartedAt.getTime()
         dbUpdates.timeSpent =
           (dbUpdates.timeSpent ?? currentTask.timeSpent) + elapsed
-        dbUpdates.inProgressStartedAt = null
-      }
-
-      if (newStatus === TaskStatus.COMPLETED) {
-        // Completing: stamp completedAt and auto-hide under parent if needed
-        dbUpdates.completedAt = new Date()
-        if (currentTask.parentId) {
-          const parent = await this.getTask(currentTask.parentId, userId)
-          if (parent?.autoHideCompleted) {
-            dbUpdates.hidden = true
-          }
-        }
-      } else {
-        // Restoring from completed: clear completedAt
-        dbUpdates.completedAt = null
       }
     }
 
@@ -279,20 +267,6 @@ export class DatabaseStorage implements IStorage {
       .returning()
 
     const updated = task
-
-    // autoHideCompleted toggled: update visibility of existing completed children
-    if (dbUpdates.autoHideCompleted !== undefined) {
-      await db
-        .update(tasks)
-        .set({ hidden: dbUpdates.autoHideCompleted })
-        .where(
-          and(
-            eq(tasks.parentId, id),
-            eq(tasks.userId, userId),
-            eq(tasks.status, TaskStatus.COMPLETED),
-          ),
-        )
-    }
 
     // inheritCompletionState turned on while task is already completed:
     // revert if it still has incomplete children

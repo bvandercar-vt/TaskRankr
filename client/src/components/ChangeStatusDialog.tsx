@@ -116,6 +116,7 @@ interface ChangeStatusDialogProps {
   timeSpent: number
   isSubtask?: boolean
   isHidden?: boolean
+  showToggleHidden?: boolean
   hasIncompleteSubtasks?: boolean
   onSetStatus: (status: TaskStatus) => void
   onUpdateTime: (timeMs: number) => void
@@ -131,6 +132,7 @@ export const ChangeStatusDialog = ({
   timeSpent: initialTimeSpent,
   isSubtask,
   isHidden,
+  showToggleHidden,
   hasIncompleteSubtasks,
   onSetStatus,
   onUpdateTime,
@@ -265,7 +267,7 @@ export const ChangeStatusDialog = ({
             )}
 
             <div className="flex justify-center gap-2">
-              {isSubtask && onToggleHidden && (
+              {showToggleHidden && isSubtask && onToggleHidden && (
                 <VisibilityToggleButton
                   action={isHidden ? 'show' : 'hide'}
                   label={

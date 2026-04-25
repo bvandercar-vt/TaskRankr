@@ -23,6 +23,7 @@ import {
   type Task,
   TaskStatus,
 } from '~/shared/schema'
+import { isAutoHiddenByParent } from '~/shared/utils/task-utils'
 import { ChangeStatusDialog } from './ChangeStatusDialog'
 import { Badge } from './primitives/Badge'
 import { Icon } from './primitives/LucideIcon'
@@ -222,6 +223,7 @@ const TimeSpentDisplay = (
 
 interface TaskCardProps {
   task: TaskWithSubtasks
+  parent?: Task
   level?: number
   showRestore?: boolean
   showCompletedDate?: boolean
@@ -230,6 +232,7 @@ interface TaskCardProps {
 
 export const TaskCard = ({
   task,
+  parent,
   level = 0,
   showRestore = false,
   showCompletedDate = false,
@@ -392,8 +395,9 @@ export const TaskCard = ({
               />
               {task.subtasks.map((subtask, index) => (
                 <TaskCard
-                  key={subtask.id}
+                  key={subtask.clientKey}
                   task={subtask}
+                  parent={task}
                   level={level + 1}
                   showRestore={showRestore}
                   showCompletedDate={showCompletedDate}
@@ -418,6 +422,7 @@ export const TaskCard = ({
         timeSpent={getTotalAccumulatedTime(task)}
         isSubtask={!!task.parentId}
         isHidden={task.hidden}
+        showToggleHidden={!isAutoHiddenByParent(task, parent)}
         hasIncompleteSubtasks={getHasIncomplete(task.subtasks)}
         onSetStatus={handleSetStatus}
         onUpdateTime={(timeMs) => updateTask(task.id, { timeSpent: timeMs })}

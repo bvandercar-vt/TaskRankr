@@ -28,6 +28,7 @@ import { useSettings } from '@/providers/SettingsProvider'
 import { useTaskMutations, useTasks } from '@/providers/TasksProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
+import { isEffectivelyHiddenInTree, mapById } from '~/shared/utils/task-utils'
 
 const SortButtons = ({
   sortBy,
@@ -130,9 +131,10 @@ const Home = () => {
   // Also extract in-progress and pinned tasks to be hoisted to top
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
+    const taskById = mapById(allTasks)
     const activeTasks = allTasks.filter(
       (task) =>
-        !task.hidden &&
+        !isEffectivelyHiddenInTree(task, taskById) &&
         (task.status !== TaskStatus.COMPLETED || task.parentId !== null),
     )
 
@@ -223,7 +225,9 @@ const Home = () => {
             onCreateClick={() => openCreateDialog()}
           />
         ) : (
-          displayedTasks.map((task) => <TaskCard key={task.id} task={task} />)
+          displayedTasks.map((task) => (
+            <TaskCard key={task.clientKey} task={task} />
+          ))
         )}
 
         {hasDemoData && displayedTasks.length > 0 && (

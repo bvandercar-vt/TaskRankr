@@ -48,6 +48,9 @@ export const Selectors = {
     ASSIGN_SUBTASK_BTN: testId('button-assign-subtask'),
     SUBTASK_ROW: testIdStartsWith('subtask-row-'),
     SUBTASK_NAME: testIdStartsWith('subtask-name-'),
+    SUBTASK_SETTINGS_BTN: testId('button-subtask-settings'),
+    AUTO_HIDE_COMPLETED_SUBTASKS_SWITCH: testId('switch-auto-hide-completed'),
+    EDIT_SUBTASK_BTN: testIdStartsWith('button-edit-subtask-'),
   },
   AssignSubtaskDialog: {
     DIALOG: testId('assign-subtask-dialog'),

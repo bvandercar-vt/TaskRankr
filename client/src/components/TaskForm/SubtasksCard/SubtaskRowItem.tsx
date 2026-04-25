@@ -5,10 +5,11 @@ import { EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-react'
 import { getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
+import type { LocalTask } from '@/types'
 import { SubtaskSortMode, type Task } from '~/shared/schema'
 import { Button } from '../../primitives/Button'
 
-export type Subtask = Task & { depth: number; subtaskIndex?: number }
+export type Subtask = LocalTask & { depth: number; subtaskIndex?: number }
 
 export interface SubtaskRowItemProps {
   task: Subtask

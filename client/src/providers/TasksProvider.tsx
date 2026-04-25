@@ -24,18 +24,24 @@ import {
   useState,
 } from 'react'
 import { omit } from 'es-toolkit'
-import type { z } from 'zod'
 
 import { toast } from '@/hooks/useToast'
 import { debugLog } from '@/lib/debug-logger'
 import { createDemoTasks } from '@/lib/demo-tasks'
 import { getStorageKeys, type StorageMode, storage } from '@/lib/storage'
 import {
+  buildLocalTask,
+  clientKeyMap,
+  statusToStatusPatch,
+  withClientKeys,
+} from '@/lib/task-provider-utils'
+import {
   collectDescendantIds,
   getById,
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
+  mapById,
   removeIds,
   updateItem,
 } from '@/lib/task-tree-utils'
@@ -45,8 +51,8 @@ import {
   SyncOperationType,
   useTaskSyncQueue,
 } from '@/providers/TaskSyncQueueProvider'
+import type { LocalTask } from '@/types'
 import {
-  allRankFieldsNull,
   type CreateTask,
   SubtaskSortMode,
   type Task,
@@ -55,7 +61,10 @@ import {
   type UpdateTask,
 } from '~/shared/schema'
 
-export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'>
+export type CreateTaskContent = Omit<CreateTask, 'userId' | 'id'> & {
+  /** Preserved across draft → real promotion. */
+  clientKey?: string
+}
 export type UpdateTaskContent = Omit<UpdateTask, 'id'>
 export type MutateTaskContent = CreateTaskContent | UpdateTaskContent
 export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
@@ -63,13 +72,14 @@ export type DeleteTaskArgs = Pick<Task, 'id' | 'name'>
 /**
  * Walks the tree until fixed point, auto-completing parents with
  * `inheritCompletionState` once all their children are completed and
- * auto-reverting them when any child is not completed. When a parent is
- * auto-completed and its grandparent has `autoHideCompleted`, cascades
- * `hidden: true` down the parent's subtree. Returns the reconciled tasks
- * plus the list of status corrections so callers can enqueue sync ops.
+ * auto-reverting them when any child is not completed. Returns the
+ * reconciled tasks plus the list of status corrections so callers can
+ * enqueue sync ops.
  */
-function reconcileInheritCompletionState(tasks: Task[]): {
-  tasks: Task[]
+function reconcileInheritCompletionState<T extends Task>(
+  tasks: T[],
+): {
+  tasks: T[]
   corrections: { id: number; status: TaskStatus }[]
 } {
   const corrections: { id: number; status: TaskStatus }[] = []
@@ -90,26 +100,12 @@ function reconcileInheritCompletionState(tasks: Task[]): {
       if (allChildrenCompleted && parent.status !== TaskStatus.COMPLETED) {
         const latestCompletedAt = getChildrenLatestCompletedAt(children)
 
-        const shouldHide = parent.parentId
-          ? (getById(updated, parent.parentId)?.autoHideCompleted ?? false)
-          : false
-
         updated = updateItem(updated, parent.id, (t) => ({
           ...t,
           status: TaskStatus.COMPLETED,
           completedAt: latestCompletedAt ?? new Date(),
           inProgressStartedAt: null,
-          ...(shouldHide ? { hidden: true } : {}),
         }))
-
-        if (shouldHide) {
-          const toHide = collectDescendantIds(updated, [parent.id])
-          if (toHide.size > 0) {
-            updated = updated.map((t) =>
-              toHide.has(t.id) ? { ...t, hidden: true } : t,
-            )
-          }
-        }
 
         corrections.push({ id: parent.id, status: TaskStatus.COMPLETED })
         changed = true
@@ -139,14 +135,14 @@ function reconcileInheritCompletionState(tasks: Task[]): {
  * have a queued CREATE op (those resolve via the queue's own idMap at flush
  * time). Used when re-enqueuing orphaned negative-id creates.
  */
-function topoSortForRecovery(
-  orphaned: Task[],
-  taskById: Map<number, Task>,
+function topoSortForRecovery<T extends Task>(
+  orphaned: T[],
+  taskById: Map<number, T>,
   recoverableIds: Set<number>,
-): Task[] {
-  const sorted: Task[] = []
+): T[] {
+  const sorted: T[] = []
   const visited = new Set<number>()
-  const visit = (t: Task) => {
+  const visit = (t: T) => {
     if (visited.has(t.id)) return
     visited.add(t.id)
     if (
@@ -173,7 +169,7 @@ function topoSortForRecovery(
  * subscribe to the task array.
  */
 interface TasksContextValue {
-  tasks: Task[]
+  tasks: LocalTask[]
   hasDemoData: boolean
 }
 
@@ -187,9 +183,9 @@ interface TasksContextValue {
 interface TaskMutationsContextValue {
   isInitialized: boolean
   // Task mutations
-  createTask: (data: CreateTaskContent) => Task
-  updateTask: (id: number, updates: UpdateTaskContent) => Task
-  setTaskStatus: (id: number, status: TaskStatus) => Task
+  createTask: (data: CreateTaskContent) => LocalTask
+  updateTask: (id: number, updates: UpdateTaskContent) => LocalTask
+  setTaskStatus: (id: number, status: TaskStatus) => LocalTask
   deleteTask: (id: number) => void
   reorderSubtasks: (parentId: number, orderedIds: number[]) => void
   deleteDemoData: () => void
@@ -209,14 +205,21 @@ const TaskMutationsContext = createContext<TaskMutationsContextValue | null>(
 )
 
 // TODO: we haven't stored with subtasks in a while, I think we can remove the flattening.
-const loadTasksFromStorage = (key: string): Task[] => {
-  type TasksInStorage = (Task & { subtasks?: Task[] })[]
+const loadTasksFromStorage = (key: string): LocalTask[] => {
+  type TasksInStorage = (Task & {
+    subtasks?: Task[]
+    clientKey?: string
+  })[]
   try {
     const parsed = storage.get<TasksInStorage>(key, [])
-    const flatten = (tasks: TasksInStorage): Task[] => {
-      const result: Task[] = []
+    const flatten = (tasks: TasksInStorage): LocalTask[] => {
+      const result: LocalTask[] = []
       for (const t of tasks) {
-        result.push(taskSchema.parse(t))
+        result.push({
+          ...taskSchema.parse(t),
+          clientKey:
+            typeof t.clientKey === 'string' ? t.clientKey : crypto.randomUUID(),
+        })
         if (t.subtasks?.length) {
           result.push(...flatten(t.subtasks))
         }
@@ -243,10 +246,10 @@ export const TasksProvider = ({
   const { syncQueue, enqueue, enqueueMany, replaceTempIdInQueue } =
     useTaskSyncQueue()
   const [isInitialized, setIsInitialized] = useState(false)
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [tasks, setTasks] = useState<LocalTask[]>([])
   const [demoTaskIds, setDemoTaskIds] = useState<number[]>([])
   const nextIdRef = useRef(-1)
-  const tasksRef = useRef<Task[]>([])
+  const tasksRef = useRef<LocalTask[]>([])
   // Capture the initial sync queue once so the init effect can scan for
   // orphaned negative-id tasks without re-running when the queue changes.
   const initialQueueRef = useRef(syncQueue)
@@ -267,7 +270,7 @@ export const TasksProvider = ({
   const storageKeys = useMemo(() => getStorageKeys(storageMode), [storageMode])
 
   const reconcileAndSetTasks = useCallback(
-    (incomingTasks: Task[], source: string) => {
+    (incomingTasks: LocalTask[], source: string) => {
       const { tasks: reconciled, corrections } =
         reconcileInheritCompletionState(incomingTasks)
       setTasks(reconciled)
@@ -291,7 +294,7 @@ export const TasksProvider = ({
   )
 
   useEffect(() => {
-    const loadedTasks: Task[] = loadTasksFromStorage(storageKeys.tasks)
+    const loadedTasks: LocalTask[] = loadTasksFromStorage(storageKeys.tasks)
     const loadedNextId: number = storage.get<number>(storageKeys.nextId, -1)
     const loadedDemoIds: number[] = storage.get<number[]>(
       storageKeys.demoTaskIds,
@@ -313,8 +316,8 @@ export const TasksProvider = ({
           .filter((op) => op.type === SyncOperationType.CREATE_TASK)
           .map((op) => (op as { tempId: number }).tempId),
       )
-      const taskById = new Map(loadedTasks.map((t) => [t.id, t]))
-      const orphaned: Task[] = loadedTasks.filter(
+      const taskById = mapById(loadedTasks)
+      const orphaned: LocalTask[] = loadedTasks.filter(
         (t) =>
           t.id < 0 &&
           !queuedTempIds.has(t.id) &&
@@ -329,7 +332,7 @@ export const TasksProvider = ({
         const recoveryOps: SyncOperation[] = sorted.map((t) => ({
           type: SyncOperationType.CREATE_TASK,
           tempId: t.id,
-          data: omit(t, ['id', 'userId']),
+          data: omit(t, ['id', 'userId', 'clientKey']),
         }))
         enqueueMany(recoveryOps)
         debugLog.log('sync', 'recoverOrphanedTasks', {
@@ -344,7 +347,7 @@ export const TasksProvider = ({
       storage.set(storageKeys.nextId, nextIdRef.current)
       storage.remove(getStorageKeys(storageMode).expanded)
       setDemoTaskIds(demoTasks.map((t) => t.id))
-      setTasks(demoTasks)
+      setTasks(withClientKeys(demoTasks))
     } else {
       reconcileAndSetTasks(loadedTasks, 'init')
     }
@@ -366,12 +369,12 @@ export const TasksProvider = ({
   const updateTaskById = useCallback(
     (
       id: number,
-      updateThisTask: (task: Task) => Partial<Task>,
-      updateOtherTasks?: (task: Task) => Partial<Task>,
-    ): Task | undefined => {
-      let updatedTask: Task | undefined
+      updateThisTask: (task: LocalTask) => Partial<Task>,
+      updateOtherTasks?: (task: LocalTask) => Partial<Task>,
+    ): LocalTask | undefined => {
+      let updatedTask: LocalTask | undefined
       setTasks((prev) =>
-        prev.map((task) => {
+        prev.map((task): LocalTask => {
           if (task.id === id) {
             updatedTask = { ...task, ...updateThisTask(task) }
             return updatedTask
@@ -391,13 +394,15 @@ export const TasksProvider = ({
   const replaceTaskId = useCallback(
     (tempId: number, realId: number) => {
       setTasks((prev) =>
-        prev.map((t) => ({
-          ...(t.id === tempId ? { ...t, id: realId } : t),
-          parentId: t.parentId === tempId ? realId : t.parentId,
-          subtaskOrder: t.subtaskOrder.map((sid) =>
-            sid === tempId ? realId : sid,
-          ),
-        })),
+        prev.map(
+          (t): LocalTask => ({
+            ...(t.id === tempId ? { ...t, id: realId } : t),
+            parentId: t.parentId === tempId ? realId : t.parentId,
+            subtaskOrder: t.subtaskOrder.map((sid) =>
+              sid === tempId ? realId : sid,
+            ),
+          }),
+        ),
       )
       replaceTempIdInQueue(tempId, realId)
       idReplacedCallbacks.current.forEach((cb) => {
@@ -408,7 +413,7 @@ export const TasksProvider = ({
   )
 
   const createTask = useCallback(
-    (data: CreateTaskContent): Task => {
+    (data: CreateTaskContent): LocalTask => {
       const tempId = nextIdRef.current--
       storage.set(storageKeys.nextId, nextIdRef.current)
 
@@ -418,22 +423,9 @@ export const TasksProvider = ({
         return pinNew ? TaskStatus.PINNED : TaskStatus.OPEN
       })()
 
-      const newTask: Task = taskSchema.parse({
-        ...allRankFieldsNull,
-        ...data,
-        id: tempId,
-        userId: 'local',
-        status: newStatus,
-      } satisfies z.input<typeof taskSchema>)
+      const newTask = buildLocalTask({ ...data, id: tempId, status: newStatus })
 
       setTasks((prev) => {
-        const parent = data.parentId ? getById(prev, data.parentId) : undefined
-        if (
-          parent?.autoHideCompleted &&
-          newTask.status === TaskStatus.COMPLETED
-        ) {
-          newTask.hidden = true
-        }
         let updated = [...prev, newTask]
         if (data.parentId) {
           updated = updated.map((t) => {
@@ -456,12 +448,11 @@ export const TasksProvider = ({
         }
         return updated
       })
-      const syncData = (() => {
-        let d = { ...data, status: newStatus }
-        if (newTask.hidden && !data.hidden) d = { ...d, hidden: true }
-        return d
-      })()
-      enqueue({ type: SyncOperationType.CREATE_TASK, tempId, data: syncData })
+      enqueue({
+        type: SyncOperationType.CREATE_TASK,
+        tempId,
+        data: { ...omit(data, ['clientKey']), status: newStatus },
+      })
       debugLog.log('task', 'create', {
         tempId,
         name: data.name,
@@ -474,26 +465,10 @@ export const TasksProvider = ({
   )
 
   const updateTask = useCallback(
-    (id: number, updates: UpdateTaskContent): Task => {
+    (id: number, updates: UpdateTaskContent): LocalTask => {
       const updatedTask = updateTaskById(id, () => updates)
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: updates })
       debugLog.log('task', 'update', { id, updates })
-
-      if (updates.autoHideCompleted !== undefined) {
-        const hide = updates.autoHideCompleted
-        setTasks((prev) => {
-          const completedDirectIds = getDirectSubtasks(prev, id)
-            .filter((t) => t.status === TaskStatus.COMPLETED)
-            .map((t) => t.id)
-          if (completedDirectIds.length === 0) return prev
-          const toHide = collectDescendantIds(prev, completedDirectIds, {
-            includeRoots: true,
-          })
-          return prev.map((t) =>
-            toHide.has(t.id) ? { ...t, hidden: hide } : t,
-          )
-        })
-      }
 
       if (
         updates.inheritCompletionState === true &&
@@ -535,7 +510,7 @@ export const TasksProvider = ({
   )
 
   const setTaskStatus = useCallback(
-    (id: number, status: TaskStatus): Task => {
+    (id: number, status: TaskStatus): LocalTask => {
       if (status === TaskStatus.COMPLETED) {
         const hasIncompleteSubtasks = getHasIncompleteSubtasks(
           tasksRef.current,
@@ -554,37 +529,7 @@ export const TasksProvider = ({
 
       const updatedTask = updateTaskById(
         id,
-        (task) => {
-          const base = (() => {
-            switch (status) {
-              case TaskStatus.IN_PROGRESS:
-                return {
-                  status: TaskStatus.IN_PROGRESS,
-                  inProgressStartedAt: new Date(),
-                }
-              case TaskStatus.COMPLETED:
-                return {
-                  status: TaskStatus.COMPLETED,
-                  completedAt: new Date(),
-                  inProgressStartedAt: null,
-                }
-              default:
-                return {
-                  status,
-                  inProgressStartedAt: null,
-                }
-            }
-          })()
-
-          if (status === TaskStatus.COMPLETED && task.parentId) {
-            const parent = getById(tasksRef.current, task.parentId)
-            if (parent?.autoHideCompleted) {
-              return { ...base, hidden: true }
-            }
-          }
-
-          return base
-        },
+        () => statusToStatusPatch(status),
         // Clear IN_PROGRESS status from other tasks when setting a new task to IN_PROGRESS
         status === TaskStatus.IN_PROGRESS
           ? (t) =>
@@ -599,16 +544,6 @@ export const TasksProvider = ({
 
       enqueue({ type: SyncOperationType.UPDATE_TASK, id, data: { status } })
       debugLog.log('task', 'setStatus', { id, status })
-
-      if (status === TaskStatus.COMPLETED && updatedTask?.hidden) {
-        setTasks((prev) => {
-          const toHide = collectDescendantIds(prev, [id])
-          if (toHide.size === 0) return prev
-          return prev.map((t) =>
-            toHide.has(t.id) ? { ...t, hidden: true } : t,
-          )
-        })
-      }
 
       if (status === TaskStatus.COMPLETED && updatedTask?.parentId) {
         const autoCompletedParents: number[] = []
@@ -631,22 +566,11 @@ export const TasksProvider = ({
 
             const latestCompletedAt = getChildrenLatestCompletedAt(thisChildren)
 
-            const parentUpdate: Partial<Task> = {
+            updated = updateItem(updated, parent.id, (t) => ({
+              ...t,
               status: TaskStatus.COMPLETED,
               completedAt: latestCompletedAt ?? new Date(),
               inProgressStartedAt: null,
-            }
-
-            if (parent.parentId) {
-              const grandparent = getById(updated, parent.parentId)
-              if (grandparent?.autoHideCompleted) {
-                parentUpdate.hidden = true
-              }
-            }
-
-            updated = updateItem(updated, parent.id, (t) => ({
-              ...t,
-              ...parentUpdate,
             }))
             autoCompletedParents.push(parent.id)
 
@@ -794,7 +718,8 @@ export const TasksProvider = ({
         )
       }
 
-      reconcileAndSetTasks(sanitized, 'fromServer')
+      const hydrated = withClientKeys(sanitized, clientKeyMap(tasksRef.current))
+      reconcileAndSetTasks(hydrated, 'fromServer')
       nextIdRef.current = -1
       storage.set(storageKeys.nextId, -1)
       debugLog.log('sync', 'setTasksFromServer', { count: serverTasks.length })

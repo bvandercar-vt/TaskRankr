@@ -2,39 +2,24 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Settings2 } from 'lucide-react'
 
-import { VisibilityToggleButton } from '@/components/VisibilityToggleButton'
 import { cn } from '@/lib/utils'
-import { useTaskMutations } from '@/providers/TasksProvider'
 import { SubtaskSortMode } from '~/shared/schema'
 import { Switch } from '../../primitives/forms/Switch'
+import { VisibilityToggleButton } from '../../VisibilityToggleButton'
 
 const SortingMethodSwitch = ({
-  taskId,
-  directChildIds,
   sortMode,
   onSortModeChange,
 }: {
-  taskId: number
-  directChildIds: number[]
   sortMode: SubtaskSortMode
   onSortModeChange: (mode: SubtaskSortMode) => void
 }) => {
-  const { updateTask, reorderSubtasks } = useTaskMutations()
-
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
   const handleSortToggle = () => {
-    const newMode: SubtaskSortMode = isManualSortMode
-      ? SubtaskSortMode.INHERIT
-      : SubtaskSortMode.MANUAL
-
-    onSortModeChange(newMode)
-
-    if (newMode === SubtaskSortMode.MANUAL && directChildIds.length > 0) {
-      reorderSubtasks(taskId, directChildIds)
-    }
-
-    updateTask(taskId, { subtaskSortMode: newMode })
+    onSortModeChange(
+      isManualSortMode ? SubtaskSortMode.INHERIT : SubtaskSortMode.MANUAL,
+    )
   }
 
   return (
@@ -129,41 +114,37 @@ const SwitchRow = ({
 )
 
 export interface SubtaskSettingsProps {
-  taskId: number
   sortMode: SubtaskSortMode
   showNumbers: boolean
   autoHideCompleted: boolean
   inheritCompletionState: boolean
   showHidden: boolean
   hiddenCount: number
-  directChildIds: number[]
   onSortModeChange: (mode: SubtaskSortMode) => void
   onShowNumbersChange: (show: boolean) => void
+  onAutoHideCompletedChange: (value: boolean) => void
+  onInheritCompletionStateChange: (value: boolean) => void
   onShowHiddenChange: (show: boolean) => void
 }
 
 const SubtasksSettingsMenu = ({
-  taskId,
   sortMode,
   showNumbers,
   autoHideCompleted,
   inheritCompletionState,
   showHidden,
   hiddenCount,
-  directChildIds,
   onSortModeChange,
   onShowNumbersChange,
+  onAutoHideCompletedChange,
+  onInheritCompletionStateChange,
   onShowHiddenChange,
 }: SubtaskSettingsProps) => {
-  const { updateTask } = useTaskMutations()
-
   const isManualSortMode = sortMode === SubtaskSortMode.MANUAL
 
   return (
     <div className="px-3 py-2.5 space-y-3 bg-secondary/5 border-t border-white/5">
       <SortingMethodSwitch
-        taskId={taskId}
-        directChildIds={directChildIds}
         sortMode={sortMode}
         onSortModeChange={onSortModeChange}
       />
@@ -179,10 +160,7 @@ const SubtasksSettingsMenu = ({
             <SwitchRow
               label="Show numbers"
               checked={showNumbers}
-              onCheckedChange={(checked) => {
-                onShowNumbersChange(checked)
-                updateTask(taskId, { subtasksShowNumbers: checked })
-              }}
+              onCheckedChange={onShowNumbersChange}
               data-testid="switch-show-numbers"
             />
           </motion.div>
@@ -192,18 +170,14 @@ const SubtasksSettingsMenu = ({
       <SwitchRow
         label="Auto-complete main task when all subtasks are complete"
         checked={inheritCompletionState}
-        onCheckedChange={(checked) =>
-          updateTask(taskId, { inheritCompletionState: checked })
-        }
+        onCheckedChange={onInheritCompletionStateChange}
         data-testid="switch-inherit-completion-state"
       />
 
       <SwitchRow
         label="Auto-hide completed subtasks"
         checked={autoHideCompleted}
-        onCheckedChange={(checked) =>
-          updateTask(taskId, { autoHideCompleted: checked })
-        }
+        onCheckedChange={onAutoHideCompletedChange}
         data-testid="switch-auto-hide-completed"
       />
 
