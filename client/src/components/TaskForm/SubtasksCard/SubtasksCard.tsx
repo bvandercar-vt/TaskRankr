@@ -68,9 +68,6 @@ export const SubtasksCard = ({
 
   const task = getById(allTasks, taskProp.id) ?? taskProp
 
-  // All four settings flow through form state so Save commits them together
-  // and Cancel discards them — preserving the form's "no backend writes until
-  // Save" contract (see TaskFormDialogProvider.ensureMutableParent).
   const {
     subtaskSortMode: sortMode,
     subtasksShowNumbers: showNumbers,
@@ -175,13 +172,11 @@ export const SubtasksCard = ({
 
   const totalCount = allSubtasks.length
 
-  const directChildIds = useMemo(
+  const visibleDirectChildIds = useMemo(
     () => visibleSubtasks.filter((t) => t.depth === 0).map((t) => t.id),
     [visibleSubtasks],
   )
 
-  // All direct children regardless of hidden state — used when materializing
-  // MANUAL order so hidden subtasks keep their place in the persisted order.
   const allDirectChildIds = useMemo(
     () => allSubtasks.filter((t) => t.depth === 0).map((t) => t.id),
     [allSubtasks],
@@ -191,11 +186,11 @@ export const SubtasksCard = ({
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = directChildIds.indexOf(active.id as number)
-      const newIndex = directChildIds.indexOf(over.id as number)
+      const oldIndex = visibleDirectChildIds.indexOf(active.id as number)
+      const newIndex = visibleDirectChildIds.indexOf(over.id as number)
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
+        const newOrder = arrayMove(visibleDirectChildIds, oldIndex, newIndex)
         form.setValue('subtaskOrder', newOrder, { shouldDirty: true })
       }
     }
@@ -256,7 +251,7 @@ export const SubtasksCard = ({
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={directChildIds}
+              items={visibleDirectChildIds}
               strategy={verticalListSortingStrategy}
             >
               <div className="divide-y divide-white/5">
