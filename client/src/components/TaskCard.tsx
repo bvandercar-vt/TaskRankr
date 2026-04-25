@@ -223,12 +223,6 @@ const TimeSpentDisplay = (
 
 interface TaskCardProps {
   task: TaskWithSubtasks
-  /**
-   * Immediate parent task — passed by recursive subtask rendering. Used to
-   * derive whether `task` is auto-hidden by parent's `autoHideCompleted`,
-   * so the hide/unhide toggle in the status dialog can disable itself with
-   * an explanatory tooltip. Top-level callers leave undefined.
-   */
   parent?: Task
   level?: number
   showRestore?: boolean
