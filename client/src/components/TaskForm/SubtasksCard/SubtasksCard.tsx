@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { Link, Plus } from 'lucide-react'
+import { useFormContext } from 'react-hook-form'
 
 import {
   getById,
@@ -27,12 +28,14 @@ import {
   sortTasksByIdOrder,
 } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
-import {
-  useDraftSession,
-  useDraftSessionMutations,
-} from '@/providers/DraftSessionProvider'
+import { useDraftSession } from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
-import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
+import {
+  type MutateTask,
+  SubtaskSortMode,
+  type Task,
+  TaskStatus,
+} from '~/shared/schema'
 import { isEffectivelyHiddenInTree, mapById } from '~/shared/utils/task-utils'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
@@ -59,19 +62,21 @@ export const SubtasksCard = ({
   disableAddSubtask = false,
 }: SubtasksCardProps) => {
   const { tasksWithDrafts: allTasks } = useDraftSession()
-  const { reorderSubtasks } = useDraftSessionMutations()
+  const form = useFormContext<MutateTask>()
 
   const task = getById(allTasks, taskProp.id) ?? taskProp
 
-  const [sortMode, setSortMode] = useState<SubtaskSortMode>(
-    task.subtaskSortMode,
-  )
-  const [showNumbers, setShowNumbers] = useState(task.subtasksShowNumbers)
-  const [showHidden, setShowHidden] = useState(false)
+  // All four settings flow through form state so Save commits them together
+  // and Cancel discards them — preserving the form's "no backend writes until
+  // Save" contract (see TaskFormDialogProvider.ensureMutableParent).
+  const sortMode = form.watch('subtaskSortMode') ?? SubtaskSortMode.INHERIT
+  const showNumbers = form.watch('subtasksShowNumbers') ?? false
+  const subtaskOrder = form.watch('subtaskOrder') ?? []
+  const formAutoHideCompleted = form.watch('autoHideCompleted') ?? false
+  const formInheritCompletionState =
+    form.watch('inheritCompletionState') ?? false
 
-  const [localSubtaskOrder, setLocalSubtaskOrder] = useState<number[] | null>(
-    null,
-  )
+  const [showHidden, setShowHidden] = useState(false)
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -101,8 +106,8 @@ export const SubtasksCard = ({
 
       if (parentSortMode === SubtaskSortMode.MANUAL) {
         const order =
-          depth === 0 && localSubtaskOrder
-            ? localSubtaskOrder
+          depth === 0
+            ? subtaskOrder
             : (getById(allTasks, parentId_)?.subtaskOrder ?? [])
         children = sortTasksByIdOrder(children, order)
       } else {
@@ -137,16 +142,29 @@ export const SubtasksCard = ({
     }
 
     return collectDescendants(task.id, 0, sortMode, showNumbers)
-  }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
+  }, [task, allTasks, sortMode, subtaskOrder, showNumbers])
+
+  // Override the edited task's `autoHideCompleted` in the lookup map so the
+  // live preview reflects the unsaved form value rather than the persisted one.
+  const taskById = useMemo(() => {
+    const map = mapById(allTasks)
+    const current = map.get(task.id)
+    if (current) {
+      map.set(task.id, {
+        ...current,
+        autoHideCompleted: formAutoHideCompleted,
+      })
+    }
+    return map
+  }, [allTasks, task.id, formAutoHideCompleted])
 
   const hiddenSubtaskIds = useMemo(() => {
-    const taskById = mapById(allTasks)
     return new Set(
       allSubtasks
         .filter((s) => isEffectivelyHiddenInTree(s, taskById))
         .map((s) => s.id),
     )
-  }, [allSubtasks, allTasks])
+  }, [allSubtasks, taskById])
 
   const hiddenCount = hiddenSubtaskIds.size
 
@@ -162,6 +180,13 @@ export const SubtasksCard = ({
     [visibleSubtasks],
   )
 
+  // All direct children regardless of hidden state — used when materializing
+  // MANUAL order so hidden subtasks keep their place in the persisted order.
+  const allDirectChildIds = useMemo(
+    () => allSubtasks.filter((t) => t.depth === 0).map((t) => t.id),
+    [allSubtasks],
+  )
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
@@ -171,16 +196,29 @@ export const SubtasksCard = ({
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const newOrder = arrayMove(directChildIds, oldIndex, newIndex)
-        setLocalSubtaskOrder(newOrder)
-        reorderSubtasks(task.id, newOrder)
+        form.setValue('subtaskOrder', newOrder, { shouldDirty: true })
       }
     }
   }
 
   const handleSortModeChange = (newMode: SubtaskSortMode) => {
-    setSortMode(newMode)
-    setLocalSubtaskOrder(null)
+    form.setValue('subtaskSortMode', newMode, { shouldDirty: true })
+    // Materialize the current order into the form so dragging works immediately
+    // under MANUAL mode. Includes hidden children so they keep their relative
+    // position when the order is persisted on Save.
+    if (newMode === SubtaskSortMode.MANUAL && allDirectChildIds.length > 0) {
+      form.setValue('subtaskOrder', allDirectChildIds, { shouldDirty: true })
+    }
   }
+
+  const handleShowNumbersChange = (checked: boolean) =>
+    form.setValue('subtasksShowNumbers', checked, { shouldDirty: true })
+
+  const handleAutoHideCompletedChange = (checked: boolean) =>
+    form.setValue('autoHideCompleted', checked, { shouldDirty: true })
+
+  const handleInheritCompletionStateChange = (checked: boolean) =>
+    form.setValue('inheritCompletionState', checked, { shouldDirty: true })
 
   return (
     <div
@@ -200,16 +238,16 @@ export const SubtasksCard = ({
           data-testid="button-toggle-subtasks"
         >
           <SubtasksSettings
-            taskId={task.id}
             sortMode={sortMode}
             showNumbers={showNumbers}
-            autoHideCompleted={task.autoHideCompleted}
-            inheritCompletionState={task.inheritCompletionState}
+            autoHideCompleted={formAutoHideCompleted}
+            inheritCompletionState={formInheritCompletionState}
             showHidden={showHidden}
             hiddenCount={hiddenCount}
-            directChildIds={directChildIds}
             onSortModeChange={handleSortModeChange}
-            onShowNumbersChange={setShowNumbers}
+            onShowNumbersChange={handleShowNumbersChange}
+            onAutoHideCompletedChange={handleAutoHideCompletedChange}
+            onInheritCompletionStateChange={handleInheritCompletionStateChange}
             onShowHiddenChange={setShowHidden}
           />
           <DndContext

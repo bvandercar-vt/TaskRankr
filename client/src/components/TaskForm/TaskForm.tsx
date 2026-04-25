@@ -5,7 +5,6 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
-import { omit } from 'es-toolkit'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
@@ -70,6 +69,11 @@ const taskFormDefaultsSchema = taskSchema.pick({
   createdAt: true,
   completedAt: true,
   status: true,
+  subtaskSortMode: true,
+  subtaskOrder: true,
+  subtasksShowNumbers: true,
+  autoHideCompleted: true,
+  inheritCompletionState: true,
 })
 
 type TaskFormDefaults = z.infer<typeof taskFormDefaultsSchema>
@@ -210,8 +214,11 @@ export const TaskForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          const submitted = omit(data, ['subtaskSortMode', 'subtaskOrder'])
-          if (data.status === TaskStatus.COMPLETED && !submitted.completedAt) {
+          const submitted: MutateTaskContent = { ...data }
+          if (
+            submitted.status === TaskStatus.COMPLETED &&
+            !submitted.completedAt
+          ) {
             submitted.completedAt = new Date()
           }
           onSubmit(submitted)
