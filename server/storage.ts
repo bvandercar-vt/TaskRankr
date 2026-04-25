@@ -21,6 +21,7 @@ import {
 } from '~/shared/schema'
 import {
   getHasIncomplete,
+  mapById,
   statusToStatusPatch,
 } from '~/shared/utils/task-utils'
 import { db } from './db'
@@ -56,7 +57,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.userId, userId))
       .orderBy(tasks.id)
 
-    const byId = new Map(result.map((t) => [t.id, t]))
+    const byId = mapById(result)
     const fixes: (
       | { id: number; subtaskOrder: number[] }
       | { id: number; parentId: null }

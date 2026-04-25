@@ -18,7 +18,7 @@ import { filterAndSortTree, getDirectSubtasks } from '@/lib/task-tree-utils'
 import { useTaskMutations, useTasks } from '@/providers/TasksProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { TaskStatus } from '~/shared/schema'
-import { isEffectivelyHidden } from '~/shared/utils/task-utils'
+import { isEffectivelyHidden, mapById } from '~/shared/utils/task-utils'
 
 const ColumnHeaders = () => (
   <div className="flex items-center gap-1 shrink-0 justify-end">
@@ -56,7 +56,7 @@ const Completed = () => {
   const [search, setSearch] = useState('')
 
   const completedTasks = useMemo(() => {
-    const taskById = new Map(allTasks.map((t) => [t.id, t]))
+    const taskById = mapById(allTasks)
 
     const buildSubtaskTree = (parentId: number): TaskWithSubtasks[] => {
       const parent = taskById.get(parentId)

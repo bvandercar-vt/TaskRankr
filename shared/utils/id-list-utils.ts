@@ -13,6 +13,9 @@ export const removeIds = <T extends HasId>(
   return allItems.filter((i) => !idsSet.has(i.id))
 }
 
+export const mapById = <T extends HasId>(allItems: T[]): Map<T['id'], T> =>
+  new Map(allItems.map((i) => [i.id, i]))
+
 export const updateItem = <T extends HasId>(
   allItems: T[],
   itemId: T['id'],

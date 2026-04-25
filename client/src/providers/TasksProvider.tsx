@@ -36,6 +36,7 @@ import {
   getChildrenLatestCompletedAt,
   getDirectSubtasks,
   getHasIncompleteSubtasks,
+  mapById,
   removeIds,
   updateItem,
 } from '@/lib/task-tree-utils'
@@ -275,7 +276,7 @@ export const TasksProvider = ({
       const migrationFlag = `${storageKeys.tasks}.autoHideMigrated_v2`
       if (storage.get<boolean>(migrationFlag, false)) return input
 
-      const taskById = new Map(input.map((t) => [t.id, t]))
+      const taskById = mapById(input)
       const migrationOps: SyncOperation[] = []
       const migrated = input.map((t) => {
         if (!t.hidden || t.parentId == null) return t
@@ -350,7 +351,7 @@ export const TasksProvider = ({
           .filter((op) => op.type === SyncOperationType.CREATE_TASK)
           .map((op) => (op as { tempId: number }).tempId),
       )
-      const taskById = new Map(loadedTasks.map((t) => [t.id, t]))
+      const taskById = mapById(loadedTasks)
       const orphaned: Task[] = loadedTasks.filter(
         (t) =>
           t.id < 0 &&

@@ -33,7 +33,7 @@ import {
 } from '@/providers/DraftSessionProvider'
 import type { DeleteTaskArgs } from '@/providers/TasksProvider'
 import { SubtaskSortMode, type Task, TaskStatus } from '~/shared/schema'
-import { isEffectivelyHidden } from '~/shared/utils/task-utils'
+import { isEffectivelyHidden, mapById } from '~/shared/utils/task-utils'
 import { CollapsibleCard } from '../../primitives/CollapsibleCard'
 import { type Subtask, SubtaskRowItem } from './SubtaskRowItem'
 import { SubtasksSettings } from './SubtasksSettings'
@@ -140,7 +140,7 @@ export const SubtasksCard = ({
   }, [task, allTasks, sortMode, localSubtaskOrder, showNumbers])
 
   const hiddenSubtaskIds = useMemo(() => {
-    const taskById = new Map(allTasks.map((t) => [t.id, t]))
+    const taskById = mapById(allTasks)
     return new Set(
       allSubtasks
         .filter((s) =>

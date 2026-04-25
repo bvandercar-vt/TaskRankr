@@ -28,7 +28,7 @@ import { useSettings } from '@/providers/SettingsProvider'
 import { useTaskMutations, useTasks } from '@/providers/TasksProvider'
 import type { TaskWithSubtasks } from '@/types'
 import { type FieldConfig, SortOption, TaskStatus } from '~/shared/schema'
-import { isEffectivelyHidden } from '~/shared/utils/task-utils'
+import { isEffectivelyHidden, mapById } from '~/shared/utils/task-utils'
 
 const SortButtons = ({
   sortBy,
@@ -131,7 +131,7 @@ const Home = () => {
   // Also extract in-progress and pinned tasks to be hoisted to top
   // Pinned/in-progress subtasks appear both hoisted AND under their parent
   const { taskTree, inProgressTask, pinnedTasks } = useMemo(() => {
-    const taskById = new Map(allTasks.map((t) => [t.id, t]))
+    const taskById = mapById(allTasks)
     const activeTasks = allTasks.filter((task) => {
       const parent = task.parentId ? taskById.get(task.parentId) : undefined
       return (
