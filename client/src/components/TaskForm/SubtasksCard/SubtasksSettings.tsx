@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Eye, EyeOff, Settings2 } from 'lucide-react'
+import { ChevronDown, Settings2 } from 'lucide-react'
 
+import { VisibilityToggleButton } from '@/components/VisibilityToggleButton'
 import { cn } from '@/lib/utils'
 import { useTaskMutations } from '@/providers/TasksProvider'
 import { SubtaskSortMode } from '~/shared/schema'
-import { Button } from '../../primitives/Button'
 import { Switch } from '../../primitives/forms/Switch'
-import { Icon } from '../../primitives/LucideIcon'
 
 const SortingMethodSwitch = ({
   taskId,
@@ -210,21 +209,13 @@ const SubtasksSettingsMenu = ({
 
       {hiddenCount > 0 && (
         <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
+          <VisibilityToggleButton
+            action={showHidden ? 'hide' : 'show'}
+            label={`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
             onClick={() => onShowHiddenChange(!showHidden)}
             className="text-xs text-muted-foreground"
             data-testid="button-show-hidden"
-          >
-            <Icon
-              icon={showHidden ? EyeOff : Eye}
-              className="size-3.5"
-              aria-hidden
-            />
-            {`${showHidden ? 'Hide' : 'Show'} Hidden (${hiddenCount})`}
-          </Button>
+          />
         </div>
       )}
     </div>

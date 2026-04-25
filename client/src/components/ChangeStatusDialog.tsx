@@ -5,15 +5,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import {
-  Clock,
-  Eye,
-  EyeOff,
-  type LucideIcon,
-  Pin,
-  PinOff,
-  StopCircle,
-} from 'lucide-react'
+import { Clock, type LucideIcon, Pin, PinOff, StopCircle } from 'lucide-react'
 
 import { getTaskStatuses } from '@/lib/task-tree-utils'
 import { cn } from '@/lib/utils'
@@ -22,7 +14,6 @@ import { TaskStatus } from '~/shared/schema'
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog'
 import { Button } from './primitives/Button'
 import { TimeInput } from './primitives/forms/TimeInput'
-import { Icon as LucideIconComponent } from './primitives/LucideIcon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +25,7 @@ import {
   AlertDialogTitle,
 } from './primitives/overlays/AlertDialog'
 import { SubtaskBlockedTooltip } from './SubtaskBlockedTooltip'
+import { VisibilityToggleButton } from './VisibilityToggleButton'
 
 const TimeSpentInput = ({
   onBlur,
@@ -274,24 +266,20 @@ export const ChangeStatusDialog = ({
 
             <div className="flex justify-center gap-2">
               {isSubtask && onToggleHidden && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 h-8"
+                <VisibilityToggleButton
+                  action={isHidden ? 'show' : 'hide'}
+                  label={
+                    <span className="text-xs font-medium">
+                      {isHidden ? 'Unhide' : 'Hide'}
+                    </span>
+                  }
                   onClick={() => {
                     onToggleHidden()
                     onOpenChange(false)
                   }}
+                  className="h-8"
                   data-testid="button-toggle-hidden"
-                >
-                  <LucideIconComponent
-                    icon={isHidden ? Eye : EyeOff}
-                    className="size-3.5"
-                  />
-                  <span className="text-xs font-medium">
-                    {isHidden ? 'Unhide' : 'Hide'}
-                  </span>
-                </Button>
+                />
               )}
               <DeleteButton
                 taskName={taskName}
