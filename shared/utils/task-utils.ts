@@ -69,6 +69,20 @@ export const isEffectivelyHidden = (
 ): boolean => task.hidden || isAutoHiddenByParent(task, parent)
 
 /**
+ * Convenience wrapper around `isEffectivelyHidden` that resolves the parent
+ * from a `Map<id, Task>` (typically built via `mapById(allTasks)`). Use when
+ * filtering a flat task list where the parent must be looked up per-task.
+ */
+export const isEffectivelyHiddenInTree = (
+  task: Pick<Task, 'hidden' | 'status' | 'parentId'>,
+  taskById: Map<number, Task>,
+): boolean =>
+  isEffectivelyHidden(
+    task,
+    task.parentId != null ? taskById.get(task.parentId) : undefined,
+  )
+
+/**
  * Translates a target `TaskStatus` into the timestamp side-effects that
  * accompany the transition: starting `IN_PROGRESS` stamps
  * `inProgressStartedAt` and clears any prior `completedAt`; transitioning
