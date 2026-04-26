@@ -28,6 +28,7 @@ const checkTitleAndSubtasks = (task: TaskTreeNode, tier: number) => {
         'line-through',
       )
       .closest(TaskCard.CARD)
+      .should('have.attr', 'data-status', task.status)
 
   const taskCard = getTaskCard()
 
