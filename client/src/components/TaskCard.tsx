@@ -296,6 +296,7 @@ export const TaskCard = ({
       className="group relative"
       data-testid={`task-card-${task.id}`}
       data-tier={`${level}`}
+      data-status={task.status}
     >
       <motion.div
         {...(level === 0
